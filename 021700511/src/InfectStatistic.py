@@ -4,6 +4,7 @@ import re
 import sys
 from datetime import date as Date
 
+
 def parse_argument():
     parser = argparse.ArgumentParser(description='疫情统计程序')
     subparsers = parser.add_subparsers(help='sub-command help')
@@ -25,7 +26,6 @@ class InfectStatistic:
         self.out_path = out
         self.allow_types = allow_types
         self.province = province
-
         self.dates = []
         if dates:
             try:
@@ -37,21 +37,19 @@ class InfectStatistic:
                 print('日期 %s 非法' % dates)
                 sys.exit(0)
 
-
         # 数据类
         self.ip = {}  # 感染患者 {province: num}
         self.sp = {}  # 疑似患者 {province: num}
         self.cure = {}  # 治愈 {province: num}
         self.dead = {}  # 死亡 {province: num}
 
+    # TODO 待优化
     # 解析日志中的一行
     def _parse_line(self, line):
         _list = [self.ip, self.sp, self.dead, self.cure]
         _pattern = [
             '(.*?) 新增 感染患者 ([0-9]+)人',
             '(.*?) 新增 疑似患者 ([0-9]+)人',
-            '(.*?) 死亡 ([0-9]+)人',
-            '(.*?) 治愈 ([0-9]+)人',
         ]
         for i in range(len(_pattern)):
             pattern = _pattern[i]
@@ -74,6 +72,32 @@ class InfectStatistic:
                 dic[province_out] = int(dic[province_out]) - int(num) if province_out in dic else -int(num)
                 dic[province_in] = int(dic[province_in]) + int(num) if province_in in dic else int(num)
                 return
+        _pattern = [
+            '(.*?) 死亡 ([0-9]+)人',
+            '(.*?) 治愈 ([0-9]+)人',
+        ]
+        _list = [self.dead, self.cure]
+        for i in range(len(_pattern)):
+            pattern = _pattern[i]
+            result = re.match(pattern, line)
+            if result:
+                province, num = result.group(1, 2)
+                dic = _list[i]
+                dic[province] = int(dic[province]) + int(num) if province in dic else int(num)
+                self.ip[province] = int(self.ip[province]) - int(num) if province in self.ip else -int(num)
+                return
+        result = re.match('(.*?) 疑似患者 确诊感染 ([0-9]+)人', line)
+        if result:
+            province, num = result.group(1, 2)
+            self.ip[province] = int(self.ip[province]) + int(num) if province in self.ip else int(num)
+            self.sp[province] = int(self.sp[province]) - int(num) if province in self.sp else -int(num)
+            return
+        result = re.match('(.*?) 排除 疑似患者 ([0-9]+)人', line)
+        if result:
+            province, num = result.group(1, 2)
+            self.sp[province] = int(self.sp[province]) - int(num) if province in self.sp else -int(num)
+            return
+
 
     # 解析日志
     def _read_log(self):
