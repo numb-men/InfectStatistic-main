@@ -2,7 +2,11 @@ import argparse
 import os
 import re
 import sys
-from datetime import date as Date
+from datetime import date as _date
+
+
+def get_date(year, month, day):
+    return _date(int(year), int(month), int(day))
 
 
 def parse_argument():
@@ -27,14 +31,14 @@ class InfectStatistic:
         self.deadline = None
         if date:
             try:
-                year, month, day = date.split('-', 2)
-                date = Date(int(year), int(month), int(day))
+                date = get_date(*date.split('-', 2))
                 self.deadline = date
             except (ValueError, TypeError):
                 print('日期 %s 非法' % date)
                 sys.exit(0)
         self.out_path = out
         self.logs_path = log
+        self.log_list = {}
         self._check_path()
 
         # 数据类
@@ -47,7 +51,21 @@ class InfectStatistic:
     def _check_path(self):
         if not os.path.isdir(self.logs_path):
             print('日志目录: %s 不是正确的目录' % self.logs_path)
-            exit(0)
+            sys.exit(0)
+        for filename in os.listdir(self.logs_path):
+            file_path = os.path.join(self.logs_path, filename)
+            if os.path.isfile(file_path):
+                result = re.match(r'(\d+)-(\d+)-(\d+).log.txt', filename)
+                if result:
+                    try:
+                        date = get_date(*result.group(1, 2, 3))
+                    except ValueError:
+                        continue
+                    self.log_list.update({date: file_path})
+        # 范围检测
+        if self.deadline and self.deadline > max(self.log_list.keys()):
+            print('%s 超出日志给出的范围' % self.deadline)
+            sys.exit()
 
         try:
             open(self.out_path, 'w').close()
@@ -70,7 +88,6 @@ class InfectStatistic:
 
     # 解析日志中的一行
     def _parse_line(self, line):
-        result = None
         _patterns = [
             ('(.*?) 新增 感染患者 ([0-9]+)人', ((self._add_people, (1, 2), 'ip'),)),
             ('(.*?) 新增 疑似患者 ([0-9]+)人', ((self._add_people, (1, 2), 'sp'),)),
@@ -96,21 +113,15 @@ class InfectStatistic:
 
     # 解析日志文件列表
     def _read_log(self):
-        for filename in os.listdir(self.logs_path):
-            file_path = os.path.join(self.logs_path, filename)
-            if os.path.isfile(file_path):
-                result = re.match(r'(\d+)-(\d+)-(\d+).log.txt', filename)
-                if result:
-                    try:
-                        year, month, day = result.group(1, 2, 3)
-                        date = Date(int(year), int(month), int(day))
-                    except ValueError:
-                        continue
-                    if self.deadline and date > self.deadline:
-                        continue
-                    log = open(file_path, mode='r', encoding='utf-8')
-                    for line in log.readlines():
-                        self._parse_line(line.strip())
+        for date, file_path in self.log_list.items():
+            if self.deadline and date > self.deadline:
+                continue
+            log = open(file_path, mode='r', encoding='utf-8')
+            try:
+                for line in log.readlines():
+                    self._parse_line(line.strip())
+            finally:
+                log.close()
 
     def _print(self, out_file, province, *num):
         type_dict = {
