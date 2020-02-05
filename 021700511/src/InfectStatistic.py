@@ -24,67 +24,64 @@ def parse_argument():
 
 class InfectStatistic:
 
-    def __init__(self, log, out, date=None, allow_types=None, province=None):
-        # 配置
-        self.allow_types = allow_types or ['ip', 'sp', 'cure', 'dead']
-        self.allow_provinces = province
-        self.deadline = None
-        if date:
-            try:
-                date = get_date(*date.split('-', 2))
-                self.deadline = date
-            except (ValueError, TypeError):
-                print('日期 %s 非法' % date)
-                sys.exit(0)
-        self.out_path = out
-        self.logs_path = log
-        self.log_list = {}
-        self._check_path()
+    def __init__(self, logs_path, out_path, date=None, allow_types=None, province=None):
+        self.allow_types = allow_types or ['ip', 'sp', 'cure', 'dead']  # 输出的数据类型
+        self.allow_provinces = province or []  # 输出的省份
+        self.deadline = None  # 日志截止日期
+        self.out_path = ""  # 输出文件
+        self.logs_list = {}  # 日志文件
+        self.data = {}  # 数据  格式为：{province: {ip: num, sp: num, cure: num, dead: num}}
 
-        # 数据类
-        self.ip = {}  # 感染患者 {province: num}
-        self.sp = {}  # 疑似患者 {province: num}
-        self.cure = {}  # 治愈 {province: num}
-        self.dead = {}  # 死亡 {province: num}
-        self._list = (self.ip, self.sp, self.cure, self.dead)
-
-    def _check_path(self):
-        if not os.path.isdir(self.logs_path):
-            print('日志目录: %s 不是正确的目录' % self.logs_path)
+        # 计算日期合法性
+        try:
+            self.deadline = get_date(*date.split('-', 2)) if date else None
+        except (ValueError, TypeError):
+            print('日期 %s 非法' % date)
             sys.exit(0)
-        for filename in os.listdir(self.logs_path):
-            file_path = os.path.join(self.logs_path, filename)
+        # 计算路径合法性
+        self._check_logs_path(logs_path)
+        self._check_out_path(out_path)
+
+        # 日志日期范围检测
+        if self.deadline and self.deadline > max(self.logs_list.keys()):
+            print('%s 超出日志给出的范围' % self.deadline)
+            sys.exit()
+
+    def _check_logs_path(self, logs_path):
+        if not os.path.isdir(logs_path):
+            print('日志目录: %s 不是正确的目录' % logs_path)
+            sys.exit(0)
+        for filename in os.listdir(logs_path):
+            file_path = os.path.join(logs_path, filename)
             if os.path.isfile(file_path):
                 result = re.match(r'(\d+)-(\d+)-(\d+).log.txt', filename)
                 if result:
                     try:
                         date = get_date(*result.group(1, 2, 3))
                     except ValueError:
-                        continue
-                    self.log_list.update({date: file_path})
-        # 范围检测
-        if self.deadline and self.deadline > max(self.log_list.keys()):
-            print('%s 超出日志给出的范围' % self.deadline)
+                        continue  # 忽略日期不正确的文件
+                    self.logs_list.update({date: file_path})
+        if not self.logs_list:
+            print('日志目录为空')
             sys.exit()
 
+    def _check_out_path(self, out_path):
         try:
-            open(self.out_path, 'w').close()
+            open(out_path, 'w').close()
+            self.out_path = out_path
         except (FileNotFoundError, PermissionError):
-            print('输出路径 %s 不正确' % self.out_path)
+            print('输出路径 %s 不正确' % out_path)
             exit(0)
 
+    def _new_province(self, province):
+        self.data.update({province: {"ip": 0, "sp": 0, "cure": 0, "dead": 0}})
+
     def _add_people(self, re_result, result_index, _type, _sub=False):
-        _province, _num = re_result.group(*result_index)
-        _dic = {
-            "ip": self.ip,
-            "sp": self.sp,
-            "cure": self.cure,
-            "dead": self.dead
-        }[_type]
-        _num = -int(_num) if _sub else int(_num)
-        if _province not in _dic:
-            _dic[_province] = 0
-        _dic[_province] += _num
+        province, num = re_result.group(*result_index)
+        num = -int(num) if _sub else int(num)
+        if province not in self.data:
+            self._new_province(province)
+        self.data[province][_type] += num
 
     # 解析日志中的一行
     def _parse_line(self, line):
@@ -113,7 +110,7 @@ class InfectStatistic:
 
     # 解析日志文件列表
     def _read_log(self):
-        for date, file_path in self.log_list.items():
+        for date, file_path in self.logs_list.items():
             if self.deadline and date > self.deadline:
                 continue
             log = open(file_path, mode='r', encoding='utf-8')
@@ -123,12 +120,14 @@ class InfectStatistic:
             finally:
                 log.close()
 
-    def _print(self, out_file, province, *num):
+    def _print(self, out_file, province):
+        if province not in self.data:
+            self._new_province(province)
         type_dict = {
-            "ip": "感染患者%s人" % num[0],
-            "sp": "疑似患者%s人" % num[1],
-            "cure": "治愈%s人" % num[2],
-            "dead": "死亡%s人" % num[3]
+            "ip": "感染患者%s人" % self.data[province]["ip"],
+            "sp": "疑似患者%s人" % self.data[province]["sp"],
+            "cure": "治愈%s人" % self.data[province]["cure"],
+            "dead": "死亡%s人" % self.data[province]["dead"]
         }
         out_str = province
         for out_type in self.allow_types:
@@ -136,29 +135,36 @@ class InfectStatistic:
                 out_str += " " + type_dict[out_type]
         out_file.writelines(out_str + '\n')
 
+    # 计算全国总数据
+    def _all_data(self):
+        data = {"ip": 0, "sp": 0, "cure": 0, "dead": 0}
+        for province in self.data:
+            data['ip'] += self.data[province]['ip']
+            data['sp'] += self.data[province]['sp']
+            data['cure'] += self.data[province]['cure']
+            data['dead'] += self.data[province]['dead']
+        self.data.update({'全国': data})
+
     def _out(self):
-        all_num = []
-        province_list = set()
         out_file = open(self.out_path, 'w', encoding='utf8')
         try:
-            for dic in self._list:
-                all_num.append(sum(dic.values()))
-                province_list.update(dic.keys())
-            if self.allow_provinces:
-                for p in self.allow_provinces:
-                    if p != '全国':
-                        province_list.add(p)
+            # 计算全国总量
             if not self.allow_provinces or '全国' in self.allow_provinces:
-                self._print(out_file, '全国', *all_num)
-            province_list = list(province_list)
+                self._all_data()
+
+            # 获取省份列表 并排序
+            if self.allow_provinces:
+                province_list = list(set(self.allow_provinces))
+            else:
+                province_list = list(self.data.keys())
             province_list.sort(reverse=True)
+
+            # 执行输出
+            if '全国' in province_list:
+                self._print(out_file, '全国')
+                province_list.remove('全国')
             for province in province_list:
-                if self.allow_provinces and province not in self.allow_provinces:
-                    continue
-                num_list = []
-                for dic in self._list:
-                    num_list.append(dic[province] if province in dic else 0)
-                self._print(out_file, province, *num_list)
+                self._print(out_file, province)
             out_file.writelines('// 该文档并非真实数据，仅供测试使用\n')
         finally:
             out_file.close()
