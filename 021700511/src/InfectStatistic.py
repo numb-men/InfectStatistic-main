@@ -21,18 +21,18 @@ def parse_argument():
 class InfectStatistic:
 
     def __init__(self, log, out, dates=None, allow_types=None, province=None):
-        # 配置类
+        # 配置
         self.logs_path = log
         self.out_path = out
-        self.allow_types = allow_types
-        self.province = province
-        self.dates = []
+        self.allow_types = allow_types or ['ip', 'sp', 'cure', 'dead']
+        self.allow_provinces = province
+        self.allow_dates = []
         if dates:
             try:
                 for date in dates:
                     year, month, day = date.split('-', 2)
                     date = Date(int(year), int(month), int(day))
-                    self.dates.append(date)
+                    self.allow_dates.append(date)
             except (ValueError, TypeError):
                 print('日期 %s 非法' % dates)
                 sys.exit(0)
@@ -42,6 +42,7 @@ class InfectStatistic:
         self.sp = {}  # 疑似患者 {province: num}
         self.cure = {}  # 治愈 {province: num}
         self.dead = {}  # 死亡 {province: num}
+        self._list = (self.ip, self.sp, self.cure, self.dead)
 
     # TODO 待优化
     # 解析日志中的一行
@@ -98,7 +99,6 @@ class InfectStatistic:
             self.sp[province] = int(self.sp[province]) - int(num) if province in self.sp else -int(num)
             return
 
-
     # 解析日志
     def _read_log(self):
         logs_path = self.logs_path
@@ -113,7 +113,7 @@ class InfectStatistic:
                             date = Date(int(year), int(month), int(day))
                         except ValueError:
                             continue
-                        if self.dates and date not in self.dates:
+                        if self.allow_dates and date not in self.allow_dates:
                             continue
                         log = open(file_path, mode='r', encoding='utf-8')
                         for line in log.readlines():
@@ -130,37 +130,40 @@ class InfectStatistic:
             "dead": "死亡%s人" % num[3]
         }
         out_str = province
-        for out_type in type_dict:
-            if not self.allow_types or out_type in self.allow_types:
+        for out_type in self.allow_types:
+            if out_type in type_dict:
                 out_str += " " + type_dict[out_type]
         print(out_str)
 
-    def out(self):
-        _list = [self.ip, self.sp, self.cure, self.dead]
+    def _out(self):
         all_num = []
         province_list = set()
-        for dic in _list:
+        for dic in self._list:
             all_num.append(sum(dic.values()))
             province_list.update(dic.keys())
-        if self.province:
-            for p in self.province:
+        if self.allow_provinces:
+            for p in self.allow_provinces:
                 if p != '全国':
                     province_list.add(p)
-        if not self.province or '全国' in self.province:
+        if not self.allow_provinces or '全国' in self.allow_provinces:
             self._print('全国', *all_num)
+        province_list = list(province_list)
+        province_list.sort(reverse=True)
         for province in province_list:
-            if self.province and province not in self.province:
+            if self.allow_provinces and province not in self.allow_provinces:
                 continue
             num_list = []
-            for dic in _list:
+            for dic in self._list:
                 num_list.append(dic[province] if province in dic else 0)
             self._print(province, *num_list)
+
+    def read_and_out(self):
+        self._read_log()
+        self._out()
 
 
 if __name__ == "__main__":
     args = parse_argument()
     i = InfectStatistic(args['log'], args['out'], args['date'], args['type'], args['province'])
-    i._read_log()
-    i.out()
-
+    i.read_and_out()
 
