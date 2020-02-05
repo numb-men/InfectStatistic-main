@@ -11,7 +11,7 @@ def parse_argument():
     parser_a = subparsers.add_parser('list', allow_abbrev=False)
     parser_a.add_argument('-log', help="指定日志目录的位置", required=True)
     parser_a.add_argument('-out', help="指定输出文件路径和文件名", required=True)
-    parser_a.add_argument('-date', nargs='*', help="指定日期")
+    parser_a.add_argument('-date', help="指定日期")
     parser_a.add_argument('-type', nargs='*', help="[ip： 感染患者，sp：疑似患者，cure：治愈 ，dead：死亡患者]")
     parser_a.add_argument('-province', nargs='*', help="指定列出的省")
     args = parser.parse_args()
@@ -20,22 +20,22 @@ def parse_argument():
 
 class InfectStatistic:
 
-    def __init__(self, log, out, dates=None, allow_types=None, province=None):
+    def __init__(self, log, out, date=None, allow_types=None, province=None):
         # 配置
-        self.logs_path = log
-        self.out_path = out
         self.allow_types = allow_types or ['ip', 'sp', 'cure', 'dead']
         self.allow_provinces = province
-        self.allow_dates = []
-        if dates:
+        self.deadline = None
+        if date:
             try:
-                for date in dates:
-                    year, month, day = date.split('-', 2)
-                    date = Date(int(year), int(month), int(day))
-                    self.allow_dates.append(date)
+                year, month, day = date.split('-', 2)
+                date = Date(int(year), int(month), int(day))
+                self.deadline = date
             except (ValueError, TypeError):
-                print('日期 %s 非法' % dates)
+                print('日期 %s 非法' % date)
                 sys.exit(0)
+        self.out_path = out
+        self.logs_path = log
+        self._check_path()
 
         # 数据类
         self.ip = {}  # 感染患者 {province: num}
@@ -43,6 +43,17 @@ class InfectStatistic:
         self.cure = {}  # 治愈 {province: num}
         self.dead = {}  # 死亡 {province: num}
         self._list = (self.ip, self.sp, self.cure, self.dead)
+
+    def _check_path(self):
+        if not os.path.isdir(self.logs_path):
+            print('日志目录: %s 不是正确的目录' % self.logs_path)
+            exit(0)
+
+        try:
+            open(self.out_path, 'w').close()
+        except (FileNotFoundError, PermissionError):
+            print('输出路径 %s 不正确' % self.out_path)
+            exit(0)
 
     # TODO 待优化
     # 解析日志中的一行
@@ -99,30 +110,25 @@ class InfectStatistic:
             self.sp[province] = int(self.sp[province]) - int(num) if province in self.sp else -int(num)
             return
 
-    # 解析日志
+    # 解析日志文件列表
     def _read_log(self):
-        logs_path = self.logs_path
-        if os.path.exists(logs_path) and os.path.isdir(logs_path):
-            for filename in os.listdir(logs_path):
-                file_path = os.path.join(logs_path, filename)
-                if os.path.isfile(file_path):
-                    result = re.match(r'(\d+)-(\d+)-(\d+).log.txt', filename)
-                    if result:
-                        try:
-                            year, month, day = result.group(1, 2, 3)
-                            date = Date(int(year), int(month), int(day))
-                        except ValueError:
-                            continue
-                        if self.allow_dates and date not in self.allow_dates:
-                            continue
-                        log = open(file_path, mode='r', encoding='utf-8')
-                        for line in log.readlines():
-                            self._parse_line(line.strip())
-        else:
-            print('不存在目录 %s ' % logs_path)
-            sys.exit()
+        for filename in os.listdir(self.logs_path):
+            file_path = os.path.join(self.logs_path, filename)
+            if os.path.isfile(file_path):
+                result = re.match(r'(\d+)-(\d+)-(\d+).log.txt', filename)
+                if result:
+                    try:
+                        year, month, day = result.group(1, 2, 3)
+                        date = Date(int(year), int(month), int(day))
+                    except ValueError:
+                        continue
+                    if self.deadline and date > self.deadline:
+                        continue
+                    log = open(file_path, mode='r', encoding='utf-8')
+                    for line in log.readlines():
+                        self._parse_line(line.strip())
 
-    def _print(self, province, *num):
+    def _print(self, out_file, province, *num):
         type_dict = {
             "ip": "感染患者%s人" % num[0],
             "sp": "疑似患者%s人" % num[1],
@@ -133,29 +139,34 @@ class InfectStatistic:
         for out_type in self.allow_types:
             if out_type in type_dict:
                 out_str += " " + type_dict[out_type]
-        print(out_str)
+        out_file.writelines(out_str+'\n')
 
     def _out(self):
         all_num = []
         province_list = set()
-        for dic in self._list:
-            all_num.append(sum(dic.values()))
-            province_list.update(dic.keys())
-        if self.allow_provinces:
-            for p in self.allow_provinces:
-                if p != '全国':
-                    province_list.add(p)
-        if not self.allow_provinces or '全国' in self.allow_provinces:
-            self._print('全国', *all_num)
-        province_list = list(province_list)
-        province_list.sort(reverse=True)
-        for province in province_list:
-            if self.allow_provinces and province not in self.allow_provinces:
-                continue
-            num_list = []
+        out_file = open(self.out_path, 'w', encoding='utf8')
+        try:
             for dic in self._list:
-                num_list.append(dic[province] if province in dic else 0)
-            self._print(province, *num_list)
+                all_num.append(sum(dic.values()))
+                province_list.update(dic.keys())
+            if self.allow_provinces:
+                for p in self.allow_provinces:
+                    if p != '全国':
+                        province_list.add(p)
+            if not self.allow_provinces or '全国' in self.allow_provinces:
+                self._print(out_file, '全国', *all_num)
+            province_list = list(province_list)
+            province_list.sort(reverse=True)
+            for province in province_list:
+                if self.allow_provinces and province not in self.allow_provinces:
+                    continue
+                num_list = []
+                for dic in self._list:
+                    num_list.append(dic[province] if province in dic else 0)
+                self._print(out_file, province, *num_list)
+            out_file.writelines('// 该文档并非真实数据，仅供测试使用\n')
+        finally:
+            out_file.close()
 
     def read_and_out(self):
         self._read_log()
