@@ -55,60 +55,44 @@ class InfectStatistic:
             print('输出路径 %s 不正确' % self.out_path)
             exit(0)
 
-    # TODO 待优化
+    def _add_people(self, re_result, result_index, _type, _sub=False):
+        _province, _num = re_result.group(*result_index)
+        _dic = {
+            "ip": self.ip,
+            "sp": self.sp,
+            "cure": self.cure,
+            "dead": self.dead
+        }[_type]
+        _num = -int(_num) if _sub else int(_num)
+        if _province not in _dic:
+            _dic[_province] = 0
+        _dic[_province] += _num
+
     # 解析日志中的一行
     def _parse_line(self, line):
-        _list = [self.ip, self.sp, self.dead, self.cure]
-        _pattern = [
-            '(.*?) 新增 感染患者 ([0-9]+)人',
-            '(.*?) 新增 疑似患者 ([0-9]+)人',
+        result = None
+        _patterns = [
+            ('(.*?) 新增 感染患者 ([0-9]+)人', ((self._add_people, (1, 2), 'ip'),)),
+            ('(.*?) 新增 疑似患者 ([0-9]+)人', ((self._add_people, (1, 2), 'sp'),)),
+            ('(.*?) 感染患者 流入 (.*?) ([0-9]+)人', ((self._add_people, (1, 3), 'ip', True),
+                                               (self._add_people, (2, 3), 'ip'),)),
+            ('(.*?) 疑似患者 流入 (.*?) ([0-9]+)人', ((self._add_people, (1, 3), 'sp', True),
+                                               (self._add_people, (2, 3), 'sp'),)),
+            ('(.*?) 死亡 ([0-9]+)人', ((self._add_people, (1, 2), 'dead'),
+                                    (self._add_people, (1, 2), 'ip', True),)),
+            ('(.*?) 治愈 ([0-9]+)人', ((self._add_people, (1, 2), 'cure'),
+                                    (self._add_people, (1, 2), 'ip', True),)),
+            ('(.*?) 疑似患者 确诊感染 ([0-9]+)人', ((self._add_people, (1, 2), 'sp', True),
+                                           (self._add_people, (1, 2), 'ip'),)),
+            ('(.*?) 排除 疑似患者 ([0-9]+)人', ((self._add_people, (1, 2), 'sp', True),)),
         ]
-        for i in range(len(_pattern)):
-            pattern = _pattern[i]
-            result = re.match(pattern, line)
+        for _pattern, _funcs in _patterns:
+            result = re.match(_pattern, line)
             if result:
-                province, num = result.group(1, 2)
-                dic = _list[i]
-                dic[province] = int(dic[province]) + int(num) if province in dic else int(num)
+                for _func, *_arg in _funcs:
+                    _arg.insert(0, result)
+                    _func(*_arg)
                 return
-        _pattern = [
-            '(.*?) 感染患者 流入 (.*?) ([0-9]+)人',
-            '(.*?) 疑似患者 流入 (.*?) ([0-9]+)人'
-        ]
-        for i in range(len(_pattern)):
-            pattern = _pattern[i]
-            result = re.match(pattern, line)
-            if result:
-                province_out, province_in, num = result.group(1, 2, 3)
-                dic = _list[i]
-                dic[province_out] = int(dic[province_out]) - int(num) if province_out in dic else -int(num)
-                dic[province_in] = int(dic[province_in]) + int(num) if province_in in dic else int(num)
-                return
-        _pattern = [
-            '(.*?) 死亡 ([0-9]+)人',
-            '(.*?) 治愈 ([0-9]+)人',
-        ]
-        _list = [self.dead, self.cure]
-        for i in range(len(_pattern)):
-            pattern = _pattern[i]
-            result = re.match(pattern, line)
-            if result:
-                province, num = result.group(1, 2)
-                dic = _list[i]
-                dic[province] = int(dic[province]) + int(num) if province in dic else int(num)
-                self.ip[province] = int(self.ip[province]) - int(num) if province in self.ip else -int(num)
-                return
-        result = re.match('(.*?) 疑似患者 确诊感染 ([0-9]+)人', line)
-        if result:
-            province, num = result.group(1, 2)
-            self.ip[province] = int(self.ip[province]) + int(num) if province in self.ip else int(num)
-            self.sp[province] = int(self.sp[province]) - int(num) if province in self.sp else -int(num)
-            return
-        result = re.match('(.*?) 排除 疑似患者 ([0-9]+)人', line)
-        if result:
-            province, num = result.group(1, 2)
-            self.sp[province] = int(self.sp[province]) - int(num) if province in self.sp else -int(num)
-            return
 
     # 解析日志文件列表
     def _read_log(self):
@@ -139,7 +123,7 @@ class InfectStatistic:
         for out_type in self.allow_types:
             if out_type in type_dict:
                 out_str += " " + type_dict[out_type]
-        out_file.writelines(out_str+'\n')
+        out_file.writelines(out_str + '\n')
 
     def _out(self):
         all_num = []
@@ -177,4 +161,3 @@ if __name__ == "__main__":
     args = parse_argument()
     i = InfectStatistic(args['log'], args['out'], args['date'], args['type'], args['province'])
     i.read_and_out()
-
