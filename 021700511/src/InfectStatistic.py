@@ -10,9 +10,9 @@ def parse_argument():
     parser_a = subparsers.add_parser('list', allow_abbrev=False)
     parser_a.add_argument('-log', help="指定日志目录的位置", required=True)
     parser_a.add_argument('-out', help="指定输出文件路径和文件名", required=True)
-    parser_a.add_argument('-date', help="指定日期")
-    parser_a.add_argument('-type', help="[ip： 感染患者，sp：疑似患者，cure：治愈 ，dead：死亡患者]")
-    parser_a.add_argument('-province', help="指定列出的省")
+    parser_a.add_argument('-date', nargs='*', help="指定日期")
+    parser_a.add_argument('-type', nargs='*', help="[ip： 感染患者，sp：疑似患者，cure：治愈 ，dead：死亡患者]")
+    parser_a.add_argument('-province', nargs='*', help="指定列出的省")
     args = parser.parse_args()
     return vars(args)
 
@@ -23,13 +23,13 @@ class InfectStatistic:
         # 配置类
         self.logs_path = log
         self.out_path = out
-        self.allow_types = allow_types.split(' ') if allow_types else []
-        self.province = province.split(' ') if province else []
+        self.allow_types = allow_types
+        self.province = province
 
         self.dates = []
         if dates:
             try:
-                for date in dates.split(' '):
+                for date in dates:
                     year, month, day = date.split('-', 2)
                     date = Date(int(year), int(month), int(day))
                     self.dates.append(date)
@@ -120,11 +120,12 @@ class InfectStatistic:
             province_list.update(dic.keys())
         if self.province:
             for p in self.province:
-                province_list.add(p)
+                if p != '全国':
+                    province_list.add(p)
         if not self.province or '全国' in self.province:
             self._print('全国', *all_num)
         for province in province_list:
-            if self.province and 'province' not in self.province:
+            if self.province and province not in self.province:
                 continue
             num_list = []
             for dic in _list:
