@@ -9,3 +9,6 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+
+#输出文件夹
+/out/
