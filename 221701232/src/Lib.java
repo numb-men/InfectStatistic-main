@@ -1,19 +1,31 @@
+import java.io.File;
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import static java.util.Map.Entry.comparingByValue;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Lib
  * TODO
+ * 1.HandleFileUtil
+ *      a.getFiles
+ *      b.readLogFile
+ *      c.writeOutFile
+ * 2.HandleArgsUtil
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author 岳逾先
+ * @version 1.1.1
+ * @since 1.8
  */
 public class Lib {
 }
 
 class HandleArgsUtil {
 
-    public static void HandleArgs(String[] args, InfectStatistic infectStatistic) throws ParseException {
+    public static void handleArgs(String[] args, InfectStatistic infectStatistic) throws ParseException {
         for (int i = 0; i < args.length; ++i) {
             if (args[i].equals("-log")) {
                 infectStatistic.setLogFilePath(args[++i]);
@@ -41,7 +53,7 @@ class HandleArgsUtil {
         }
     }
 
-    public static void ShowArgs(InfectStatistic infectStatistic) {
+    public static void showArgs(InfectStatistic infectStatistic) {
         System.out.println("日志目录位置:" + infectStatistic.getLogFilePath());
         System.out.println("输出文件位置:" + infectStatistic.getOutFilePath());
         System.out.println("统计的最新截至日期:" + infectStatistic.getDate());

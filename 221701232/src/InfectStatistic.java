@@ -9,6 +9,9 @@ import java.util.Vector;
 /**
  * InfectStatistic
  * TODO
+ * 1.InfectStatistic
+ * 2.Container
+ * 3.Record
  *
  * @author 岳逾先
  * @version 1.1.1
