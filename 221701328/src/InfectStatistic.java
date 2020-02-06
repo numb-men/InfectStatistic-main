@@ -1,18 +1,15 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * InfectStatistic
  * TODO
  *
  * @author herokilito@outlook.com
- * @version 0.3
+ * @version 0.4
  * @since 2020.02
  */
 class InfectStatistic {
@@ -41,7 +38,7 @@ class InfectStatistic {
     private ArrayList<String> provinceParams;
 
     /*用于保存各省份疫情信息*/
-    private Map<String, Map<String,Integer>> statistics;
+    private Map<String, ArrayList<Integer>> statistics;
 
     /*日志目录*/
     private File logDirectory;
@@ -55,13 +52,8 @@ class InfectStatistic {
         hasProvince = false;
         typeParams = new ArrayList<>();
         provinceParams = new ArrayList<>();
-        statistics = new TreeMap<>();
-        Map<String,Integer> data = new TreeMap<>(); //全国数据
-        data.put(INFECTION_PATIENT,0);
-        data.put(SUSPECTED_PATIENT,0);
-        data.put(CURE,0);
-        data.put(DEAD,0);
-        statistics.put("全国",data);
+        statistics = new LinkedHashMap<>();
+        Lib.mapInit(statistics);
     }
 
     public static void main(String[] args) {
@@ -131,7 +123,7 @@ class InfectStatistic {
                 break;
             //case something:此处可扩展其他命令
             default:
-                System.out.println("无效的命令");
+                System.out.println(args[0] + " 无效的命令");
                 System.exit(1);
         }
         /*执行相应的方法*/
@@ -179,12 +171,12 @@ class InfectStatistic {
         try {
             writer = new FileWriter(outFile);
             for(String province : statistics.keySet()){   //遍历统计数据
-                writer.write(province);
-                writer.write("     ");
-                for (String type : statistics.get(province).keySet()) {   //各个省份的数据 占一行
-                    writer.write(type + statistics.get(province).get(type) + "人");
-                    writer.write("     ");
-                }
+                ArrayList<Integer> data = statistics.get(province);
+                writer.write(province + "    ");
+                writer.write(INFECTION_PATIENT + data.get(0) + "人    ");
+                writer.write(SUSPECTED_PATIENT + data.get(1) + "人    ");
+                writer.write(CURE + data.get(2) + "人    ");
+                writer.write(DEAD + data.get(3) + "人    ");
                 writer.write("\n");
             }
             writer.flush();
@@ -206,7 +198,52 @@ class InfectStatistic {
      * @param date -date参数后面的具体日期
      */
     private void doDate(String date){
-        System.out.println("date:" + date);
+        File[] logList = logDirectory.listFiles();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date paramDate;
+        BufferedReader reader = null;
+        try {
+            paramDate = dateFormat.parse(date);
+            for (File log : logList) {
+                Date logDate = dateFormat.parse(log.getName().substring(0, log.getName().indexOf('.')));
+                if(logDate.compareTo(paramDate) <= 0){  //判断日志文件的日期是否小于等于给定日期
+                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(log), StandardCharsets.UTF_8));
+                    String dataRow;
+                    while((dataRow = reader.readLine()) != null){  //忽略注释行
+                        if(!dataRow.startsWith("//")) {
+                            String[] data = dataRow.split(" ");
+                            List<Integer> provinceData = statistics.get(data[0]);
+                            if(data[1].equals(INCREMENT)){
+                                if(data[2].equals(INFECTION_PATIENT)){  //新增感染
+                                    int infection = provinceData.get(0);
+                                    int suspected = provinceData.get(1);
+                                    int count = Lib.parseData(data[3]);
+                                    infection += count;
+                                    suspected -= count;
+                                    provinceData.set(0,infection);
+                                    provinceData.set(1,suspected);
+                                }else{                                  //新增疑似
+                                    int suspected = provinceData.get(1);
+                                    suspected += Lib.parseData(data[3]);
+                                    provinceData.set(1,suspected);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            System.exit(1);
+        }finally {
+            try{
+                if (reader != null) {
+                    reader.close();
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
