@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,8 +16,8 @@ public class Lib {
      * 初始化统计数据
      * @param statistics 统计数据
      */
-    public static void mapInit(Map<String,ArrayList<Integer>> statistics){
-        ArrayList<Integer> originData = new ArrayList<>();
+    public static void mapInit(Map<String, List<Integer>> statistics){
+        List<Integer> originData = new ArrayList<>();
         originData.add(0); //感染人数
         originData.add(0); //疑似人数
         originData.add(0); //治愈人数

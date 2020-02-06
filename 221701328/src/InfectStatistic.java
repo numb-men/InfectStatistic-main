@@ -39,10 +39,13 @@ class InfectStatistic {
     private ArrayList<String> provinceParams;
 
     /*用于保存各省份疫情信息*/
-    private Map<String, ArrayList<Integer>> statistics;
+    private Map<String, List<Integer>> statistics;
 
     /*日志目录*/
     private File logDirectory;
+
+    /*指定输出那些类型数据*/
+    private Map<String,Integer> outType;
 
     /*构造方法*/
     public InfectStatistic(){
@@ -54,6 +57,7 @@ class InfectStatistic {
         typeParams = new ArrayList<>();
         provinceParams = new ArrayList<>();
         statistics = new LinkedHashMap<>();
+        outType = new LinkedHashMap<>();
         Lib.mapInit(statistics);
     }
 
@@ -151,7 +155,7 @@ class InfectStatistic {
     }
 
     /**
-     *执行-log命令参数
+     *执行-log命令参数 读取log文件夹
      * @param logPath -log参数后面的log文件路径
      */
     private void doLog(String logPath){
@@ -172,12 +176,15 @@ class InfectStatistic {
         try {
             writer = new FileWriter(outFile);
             for(String province : statistics.keySet()){   //遍历统计数据
-                ArrayList<Integer> data = statistics.get(province);
+                List<Integer> data = statistics.get(province);
                 writer.write(province + "    ");
-                writer.write(INFECTION_PATIENT + data.get(0) + "人    ");
-                writer.write(SUSPECTED_PATIENT + data.get(1) + "人    ");
-                writer.write(CURE + data.get(2) + "人    ");
-                writer.write(DEAD + data.get(3) + "人    ");
+//                writer.write(INFECTION_PATIENT + data.get(0) + "人    ");
+//                writer.write(SUSPECTED_PATIENT + data.get(1) + "人    ");
+//                writer.write(CURE + data.get(2) + "人    ");
+//                writer.write(DEAD + data.get(3) + "人    ");
+                for(String type : outType.keySet()){
+                    writer.write(type + data.get(outType.get(type)) + "人    ");
+                }
                 writer.write("\n");
             }
             writer.flush();
@@ -195,7 +202,7 @@ class InfectStatistic {
     }
 
     /**
-     *执行-date命令参数
+     *执行-date命令参数 计算当日疫情状况
      * @param date -date参数后面的具体日期
      */
     private void doDate(String date){
@@ -224,24 +231,24 @@ class InfectStatistic {
                                         increaseSus(nationalData, provinceData, Lib.parseData(data[3]));
                                     }
                                     break;
-                                case EXCLUDE:
+                                case EXCLUDE:  //处理排除疑似
                                     excludeSus(nationalData, provinceData, Lib.parseData(data[3]));
                                     break;
-                                case CURE:
+                                case CURE:  //处理治愈
                                     cure(nationalData,provinceData,Lib.parseData(data[2]));
                                     break;
-                                case DEAD:
+                                case DEAD:  //处理死亡
                                     dead(nationalData,provinceData,Lib.parseData(data[2]));
                                     break;
-                                case INFECTION_PATIENT:
+                                case INFECTION_PATIENT:  //处理感染患者流入
                                     destProvince = statistics.get(data[3]);
                                     infInflow(provinceData,destProvince,Lib.parseData(data[4]));
                                     break;
                                 case SUSPECTED_PATIENT:
-                                    if(data[2].equals(INFLOW)){
+                                    if(data[2].equals(INFLOW)){   //处理疑似患者流入
                                         destProvince = statistics.get(data[3]);
                                         susInflow(provinceData,destProvince,Lib.parseData(data[4]));
-                                    } else if(data[2].equals(DIAGNOSE)) {
+                                    } else if(data[2].equals(DIAGNOSE)) {  //处理确诊
                                         diagnose(nationalData,provinceData,Lib.parseData(data[3]));
                                     }
                                     break;
@@ -269,11 +276,35 @@ class InfectStatistic {
      * @param types -type命令参数后面的具体参数值数组
      */
     private void doType(ArrayList<String> types){
-        System.out.print("types:");
-        for(String s : types){
-            System.out.print(s + " ");
+        for (String key : statistics.keySet()){
+            List<Integer> oldData = statistics.get(key);
+            List<Integer> newData = new ArrayList<>();
+            int index = 0;
+            for(String type : types){
+                switch (type){
+                    case "ip":
+                        newData.add(oldData.get(0));
+                        outType.put(INFECTION_PATIENT,index++);
+                        break;
+                    case "sp":
+                        newData.add(oldData.get(1));
+                        outType.put(SUSPECTED_PATIENT,index++);
+                        break;
+                    case "cure":
+                        newData.add(oldData.get(2));
+                        outType.put(CURE,index++);
+                        break;
+                    case "dead":
+                        newData.add(oldData.get(3));
+                        outType.put(DEAD,index++);
+                        break;
+                    default:
+                        System.out.println("\"-type\" 无法解析的类型 " + type);
+                        System.exit(1);
+                }
+            }
+            statistics.put(key,newData);
         }
-        System.out.println("");
     }
 
     /**
