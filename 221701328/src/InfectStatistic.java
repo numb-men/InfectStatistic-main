@@ -1,4 +1,6 @@
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -85,7 +87,7 @@ class InfectStatistic {
                         case "-log":
                             hasLog = true;
                             if(++i >= args.length){
-                                System.out.println("log参数缺少参数值");
+                                System.out.println("-log参数缺少参数值");
                                 System.exit(1);
                             }
                             logParam = args[i++];
@@ -93,7 +95,7 @@ class InfectStatistic {
                         case "-out":
                             hasOut = true;
                             if(++i >= args.length){
-                                System.out.println("out参数缺少参数值");
+                                System.out.println("-out参数缺少参数值");
                                 System.exit(1);
                             }
                             outParam = args[i++];
@@ -101,7 +103,7 @@ class InfectStatistic {
                         case "-date":
                             hasDate = true;
                             if(++i >= args.length){
-                                System.out.println("date参数缺少参数值");
+                                System.out.println("-date参数缺少参数值");
                                 System.exit(1);
                             }
                             dateParam = args[i++];
@@ -162,7 +164,7 @@ class InfectStatistic {
     private void doLog(String logPath){
         logDirectory = new File(logPath);  //读取路径
         if(!logDirectory.exists()){
-            System.out.println("\"" + logDirectory + "\"无法解析的路径");
+            System.out.println("\"-log\" " + logDirectory + " 无法解析的路径");
             System.exit(1);
         }
     }
@@ -172,7 +174,31 @@ class InfectStatistic {
      * @param outPath -out参数后面的输出路径
      */
     private void doOut(String outPath){
-        System.out.println("out:" + outPath);
+        File outFile = new File(outPath);
+        FileWriter writer = null;    //字符输出流
+        try {
+            writer = new FileWriter(outFile);
+            for(String province : statistics.keySet()){   //遍历统计数据
+                writer.write(province);
+                writer.write("     ");
+                for (String type : statistics.get(province).keySet()) {   //各个省份的数据 占一行
+                    writer.write(type + statistics.get(province).get(type) + "人");
+                    writer.write("     ");
+                }
+                writer.write("\n");
+            }
+            writer.flush();
+        }catch (Exception e){
+            System.out.println("\"out\" " + e.getMessage());   //出现错误提示并退出程序
+            System.exit(1);
+        }finally {
+            try {
+                assert writer != null;
+                writer.close();   //关闭流
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
