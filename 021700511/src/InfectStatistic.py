@@ -120,20 +120,32 @@ class InfectStatistic:
             finally:
                 log.close()
 
-    def _print(self, out_file, province):
-        if province not in self.data:
-            self._new_province(province)
+    def _write_str(self, province, province_data):
         type_dict = {
-            "ip": "感染患者%s人" % self.data[province]["ip"],
-            "sp": "疑似患者%s人" % self.data[province]["sp"],
-            "cure": "治愈%s人" % self.data[province]["cure"],
-            "dead": "死亡%s人" % self.data[province]["dead"]
+            "ip": "感染患者%s人",
+            "sp": "疑似患者%s人",
+            "cure": "治愈%s人",
+            "dead": "死亡%s人"
         }
-        out_str = province
-        for out_type in self.allow_types:
-            if out_type in type_dict:
-                out_str += " " + type_dict[out_type]
-        out_file.writelines(out_str + '\n')
+        out_str = province + " "
+        for _type in self.allow_types:
+            if _type in type_dict:
+                out_str += (type_dict[_type] % province_data[_type]) + " "
+        return out_str
+
+    def _out_to_file(self, data):
+        out_file = open(self.out_path, 'w', encoding='utf8')
+        try:
+            if '全国' in data:
+                out_file.writelines(self._write_str('全国', data['全国']) + '\n')
+                data.pop('全国')
+            province_list = list(data.keys())
+            province_list.sort(reverse=True)
+            for province in province_list:
+                out_file.writelines(self._write_str(province, data[province]) + '\n')
+            out_file.writelines('// 该文档并非真实数据，仅供测试使用\n')
+        finally:
+            out_file.close()
 
     # 计算全国总数据
     def _all_data(self):
@@ -145,36 +157,43 @@ class InfectStatistic:
             data['dead'] += self.data[province]['dead']
         self.data.update({'全国': data})
 
-    def _out(self):
-        out_file = open(self.out_path, 'w', encoding='utf8')
-        try:
-            # 计算全国总量
-            if not self.allow_provinces or '全国' in self.allow_provinces:
-                self._all_data()
+    def _get_out_data(self):
+        out_data = {}
+        # 获取省份列表 并排序
+        if self.allow_provinces:
+            province_list = list(set(self.allow_provinces))
+        else:
+            province_list = list(self.data.keys())
+        # 计算全国总量
+        if not self.allow_provinces or '全国' in self.allow_provinces:
+            self._all_data()
+            province_list.append('全国')
 
-            # 获取省份列表 并排序
-            if self.allow_provinces:
-                province_list = list(set(self.allow_provinces))
-            else:
-                province_list = list(self.data.keys())
-            province_list.sort(reverse=True)
+        # 生成数据字典
+        for province in province_list:
+            if province not in self.data:
+                self._new_province(province)
+            province_data = {}
+            for out_type in self.allow_types:
+                try:
+                    province_data.update({out_type: self.data[province][out_type]})
+                except KeyError:
+                    continue
+            out_data.update({province: province_data})
 
-            # 执行输出
-            if '全国' in province_list:
-                self._print(out_file, '全国')
-                province_list.remove('全国')
-            for province in province_list:
-                self._print(out_file, province)
-            out_file.writelines('// 该文档并非真实数据，仅供测试使用\n')
-        finally:
-            out_file.close()
+        return out_data
 
-    def read_and_out(self):
+    def read_and_out_to_file(self):
         self._read_log()
-        self._out()
+        data = self._get_out_data()
+        self._out_to_file(data)
+
+    def read_and_out_to_object(self):
+        self._read_log()
+        return self._get_out_data()
 
 
 if __name__ == "__main__":
     args = parse_argument()
     i = InfectStatistic(args['log'], args['out'], args['date'], args['type'], args['province'])
-    i.read_and_out()
+    i.read_and_out_to_file()
