@@ -1,3 +1,5 @@
+import java.text.ParseException;
+
 /**
  * Lib
  * TODO
@@ -11,7 +13,7 @@ public class Lib {
 
 class HandleArgsUtil {
 
-    public static void HandleArgs(String[] args, InfectStatistic infectStatistic) {
+    public static void HandleArgs(String[] args, InfectStatistic infectStatistic) throws ParseException {
         for (int i = 0; i < args.length; ++i) {
             if (args[i].equals("-log")) {
                 infectStatistic.setLogFilePath(args[++i]);

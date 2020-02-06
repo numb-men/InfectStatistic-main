@@ -45,20 +45,27 @@ class InfectStatistic {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(String date) throws ParseException {
         boolean convertSuccess=true;
+        // comfirm date is valid
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         try {
             format.parse(date);
         } catch (ParseException e) {
             convertSuccess=false;
         }
-        if (convertSuccess) {
-            this.date = date;
-        } else {
+        if (!convertSuccess) {
             System.out.println("args's date is not invalid, date is been setted to" + this.date);
             return;
         }
+        // comfirm now date >= date
+        Date now = new Date();
+        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd");
+        if (now.compareTo(sd.parse(date)) < 0) {// now >= date
+            System.out.println("now's date < date, date is been setted to" + this.date);
+            return;
+        }
+        this.date = date;
     }
 
     public Vector<String> getTypes() {
