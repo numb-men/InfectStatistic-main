@@ -49,23 +49,8 @@ class InfectStatistic {
     }
 
     public void setDate(String date) throws ParseException {
-        boolean convertSuccess=true;
-        // comfirm date is valid
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            format.parse(date);
-        } catch (ParseException e) {
-            convertSuccess=false;
-        }
-        if (!convertSuccess) {
-            System.out.println("args's date is not invalid, date is been setted to" + this.date);
-            return;
-        }
-        // comfirm now date >= date
-        Date now = new Date();
-        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd");
-        if (now.compareTo(sd.parse(date)) < 0) {// now >= date
-            System.out.println("now's date < date, date is been setted to" + this.date);
+        if (CommonUtil.stringToDate(date) == null) {
+            // invalid date
             return;
         }
         this.date = date;
@@ -101,6 +86,51 @@ class InfectStatistic {
 
     public Record getCountry() {
         return country;
+    }
+    // logical function
+    public void addDeadNum(Record record, int num) {
+        record.incDeadNum(num);
+        record.decIpNum(num);
+        country.incDeadNum(num);
+        country.decIpNum(num);
+    }
+
+    public void addCureNum(Record record, int num) {
+        record.incCureNum(num);
+        record.decIpNum(num);
+        country.incCureNum(num);
+        country.decIpNum(num);
+    }
+
+    public void addIpNum(Record record, int num) {
+        record.incIpNum(num);
+        country.incIpNum(num);
+    }
+
+    public void addSpNum(Record record, int num) {
+        record.incSpNum(num);
+        country.incSpNum(num);
+    }
+
+    public void spTurnToIp(Record record, int num) {
+        record.incIpNum(num);
+        record.decSpNum(num);
+        country.incIpNum(num);
+        country.decSpNum(num);
+    }
+    public void excludeSp(Record record, int num) {
+        record.decSpNum(num);
+        country.decSpNum(num);
+    }
+
+    public void peopleMove(Record fromRecord, Record infectedRecord, String type, int num) {
+        if (type.equals("感染患者")) {
+            fromRecord.decIpNum(num);
+            infectedRecord.incIpNum(num);
+        } else if (type.equals("疑似患者")) {
+            fromRecord.decSpNum(num);
+            infectedRecord.incSpNum(num);
+        }
     }
     // Constructor
     public InfectStatistic() {
@@ -153,6 +183,10 @@ class Record {
         return provinceName;
     }
 
+    public void setProvinceName(String provinceName) {
+        this.provinceName = provinceName;
+    }
+
     public int getIpNum() {
         return ipNum;
     }
@@ -169,6 +203,10 @@ class Record {
         return spNum;
     }
 
+    public void setSpNum(int spNum) {
+        this.spNum = spNum;
+    }
+
     public void incSpNum(int num) { this.spNum += num; }
 
     public void decSpNum(int num) { this.spNum -= num; }
@@ -177,13 +215,31 @@ class Record {
         return cureNum;
     }
 
+    public void setCureNum(int cureNum) {
+        this.cureNum = cureNum;
+    }
+
     public void incCureNum(int num) { this.cureNum += num; }
 
     public int getDeadNum() {
         return deadNum;
     }
 
+    public void setDeadNum(int deadNum) {
+        this.deadNum = deadNum;
+    }
+
     public void incDeadNum(int num) { this.deadNum += num; }
+    // debug
+    public void showMessage() {
+        String provinceRecord = this.getProvinceName() + " 感染患者"
+                + this.getIpNum() +"人 "
+                + "疑似患者" + this.getSpNum() + "人 "
+                + "治愈" + this.getCureNum() + "人 "
+                + "死亡" + this.getDeadNum() + "人";
+        provinceRecord += "\r\n";
+        System.out.println(provinceRecord);
+    }
     // Constructor
     public Record(String provinceName) {
         this.provinceName = provinceName;
