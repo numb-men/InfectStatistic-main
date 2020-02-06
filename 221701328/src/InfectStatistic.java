@@ -1,3 +1,4 @@
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +40,9 @@ class InfectStatistic {
 
     /*用于保存各省份疫情信息*/
     private Map<String, Map<String,Integer>> statistics;
+
+    /*日志目录*/
+    private File logDirectory;
 
     /*构造方法*/
     public InfectStatistic(){
@@ -117,7 +121,7 @@ class InfectStatistic {
                             }
                             break;
                         default:
-                            System.out.println("\""+args[i]+"\"无法解析的参数");
+                            System.out.println("\"" + args[i] + "\"无法解析的参数");
                             System.exit(1);
                             break;
                     }
@@ -156,7 +160,11 @@ class InfectStatistic {
      * @param logPath -log参数后面的log文件路径
      */
     private void doLog(String logPath){
-        System.out.println("log:"+logPath);
+        logDirectory = new File(logPath);  //读取路径
+        if(!logDirectory.exists()){
+            System.out.println("\"" + logDirectory + "\"无法解析的路径");
+            System.exit(1);
+        }
     }
 
     /**
@@ -164,7 +172,7 @@ class InfectStatistic {
      * @param outPath -out参数后面的输出路径
      */
     private void doOut(String outPath){
-        System.out.println("out:"+outPath);
+        System.out.println("out:" + outPath);
     }
 
     /**
@@ -172,7 +180,7 @@ class InfectStatistic {
      * @param date -date参数后面的具体日期
      */
     private void doDate(String date){
-        System.out.println("date:"+date);
+        System.out.println("date:" + date);
     }
 
     /**
@@ -181,8 +189,8 @@ class InfectStatistic {
      */
     private void doType(ArrayList<String> types){
         System.out.print("types:");
-        for(String s:types){
-            System.out.print(s+" ");
+        for(String s : types){
+            System.out.print(s + " ");
         }
         System.out.println("");
     }
@@ -193,8 +201,8 @@ class InfectStatistic {
      */
     private void doProvince(ArrayList<String> provinces){
         System.out.print("provinces:");
-        for(String s:provinces){
-            System.out.print(s+" ");
+        for(String s : provinces){
+            System.out.print(s + " ");
         }
         System.out.println("");
     }
