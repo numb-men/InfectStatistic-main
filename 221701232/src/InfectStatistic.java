@@ -91,6 +91,10 @@ class InfectStatistic {
 
     public int provinceNumber() { return this.provinces.size(); }
 
+    public Map<String, File> getLogFilesMap() {
+        return logFilesMap;
+    }
+
     public Container getContainer() {
         return container;
     }

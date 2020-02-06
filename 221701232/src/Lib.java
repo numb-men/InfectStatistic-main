@@ -23,6 +23,38 @@ import static java.util.stream.Collectors.toMap;
 public class Lib {
 }
 
+class HandleFileUtil {
+
+    public static Map<String,File> getFiles(String path) {
+        File file = new File(path);
+        File[] fileList = file.listFiles();
+        Map<String, File> fileMap = new HashMap<>();
+        if (fileList != null) {
+            for (int i = 0; i < fileList.length; ++i) {
+                if (fileList[i].isFile()) {
+                    String[] temp = fileList[i].toString().split("/");
+                    if (!temp[temp.length - 1].matches("2020-[0-1][0-9]-[0-3][0-9].log.txt")) {
+                        System.out.println("invalid file : " + temp[temp.length - 1] +" skip");
+                        continue;
+                    }
+                    fileMap.put(fileList[i].toString(), fileList[i]);
+                }
+            }
+        }
+        // sorted for file name
+        fileMap = fileMap.entrySet().stream()
+                .sorted(comparingByValue())
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (e1, e2) -> e2, LinkedHashMap::new));
+        // debug
+        if (fileMap != null) {
+            for (Map.Entry<String, File> entry : fileMap.entrySet()) {
+                System.out.println(entry.getKey());
+            }
+        }
+        return fileMap;
+    }
+}
 class HandleArgsUtil {
 
     public static void handleArgs(String[] args, InfectStatistic infectStatistic) throws ParseException {
