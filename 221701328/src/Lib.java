@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -8,7 +7,7 @@ import java.util.Map;
  *程序执行过程中需要的一些静态方法
  *
  * @author herokilito@outlook.com
- * @version 0.4
+ * @version 0.5
  * @since 2020.02
  */
 public class Lib {

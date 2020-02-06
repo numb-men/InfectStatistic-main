@@ -9,19 +9,20 @@ import java.util.*;
  * TODO
  *
  * @author herokilito@outlook.com
- * @version 0.4
+ * @version 0.5
  * @since 2020.02
  */
 class InfectStatistic {
 
     /*一些常量*/
-    private final String INFECTION_PATIENT="感染患者";
-    private final String SUSPECTED_PATIENT="疑似患者";
-    private final String CURE="治愈";
-    private final String DEAD="死亡";
-    private final String INCREMENT="新增";
-    private final String EXCLUDE="排除";
-    private final String INFLOW="流入";
+    private final String INFECTION_PATIENT = "感染患者";
+    private final String SUSPECTED_PATIENT = "疑似患者";
+    private final String DIAGNOSE = "确诊感染";
+    private final String CURE = "治愈";
+    private final String DEAD = "死亡";
+    private final String INCREMENT = "新增";
+    private final String EXCLUDE = "排除";
+    private final String INFLOW = "流入";
 
     /*以下成员变量用于判断是否传入了相应的参数*/
     private boolean hasLog;
@@ -204,29 +205,46 @@ class InfectStatistic {
         BufferedReader reader = null;
         try {
             paramDate = dateFormat.parse(date);
+            List<Integer> nationalData = statistics.get("全国"); //全国数据
             for (File log : logList) {
                 Date logDate = dateFormat.parse(log.getName().substring(0, log.getName().indexOf('.')));
                 if(logDate.compareTo(paramDate) <= 0){  //判断日志文件的日期是否小于等于给定日期
                     reader = new BufferedReader(new InputStreamReader(new FileInputStream(log), StandardCharsets.UTF_8));
                     String dataRow;
-                    while((dataRow = reader.readLine()) != null){  //忽略注释行
-                        if(!dataRow.startsWith("//")) {
+                    while((dataRow = reader.readLine()) != null){
+                        if(!dataRow.startsWith("//")) { //忽略注释行
                             String[] data = dataRow.split(" ");
                             List<Integer> provinceData = statistics.get(data[0]);
-                            if(data[1].equals(INCREMENT)){
-                                if(data[2].equals(INFECTION_PATIENT)){  //新增感染
-                                    int infection = provinceData.get(0);
-                                    int suspected = provinceData.get(1);
-                                    int count = Lib.parseData(data[3]);
-                                    infection += count;
-                                    suspected -= count;
-                                    provinceData.set(0,infection);
-                                    provinceData.set(1,suspected);
-                                }else{                                  //新增疑似
-                                    int suspected = provinceData.get(1);
-                                    suspected += Lib.parseData(data[3]);
-                                    provinceData.set(1,suspected);
-                                }
+                            List<Integer> destProvince;
+                            switch (data[1]) {
+                                case INCREMENT:  //处理新增
+                                    if (data[2].equals(INFECTION_PATIENT)) {  //新增感染
+                                        increaseInf(nationalData, provinceData, Lib.parseData(data[3]));
+                                    } else {                                  //新增疑似
+                                        increaseSus(nationalData, provinceData, Lib.parseData(data[3]));
+                                    }
+                                    break;
+                                case EXCLUDE:
+                                    excludeSus(nationalData, provinceData, Lib.parseData(data[3]));
+                                    break;
+                                case CURE:
+                                    cure(nationalData,provinceData,Lib.parseData(data[2]));
+                                    break;
+                                case DEAD:
+                                    dead(nationalData,provinceData,Lib.parseData(data[2]));
+                                    break;
+                                case INFECTION_PATIENT:
+                                    destProvince = statistics.get(data[3]);
+                                    infInflow(provinceData,destProvince,Lib.parseData(data[4]));
+                                    break;
+                                case SUSPECTED_PATIENT:
+                                    if(data[2].equals(INFLOW)){
+                                        destProvince = statistics.get(data[3]);
+                                        susInflow(provinceData,destProvince,Lib.parseData(data[4]));
+                                    } else if(data[2].equals(DIAGNOSE)) {
+                                        diagnose(nationalData,provinceData,Lib.parseData(data[3]));
+                                    }
+                                    break;
                             }
                         }
                     }
@@ -268,5 +286,143 @@ class InfectStatistic {
             System.out.print(s + " ");
         }
         System.out.println("");
+    }
+
+    /**
+     *新增确诊患者的计算
+     * @param nationalData 全国疫情
+     * @param provinceData 当前省份疫情
+     * @param count 新增数量
+     */
+    private void increaseInf(List<Integer> nationalData,List<Integer> provinceData,int count){
+        int provinceInf = provinceData.get(0);
+        int nationalInf = nationalData.get(0);
+        provinceInf += count;
+        nationalInf += count;
+        provinceData.set(0,provinceInf);
+        nationalData.set(0,nationalInf);
+    }
+
+    /**
+     *新增疑似患者的计算
+     * @param nationalData 全国疫情
+     * @param provinceData 当前省份疫情
+     * @param count 新增人数
+     */
+    private void increaseSus(List<Integer> nationalData,List<Integer> provinceData,int count){
+        int provinceSus = provinceData.get(1);
+        int nationalSus = nationalData.get(1);
+        provinceSus += count;
+        nationalSus += count;
+        provinceData.set(1,provinceSus);
+        nationalData.set(1,nationalSus);
+    }
+
+    /**
+     *排除疑似患者的计算
+     * @param nationalData 全国疫情
+     * @param provinceData 当前省份疫情
+     * @param count 排除人数
+     */
+    private void excludeSus(List<Integer> nationalData,List<Integer> provinceData,int count){
+        int provinceSus = provinceData.get(1);
+        int nationalSus = nationalData.get(1);
+        provinceSus -= count;
+        nationalSus -= count;
+        provinceData.set(1,provinceSus);
+        nationalData.set(1,nationalSus);
+    }
+
+    /**
+     *新增治愈病例的计算
+     * @param nationalData 全国疫情
+     * @param provinceData 当前省份疫情
+     * @param count 治愈人数
+     */
+    private void cure(List<Integer> nationalData,List<Integer> provinceData,int count){
+        int provinceCure = provinceData.get(2);
+        int nationalCure = nationalData.get(2);
+        int provinceInf = provinceData.get(0);
+        int nationalInf = nationalData.get(0);
+        provinceCure += count;
+        nationalCure += count;
+        provinceInf -= count;
+        nationalInf -= count;
+        provinceData.set(2,provinceCure);
+        nationalData.set(2,nationalCure);
+        provinceData.set(0,provinceInf);
+        nationalData.set(0,nationalInf);
+    }
+
+    /**
+     *新增死亡病例的计算
+     * @param nationalData 全国疫情
+     * @param provinceData 当前省份疫情
+     * @param count 死亡人数
+     */
+    private void dead(List<Integer> nationalData,List<Integer> provinceData,int count){
+        int provinceDead = provinceData.get(3);
+        int nationalDead = nationalData.get(3);
+        int provinceInf = provinceData.get(0);
+        int nationalInf = nationalData.get(0);
+        provinceDead += count;
+        nationalDead += count;
+        provinceInf -= count;
+        nationalInf -= count;
+        provinceData.set(3,provinceDead);
+        nationalData.set(3,nationalDead);
+        provinceData.set(0,provinceInf);
+        nationalData.set(0,nationalInf);
+    }
+
+    /**
+     * 流入感染患者的计算
+     * @param sourceProvince 感染者从那个省（市、自治区）流出
+     * @param destProvince 感染者流入哪个省（市、自治区）
+     * @param count 人数
+     */
+    private void infInflow(List<Integer> sourceProvince,List<Integer> destProvince,int count){
+        int sourceInf = sourceProvince.get(0);
+        int destInf = destProvince.get(0);
+        sourceInf -= count;
+        destInf += count;
+        sourceProvince.set(0,sourceInf);
+        destProvince.set(0,destInf);
+    }
+
+    /**
+     * 流入疑似患者的计算
+     * @param sourceProvince 感染者从那个省（市、自治区）流出
+     * @param destProvince 感染者流入哪个省（市、自治区）
+     * @param count 人数
+     */
+    private void susInflow(List<Integer> sourceProvince,List<Integer> destProvince,int count){
+        int sourceSus = sourceProvince.get(1);
+        int destSus = destProvince.get(1);
+        sourceSus -= count;
+        destSus += count;
+        sourceProvince.set(1,sourceSus);
+        destProvince.set(1,destSus);
+    }
+
+    /**
+     *确诊病例的计算
+     * @param nationalData 全国疫情
+     * @param provinceData 当前省份疫情
+     * @param count 确诊人数
+     */
+    private void diagnose(List<Integer> nationalData,List<Integer> provinceData,int count){
+        int provinceInf = provinceData.get(0);
+        int provinceSus = provinceData.get(1);
+        int nationalInf = nationalData.get(0);
+        int nationalSus = nationalData.get(1);
+        provinceInf += count;
+        provinceSus -= count;
+        nationalInf += count;
+        nationalSus -= count;
+        provinceData.set(0,provinceInf);
+        provinceData.set(1,provinceSus);
+        nationalData.set(0,nationalInf);
+        nationalData.set(1,nationalSus);
     }
 }
