@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -15,16 +17,17 @@ class InfectStatistic {
     /**
      * CommandLine
      * TODO
+     *
+     * @author 221701412_theTuring
+     * @version v 1.0.0
      * @description 整条命令行对应的实体类
      * eg $ java InfectStatistic list -date 2020-01-22 -log D:/log/ -out D:/output.txt
      * 命令行分为 命令+命令行参数
      * 命令 list
      * 命令行参数 -log -out
-     * @author 221701412_theTuring
-     * @version v 1.0.0
      * @since 2020.2.7
      */
-    static class CommandLine{
+    static class CommandLine {
 
         private Command command;
 
@@ -51,13 +54,14 @@ class InfectStatistic {
         /**
          * Command
          * TODO
-         * @description 命令
-         * 现有命令 list
+         *
          * @author 221701412_theTuring
          * @version v 1.0.0
+         * @description 命令
+         * 现有命令 list
          * @since 2020.2.7
          */
-        static class Command{
+        static class Command {
 
             //List （命令）
             private boolean list;
@@ -74,6 +78,9 @@ class InfectStatistic {
         /**
          * Arguments
          * TODO
+         *
+         * @author 221701412_theTuring
+         * @version v 1.0.0
          * @description 命令行参数对应的实体类
          * 现有命令行参数 log out date type province
          * -log 指定日志目录的位置，该项必会附带，请直接使用传入的路径，而不是自己设置路径
@@ -82,11 +89,9 @@ class InfectStatistic {
          * -type 可选择[ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 ，dead：死亡患者]，
          * 使用缩写选择，如 -type ip 表示只列出感染患者的情况，-type sp cure则会按顺序【sp, cure】列出疑似患者和治愈患者的情况，不指定该项默认会列出所有情况。
          * -province 指定列出的省，如-province 福建，则只列出福建，-province 全国 浙江则只会列出全国、浙江
-         * @author 221701412_theTuring
-         * @version v 1.0.0
          * @since 2020.2.7
          */
-        static class Arguments{
+        static class Arguments {
 
             private boolean log;
 
@@ -192,16 +197,17 @@ class InfectStatistic {
         /**
          * TypeOption
          * TODO
-         * @description 命令行参数中 type 可选择[ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 ，dead：死亡患者]
-         * 使用的枚举类型
+         *
          * @author 221701412_theTuring
          * @version v 1.0.0
+         * @description 命令行参数中 type 可选择[ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 ，dead：死亡患者]
+         * 使用的枚举类型
          * @since 2020.2.7
          */
-        enum TypeOption{
+        enum TypeOption {
 
-            IP("infection_patients",1,false),SP("suspected patients",2,false),
-            CURE("cure_patients",3,false),DEAD("dead__patient",4,false);
+            IP("infection_patients", 1, false), SP("suspected patients", 2, false),
+            CURE("cure_patients", 3, false), DEAD("dead__patient", 4, false);
 
             //类型名
             private String name;
@@ -210,11 +216,11 @@ class InfectStatistic {
             //状态 false：未选中 true：选中
             private boolean status;
 
-            private TypeOption(String name, int index, boolean status){
+            private TypeOption(String name, int index, boolean status) {
 
-                this.name = name ;
-                this.index = index ;
-                this.status = status ;
+                this.name = name;
+                this.index = index;
+                this.status = status;
 
             }
 
@@ -240,18 +246,23 @@ class InfectStatistic {
 
             public void setStatus(boolean status) {
                 this.status = status;
+            }
+
+            public void setTypeOptionIP() {
+
             }
         }
 
         /**
          * TypeOptionDto
          * TODO
-         * @description 封装枚举类型的类
+         *
          * @author 221701412_theTuring
          * @version v 1.0.0
+         * @description 封装枚举类型的类
          * @since 2020.2.7
          */
-        static class TypeOptionDto{
+        static class TypeOptionDto {
 
             //类型名
             private String name;
@@ -282,6 +293,86 @@ class InfectStatistic {
 
             public void setStatus(boolean status) {
                 this.status = status;
+            }
+
+            /**
+             * setTypeOptionIp()
+             * TODO
+             * @description 创建ip选项的实例化
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.7
+             * @return TypeOptionDto
+             */
+            public TypeOptionDto setTypeOptionIp(){
+
+                CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
+                typeOptionDto.setName(TypeOption.IP.getName());
+                typeOptionDto.setIndex(TypeOption.IP.getIndex());
+                TypeOption.IP.setStatus(true);
+                typeOptionDto.setStatus(TypeOption.IP.isStatus());
+
+                return typeOptionDto;
+            }
+
+            /**
+             * setTypeOptionSp()
+             * TODO
+             * @description 创建sp选项的实例化
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.7
+             * @return TypeOptionDto
+             */
+            public TypeOptionDto setTypeOptionSp(){
+
+                CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
+                typeOptionDto.setName(TypeOption.SP.getName());
+                typeOptionDto.setIndex(TypeOption.SP.getIndex());
+                TypeOption.SP.setStatus(true);
+                typeOptionDto.setStatus(TypeOption.SP.isStatus());
+
+                return typeOptionDto;
+            }
+
+            /**
+             * setTypeOptionCure()
+             * TODO
+             * @description 创建cure选项的实例化
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.7
+             * @return TypeOptionDto
+             */
+            public TypeOptionDto setTypeOptionCure(){
+
+                CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
+                typeOptionDto.setName(TypeOption.CURE.getName());
+                typeOptionDto.setIndex(TypeOption.CURE.getIndex());
+                TypeOption.CURE.setStatus(true);
+                typeOptionDto.setStatus(TypeOption.CURE.isStatus());
+
+                return typeOptionDto;
+            }
+
+            /**
+             * setTypeOptionDead()
+             * TODO
+             * @description 创建dead选项的实例化
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.7
+             * @return TypeOptionDto
+             */
+            public TypeOptionDto setTypeOptionDead(){
+
+                CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
+                typeOptionDto.setName(TypeOption.DEAD.getName());
+                typeOptionDto.setIndex(TypeOption.DEAD.getIndex());
+                TypeOption.DEAD.setStatus(true);
+                typeOptionDto.setStatus(TypeOption.DEAD.isStatus());
+
+                return typeOptionDto;
             }
         }
 
@@ -291,88 +382,250 @@ class InfectStatistic {
     /**
      * CommandLineAnalytic
      * TODO
+     *
+     * @author 221701412_theTuring
+     * @version v 1.0.0
      * @description 命令行解析类
-     * @author 221701412_theTuring
-     * @version v 1.0.0
-     * @since
+     * @since 2020.2.7
      */
-    class CommandLineAnalytic{
+    static class CommandLineAnalytic {
+
+        /**
+         * Analytic()
+         * TODO
+         *
+         * @return CommandLine
+         * @description 命令行解析方法
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.7
+         */
+        public CommandLine Analytic(List<String> list) {
+
+            //实例化命令行
+            CommandLine CommandLine = new CommandLine();
+
+            //实例化命令
+            CommandLine.Command command = new CommandLine.Command();
+
+            //实例化命令行参数
+            CommandLine.Arguments arguments = new CommandLine.Arguments();
+
+            for (int i = 0; i < list.size(); i++) {
+
+                String temp = list.get(i);
+
+                switch (temp) {
+                    case "list":
+                        command.setList(true);
+                        break;
+                    case "-log":
+                        arguments.setLog(true);
+                        arguments.setLog_content(list.get(i + 1));
+                        break;
+                    case "-out":
+                        arguments.setOut(true);
+                        arguments.setOut_content(list.get(i + 1));
+                        break;
+                    case "-date":
+                        arguments.setDate(true);
+                        arguments.setDate_content(list.get(i + 1));
+                        break;
+                    case "-type":
+                        arguments.setType(true);
+                        ArrayList<CommandLine.TypeOptionDto> arrayList = new ArrayList<>();
+                        for (int j = i; j < list.size(); j++) {
+                            String type = list.get(j);
+                            if (!type.substring(0, 1).equals('-')) {
+
+                                if (type.equals("ip")) {
+                                    InfectStatistic.CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
+                                    arrayList.add(typeOptionDto.setTypeOptionIp());
+                                }
+
+                                if (type.equals("sp")) {
+                                    InfectStatistic.CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
+                                    arrayList.add(typeOptionDto.setTypeOptionSp());
+                                }
+
+                                if (type.equals("cure")) {
+                                    InfectStatistic.CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
+                                    arrayList.add(typeOptionDto.setTypeOptionCure());
+                                }
+
+                                if (type.equals("dead")) {
+                                    InfectStatistic.CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
+                                    arrayList.add(typeOptionDto.setTypeOptionDead());
+                                }
+                            }
+                        }
+                        arguments.setTypeOption(arrayList);
+                        break;
+                    case "-province":
+                        arguments.setProvince(true);
+                        ArrayList<String> p_list = new ArrayList<>();
+                        for (int j = i+1; j < list.size(); j++) {
+                            String province = list.get(j);
+                            if (!province.substring(0, 1).equals('-')) {
+                                p_list.add(province);
+                            }
+                        }
+                        arguments.setProvince_content(p_list);
+                        break;
+                }
+            }
+            CommandLine.setCommand(command);
+            CommandLine.setArguments(arguments);
+            return CommandLine;
+        }
     }
 
+        /**
+         * RegexUtil
+         * TODO
+         *
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @description 正则工具类 用正则表达式用于提取文本
+         * @since 2020.2.7
+         */
+        public static class RegexUtil {
 
-    /**
-     * LogUtil
-     * TODO
-     * @description Log文件连接初始化类
-     * @author 221701412_theTuring
-     * @version v 1.0.0
-     * @since
-     */
-    class LogUtil{
-    }
+            public static String getLink(String text) {
+                Pattern pattern = Pattern.compile("链接：(.*)");
+                Matcher m = pattern.matcher(text);
+                String str = "";
+                if (m.find()) {
+                    str = m.group(1);
+                }
+                return str;
+            }
 
-    /**
-     * LogDao
-     * TODO
-     * @description Log文件控制类
-     * @author 221701412_theTuring
-     * @version v 1.0.0
-     * @since
-     */
-    class LogDao{
-    }
+            public static String getCode(String text) {
+                Pattern pattern = Pattern.compile("提取码：(.*)");
+                Matcher m = pattern.matcher(text);
+                String str = "";
+                if (m.find()) {
+                    str = m.group(1);
+                }
+                return str;
+            }
 
+        }
 
-    /**
-     * CommandLine
-     * TODO
-     * @description 命令行启动类
-     * @author 221701412_theTuring
-     * @version v 1.0.0
-     * @since
-     */
-    class CommandLineApplication{
-    }
+        /**
+         * LogUtil
+         * TODO
+         *
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @description Log文件连接初始化类
+         * @since
+         */
+        class LogUtil {
+        }
 
-    public static void main(String[] args) {
-
-         CommandLine commandLine = new CommandLine();
-
-
-         CommandLine.Command command = new CommandLine.Command();
-
-
-         CommandLine.Arguments arguments = new CommandLine.Arguments();
-
-
-         command.setList(true);
-
-
-         arguments.setLog(true);
-         arguments.setLog_content("C");
-         arguments.setOut(true);
-         arguments.setOut_content("D");
-         arguments.setType(true);
-
-         ArrayList<CommandLine.TypeOptionDto> arrayList = new ArrayList<>();
-         CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
-         typeOptionDto.setName(CommandLine.TypeOption.CURE.getName());
-         typeOptionDto.setIndex(CommandLine.TypeOption.CURE.getIndex());
-         typeOptionDto.setStatus(CommandLine.TypeOption.CURE.isStatus());
-
-         arrayList.add(typeOptionDto);
-
-         arguments.setTypeOption(arrayList);
+        /**
+         * LogDao
+         * TODO
+         *
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @description Log文件控制类
+         * @since
+         */
+        class LogDao {
+        }
 
 
-         commandLine.setCommand(command);
+        /**
+         * CommandLine
+         * TODO
+         *
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @description 命令行启动类
+         * @since
+         */
+        class CommandLineApplication {
+        }
 
+        public static void main(String[] args) {
 
-         commandLine.setArguments(arguments);
+//         CommandLine commandLine = new CommandLine();
+//
+//         CommandLine.Command command = new CommandLine.Command();
+//
+//         CommandLine.Arguments arguments = new CommandLine.Arguments();
+//
+//         command.setList(true);
+//
+//         arguments.setLog(true);
+//         arguments.setLog_content("C");
+//         arguments.setOut(true);
+//         arguments.setOut_content("D");
+//         arguments.setType(true);
+//
+//         ArrayList<CommandLine.TypeOptionDto> arrayList = new ArrayList<>();
+//         CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
+//         typeOptionDto.setName(CommandLine.TypeOption.CURE.getName());
+//         typeOptionDto.setIndex(CommandLine.TypeOption.CURE.getIndex());
+//         typeOptionDto.setStatus(CommandLine.TypeOption.CURE.isStatus());
+//
+//         arrayList.add(typeOptionDto);
+//
+//         arguments.setTypeOption(arrayList);
+//
+//
+//         commandLine.setCommand(command);
+//
+//
+//         commandLine.setArguments(arguments);
+//
+//
+//         System.out.println(commandLine.getArguments().getTypeOption().get(0).getName());
 
+            List<String> list = new ArrayList<String>();
 
-         System.out.println(commandLine.getArguments().getTypeOption().get(0).getName());
+            for (String temp : args) {
+                list.add(temp);
+            }
+//
+//        for(String temp:list){
+//            System.out.print(temp+"\n");
+//        }
+//
+//        for(int i=0; i<list.size(); i++) {
+//            String temp = list.get(i);
+//            System.out.print(temp+"\n");
+//        }
+//
 
-         System.out.println("hello world");
-    }
+            CommandLineAnalytic commandLineAnalytic = new CommandLineAnalytic();
+            CommandLine commandLine = new CommandLine();
+
+            commandLine = commandLineAnalytic.Analytic(list);
+
+            commandLine.getArguments().isLog();
+            commandLine.getArguments().isOut();
+            commandLine.getArguments().isDate();
+            commandLine.getArguments().isType();
+            commandLine.getArguments().getTypeOption();
+            commandLine.getArguments().isProvince();
+            commandLine.getArguments().getProvince_content();
+
+            System.out.println(commandLine.getArguments().isLog());
+            System.out.println(commandLine.getArguments().isOut());
+            System.out.println(commandLine.getArguments().isDate());
+            System.out.println(commandLine.getArguments().isType());
+            System.out.println(commandLine.getArguments().getTypeOption().get(0).getName());
+            System.out.println(commandLine.getArguments().getTypeOption().get(1).getName());
+            System.out.println(commandLine.getArguments().isProvince());
+            System.out.println(commandLine.getArguments().getProvince_content().get(0));
+            System.out.println(commandLine.getArguments().getProvince_content().get(1));
+            System.out.println(commandLine.getArguments().getProvince_content().get(2));
+
+            System.out.println("hello world");
+        }
+
 }
