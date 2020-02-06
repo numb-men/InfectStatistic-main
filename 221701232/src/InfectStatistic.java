@@ -1,4 +1,5 @@
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,7 +46,19 @@ class InfectStatistic {
     }
 
     public void setDate(String date) {
-        this.date = date;
+        boolean convertSuccess=true;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            format.parse(date);
+        } catch (ParseException e) {
+            convertSuccess=false;
+        }
+        if (convertSuccess) {
+            this.date = date;
+        } else {
+            System.out.println("args's date is not invalid, date is been setted to" + this.date);
+            return;
+        }
     }
 
     public Vector<String> getTypes() {
@@ -89,7 +102,7 @@ class InfectStatistic {
         logFilesMap = new HashMap<>();
     }
     public static void main(String[] args) {
-        System.out.println("helloworld");
+
     }
 }
 
