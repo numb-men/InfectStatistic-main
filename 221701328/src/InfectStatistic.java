@@ -9,7 +9,7 @@ import java.util.*;
  * TODO
  *
  * @author herokilito@outlook.com
- * @version 0.5
+ * @version 0.6
  * @since 2020.02
  */
 class InfectStatistic {
@@ -57,7 +57,11 @@ class InfectStatistic {
         typeParams = new ArrayList<>();
         provinceParams = new ArrayList<>();
         statistics = new LinkedHashMap<>();
-        outType = new LinkedHashMap<>();
+        outType = new LinkedHashMap<>();   //默认输出全部类型数据
+        outType.put(INFECTION_PATIENT,0);
+        outType.put(SUSPECTED_PATIENT,1);
+        outType.put(CURE,2);
+        outType.put(DEAD,3);
         Lib.mapInit(statistics);
     }
 
@@ -178,10 +182,6 @@ class InfectStatistic {
             for(String province : statistics.keySet()){   //遍历统计数据
                 List<Integer> data = statistics.get(province);
                 writer.write(province + "    ");
-//                writer.write(INFECTION_PATIENT + data.get(0) + "人    ");
-//                writer.write(SUSPECTED_PATIENT + data.get(1) + "人    ");
-//                writer.write(CURE + data.get(2) + "人    ");
-//                writer.write(DEAD + data.get(3) + "人    ");
                 for(String type : outType.keySet()){
                     writer.write(type + data.get(outType.get(type)) + "人    ");
                 }
@@ -193,8 +193,9 @@ class InfectStatistic {
             System.exit(1);
         }finally {
             try {
-                assert writer != null;
-                writer.close();   //关闭流
+                if (writer != null) {
+                    writer.close();   //关闭流
+                }
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -206,7 +207,7 @@ class InfectStatistic {
      * @param date -date参数后面的具体日期
      */
     private void doDate(String date){
-        File[] logList = logDirectory.listFiles();
+        List<File> logList = Lib.getLogFiles(logDirectory);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date paramDate;
         BufferedReader reader = null;
@@ -219,44 +220,45 @@ class InfectStatistic {
                     reader = new BufferedReader(new InputStreamReader(new FileInputStream(log), StandardCharsets.UTF_8));
                     String dataRow;
                     while((dataRow = reader.readLine()) != null){
-                        if(!dataRow.startsWith("//")) { //忽略注释行
-                            String[] data = dataRow.split(" ");
-                            List<Integer> provinceData = statistics.get(data[0]);
-                            List<Integer> destProvince;
-                            switch (data[1]) {
-                                case INCREMENT:  //处理新增
-                                    if (data[2].equals(INFECTION_PATIENT)) {  //新增感染
-                                        increaseInf(nationalData, provinceData, Lib.parseData(data[3]));
-                                    } else {                                  //新增疑似
-                                        increaseSus(nationalData, provinceData, Lib.parseData(data[3]));
-                                    }
-                                    break;
-                                case EXCLUDE:  //处理排除疑似
-                                    excludeSus(nationalData, provinceData, Lib.parseData(data[3]));
-                                    break;
-                                case CURE:  //处理治愈
-                                    cure(nationalData,provinceData,Lib.parseData(data[2]));
-                                    break;
-                                case DEAD:  //处理死亡
-                                    dead(nationalData,provinceData,Lib.parseData(data[2]));
-                                    break;
-                                case INFECTION_PATIENT:  //处理感染患者流入
+                        if(dataRow.startsWith("//")) { //忽略注释行
+                            continue;
+                        }
+                        String[] data = dataRow.split(" ");  //分割数据行
+                        List<Integer> provinceData = statistics.get(data[0]);   //当前行的省份数据
+                        List<Integer> destProvince;   //用于处理流入
+                        switch (data[1]) {
+                            case INCREMENT:  //处理新增
+                                if (data[2].equals(INFECTION_PATIENT)) {  //新增感染
+                                    increaseInf(nationalData, provinceData, Lib.parseData(data[3]));
+                                } else {                                  //新增疑似
+                                    increaseSus(nationalData, provinceData, Lib.parseData(data[3]));
+                                }
+                                break;
+                            case EXCLUDE:  //处理排除疑似
+                                excludeSus(nationalData, provinceData, Lib.parseData(data[3]));
+                                break;
+                            case CURE:  //处理治愈
+                                cure(nationalData,provinceData,Lib.parseData(data[2]));
+                                break;
+                            case DEAD:  //处理死亡
+                                dead(nationalData,provinceData,Lib.parseData(data[2]));
+                                break;
+                            case INFECTION_PATIENT:  //处理感染患者流入
+                                destProvince = statistics.get(data[3]);
+                                infInflow(provinceData,destProvince,Lib.parseData(data[4]));
+                                break;
+                            case SUSPECTED_PATIENT:
+                                if(data[2].equals(INFLOW)){   //处理疑似患者流入
                                     destProvince = statistics.get(data[3]);
-                                    infInflow(provinceData,destProvince,Lib.parseData(data[4]));
-                                    break;
-                                case SUSPECTED_PATIENT:
-                                    if(data[2].equals(INFLOW)){   //处理疑似患者流入
-                                        destProvince = statistics.get(data[3]);
-                                        susInflow(provinceData,destProvince,Lib.parseData(data[4]));
-                                    } else if(data[2].equals(DIAGNOSE)) {  //处理确诊
-                                        diagnose(nationalData,provinceData,Lib.parseData(data[3]));
-                                    }
-                                    break;
+                                    susInflow(provinceData,destProvince,Lib.parseData(data[4]));
+                                } else if(data[2].equals(DIAGNOSE)) {  //处理确诊
+                                    diagnose(nationalData,provinceData,Lib.parseData(data[3]));
+                                }
+                                break;
                             }
                         }
                     }
                 }
-            }
         }catch (Exception e){
             System.out.println(e.getMessage());
             System.exit(1);
@@ -276,6 +278,7 @@ class InfectStatistic {
      * @param types -type命令参数后面的具体参数值数组
      */
     private void doType(ArrayList<String> types){
+        Map<String,Integer> newOutType = new LinkedHashMap<>();
         for (String key : statistics.keySet()){
             List<Integer> oldData = statistics.get(key);
             List<Integer> newData = new ArrayList<>();
@@ -284,25 +287,26 @@ class InfectStatistic {
                 switch (type){
                     case "ip":
                         newData.add(oldData.get(0));
-                        outType.put(INFECTION_PATIENT,index++);
+                        newOutType.put(INFECTION_PATIENT,index++);
                         break;
                     case "sp":
                         newData.add(oldData.get(1));
-                        outType.put(SUSPECTED_PATIENT,index++);
+                        newOutType.put(SUSPECTED_PATIENT,index++);
                         break;
                     case "cure":
                         newData.add(oldData.get(2));
-                        outType.put(CURE,index++);
+                        newOutType.put(CURE,index++);
                         break;
                     case "dead":
                         newData.add(oldData.get(3));
-                        outType.put(DEAD,index++);
+                        newOutType.put(DEAD,index++);
                         break;
                     default:
                         System.out.println("\"-type\" 无法解析的类型 " + type);
                         System.exit(1);
                 }
             }
+            outType = newOutType;
             statistics.put(key,newData);
         }
     }
@@ -312,11 +316,11 @@ class InfectStatistic {
      * @param provinces -province命令参数后面的具体参数值数组
      */
     private void doProvince(ArrayList<String> provinces){
-        System.out.print("provinces:");
-        for(String s : provinces){
-            System.out.print(s + " ");
+        Map<String,List<Integer>> newStatistics = new LinkedHashMap<>();
+        for(String province : provinces){
+            newStatistics.put(province,statistics.get(province));
         }
-        System.out.println("");
+        statistics = newStatistics;
     }
 
     /**

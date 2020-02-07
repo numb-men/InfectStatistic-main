@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,7 @@ import java.util.Map;
  *程序执行过程中需要的一些静态方法
  *
  * @author herokilito@outlook.com
- * @version 0.5
+ * @version 0.6
  * @since 2020.02
  */
 public class Lib {
@@ -79,5 +80,21 @@ public class Lib {
             System.exit(1);
             return 0;
         }
+    }
+
+    /**
+     * 从日志文件路径中提取日志文件
+     * @param logDirectory 给定的日志文件路径
+     * @return 日志文件夹下的所有日志文件list
+     */
+    public static List<File> getLogFiles(File logDirectory){
+        List<File> fileList = new ArrayList<>();
+        String regex = "\\d{4}-\\d{2}-\\d{2}.log.txt";   //日志文件名所遵循的格式
+        for (File file : logDirectory.listFiles()){
+            if(file.getName().matches(regex)){
+                fileList.add(file);
+            }
+        }
+        return fileList;
     }
 }
