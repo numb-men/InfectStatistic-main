@@ -1,6 +1,7 @@
 import javafx.util.Pair;
 
 import java.io.*;
+import java.text.Collator;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -315,8 +316,12 @@ class InfectDataParser {
         return map.values();
     }
 
-    protected Integer getNumberByAttr(String attr) {
-        return Integer.parseInt(attr.substring(0, attr.length() - 1));
+    protected int getNumberByAttr(String attr) {
+        try {
+            return Integer.parseInt(attr.substring(0, attr.length() - 1));
+        } catch (NumberFormatException e) {
+            throw new InfectDataParseException("数据转换发生异常:" + e.getMessage(), e);
+        }
     }
 
     protected InfectionItem getOrCreateItem(Map<String, InfectionItem> map, String itemName) {
@@ -348,32 +353,98 @@ class InfectStatisticException extends RuntimeException {
 }
 
 class InfectStatistician {
+    private boolean ready = false;
     private static final String FILE_NAME_PATTERN = "\\d{4}-\\d{2}-\\d{2}.log.txt";
+    private LocalDate endDate;
     private LocalDate minDate;
     private LocalDate maxDate;
     public Vector<Pair<LocalDate, Collection<InfectionItem>>> data;
+    private static final Collection<String> APPROVED_TYPES = Arrays.asList("sp", "ip", "cure", "dead");
 
-    public void readDataFrom(String path) {
+
+    public void readDataFrom(String path, LocalDate endDate) {
+        ready = false;
         File targetDir = new File(path);
         if (!(targetDir.exists() && targetDir.isDirectory())) {
             throw new InfectStatisticException(path + ":不存在或者不是一个目录");
         }
+        this.minDate = this.maxDate = null;
+        this.endDate = endDate;
+
         File[] files = targetDir.listFiles((dir, name) -> name.matches(FILE_NAME_PATTERN));
-        data = new Vector<>(files.length);
-        List<File> fileList = Arrays.asList(files);
-        fileList.parallelStream().forEach((file) -> {
+        this.data = new Vector<>(files.length);
+        List<Pair<LocalDate, File>> dateFilePairs = new LinkedList<>();
+        if (this.endDate != null) {
+            for (int i = 0; i < files.length; i++) {
+                try {
+                    String fileName = files[i].getName();
+                    LocalDate date = LocalDate.parse(fileName.substring(0, fileName.indexOf('.')));
+                    maintainDateBound(date);
+                    if (this.endDate.isBefore(date)) {
+                        continue;
+                    }
+                    dateFilePairs.add(new Pair<>(date, files[i]));
+                } catch (DateTimeParseException e) {
+                    System.out.println(files[i].getAbsolutePath() + ":文件名中的日期无效, " + e.getMessage());
+                }
+            }
+        }
+        dateFilePairs.parallelStream().forEach((dateFile) -> {
             try {
-                String fileName = file.getName();
-                LocalDate date = LocalDate.parse(fileName.substring(0, fileName.indexOf('.')));
                 InfectFileReader reader = new InfectFileReader();
                 InfectDataParser parser = new InfectDataParser();
-                Collection<InfectionItem> items = parser.parse(reader.read(file));
-                data.add(new Pair<>(date, items));
-            } catch (DateTimeParseException e) {
-                System.out.println(file.getAbsolutePath() + ":文件名中的日期无效, " + e.getMessage());
+                Collection<InfectionItem> items = parser.parse(reader.read(dateFile.getValue()));
+                data.add(new Pair<>(dateFile.getKey(), items));
             } catch (IOException | InfectDataParseException e) {
-                System.out.println("无法处理文件"+file.getAbsolutePath()+","+ e.getMessage());
+                System.out.println("无法处理文件" + dateFile.getValue().getAbsolutePath() + "," + e.getMessage());
             }
         });
+        if (endDate != null && maxDate != null && endDate.isAfter(maxDate)) {
+            throw new InfectStatisticException("日期超出范围,已知范围:"+minDate+"至"+maxDate);
+        }
+        data.sort((o1, o2) -> {
+            LocalDate date1 = o1.getKey();
+            LocalDate date2 = o2.getKey();
+            if (date1.isBefore(date2)) {
+                return -1;
+            } else if (date1.isAfter(date2)) {
+                return 1;
+            }
+            return 0;
+        });
+        ready = true;
     }
+
+    protected void maintainDateBound(LocalDate date) {
+        if (minDate != null) {
+            if (minDate.isAfter(date)) {
+                minDate = date;
+            }
+        } else {
+            minDate = date;
+        }
+        if (maxDate != null) {
+            if (maxDate.isBefore(date)) {
+                maxDate = date;
+            }
+        } else {
+            maxDate = date;
+        }
+    }
+
+    public void printf(Collection<String> provinces, Collection<String> types) {
+        if (!ready) {
+            throw new InfectStatisticException("无法执行操作，请重新取数据");
+        }
+        if (APPROVED_TYPES.containsAll(types)) {
+            throw new InfectStatisticException("类型参数中中含有不支持的类型");
+        }
+        if (endDate == null) {
+            endDate = maxDate;
+        }
+
+        ArrayList<String> provinceList = new ArrayList<>(provinces);
+        provinceList.sort(Collator.getInstance(Locale.CHINA));
+    }
+
 }
