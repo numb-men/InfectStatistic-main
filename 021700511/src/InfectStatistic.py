@@ -37,7 +37,8 @@ class InfectStatistic:
             self.deadline = get_date(*date.split('-', 2)) if date else None
         except (ValueError, TypeError):
             print('日期 %s 非法' % date)
-            sys.exit(0)
+            sys.exit('error-date')
+
         # 计算路径合法性
         self._check_logs_path(logs_path)
         self._check_out_path(out_path)
@@ -45,12 +46,12 @@ class InfectStatistic:
         # 日志日期范围检测
         if self.deadline and self.deadline > max(self.logs_list.keys()):
             print('%s 超出日志给出的范围' % self.deadline)
-            sys.exit()
+            sys.exit('error-date-range')
 
     def _check_logs_path(self, logs_path):
         if not os.path.isdir(logs_path):
             print('日志目录: %s 不是正确的目录' % logs_path)
-            sys.exit(0)
+            sys.exit('error-log-dir')
         for filename in os.listdir(logs_path):
             file_path = os.path.join(logs_path, filename)
             if os.path.isfile(file_path):
@@ -63,7 +64,7 @@ class InfectStatistic:
                     self.logs_list.update({date: file_path})
         if not self.logs_list:
             print('日志目录为空')
-            sys.exit()
+            sys.exit('error-log-null')
 
     def _check_out_path(self, out_path):
         try:
@@ -71,7 +72,7 @@ class InfectStatistic:
             self.out_path = out_path
         except (FileNotFoundError, PermissionError):
             print('输出路径 %s 不正确' % out_path)
-            exit(0)
+            exit('error-out')
 
     def _new_province(self, province):
         self.data.update({province: {"ip": 0, "sp": 0, "cure": 0, "dead": 0}})
@@ -113,11 +114,9 @@ class InfectStatistic:
         for date, file_path in self.logs_list.items():
             if self.deadline and date > self.deadline:
                 continue
-            log = open(file_path, mode='r', encoding='utf-8')
-            try:
+            with open(file_path, mode='r', encoding='utf-8') as log:
                 for line in log.readlines():
                     self._parse_line(line.strip())
-            finally:
                 log.close()
 
     def _write_str(self, province, province_data):
@@ -134,8 +133,7 @@ class InfectStatistic:
         return out_str
 
     def _out_to_file(self, data):
-        out_file = open(self.out_path, 'w', encoding='utf8')
-        try:
+        with open(self.out_path, 'w', encoding='utf8') as out_file:
             if '全国' in data:
                 out_file.writelines(self._write_str('全国', data['全国']) + '\n')
                 data.pop('全国')
@@ -144,8 +142,6 @@ class InfectStatistic:
             for province in province_list:
                 out_file.writelines(self._write_str(province, data[province]) + '\n')
             out_file.writelines('// 该文档并非真实数据，仅供测试使用\n')
-        finally:
-            out_file.close()
 
     # 计算全国总数据
     def _all_data(self):
