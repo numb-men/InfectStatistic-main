@@ -71,4 +71,7 @@
   + if、for、do、while、case、switch、default等语句自占一行，且 if、for、 do、while 等语句的执行语句部分无论多少都要加括号{}
 
   + 使用{}时，左括号接在前部分的句末，例如：
+  <pre>if(i<4){
+  ...
+  }</pre>
   
