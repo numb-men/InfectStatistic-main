@@ -66,18 +66,40 @@ class InfectStatistic {
         this.types.add(type);
     }
 
+    public void addType(String[] types) {
+        for (String type : types) {
+            this.types.add(type);
+        }
+    }
+
     public Vector<String> getProvinces() {
         return provinces;
     }
 
     public void addProvince(String province) {
         this.provinces.add(province);
+        if (!province.equals("全国")) {
+            if (!this.getContainer().getRecordMap().containsKey(province)) {
+                Record record = new Record();
+                record.setProvinceName(province);
+                this.getContainer().addRecord(record);
+            }
+        }
     }
 
+    public void addProvince(String[] provinces) {
+        for (String province : provinces) {
+            addProvince(province);
+        }
+    }
     public int provinceNumber() { return this.provinces.size(); }
 
     public Map<String, File> getLogFilesMap() {
         return logFilesMap;
+    }
+
+    public void setLogFilesMap(Map<String, File> logFilesMap) {
+        this.logFilesMap = logFilesMap;
     }
 
     public Container getContainer() {
@@ -134,14 +156,15 @@ class InfectStatistic {
     }
     // Constructor
     public InfectStatistic() {
-        this.types = null;
-        this.provinces = null;
+        this.types = new Vector<String>();
+        this.provinces = new Vector<String>();
         this.logFilePath = "/home/yyx/JavaWorkspace/InfectStatistic-main/221701232/log";
         this.outFilePath = "/home/yyx/JavaWorkspace/InfectStatistic-main/221701232/result/";
         Date now = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         this.date = sdf.format(now);
-        country = new Record("全国");
+        country = new Record();
+        country.setProvinceName("全国");
         container = new Container();
         logFilesMap = new HashMap<>();
     }
@@ -230,19 +253,9 @@ class Record {
     }
 
     public void incDeadNum(int num) { this.deadNum += num; }
-    // debug
-    public void showMessage() {
-        String provinceRecord = this.getProvinceName() + " 感染患者"
-                + this.getIpNum() +"人 "
-                + "疑似患者" + this.getSpNum() + "人 "
-                + "治愈" + this.getCureNum() + "人 "
-                + "死亡" + this.getDeadNum() + "人";
-        provinceRecord += "\r\n";
-        System.out.println(provinceRecord);
-    }
     // Constructor
-    public Record(String provinceName) {
-        this.provinceName = provinceName;
+    public Record() {
+        this.provinceName = "";
         this.ipNum = 0;
         this.spNum = 0;
         this.deadNum = 0;

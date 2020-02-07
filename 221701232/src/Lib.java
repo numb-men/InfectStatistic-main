@@ -1,13 +1,7 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.toMap;
@@ -34,10 +28,6 @@ class HandleFileUtil {
         Container container = infectStatistic.getContainer();
         int index = 0;
         for (Map.Entry<String, File> entry : fileMap.entrySet()) {
-            // support args -date
-            if (CommonUtil.compareDate(entry.getKey(), infectStatistic.getDate())) {
-                break;
-            }
             index++;
             System.out.println("Handle file : " + entry.getKey());
             FileReader fr = new FileReader(entry.getValue());
@@ -51,20 +41,12 @@ class HandleFileUtil {
                 // get province record
                 Record record = container.getRecord(data[0]);
                 if (record == null) {
-                    record = new Record(data[0]);
+                    record = new Record();
+                    record.setProvinceName(data[0]);
                     container.addRecord(record);
                 }
                 // get number
-                String str1 = data[data.length - 1].trim();
-                String str2 = "";
-                for (int i = 0; i < str1.length(); ++i) {
-                    if(str1.charAt(i) >= '0' && str1.charAt(i) <= '9'){
-                        str2 += str1.charAt(i);
-                    } else {
-                        break;
-                    }
-                }
-                int num = Integer.parseInt(str2);
+                int num = CommonUtil.parserStringToInt(data[data.length - 1]);
                 // handle data
                 if (data.length == 3) {
                     if (data[1].equals("死亡")) {
@@ -87,7 +69,8 @@ class HandleFileUtil {
                 } else if (data.length == 5) {
                     Record infectedRecord = container.getRecord(data[3]);
                     if (infectedRecord == null) {
-                        infectedRecord = new Record(data[3]);
+                        infectedRecord = new Record();
+                        infectedRecord.setProvinceName(data[3]);
                         container.addRecord(infectedRecord);
                     }
                     infectStatistic.peopleMove(record, infectedRecord, data[1], num);
@@ -96,13 +79,37 @@ class HandleFileUtil {
                 for (int i = 0; i < data.length; ++i) {
                     System.out.println("data[" + i + "]" + "=" +data[i]);
                 }
-                record.showMessage();
-                infectStatistic.getCountry().showMessage();
+                CommonUtil.showRecordMessage(record);
+                CommonUtil.showRecordMessage(record);
             }
         }
     }
 
-    public static Map<String,File> getFiles(String path) {
+    public static void writeOutFile(String outFilePath, InfectStatistic infectStatistic) {
+        try {
+            File file = new File(outFilePath);
+            if (file.isDirectory()) {
+                file = new File(outFilePath + "output.txt");
+            }
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            FileWriter fileWriter = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fileWriter);
+            if (infectStatistic.getProvinces() != null &&
+                    infectStatistic.getProvinces().contains("全国")) {
+                CommonUtil.writeRecordToFile(bw, infectStatistic.getCountry(),
+                        infectStatistic.getTypes());
+            }
+            CommonUtil.writeContainerToFile(bw, infectStatistic.getContainer(),
+                    infectStatistic.getTypes(), infectStatistic.getProvinces());
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Map<String, File> getFiles(String path, String date) throws ParseException {
         File file = new File(path);
         File[] fileList = file.listFiles();
         Map<String, File> fileMap = new HashMap<>();
@@ -112,6 +119,10 @@ class HandleFileUtil {
                     String[] temp = fileList[i].toString().split("/");
                     if (!temp[temp.length - 1].matches("2020-[0-1][0-9]-[0-3][0-9].log.txt")) {
                         System.out.println("invalid file : " + temp[temp.length - 1] +" skip");
+                        continue;
+                    }
+                    // support args -date
+                    if (date != null && CommonUtil.compareDate(temp[temp.length - 1], date)) {
                         continue;
                     }
                     fileMap.put(fileList[i].toString(), fileList[i]);
@@ -196,7 +207,11 @@ class CommonUtil {
 
     // r1 equals to r2 return true
     public static boolean compareRecord(Record r1, Record r2) {
-        if (!(r1.getProvinceName().equals(r2.getProvinceName()))) {
+        if (r1 == r2) {
+            return true;
+        } else if (r1 == null || r2 == null) {
+            return false;
+        } else if (!(r1.getProvinceName().equals(r2.getProvinceName()))) {
             return false;
         } else if (!(r1.getDeadNum() == r2.getDeadNum())) {
             return false;
@@ -213,6 +228,9 @@ class CommonUtil {
     public static boolean compareContainer(Container c1, Container c2) {
         Map<String, Record> recordMap1 = c1.getRecordMap();
         Map<String, Record> recordMap2 = c2.getRecordMap();
+        if (recordMap1.size() != recordMap2.size()) {
+            return false;
+        }
         for (Map.Entry<String, Record> entry : recordMap1.entrySet()) {
             Record record1 = entry.getValue();
             Record record2 = c2.getRecord(record1.getProvinceName());
@@ -244,6 +262,129 @@ class CommonUtil {
             return null;
         }
         return date;
+    }
+
+    // write container's message to file
+    public static void writeContainerToFile(BufferedWriter bw, Container container,
+                                            Vector<String> types, Vector<String> provinces) throws IOException {
+        Map<String, Record> recordMap = container.getRecordMap();
+        for (Map.Entry<String, Record> entry : recordMap.entrySet()) {
+            Record record = entry.getValue();
+            if (provinces != null) {
+                String province = entry.getKey();
+                if (!provinces.contains(province)) {
+                    continue;
+                }
+            }
+            writeRecordToFile(bw, record, types);
+        }
+    }
+    // write record's message to file
+    // [ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 ，dead：死亡患者]
+    public static void writeRecordToFile(BufferedWriter bw, Record record, Vector<String> types) throws IOException {
+        String provinceRecord = "";
+        if (types == null || types.size() == 0) {
+            provinceRecord = record.getProvinceName() + " 感染患者"
+                    + record.getIpNum() +"人 "
+                    + "疑似患者" + record.getSpNum() + "人 "
+                    + "治愈" + record.getCureNum() + "人 "
+                    + "死亡" + record.getDeadNum() + "人";
+        } else {
+            provinceRecord = record.getProvinceName();
+            for (String str : types) {
+                if (str.equals("ip")) {
+                    provinceRecord += " 感染患者" + record.getIpNum() + "人 ";
+                } else if (str.equals("sp")) {
+                    provinceRecord += " 疑似患者" + record.getSpNum() + "人 ";
+                } else if (str.equals("cure")) {
+                    provinceRecord += " 治愈" + record.getCureNum() + "人 ";
+                } else if (str.equals("dead")) {
+                    provinceRecord += " 死亡" + record.getDeadNum() + "人 ";
+                }
+            }
+        }
+        provinceRecord += "\r\n";
+        bw.write(provinceRecord);
+    }
+    // show record's message
+    public static void showRecordMessage(Record record) {
+        String provinceRecord = record.getProvinceName() + " 感染患者"
+                + record.getIpNum() +"人 "
+                + "疑似患者" + record.getSpNum() + "人 "
+                + "治愈" + record.getCureNum() + "人 "
+                + "死亡" + record.getDeadNum() + "人";
+        provinceRecord += "\r\n";
+        System.out.println(provinceRecord);
+    }
+    // read out put file
+    public static Container readOutFile(String outFilePath) throws IOException {
+        Container container = new Container();
+        File file = new File(outFilePath);
+        FileReader fr = new FileReader(file);
+        BufferedReader br = new BufferedReader(fr);
+        String line = null;
+        while((line = br.readLine()) != null) {
+            Record record = new Record();
+            if (readOneLineOfOutFile(record, line)) {
+                container.addRecord(record);
+            } else {
+                break;
+            }
+        }
+        return container;
+    }
+    // read one line in output file
+    public static boolean readOneLineOfOutFile(Record record, String line) {
+        String data [] = line.split(" ");
+        if (data[0].equals("//")) {
+            return false;
+        }
+        record.setProvinceName(data[0]);
+        for (int i = 1; i < data.length; ++i) {
+            String type = parserStringGetType(data[i]);
+            if (type.equals("感染患者")) {
+                record.setIpNum(CommonUtil.parserStringToInt(data[i]));
+            } else if (type.equals("疑似患者")) {
+                record.setSpNum(CommonUtil.parserStringToInt(data[i]));
+            } else if (type.equals("治愈")) {
+                record.setCureNum(CommonUtil.parserStringToInt(data[i]));
+            } else if (type.equals("死亡")) {
+                record.setDeadNum(CommonUtil.parserStringToInt(data[i]));
+            }
+        }
+        return true;
+    }
+    // parser a string to get type
+    // type ： 感染患者(ip) 疑似患者(sp) 治愈(cure) 死亡(dead)
+    // example ： 感染患者5人 -> type is 感染患者
+    public static String parserStringGetType(String string) {
+        String str1 = string.trim();
+        String str2 = "";
+        for (int i = 0; i < str1.length(); ++i) {
+            if(str1.charAt(i) >= '0' && str1.charAt(i) <= '9'){
+                break;
+            } else {
+                str2 += str1;
+            }
+        }
+        return str2;
+    }
+    // parser number from string
+    public static int parserStringToInt(String string) {
+        String str1 = string.trim();
+        String str2 = "";
+        for (int i = 0; i < str1.length(); ++i) {
+            if(str1.charAt(i) >= '0' && str1.charAt(i) <= '9'){
+                str2 += str1.charAt(i);
+            } else {
+                continue;
+            }
+        }
+        if (str2.equals("")) {
+            return 0;
+        }
+        int number = Integer.parseInt(str2);
+        return number;
     }
 
 }
