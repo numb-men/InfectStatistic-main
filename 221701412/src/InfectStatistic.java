@@ -2,10 +2,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.text.Collator;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -885,10 +883,24 @@ class InfectStatistic {
                 }
 
                 /**
+                 * toResultString()
+                 * TODO
+                 * @description toResultString方法
+                 * province + " " + "感染患者" + ip + "人" + "疑似患者" + sp + "人"+ "治愈" + cure + "人"+ "死亡" + dead + "人"的格式写入txt
+                 * @author 221701412_theTuring
+                 * @version v 1.0.0
+                 * @since 2020.2.8
+                 * @return String
+                 */
+                public String toResultString() {
+                    return province + " " + "感染患者" + ip + "人" + " " + "疑似患者" + sp + "人" + " " +"治愈" + cure + "人" + " " + "死亡" + dead + "人";
+                }
+
+                /**
                  * toString()
                  * TODO
                  * @description 覆写toString方法
-                 * province + " " + "感染患者" + ip + "人" + "疑似患者" + sp + "人"+ "治愈" + cure + "人"+ "死亡" + dead + "人"的格式写入txt
+                 * province + " " + ip +  " " + sp  + " "  + cure + " " + dead的格式
                  * @author 221701412_theTuring
                  * @version v 1.0.0
                  * @since 2020.2.8
@@ -896,7 +908,7 @@ class InfectStatistic {
                  */
                 @Override
                 public String toString() {
-                    return province + " " + "感染患者" + ip + "人" + " " + "疑似患者" + sp + "人" + " " +"治愈" + cure + "人" + " " + "死亡" + dead + "人";
+                    return province + " " + ip +  " " + sp  + " "  + cure + " " + dead;
                 }
             }
 
@@ -916,14 +928,20 @@ class InfectStatistic {
                  * @description 合并List<InfectResult>的相同类
                  * @author 221701412_theTuring
                  * @version v 1.0.0
-                 * @since
+                 * @since 2020.2.8
                  */
-                public static List<InfectResult> mergeList (List<InfectResult> a) {
+                public static List<InfectResult> mergeList (List<InfectResult> a, boolean flag) {
                     List<InfectResult> list = new ArrayList<>();
                     InfectResult r1 = new InfectResult();
                     InfectResult r2 = new InfectResult();
+                    InfectResult r3 = new InfectResult();
+                    r3.setProvince("全国");
                     r1 = a.get(0);
                     for (InfectResult aa : a) {
+                        r3.setIp(r3.getIp() + aa.getIp());
+                        r3.setSp(r3.getSp() + aa.getSp());
+                        r3.setCure(r3.getCure() + aa.getCure());
+                        r3.setDead(r3.getDead() + aa.getDead());
                         if (compare(aa, r1)) {
                             if (r2.getProvince() != null ) {
                                 r2.setIp(r2.getIp() + aa.getIp());
@@ -944,7 +962,13 @@ class InfectStatistic {
                     if (!list.contains(r1)) {
                         list.add(r1);
                     }
-
+                    if (flag != true) {
+                        r3.setIp(r3.getIp() / 2);
+                        r3.setSp(r3.getSp() / 2);
+                        r3.setDead(r3.getDead() / 2);
+                        r3.setCure(r3.getCure() / 2);
+                    }
+                    list.add(r3);
                     return list;
                 }
 
@@ -979,6 +1003,15 @@ class InfectStatistic {
              */
             static class ResultUtil{
 
+                /**
+                 * getIpResult(String text)
+                 * TODO
+                 * @description 获得感染患者的结果
+                 * @author 221701412_theTuring
+                 * @version v 1.0.0
+                 * @since 2020.2.8
+                 * @return InfectResult
+                 */
                 public static InfectResult getIpResult(String text) {
 
                     //实例化疫情结果
@@ -994,6 +1027,15 @@ class InfectStatistic {
                     return infectResult;
                 }
 
+                /**
+                 * getSpResult(String text)
+                 * TODO
+                 * @description 获得疑似患者的结果
+                 * @author 221701412_theTuring
+                 * @version v 1.0.0
+                 * @since 2020.2.8
+                 * @return InfectResult
+                 */
                 public static InfectResult getSpResult(String text) {
 
                     //实例化疫情结果
@@ -1009,6 +1051,15 @@ class InfectStatistic {
                     return infectResult;
                 }
 
+                /**
+                 * getEmptiesIpResult(String text)
+                 * TODO
+                 * @description 获得流出感染患者的结果
+                 * @author 221701412_theTuring
+                 * @version v 1.0.0
+                 * @since 2020.2.8
+                 * @return InfectResult
+                 */
                 public static List<InfectResult> getEmptiesIpResult(String text) {
 
                     List<InfectResult> list = new ArrayList<>();
@@ -1036,6 +1087,15 @@ class InfectStatistic {
                     return list;
                 }
 
+                /**
+                 * getEmptiesSpResult(String text)
+                 * TODO
+                 * @description 获得流出疑似患者的结果
+                 * @author 221701412_theTuring
+                 * @version v 1.0.0
+                 * @since 2020.2.8
+                 * @return InfectResult
+                 */
                 public static List<InfectResult> getEmptiesSpResult(String text) {
 
                     List<InfectResult> list = new ArrayList<>();
@@ -1063,6 +1123,15 @@ class InfectStatistic {
                     return list;
                 }
 
+                /**
+                 * getDeadResult(String text)
+                 * TODO
+                 * @description 获得死亡患者的结果
+                 * @author 221701412_theTuring
+                 * @version v 1.0.0
+                 * @since 2020.2.8
+                 * @return InfectResult
+                 */
                 public static InfectResult getDeadResult(String text) {
 
                     //实例化疫情结果
@@ -1080,6 +1149,15 @@ class InfectStatistic {
                     return infectResult;
                 }
 
+                /**
+                 * getCureResult(String text)
+                 * TODO
+                 * @description 获得治愈患者的结果
+                 * @author 221701412_theTuring
+                 * @version v 1.0.0
+                 * @since 2020.2.8
+                 * @return InfectResult
+                 */
                 public static InfectResult getCureResult(String text) {
 
                     //实例化疫情结果
@@ -1097,6 +1175,15 @@ class InfectStatistic {
                     return infectResult;
                 }
 
+                /**
+                 * getSpToIpResult(String text)
+                 * TODO
+                 * @description 获得确诊患者的结果
+                 * @author 221701412_theTuring
+                 * @version v 1.0.0
+                 * @since 2020.2.8
+                 * @return InfectResult
+                 */
                 public static InfectResult getSpToIpResult(String text) {
 
                     //实例化疫情结果
@@ -1114,6 +1201,15 @@ class InfectStatistic {
                     return infectResult;
                 }
 
+                /**
+                 * getRemoveSpResult(String text)
+                 * TODO
+                 * @description 获得排除患者的结果
+                 * @author 221701412_theTuring
+                 * @version v 1.0.0
+                 * @since 2020.2.8
+                 * @return InfectResult
+                 */
                 public static InfectResult getRemoveSpResult(String text) {
 
                     //实例化疫情结果
@@ -1148,12 +1244,13 @@ class InfectStatistic {
             /**
              * readFileByLines(String fileName)
              * TODO
-             * @description 以行为单位读取文件内容，一次读一整行以匹配正则
+             * @description 以行为单位读取文件内容，一次读一整行以匹配正则（初始化log文件）
              * @author 221701412_theTuring
              * @version v 1.0.0
              * @since 2020.2.8
+             *
              */
-            public static void readFileByLines(String fileName)  {
+            public static List<LogUtil.InfectResult> initLog(String fileName)  {
 
                 //实例化正则工具类
                 RegexUtil regexUtil = new RegexUtil();
@@ -1163,87 +1260,203 @@ class InfectStatistic {
 
                 //List<InfectResult> 存入疫情信息
                 List<LogUtil.InfectResult> list = new ArrayList<>();
+                List<LogUtil.InfectResult> last = new ArrayList<>();
+                List<LogUtil.InfectResult> merge = new ArrayList<>();
 
                 File file = new File(fileName);
-                BufferedReader reader = null;
 
-                try {
-                    System.out.println("以行为单位读取文件内容，一次读一整行：");
-                    reader = new BufferedReader(new FileReader(file));
-                    String tempString = null;
-                    int line = 1;
-                    // 一次读入一行，直到读入null为文件结束
-                    while ((tempString = reader.readLine()) != null) {
+                //如果为文件
+                if(file.isFile()) {
+                    BufferedReader reader = null;
 
-                        //匹配类型 1.<省> 新增 感染患者 n人
-                        if(tempString.matches(regexUtil.getType1())){
-                            list.add(LogUtil.ResultUtil.getIpResult(tempString));
+                    try {
+                        System.out.println("以行为单位读取文件内容，一次读一整行：");
+                        reader = new BufferedReader(new FileReader(file));
+                        String tempString = null;
+                        int line = 1;
+                        // 一次读入一行，直到读入null为文件结束
+                        while ((tempString = reader.readLine()) != null) {
+
+                            //匹配类型 1.<省> 新增 感染患者 n人
+                            if (tempString.matches(regexUtil.getType1())) {
+                                list.add(LogUtil.ResultUtil.getIpResult(tempString));
+                            }
+
+                            //匹配类型 2.<省> 新增 疑似患者 n人
+                            else if (tempString.matches(regexUtil.getType2())) {
+                                list.add(LogUtil.ResultUtil.getSpResult(tempString));
+                            }
+
+                            //匹配类型 3.<省1> 感染患者 流入 <省2> n人
+                            else if (tempString.matches(regexUtil.getType3())) {
+                                list.addAll(LogUtil.ResultUtil.getEmptiesIpResult(tempString));
+                            }
+
+                            //匹配类型 4.<省1> 疑似患者 流入 <省2> n人
+                            else if (tempString.matches(regexUtil.getType4())) {
+                                list.addAll(LogUtil.ResultUtil.getEmptiesSpResult(tempString));
+                            }
+
+                            //匹配类型 5.<省> 死亡 n人
+                            else if (tempString.matches(regexUtil.getType5())) {
+                                list.add(LogUtil.ResultUtil.getDeadResult(tempString));
+                            }
+
+                            //匹配类型 6.<省> 治愈 n人
+                            else if (tempString.matches(regexUtil.getType6())) {
+                                list.add(LogUtil.ResultUtil.getCureResult(tempString));
+                            }
+
+                            //匹配类型 7.<省> 疑似患者 确诊感染 n人
+                            else if (tempString.matches(regexUtil.getType7())) {
+                                list.add(LogUtil.ResultUtil.getSpToIpResult(tempString));
+                            }
+
+                            //匹配类型 8.<省> 排除 疑似患者 n人
+                            else if (tempString.matches(regexUtil.getType8())) {
+                                list.add(LogUtil.ResultUtil.getRemoveSpResult(tempString));
+                            }
+
+                            // 显示行号
+                            System.out.println("line " + line + ": " + tempString);
+                            line++;
+                        }
+                        reader.close();
+
+                        Collections.sort(list, new LogUtil.ListUtil.comparator());
+                        last = LogUtil.ListUtil.mergeList(list,true);
+
+                        for (LogUtil.InfectResult temp : last) {
+                            System.out.println(temp.toString());
                         }
 
-                        //匹配类型 2.<省> 新增 疑似患者 n人
-                        else if(tempString.matches(regexUtil.getType2())){
-                            list.add(LogUtil.ResultUtil.getSpResult(tempString));
-                        }
 
-                        //匹配类型 3.<省1> 感染患者 流入 <省2> n人
-                        else if(tempString.matches(regexUtil.getType3())){
-                            list.addAll(LogUtil.ResultUtil.getEmptiesIpResult(tempString));
-                        }
-
-                        //匹配类型 4.<省1> 疑似患者 流入 <省2> n人
-                        else if(tempString.matches(regexUtil.getType4())){
-                            list.addAll(LogUtil.ResultUtil.getEmptiesSpResult(tempString));
-                        }
-
-                        //匹配类型 5.<省> 死亡 n人
-                        else if(tempString.matches(regexUtil.getType5())){
-                            list.add(LogUtil.ResultUtil.getDeadResult(tempString));
-                        }
-
-                        //匹配类型 6.<省> 治愈 n人
-                        else if(tempString.matches(regexUtil.getType6())){
-                            list.add(LogUtil.ResultUtil.getCureResult(tempString));
-                        }
-
-                        //匹配类型 7.<省> 疑似患者 确诊感染 n人
-                        else if(tempString.matches(regexUtil.getType7())){
-                            list.add(LogUtil.ResultUtil.getSpToIpResult(tempString));
-                        }
-
-                        //匹配类型 8.<省> 排除 疑似患者 n人
-                        else if(tempString.matches(regexUtil.getType8())){
-                            list.add(LogUtil.ResultUtil.getRemoveSpResult(tempString));
-                        }
-
-                        // 显示行号
-                        System.out.println("line " + line + ": " + tempString);
-                        line++;
-                    }
-                    reader.close();
-
-                    //List处理实例化
-                    LogUtil.ListUtil listUtil = new LogUtil.ListUtil();
-                    Collections.sort(list, new LogUtil.ListUtil.comparator());
-                    List<LogUtil.InfectResult> A = LogUtil.ListUtil.mergeList(list);
-
-                    for(LogUtil.InfectResult a : A){
-                        System.out.println(a.toString());
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (IOException e1) {
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (reader != null) {
+                            try {
+                                reader.close();
+                            } catch (IOException e1) {
+                            }
                         }
                     }
                 }
+                //如果为文件目录
+                else if(file.isDirectory()){
+                    List<String> paths = getFiles(fileName);
+                    for(String file_path :paths){
+                        merge.addAll(initLog(file_path));
+                    }
+                    Collections.sort(merge, new LogUtil.ListUtil.comparator());
+                    last = LogUtil.ListUtil.mergeList(merge,false);
+                }
+                return last;
             }
 
-        }
+            /**
+             * sortResultByProvince(String fileName)
+             * TODO
+             * @description 文件排序（全国总是排第一个，别的省按拼音先后排序）
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.8
+             * @return List<LogUtil.InfectResult>
+             */
+            public List<LogUtil.InfectResult> sortResultByProvince(String fileName) throws IOException {
 
+                //获取所有行
+                List<LogUtil.InfectResult> list = initLog(fileName);
+
+                //定义排序后的
+                List<LogUtil.InfectResult> sort_list = new ArrayList<>();
+
+                //Comparator接口中文排序
+                Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
+
+                String[] newArray = new String[list.size()];
+                String temp = null;
+
+                for(int i = 0 ; i<= list.size()-1 ; i++){
+
+                    if (list.get(i).getProvince().equals("全国")){
+                        temp = list.get(i).toString();
+                    }
+                    newArray[i] = list.get(i).toString();
+
+                }
+
+                LogUtil.InfectResult temp_infectResult = new LogUtil.InfectResult();
+
+                //拆分存入
+                String[] temp_arr = temp.split(" ");
+
+                temp_infectResult.setProvince(temp_arr[0]);
+                temp_infectResult.setIp(Integer.parseInt(temp_arr[1]));
+                temp_infectResult.setSp(Integer.parseInt(temp_arr[2]));
+                temp_infectResult.setCure(Integer.parseInt(temp_arr[3]));
+                temp_infectResult.setDead(Integer.parseInt(temp_arr[4]));
+
+                //插入
+                sort_list.add(temp_infectResult);
+
+                //进行排序
+                Arrays.sort(newArray,com);
+
+                for(String i:newArray){
+
+                    LogUtil.InfectResult infectResult = new LogUtil.InfectResult();
+
+
+                    //拆分存入
+                    String[] arr = i.split(" ");
+                    if (arr.length > 4) {
+
+                        if(arr[0].equals("全国")) continue;
+                        infectResult.setProvince(arr[0]);
+                        infectResult.setIp(Integer.parseInt(arr[1]));
+                        infectResult.setSp(Integer.parseInt(arr[2]));
+                        infectResult.setCure(Integer.parseInt(arr[3]));
+                        infectResult.setDead(Integer.parseInt(arr[4]));
+
+                        //插入
+                        sort_list.add(infectResult);
+                    }
+                }
+
+                return sort_list;
+
+            }
+
+            /**
+             * getFiles(String path)
+             * TODO
+             * @description 获得文件目录下的所有文件
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.8
+             * @return List<String>
+             */
+            public static List<String> getFiles(String path) {
+                List<String> files = new ArrayList<String>();
+                File file = new File(path);
+                File[] tempList = file.listFiles();
+
+                for (int i = 0; i < tempList.length; i++) {
+                    if (tempList[i].isFile()) {
+                        files.add(tempList[i].toString());
+                        //文件名，不包含路径
+                        //String fileName = tempList[i].getName();
+                    }
+                    if (tempList[i].isDirectory()) {
+                        //这里就不递归了，
+                    }
+                }
+                return files;
+            }
+
+
+        }
 
         /**
          * CommandLine
@@ -1257,7 +1470,7 @@ class InfectStatistic {
         class CommandLineApplication {
         }
 
-        public static void main(String[] args) {
+        public static void main(String[] args) throws IOException {
 
 //         CommandLine commandLine = new CommandLine();
 //
@@ -1335,7 +1548,20 @@ class InfectStatistic {
 
             LogDao logDao = new LogDao();
 
-            logDao.readFileByLines(".\\log\\2020-01-22.log.txt");
+            logDao.initLog(".\\log\\2020-01-22.log.txt");
+
+            logDao.sortResultByProvince(".\\log\\2020-01-22.log.txt");
+
+            logDao.getFiles(".\\log");
+
+
+            for (LogUtil.InfectResult temp: logDao.sortResultByProvince(".\\log")){
+                System.out.println(temp.toResultString());
+            }
+
+            for (String temp: logDao.getFiles(".\\log")){
+                System.out.println(temp);
+            }
 
 //            RegexUtil regexUtil = new RegexUtil();
 //
