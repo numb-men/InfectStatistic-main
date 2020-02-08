@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.text.Collator;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -1355,6 +1352,95 @@ class InfectStatistic {
             }
 
             /**
+             * outLog(String fileName)
+             * TODO
+             * @description 输出log解析结果
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.9
+             * @return void
+             */
+            public static void outLog(String fileName, String out_path, String commandline, List<String> province, List<String> type) throws IOException {
+
+                //获取所有行
+                List<LogUtil.InfectResult> list = sortResultByProvince(fileName);
+
+                BufferedWriter out = null;
+
+                String ip = "";
+                String sp = "";
+                String cure = "";
+                String dead = "";
+
+                try {
+                    out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out_path, true)));//true追加
+                    for (int i=0; i<list.size(); i++){
+                        if(province != null){
+                            for (String s : province) {
+                                if (list.get(i).getProvince().equals(s)) {
+                                    if (type != null){
+                                        for (String str : type) {
+                                            if (str.equals("ip")) {
+                                                ip = " 感染患者" + list.get(i).getIp() + "人";
+                                            }
+                                            else if (str.equals("sp")) {
+                                                sp = " 疑似患者" + list.get(i).getSp() + "人";
+                                            }
+                                            else if (str.equals("cure")) {
+                                                cure = " 治愈" + list.get(i).getCure() + "人";
+                                            }
+                                            if (str.equals("dead")) {
+                                                dead = " 死亡" + list.get(i).getDead() + "人";
+                                            }
+                                        }
+                                        out.write(list.get(i).getProvince() + ip + sp + cure + dead + "\n");
+                                    }
+                                    else {
+                                        out.write(list.get(i).toResultString() + "\n");
+                                    }
+                                }
+                            }
+                        }
+                        else{
+                            if (type != null){
+                                for (String s : type) {
+                                    if (s.equals("ip")) {
+                                        ip = " 感染患者" + list.get(i).getIp() + "人";
+                                    }
+                                    else if (s.equals("sp")) {
+                                        sp = " 疑似患者" + list.get(i).getSp() + "人";
+                                    }
+                                    else if (s.equals("cure")) {
+                                        cure = " 治愈" + list.get(i).getCure() + "人";
+                                    }
+                                    if (s.equals("dead")) {
+                                        dead = " 死亡" + list.get(i).getDead() + "人";
+                                    }
+                                }
+                                out.write(list.get(i).getProvince() + ip + sp + cure + dead + "\n");
+                            }
+                            else {
+                                out.write(list.get(i).toResultString() + "\n");
+                            }
+                        }
+                    }
+                    out.write("// 该文档并非真实数据，仅供测试使用" + "\n");
+                    out.write("// 命令：" + commandline + "\n");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (out != null) {
+                        try {
+                            out.close();
+                        } catch (IOException e1) {
+                        }
+                    }
+                }
+
+
+            }
+
+            /**
              * sortResultByProvince(String fileName)
              * TODO
              * @description 文件排序（全国总是排第一个，别的省按拼音先后排序）
@@ -1363,7 +1449,7 @@ class InfectStatistic {
              * @since 2020.2.8
              * @return List<LogUtil.InfectResult>
              */
-            public List<LogUtil.InfectResult> sortResultByProvince(String fileName) throws IOException {
+            public static List<LogUtil.InfectResult> sortResultByProvince(String fileName) throws IOException {
 
                 //获取所有行
                 List<LogUtil.InfectResult> list = initLog(fileName);
@@ -1546,22 +1632,24 @@ class InfectStatistic {
 //            System.out.println(commandLine.getArguments().getProvince_content().get(2));
 
 
-            LogDao logDao = new LogDao();
+//            LogDao logDao = new LogDao();
+//
+//            logDao.initLog(".\\log\\2020-01-22.log.txt");
+//
+//            logDao.sortResultByProvince(".\\log\\2020-01-22.log.txt");
+//
+//            logDao.getFiles(".\\log");
 
-            logDao.initLog(".\\log\\2020-01-22.log.txt");
+//
+//            for (LogUtil.InfectResult temp: logDao.sortResultByProvince(".\\log")){
+//                System.out.println(temp.toResultString());
+//            }
 
-            logDao.sortResultByProvince(".\\log\\2020-01-22.log.txt");
+//            for (String temp: logDao.getFiles(".\\log")){
+//                System.out.println(temp);
+//            }
 
-            logDao.getFiles(".\\log");
-
-
-            for (LogUtil.InfectResult temp: logDao.sortResultByProvince(".\\log")){
-                System.out.println(temp.toResultString());
-            }
-
-            for (String temp: logDao.getFiles(".\\log")){
-                System.out.println(temp);
-            }
+//            logDao.outLog(".\\log",".\\result\\6.txt",args.toString(), Collections.singletonList("全国"), Collections.singletonList("ip"));
 
 //            RegexUtil regexUtil = new RegexUtil();
 //
