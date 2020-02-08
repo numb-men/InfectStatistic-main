@@ -18,11 +18,17 @@ def parse_argument():
     parser_a.add_argument('-date', help="指定日期")
     parser_a.add_argument('-type', nargs='*', help="[ip： 感染患者，sp：疑似患者，cure：治愈 ，dead：死亡患者]")
     parser_a.add_argument('-province', nargs='*', help="指定列出的省")
-    args = parser.parse_args()
-    return vars(args)
+    parser_a.set_defaults(func=InfectStatistic.execute_from_args)
+    _args = parser.parse_args()
+    return _args
 
 
 class InfectStatistic:
+
+    @staticmethod
+    def execute_from_args(args):
+        i = InfectStatistic(args.log, args.out, args.date, args.type, args.province)
+        i.read_and_out_to_file()
 
     def __init__(self, logs_path, out_path, date=None, allow_types=None, province=None):
         self.allow_types = allow_types or ['ip', 'sp', 'cure', 'dead']  # 输出的数据类型
@@ -77,8 +83,7 @@ class InfectStatistic:
     def _new_province(self, province):
         self.data.update({province: {"ip": 0, "sp": 0, "cure": 0, "dead": 0}})
 
-    def _add_people(self, re_result, result_index, _type, _sub=False):
-        province, num = re_result.group(*result_index)
+    def _add_people(self, province, num, _type, _sub=False):
         num = -int(num) if _sub else int(num)
         if province not in self.data:
             self._new_province(province)
@@ -86,27 +91,25 @@ class InfectStatistic:
 
     # 解析日志中的一行
     def _parse_line(self, line):
+        if line.startswith('//'):
+            return
         _patterns = [
-            ('(.*?) 新增 感染患者 ([0-9]+)人', ((self._add_people, (1, 2), 'ip'),)),
-            ('(.*?) 新增 疑似患者 ([0-9]+)人', ((self._add_people, (1, 2), 'sp'),)),
-            ('(.*?) 感染患者 流入 (.*?) ([0-9]+)人', ((self._add_people, (1, 3), 'ip', True),
-                                               (self._add_people, (2, 3), 'ip'),)),
-            ('(.*?) 疑似患者 流入 (.*?) ([0-9]+)人', ((self._add_people, (1, 3), 'sp', True),
-                                               (self._add_people, (2, 3), 'sp'),)),
-            ('(.*?) 死亡 ([0-9]+)人', ((self._add_people, (1, 2), 'dead'),
-                                    (self._add_people, (1, 2), 'ip', True),)),
-            ('(.*?) 治愈 ([0-9]+)人', ((self._add_people, (1, 2), 'cure'),
-                                    (self._add_people, (1, 2), 'ip', True),)),
-            ('(.*?) 疑似患者 确诊感染 ([0-9]+)人', ((self._add_people, (1, 2), 'sp', True),
-                                           (self._add_people, (1, 2), 'ip'),)),
-            ('(.*?) 排除 疑似患者 ([0-9]+)人', ((self._add_people, (1, 2), 'sp', True),)),
+            ('(.*?) 新增 感染患者 ([0-9]+)人', (((1, 2), 'ip', False),)),
+            ('(.*?) 新增 疑似患者 ([0-9]+)人', (((1, 2), 'sp', False),)),
+            ('(.*?) 感染患者 流入 (.*?) ([0-9]+)人', (((1, 3), 'ip', True), ((2, 3), 'ip', False))),
+            ('(.*?) 疑似患者 流入 (.*?) ([0-9]+)人', (((1, 3), 'sp', True), ((2, 3), 'sp', False))),
+            ('(.*?) 死亡 ([0-9]+)人', (((1, 2), 'dead', False), ((1, 2), 'ip', True))),
+            ('(.*?) 治愈 ([0-9]+)人', (((1, 2), 'cure', False), ((1, 2), 'ip', True))),
+            ('(.*?) 疑似患者 确诊感染 ([0-9]+)人', (((1, 2), 'sp', True), ((1, 2), 'ip', False))),
+            ('(.*?) 排除 疑似患者 ([0-9]+)人', (((1, 2), 'sp', True),)),
         ]
-        for _pattern, _funcs in _patterns:
+        for _pattern, _args_list in _patterns:
             result = re.match(_pattern, line)
             if result:
-                for _func, *_arg in _funcs:
-                    _arg.insert(0, result)
-                    _func(*_arg)
+                for _args in _args_list:
+                    index, _type, _sub = _args
+                    province, num = result.group(*index)
+                    self._add_people(province, num, _type, _sub)
                 return
 
     # 解析日志文件列表
@@ -184,12 +187,7 @@ class InfectStatistic:
         data = self._get_out_data()
         self._out_to_file(data)
 
-    def read_and_out_to_object(self):
-        self._read_log()
-        return self._get_out_data()
-
 
 if __name__ == "__main__":
     args = parse_argument()
-    i = InfectStatistic(args['log'], args['out'], args['date'], args['type'], args['province'])
-    i.read_and_out_to_file()
+    args.func(args)
