@@ -1,6 +1,7 @@
 import javafx.util.Pair;
 
 import java.io.*;
+import java.text.Collator;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -106,7 +107,70 @@ class ParameterHelper {
     }
 }
 
-class ListCommand {
+class CommandInvokeErrorException extends Exception {
+    public CommandInvokeErrorException() {
+    }
+
+    public CommandInvokeErrorException(String message) {
+        super(message);
+    }
+
+    public CommandInvokeErrorException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
+interface Command {
+    /**
+     * 使用指定的参数执行命令
+     *
+     * @param args 命名需要的参数
+     * @throws CommandInvokeErrorException 当命令执行遇到错误时产生，比如参数设置不正确，命令内部执行出错
+     */
+    void invoke(String[] args) throws CommandInvokeErrorException;
+}
+
+class CommandManager {
+    private Map<String, Command> map;
+
+    public CommandManager() {
+        this.map = new HashMap<>();
+    }
+
+    public Command register(String name, Command command) {
+        if (name == null) {
+            throw new NullPointerException("name");
+        }
+        if (command == null) {
+            throw new NullPointerException("command");
+        }
+        return map.put(name, command);
+    }
+
+    public Command unregister(String name) {
+        if (name == null) {
+            throw new NullPointerException("name");
+        }
+        return map.remove(name);
+    }
+
+    public void invoke(String[] args) throws CommandInvokeErrorException {
+        if (args == null) {
+            throw new NullPointerException("args");
+        }
+        if (args.length < 1) {
+            throw new IllegalArgumentException("给定参数列表arg必须至少含有一个参数");
+        }
+        String[] paramList = Arrays.copyOfRange(args, 1, args.length);
+        if (map.containsKey(args[0])) {
+            map.get(args[0]).invoke(paramList);
+        } else {
+            throw new IllegalArgumentException("未注册的命令:" + args[0]);
+        }
+    }
+}
+
+class ListCommand implements Command {
     private Parameter log;
     private Parameter out;
     private Parameter date;
@@ -115,12 +179,17 @@ class ListCommand {
     protected final Map<String, ParameterRule> RULES;
     protected Collection<Parameter> parameters;
 
-    public void invoke(String[] args) throws InfectStatisticException {
-        clear();
-        parameters = ParameterHelper.resolve(args, RULES);
-        prepare();
-        if (canInvoke()) {
-            invoke();
+    @Override
+    public void invoke(String[] args) throws CommandInvokeErrorException {
+        try {
+            clear();
+            parameters = ParameterHelper.resolve(args, RULES);
+            prepare();
+            if (canInvoke()) {
+                invoke();
+            }
+        } catch (InfectStatisticException | IllegalArgumentException e) {
+            throw new CommandInvokeErrorException("list:" + e.getMessage(), e);
         }
     }
 
@@ -220,8 +289,8 @@ class InfectFileReader {
     }
 
     public String[] read(File file) throws IOException {
-        Long length = file.length();
-        byte[] content = new byte[length.intValue()];
+        long length = file.length();
+        byte[] content = new byte[(int) length];
         try (FileInputStream in = new FileInputStream(file)) {
             in.read(content);
         }
@@ -370,9 +439,9 @@ class InfectStatisticException extends Exception {
 class InfectStatistician {
 
     private static final String FILE_NAME_PATTERN = "\\d{4}-\\d{2}-\\d{2}.log.txt";
-    private static final String OUT_FORMAT = "%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人" + System.lineSeparator();
     private static final String ANNOTATION = "// 该文档并非真实数据，仅供测试使用";
     private static final Collection<String> APPROVED_TYPES = Arrays.asList("ip", "sp", "cure", "dead");
+    private final static Comparator<Object> DEFAULT_COMPARE = Collator.getInstance(java.util.Locale.CHINA);
     private boolean ready = false;
     private LocalDate endDate;
     private LocalDate minDate;
@@ -389,21 +458,27 @@ class InfectStatistician {
         this.endDate = endDate;
 
         File[] files = targetDir.listFiles((dir, name) -> name.matches(FILE_NAME_PATTERN));
+        if (files == null) {
+            return;
+        }
         this.data = new Vector<>(files.length);
         List<Pair<LocalDate, File>> dateFilePairs = new LinkedList<>();
-        if (this.endDate != null) {
-            for (int i = 0; i < files.length; i++) {
-                try {
-                    String fileName = files[i].getName();
-                    LocalDate date = LocalDate.parse(fileName.substring(0, fileName.indexOf('.')));
-                    maintainDateBound(date);
-                    if (this.endDate.isBefore(date)) {
-                        continue;
-                    }
-                    dateFilePairs.add(new Pair<>(date, files[i]));
-                } catch (DateTimeParseException e) {
-                    System.out.println(files[i].getAbsolutePath() + ":文件名中的日期无效, " + e.getMessage());
+        for (int i = 0; i < files.length; i++) {
+            try {
+                String fileName = files[i].getName();
+                LocalDate date = LocalDate.parse(fileName.substring(0, fileName.indexOf('.')));
+                maintainDateBound(date);
+                if (this.endDate != null && this.endDate.isBefore(date)) {
+                    continue;
                 }
+                dateFilePairs.add(new Pair<>(date, files[i]));
+            } catch (DateTimeParseException e) {
+                System.out.println(files[i].getAbsolutePath() + ":文件名中的日期无效, " + e.getMessage());
+            }
+        }
+        if (endDate != null && maxDate != null) {
+            if (endDate.isAfter(maxDate) || endDate.isBefore(minDate)) {
+                throw new InfectStatisticException("日期超出范围,已知范围:" + minDate + "至" + maxDate);
             }
         }
         dateFilePairs.parallelStream().forEach((dateFile) -> {
@@ -416,9 +491,6 @@ class InfectStatistician {
                 System.out.println("无法处理文件" + dateFile.getValue().getAbsolutePath() + "," + e.getMessage());
             }
         });
-        if (endDate != null && maxDate != null && endDate.isAfter(maxDate)) {
-            throw new InfectStatisticException("日期超出范围,已知范围:" + minDate + "至" + maxDate);
-        }
         ready = true;
     }
 
@@ -489,6 +561,7 @@ class InfectStatistician {
 
         Map<String, InfectionItem> map = new HashMap<>(256);
         InfectionItem all = InfectionItemHelper.getOrCreateItem(map, "全国");
+        map.remove(all.name);
         for (int i = 0; i < data.size(); i++) {
             Collection<InfectionItem> infectionItems = data.get(i).getValue();
             for (InfectionItem infectionItem : infectionItems) {
@@ -504,30 +577,42 @@ class InfectStatistician {
             }
         }
 
-        String formatString=getFormatString(types)+System.lineSeparator();
+        String formatString = getFormatString(types) + System.lineSeparator();
         try (BufferedWriter writer =
                  new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(fileName)), encoding))) {
-            if (provinces != null) {
-                InfectionItem emptyItem=new InfectionItem();
-                emptyItem.patient=0;
-                emptyItem.survivor=0;
-                emptyItem.suspect=0;
-                emptyItem.dead=0;
+            ArrayList<String> provinceList;
+            boolean allRequired = false;
 
-                for (String province : provinces) {
-                    if (map.containsKey(province)) {
-                        InfectionItem item = map.get(province);
-                        writer.write(format(formatString,item));
-                    } else {
-                        emptyItem.name=province;
-                        writer.write(format(formatString,emptyItem));
-                    }
+
+            if (provinces != null) {
+                if (provinces.contains(all.name)) {
+                    provinces.remove(all.name);
+                    allRequired = true;
                 }
+                provinceList = new ArrayList<>(provinces);
             } else {
-                writer.write(format(formatString,all));
-                map.remove(all.name);
-                for (InfectionItem item : map.values()) {
-                    writer.write(format(formatString,item));
+                provinceList = new ArrayList<>(map.keySet());
+            }
+            provinceList.sort(DEFAULT_COMPARE);
+            if (provinces == null) {
+                writer.write(format(formatString, all));
+            }
+
+            InfectionItem emptyItem = new InfectionItem();
+            emptyItem.patient = 0;
+            emptyItem.survivor = 0;
+            emptyItem.suspect = 0;
+            emptyItem.dead = 0;
+            if (allRequired) {
+                writer.write(format(formatString, all));
+            }
+            for (String province : provinceList) {
+                if (map.containsKey(province)) {
+                    InfectionItem item = map.get(province);
+                    writer.write(format(formatString, item));
+                } else {
+                    emptyItem.name = province;
+                    writer.write(format(formatString, emptyItem));
                 }
             }
             writer.write(ANNOTATION);
