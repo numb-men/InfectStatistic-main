@@ -85,7 +85,8 @@ class HandleFileUtil {
         }
     }
 
-    public static void writeOutFile(String outFilePath, InfectStatistic infectStatistic) {
+    public static void writeOutFile(CmdArgs cmdArgs, Record country, Container container) {
+        String outFilePath = cmdArgs.getOutFilePath();
         try {
             File file = new File(outFilePath);
             if (file.isDirectory()) {
@@ -96,13 +97,12 @@ class HandleFileUtil {
             }
             FileWriter fileWriter = new FileWriter(file.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fileWriter);
-            if (infectStatistic.getProvinces() != null &&
-                    infectStatistic.getProvinces().contains("全国")) {
-                CommonUtil.writeRecordToFile(bw, infectStatistic.getCountry(),
-                        infectStatistic.getTypes());
+            if (cmdArgs.getProvinces() != null &&
+                    cmdArgs.getProvinces().contains("全国")) {
+                CommonUtil.writeRecordToFile(bw, country, cmdArgs.getTypes());
             }
-            CommonUtil.writeContainerToFile(bw, infectStatistic.getContainer(),
-                    infectStatistic.getTypes(), infectStatistic.getProvinces());
+            CommonUtil.writeContainerToFile(bw, container,
+                    cmdArgs.getTypes(), cmdArgs.getProvinces());
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -145,20 +145,21 @@ class HandleFileUtil {
 }
 class HandleArgsUtil {
 
-    public static void handleArgs(String[] args, InfectStatistic infectStatistic) throws ParseException {
+    public static void handleArgs(String[] args, CmdArgs cmdArgs) throws ParseException {
+        assert(cmdArgs != null);
         for (int i = 0; i < args.length; ++i) {
             if (args[i].equals("-log")) {
-                infectStatistic.setLogFilePath(args[++i]);
+                cmdArgs.setLogFilePath(args[++i]);
             } else if (args[i].equals("-out")) {
-                infectStatistic.setOutFilePath(args[++i]);
+                cmdArgs.setOutFilePath(args[++i]);
             } else if (args[i].equals("-date")) {
-                infectStatistic.setDate(args[++i]);
+                cmdArgs.setDate(args[++i]);
             } else if (args[i].equals("-type")) {
                 while (i < args.length) {
                     if ((i + 1) >= args.length || args[i + 1].charAt(0) == '-') {
                         break;
                     } else {
-                        infectStatistic.addType(args[++i]);
+                        cmdArgs.addType(args[++i]);
                     }
                 }
             } else if (args[i].equals("-province")) {
@@ -166,26 +167,26 @@ class HandleArgsUtil {
                     if ((i + 1) >= args.length || args[i + 1].charAt(0) == '-') {
                         break;
                     } else {
-                        infectStatistic.addProvince(args[++i]);
+                        cmdArgs.addProvince(args[++i]);
                     }
                 }
             }
         }
     }
 
-    public static void showArgs(InfectStatistic infectStatistic) {
-        System.out.println("日志目录位置:" + infectStatistic.getLogFilePath());
-        System.out.println("输出文件位置:" + infectStatistic.getOutFilePath());
-        System.out.println("统计的最新截至日期:" + infectStatistic.getDate());
-        if (infectStatistic.getTypes() != null && infectStatistic.typeNumber() != 0) {
+    public static void showArgs(CmdArgs cmdArgs) {
+        System.out.println("日志目录位置:" + cmdArgs.getLogFilePath());
+        System.out.println("输出文件位置:" + cmdArgs.getOutFilePath());
+        System.out.println("统计的最新截至日期:" + cmdArgs.getDate());
+        if (cmdArgs.getTypes() != null && cmdArgs.typeNumber() != 0) {
             System.out.println("选择统计的人员类型:");
-            for (String tem : infectStatistic.getTypes()) {
+            for (String tem : cmdArgs.getTypes()) {
                 System.out.print(tem + " ");
             }
         }
-        if (infectStatistic.getProvinces() != null && infectStatistic.provinceNumber() != 0) {
+        if (cmdArgs.getProvinces() != null && cmdArgs.provinceNumber() != 0) {
             System.out.println("选择统计的省份:");
-            for (String tem : infectStatistic.getProvinces()) {
+            for (String tem : cmdArgs.getProvinces()) {
                 System.out.print(tem + " ");
             }
         }
@@ -258,7 +259,7 @@ class CommonUtil {
         Date now = new Date();
         SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd");
         if (now.compareTo(sd.parse(dateStr)) < 0) {// now >= date
-            System.out.println("now's date < date");
+            System.out.println("now's date < date, " + dateStr + "is invalid" );
             return null;
         }
         return date;

@@ -19,81 +19,18 @@ import java.util.Vector;
  */
 class InfectStatistic {
 
-    private String logFilePath;
-    private String outFilePath;
-    private String date;
-    private Vector<String> types;
-    private Vector<String> provinces;
+    private CmdArgs cmdArgs;
     private Map<String, File> logFilesMap;// logFileName -> File
     private Container container;
     private Record country;
     // Set and Get Method
-    public String getLogFilePath() {
-        return logFilePath;
+    public CmdArgs getCmdArgs() {
+        return cmdArgs;
     }
 
-    public void setLogFilePath(String logFilePath) {
-        this.logFilePath = logFilePath;
+    public void setCmdArgs(CmdArgs cmdArgs) {
+        this.cmdArgs = cmdArgs;
     }
-
-    public String getOutFilePath() {
-        return outFilePath;
-    }
-
-    public void setOutFilePath(String outFilePath) {
-        this.outFilePath = outFilePath;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) throws ParseException {
-        if (CommonUtil.stringToDate(date) == null) {
-            // invalid date
-            return;
-        }
-        this.date = date;
-    }
-
-    public Vector<String> getTypes() {
-        return types;
-    }
-
-    public int typeNumber() { return this.types.size(); }
-
-    public void addType(String type) {
-        this.types.add(type);
-    }
-
-    public void addType(String[] types) {
-        for (String type : types) {
-            this.types.add(type);
-        }
-    }
-
-    public Vector<String> getProvinces() {
-        return provinces;
-    }
-
-    public void addProvince(String province) {
-        this.provinces.add(province);
-        if (!province.equals("全国")) {
-            if (!this.getContainer().getRecordMap().containsKey(province)) {
-                Record record = new Record();
-                record.setProvinceName(province);
-                this.getContainer().addRecord(record);
-            }
-        }
-    }
-
-    public void addProvince(String[] provinces) {
-        for (String province : provinces) {
-            addProvince(province);
-        }
-    }
-    public int provinceNumber() { return this.provinces.size(); }
-
     public Map<String, File> getLogFilesMap() {
         return logFilesMap;
     }
@@ -156,13 +93,7 @@ class InfectStatistic {
     }
     // Constructor
     public InfectStatistic() {
-        this.types = new Vector<String>();
-        this.provinces = new Vector<String>();
-        this.logFilePath = "/home/yyx/JavaWorkspace/InfectStatistic-main/221701232/log";
-        this.outFilePath = "/home/yyx/JavaWorkspace/InfectStatistic-main/221701232/result/";
-        Date now = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        this.date = sdf.format(now);
+        cmdArgs = new CmdArgs();
         country = new Record();
         country.setProvinceName("全国");
         container = new Container();
@@ -261,4 +192,90 @@ class Record {
         this.deadNum = 0;
         this.cureNum = 0;
     }
+}
+
+class CmdArgs {
+    private String logFilePath;
+    private String outFilePath;
+    private String date;
+    private Vector<String> types;
+    private Vector<String> provinces;
+    // Set and Get Method
+    public String getLogFilePath() {
+        return logFilePath;
+    }
+
+    public void setLogFilePath(String logFilePath) {
+        this.logFilePath = logFilePath;
+    }
+
+    public String getOutFilePath() {
+        return outFilePath;
+    }
+
+    public void setOutFilePath(String outFilePath) {
+        this.outFilePath = outFilePath;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) throws ParseException {
+        if (CommonUtil.stringToDate(date) == null) {
+            // invalid date
+            return;
+        }
+        this.date = date;
+    }
+
+    public Vector<String> getTypes() {
+        return types;
+    }
+
+    public int typeNumber() { return this.types.size(); }
+
+    public void addType(String type) {
+        this.types.add(type);
+    }
+
+    public void addType(String[] types) {
+        for (String type : types) {
+            this.types.add(type);
+        }
+    }
+
+    public Vector<String> getProvinces() {
+        return provinces;
+    }
+
+    public void addProvince(String province) {
+        this.provinces.add(province);
+        if (!province.equals("全国")) {
+            //if (!this.getContainer().getRecordMap().containsKey(province)) {
+            //    Record record = new Record();
+            //    record.setProvinceName(province);
+            //    this.getContainer().addRecord(record);
+            //}
+        }
+    }
+
+    public void addProvince(String[] provinces) {
+        for (String province : provinces) {
+            addProvince(province);
+        }
+    }
+
+    public int provinceNumber() { return this.provinces.size(); }
+
+    public CmdArgs() {
+        this.types = new Vector<String>();
+        this.provinces = new Vector<String>();
+        this.logFilePath = "/home/yyx/JavaWorkspace/InfectStatistic-main/221701232/log";
+        this.outFilePath = "/home/yyx/JavaWorkspace/InfectStatistic-main/221701232/result/";
+        Date now = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        this.date = sdf.format(now);
+    }
+
 }
