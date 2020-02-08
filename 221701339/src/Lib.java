@@ -1,8 +1,6 @@
 import javafx.util.Pair;
 
 import java.io.*;
-import java.text.Annotation;
-import java.text.Collator;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -117,16 +115,16 @@ class ListCommand {
     protected final Map<String, ParameterRule> RULES;
     protected Collection<Parameter> parameters;
 
-    public void execute(String[] args) throws InfectStatisticException {
+    public void invoke(String[] args) throws InfectStatisticException {
         clear();
         parameters = ParameterHelper.resolve(args, RULES);
         prepare();
         if (canInvoke()) {
-            execute();
+            invoke();
         }
     }
 
-    protected void execute() throws InfectStatisticException {
+    protected void invoke() throws InfectStatisticException {
         InfectStatistician statistician = new InfectStatistician();
         List<String> provinces = null;
         List<String> types = null;
@@ -141,7 +139,7 @@ class ListCommand {
             endDate = (LocalDate) date.getValue();
         }
         statistician.readDataFrom(log.getValue().toString(), endDate);
-        statistician.saveAndFormat(provinces, types, out.getValue().toString(), "UTF-8");
+        statistician.formatAndSave(provinces, types, out.getValue().toString(), "UTF-8");
     }
 
     public ListCommand() {
@@ -280,8 +278,8 @@ class InfectDataParseException extends RuntimeException {
 }
 
 class InfectDataParser {
-    protected static final String CHINESE_CHAR = "[\\u4e00-\\u9fa5]";
-    protected static final String ANNOTATION = "\\s*//.*";
+    private static final String CHINESE_CHAR = "[\\u4e00-\\u9fa5]";
+    private static final String ANNOTATION = "\\s*//.*";
     private static final String NEW_PATIENT = CHINESE_CHAR + "+\\s+新增\\s+感染患者\\s+\\d+人\\s*";
     private static final String NEW_SUSPECT = CHINESE_CHAR + "+\\s+新增\\s+疑似患者\\s+\\d+人\\s*";
     private static final String SURE_PATIENT = CHINESE_CHAR + "+\\s+疑似患者\\s+确诊感染\\s+\\d+人\\s*";
@@ -370,15 +368,16 @@ class InfectStatisticException extends Exception {
 }
 
 class InfectStatistician {
-    private boolean ready = false;
+
     private static final String FILE_NAME_PATTERN = "\\d{4}-\\d{2}-\\d{2}.log.txt";
     private static final String OUT_FORMAT = "%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人" + System.lineSeparator();
     private static final String ANNOTATION = "// 该文档并非真实数据，仅供测试使用";
+    private static final Collection<String> APPROVED_TYPES = Arrays.asList("ip", "sp", "cure", "dead");
+    private boolean ready = false;
     private LocalDate endDate;
     private LocalDate minDate;
     private LocalDate maxDate;
-    public Vector<Pair<LocalDate, Collection<InfectionItem>>> data;
-    private static final Collection<String> APPROVED_TYPES = Arrays.asList("sp", "ip", "cure", "dead");
+    protected Vector<Pair<LocalDate, Collection<InfectionItem>>> data;
 
     public void readDataFrom(String path, LocalDate endDate) throws InfectStatisticException {
         ready = false;
@@ -423,7 +422,7 @@ class InfectStatistician {
         ready = true;
     }
 
-    protected void maintainDateBound(LocalDate date) {
+    private void maintainDateBound(LocalDate date) {
         if (minDate != null) {
             if (minDate.isAfter(date)) {
                 minDate = date;
@@ -440,11 +439,48 @@ class InfectStatistician {
         }
     }
 
-    public void saveAndFormat(Collection<String> provinces, Collection<String> types, String fileName, String encoding) throws InfectStatisticException {
+    protected String getFormatString(Collection<String> types) throws InfectStatisticException {
+        if (types == null) {
+            types = APPROVED_TYPES;
+        }
+        StringBuffer buffer = new StringBuffer(64);
+        buffer.append("%s");
+        for (String type : types) {
+            switch (type) {
+                case "ip":
+                    buffer.append(" 感染患者%2$d人");
+                    break;
+                case "sp":
+                    buffer.append(" 疑似患者%3$d人");
+                    break;
+                case "cure":
+                    buffer.append(" 治愈%4$d人");
+                    break;
+                case "dead":
+                    buffer.append(" 死亡%5$d人");
+                    break;
+                default:
+                    throw new InfectStatisticException("类型参数中中含有不支持的类型");
+            }
+        }
+        return buffer.toString();
+    }
+
+    protected String format(String format, InfectionItem item) {
+        return String.format(format,
+            item.name,
+            item.patient,
+            item.suspect,
+            item.survivor,
+            item.dead);
+    }
+
+    public void formatAndSave(Collection<String> provinces, Collection<String> types, String fileName, String encoding)
+        throws InfectStatisticException {
         if (!ready) {
             throw new InfectStatisticException("无法执行操作，请重新取数据");
         }
-        if (types != null && APPROVED_TYPES.containsAll(types)) {
+        if (types != null && !APPROVED_TYPES.containsAll(types)) {
             throw new InfectStatisticException("类型参数中中含有不支持的类型");
         }
         if (endDate == null) {
@@ -453,7 +489,6 @@ class InfectStatistician {
 
         Map<String, InfectionItem> map = new HashMap<>(256);
         InfectionItem all = InfectionItemHelper.getOrCreateItem(map, "全国");
-
         for (int i = 0; i < data.size(); i++) {
             Collection<InfectionItem> infectionItems = data.get(i).getValue();
             for (InfectionItem infectionItem : infectionItems) {
@@ -469,37 +504,30 @@ class InfectStatistician {
             }
         }
 
+        String formatString=getFormatString(types)+System.lineSeparator();
         try (BufferedWriter writer =
                  new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(fileName)), encoding))) {
             if (provinces != null) {
+                InfectionItem emptyItem=new InfectionItem();
+                emptyItem.patient=0;
+                emptyItem.survivor=0;
+                emptyItem.suspect=0;
+                emptyItem.dead=0;
+
                 for (String province : provinces) {
                     if (map.containsKey(province)) {
                         InfectionItem item = map.get(province);
-                        writer.write(String.format(OUT_FORMAT,
-                            province,
-                            item.patient,
-                            item.suspect,
-                            item.survivor,
-                            item.dead));
+                        writer.write(format(formatString,item));
                     } else {
-                        writer.write(String.format(OUT_FORMAT, province, 0, 0, 0, 0));
+                        emptyItem.name=province;
+                        writer.write(format(formatString,emptyItem));
                     }
                 }
             } else {
-                writer.write(String.format(OUT_FORMAT,
-                    all.name,
-                    all.patient,
-                    all.suspect,
-                    all.survivor,
-                    all.dead));
+                writer.write(format(formatString,all));
                 map.remove(all.name);
                 for (InfectionItem item : map.values()) {
-                    writer.write(String.format(OUT_FORMAT,
-                        item.name,
-                        item.patient,
-                        item.suspect,
-                        item.survivor,
-                        item.dead));
+                    writer.write(format(formatString,item));
                 }
             }
             writer.write(ANNOTATION);
