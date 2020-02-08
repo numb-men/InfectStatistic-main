@@ -38,7 +38,6 @@ class InfectStatistic {
             return command;
         }
 
-
         public void setCommand(Command command) {
             this.command = command;
         }
@@ -51,6 +50,14 @@ class InfectStatistic {
             this.arguments = arguments;
         }
 
+        @Override
+        public String toString() {
+            return command + " -" + arguments.isLog() + " " + arguments.getLog_content() +
+                    " -" + arguments.isOut() + " " + arguments.getOut_content() +
+                    " -" + arguments.isDate() + " " + arguments.getDate_content() +
+                    " -" + arguments.isType() + " " + arguments.getTypeOption() +
+                    " -" + arguments.isProvince() + " " + arguments.getProvince_content() ;
+        }
 
         /**
          * Command
@@ -207,8 +214,8 @@ class InfectStatistic {
          */
         enum TypeOptionEnum {
 
-            IP("infection_patients", 1, false), SP("suspected patients", 2, false),
-            CURE("cure_patients", 3, false), DEAD("dead__patient", 4, false);
+            IP("ip", 1, false), SP("sp", 2, false),
+            CURE("cure", 3, false), DEAD("dead", 4, false);
 
             //类型名
             private String name;
@@ -1553,133 +1560,98 @@ class InfectStatistic {
          * @description 命令行启动类
          * @since
          */
-        class CommandLineApplication {
+        static class CommandLineApplication {
+
+
+            /**
+             * CommandLineApplication(List<String> commandline)
+             * TODO
+             * @description 命令行启动 读入->解析->实现功能
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.9
+             * @return void
+             */
+            public void Application(List<String> list, String commandline) throws IOException {
+
+                //实例化命令行对应对象
+                CommandLine commandLine = new CommandLine();
+
+                //实例化命令行解析类
+                CommandLineAnalytic commandLineAnalytic = new CommandLineAnalytic();
+
+                commandLine = commandLineAnalytic.Analytic(list);
+
+                String in_path = null;
+
+                String out_path = null;
+
+                List<String> province = new ArrayList<>();
+
+                List<String> type = new ArrayList<>();
+
+                if(commandLine.getCommand().isList()){
+                    if (commandLine.getArguments().isLog()){
+                        if(commandLine.getArguments().isDate()){
+                            in_path = commandLine.getArguments().getLog_content() + commandLine.getArguments().getDate_content() + ".log.txt";
+                        }
+                        else {
+                            in_path = commandLine.getArguments().getLog_content();
+                        }
+                    }
+                    if (commandLine.getArguments().isOut()){
+                        out_path = commandLine.getArguments().getOut_content();
+                    }
+                    if (commandLine.getArguments().isType()){
+
+                        if (commandLine.getArguments().isProvince()){
+                            province.addAll(commandLine.getArguments().getProvince_content());
+                            for(int i=0; i<commandLine.getArguments().getTypeOption().size(); i++){
+                                type.add(commandLine.getArguments().getTypeOption().get(i).getName());
+                            }
+                        }
+                        else{
+                            province = null;
+                        }
+                    }
+                    else{
+                        type = null;
+                        if (commandLine.getArguments().isProvince()){
+                            province.addAll(commandLine.getArguments().getProvince_content());
+                        }
+                        else{
+                            province = null;
+                        }
+
+                    }
+
+                }
+
+                LogDao.sortResultByProvince(in_path);
+
+                LogDao.outLog(in_path, out_path, commandline, province, type);
+
+            }
+
         }
 
         public static void main(String[] args) throws IOException {
 
-//         CommandLine commandLine = new CommandLine();
-//
-//         CommandLine.Command command = new CommandLine.Command();
-//
-//         CommandLine.Arguments arguments = new CommandLine.Arguments();
-//
-//         command.setList(true);
-//
-//         arguments.setLog(true);
-//         arguments.setLog_content("C");
-//         arguments.setOut(true);
-//         arguments.setOut_content("D");
-//         arguments.setType(true);
-//
-//         ArrayList<CommandLine.TypeOptionDto> arrayList = new ArrayList<>();
-//         CommandLine.TypeOptionDto typeOptionDto = new CommandLine.TypeOptionDto();
-//         typeOptionDto.setName(CommandLine.TypeOption.CURE.getName());
-//         typeOptionDto.setIndex(CommandLine.TypeOption.CURE.getIndex());
-//         typeOptionDto.setStatus(CommandLine.TypeOption.CURE.isStatus());
-//
-//         arrayList.add(typeOptionDto);
-//
-//         arguments.setTypeOption(arrayList);
-//
-//
-//         commandLine.setCommand(command);
-//
-//
-//         commandLine.setArguments(arguments);
-//
-//
-//         System.out.println(commandLine.getArguments().getTypeOption().get(0).getName());
+            String commandline = "";
 
-            List<String> list = new ArrayList<String>();
+            for(int i=3;i<args.length;i++){
+                commandline += args[i] + " ";
+            }
+
+            List<String> list = new ArrayList<>();
 
             for (String temp : args) {
                 list.add(temp);
             }
-//
-//        for(String temp:list){
-//            System.out.print(temp+"\n");
-//        }
-//
-//        for(int i=0; i<list.size(); i++) {
-//            String temp = list.get(i);
-//            System.out.print(temp+"\n");
-//        }
-//
 
-//            CommandLineAnalytic commandLineAnalytic = new CommandLineAnalytic();
-//            CommandLine commandLine = new CommandLine();
-//
-//            commandLine = commandLineAnalytic.Analytic(list);
-//
-//            commandLine.getArguments().isLog();
-//            commandLine.getArguments().isOut();
-//            commandLine.getArguments().isDate();
-//            commandLine.getArguments().isType();
-//            commandLine.getArguments().getTypeOption();
-//            commandLine.getArguments().isProvince();
-//            commandLine.getArguments().getProvince_content();
-//
-//            System.out.println(commandLine.getArguments().isLog());
-//            System.out.println(commandLine.getArguments().isOut());
-//            System.out.println(commandLine.getArguments().isDate());
-//            System.out.println(commandLine.getArguments().isType());
-//            System.out.println(commandLine.getArguments().getTypeOption().get(0).getName());
-//            System.out.println(commandLine.getArguments().getTypeOption().get(1).getName());
-//            System.out.println(commandLine.getArguments().isProvince());
-//            System.out.println(commandLine.getArguments().getProvince_content().get(0));
-//            System.out.println(commandLine.getArguments().getProvince_content().get(1));
-//            System.out.println(commandLine.getArguments().getProvince_content().get(2));
+            CommandLineApplication commandLineApplication = new CommandLineApplication();
+            commandLineApplication.Application(list, commandline);
 
-
-//            LogDao logDao = new LogDao();
-//
-//            logDao.initLog(".\\log\\2020-01-22.log.txt");
-//
-//            logDao.sortResultByProvince(".\\log\\2020-01-22.log.txt");
-//
-//            logDao.getFiles(".\\log");
-
-//
-//            for (LogUtil.InfectResult temp: logDao.sortResultByProvince(".\\log")){
-//                System.out.println(temp.toResultString());
-//            }
-
-//            for (String temp: logDao.getFiles(".\\log")){
-//                System.out.println(temp);
-//            }
-
-//            logDao.outLog(".\\log",".\\result\\6.txt",args.toString(), Collections.singletonList("全国"), Collections.singletonList("ip"));
-
-//            RegexUtil regexUtil = new RegexUtil();
-//
-//            regexUtil.getAddIp("福建 新增 感染患者 2人");
-//
-//            regexUtil.getEmptiesIp("湖北 感染患者 流入 福建 2人");
-//
-//            regexUtil.getDead("湖北 死亡 1人");
-//
-//            regexUtil.getSpToIp("福建 疑似患者 确诊感染 1人");
-//
-//            regexUtil.getRemoveSp("湖北 排除 疑似患者 2人");
-//
-//            System.out.println(regexUtil.getAddIp("福建 新增 感染患者 2人").getPattern1());
-//            System.out.println(regexUtil.getAddIp("福建 新增 感染患者 2人").getPattern3());
-//
-//            System.out.println(regexUtil.getEmptiesIp("湖北 感染患者 流入 福建 2人").getPattern1());
-//            System.out.println(regexUtil.getEmptiesIp("湖北 感染患者 流入 福建 2人").getPattern2());
-//            System.out.println(regexUtil.getEmptiesIp("湖北 感染患者 流入 福建 2人").getPattern3());
-//
-//            System.out.println(regexUtil.getDead("湖北 死亡 1人").getPattern1());
-//            System.out.println(regexUtil.getDead("湖北 死亡 1人").getPattern3());
-//
-//            System.out.println(regexUtil.getRemoveSp("湖北 排除 疑似患者 2人").getPattern1());
-//            System.out.println(regexUtil.getRemoveSp("湖北 排除 疑似患者 2人").getPattern3());
-//
-//            System.out.println(regexUtil.getSpToIp("福建 疑似患者 确诊感染 1人").getPattern1());
-//            System.out.println(regexUtil.getSpToIp("福建 疑似患者 确诊感染 1人").getPattern3());
-
-            System.out.println("hello world");
         }
 
 }
