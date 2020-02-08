@@ -14,10 +14,10 @@ class InfectStatistic {
     class CommandLineAnalytic{//命令行解析类
     }
 	
-    class RegexUtil{//正则工具类
+	class RegexUtil {//正则工具类
     }
     
-    class LogUtil{//Log文件连接初始化类
+    class LogUtil{//Log文件连接工具类
     }
     
     class LogDao{//Log文件控制类
