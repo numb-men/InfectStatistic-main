@@ -2,13 +2,13 @@
  * InfectStatistic
  *
  * @author XTG-L
- * @version 0.1
+ * @version 0.2
  * @since 2020-2-9
  */
 class InfectStatistic {
     public static void main(String[] args) {
         CmdArgs cmd=new CmdArgs(args);
-        cmd.argVals("log");
+        System.out.println(cmd.argVals("log")[0]);
     }
 }
 
@@ -63,17 +63,17 @@ class CmdArgs {
      * @return
      */
     String[] argVals(String key) {
+        if(!hasValue(key)) {
+            return null;
+        }
         String[] values=null;
         String cmd=getCmd();
         String[] splitedCmd=cmd.split("-");
         for (String string : splitedCmd) {
             if(string.contains(key)) {
-                String s=string.replaceAll(key, "");
-                values=s.split(" ");
+                String s=string.replaceAll(key+" ", "");
+                values=s.split("[\\s]+");
             }
-        }
-        for (String s : values) {
-            System.out.println(s);
         }
         return values;
     }
@@ -83,8 +83,18 @@ class CmdArgs {
      * @param key
      * @return
      */
-    boolean has(String key) {
+    boolean hasValue(String key) {
+        String cmd=getCmd();
+        String[] splitedCmd=cmd.split("-");
+        for (String string : splitedCmd) {
+            if(string.contains(key)) {
+                if(string.trim().length()>key.length()) {
+                    return true;
+                } else {
+                    break;
+                }
+            }
+        }
         return false;
-        //...
     }
 }
