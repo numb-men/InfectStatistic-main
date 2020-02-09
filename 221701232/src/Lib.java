@@ -16,17 +16,27 @@ import static java.util.stream.Collectors.toMap;
  * @since 1.8
  */
 public class Lib {
+    public static String logFileRegex = "2020-[0-1][0-9]-[0-3][0-9].log.txt";
+    public static String ip = "感染患者";
+    public static String sp = "疑似患者";
+    public static String dead = "死亡";
+    public static String cure = "治愈";
+    public static String exclude = "排除";
+    public static String newAdd = "新增";
+    public static String countryStr = "全国";
+    public static String skip = "//";
+    public static String[] allType = {"ip", "sp", "cure", "dead"};
 }
 
 class CommonUtil {
 
-    // new BufferReader br
+    /** new BufferReader br **/
     public static BufferedReader newBufferReader(String path) throws FileNotFoundException {
         FileReader fr = new FileReader(path);
         BufferedReader br = new BufferedReader(fr);
         return br;
     }
-    // new BufferWriter bw
+    /** new BufferWriter bw **/
     public static BufferedWriter newBufferWriter(String path) throws IOException {
         File file = new File(path);
         if (file.isDirectory()) {
@@ -39,18 +49,14 @@ class CommonUtil {
         BufferedWriter bw = new BufferedWriter(fileWriter);
         return bw;
     }
-    // d1 > d2 return true
-    public static boolean compareDate(Date d1, Date d2) {
-        return d1.compareTo(d2) > 0;
-    }
 
-    public static boolean compareDate(String d1, String d2) throws ParseException {
+    public static int compareDate(String d1, String d2) throws ParseException {
         Date date1 = stringToDate(d1);
         Date date2 = stringToDate(d2);
-        return compareDate(date1, date2);
+        return date1.compareTo(date2);
     }
 
-    // tranform "yyyy-MM-dd" to Date
+    /** tranform "yyyy-MM-dd" to Date **/
     public static Date stringToDate(String dateStr) throws ParseException {
         Date date = null;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -65,15 +71,15 @@ class CommonUtil {
         }
         // comfirm now date >= date
         Date now = new Date();
-        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd");
-        if (now.compareTo(sd.parse(dateStr)) < 0) {// now >= date
-            System.out.println("now's date < date, " + dateStr + "is invalid" );
+        if (now.compareTo(date) < 0) {
+            /** now >= date **/
+            System.out.println("now's date < date, " + dateStr + " is invalid" );
             return null;
         }
         return date;
     }
 
-    // read out put file
+    /** read out put file **/
     public static Container readOutFile(String outFilePath) throws IOException {
         Container container = new Container();
         File file = new File(outFilePath);
@@ -91,31 +97,33 @@ class CommonUtil {
         return container;
     }
 
-    // read one line in output file
+    /** read one line in output file **/
     public static boolean readOneLineOfOutFile(Record record, String line) {
-        String data [] = line.split(" ");
-        if (data[0].equals("//")) {
+        String[] data = line.split(" ");
+        if (data[0].equals(Lib.skip)) {
             return false;
         }
         record.setProvinceName(data[0]);
         for (int i = 1; i < data.length; ++i) {
             String type = parserStringGetType(data[i]);
-            if (type.equals("感染患者")) {
+            if (type.equals(Lib.ip)) {
                 record.setIpNum(CommonUtil.parserStringToInt(data[i]));
-            } else if (type.equals("疑似患者")) {
+            } else if (type.equals(Lib.sp)) {
                 record.setSpNum(CommonUtil.parserStringToInt(data[i]));
-            } else if (type.equals("治愈")) {
+            } else if (type.equals(Lib.cure)) {
                 record.setCureNum(CommonUtil.parserStringToInt(data[i]));
-            } else if (type.equals("死亡")) {
+            } else if (type.equals(Lib.dead)) {
                 record.setDeadNum(CommonUtil.parserStringToInt(data[i]));
             }
         }
         return true;
     }
 
-    // parser a string to get type
-    // type ： 感染患者(ip) 疑似患者(sp) 治愈(cure) 死亡(dead)
-    // example ： 感染患者5人 -> type is 感染患者
+    /**
+     * parser a string to get type
+     * type ： 感染患者(ip) 疑似患者(sp) 治愈(cure) 死亡(dead)
+     * example ： 感染患者5人 -> type is 感染患者
+      */
     public static String parserStringGetType(String string) {
         String str1 = string.trim();
         String str2 = "";
@@ -129,7 +137,7 @@ class CommonUtil {
         return str2;
     }
 
-    // parser number from string
+    /** parser number from string **/
     public static int parserStringToInt(String string) {
         String str1 = string.trim();
         String str2 = "";
@@ -140,14 +148,14 @@ class CommonUtil {
                 continue;
             }
         }
-        if (str2.equals("")) {
+        if (str2.length() == 0) {
             return 0;
         }
         int number = Integer.parseInt(str2);
         return number;
     }
 
-    // sort map by key
+    /** sort map by key **/
     public static <A,B> Map<A, B> sortMapByKey(Map<A, B> map, Comparator<A> comparator) {
         if (map == null || map.isEmpty()) {
             return null;
@@ -157,7 +165,7 @@ class CommonUtil {
         return sortMap;
     }
 
-    // get files from path and only get file which date < date
+    /** get files from path and only get file which date < date **/
     public static Map<String, File> getFiles(String path, String date, String regex) throws ParseException {
         File file = new File(path);
         File[] fileList = file.listFiles();
@@ -172,7 +180,8 @@ class CommonUtil {
                         continue;
                     }
                     // support args -date
-                    if (date != null && CommonUtil.compareDate(temp[temp.length - 1], date)) {
+                    if (date != null &&
+                            CommonUtil.compareDate(temp[temp.length - 1], date) > 0) {
                         continue;
                     }
                     fileMap.put(fileList[i].toString(), fileList[i]);

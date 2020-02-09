@@ -20,12 +20,11 @@ import static java.util.stream.Collectors.toMap;
  */
 class InfectStatistic {
 
-    public static String logFileRegex = "2020-[0-1][0-9]-[0-3][0-9].log.txt";
     private CmdArgs cmdArgs;
-    private Map<String, File> logFilesMap;// logFileName -> File
+    private Map<String, File> logFilesMap;
     private Container container;
     private Record country;
-    // Set and Get Method
+    /** Set and Get Method **/
     public CmdArgs getCmdArgs() {
         return cmdArgs;
     }
@@ -49,7 +48,7 @@ class InfectStatistic {
     public Record getCountry() {
         return country;
     }
-    // logical function
+    /** logical function **/
     public void addDeadNum(Record record, int num) {
         record.incDeadNum(num);
         record.decIpNum(num);
@@ -87,15 +86,15 @@ class InfectStatistic {
     }
 
     public void peopleMove(Record fromRecord, Record infectedRecord, String type, int num) {
-        if (type.equals("感染患者")) {
+        if (type.equals(Lib.ip)) {
             fromRecord.decIpNum(num);
             infectedRecord.incIpNum(num);
-        } else if (type.equals("疑似患者")) {
+        } else if (type.equals(Lib.sp)) {
             fromRecord.decSpNum(num);
             infectedRecord.incSpNum(num);
         }
     }
-    // Constructor
+    /** Constructor **/
     public InfectStatistic() throws ParseException {
         cmdArgs = new CmdArgs();
         country = new Record();
@@ -103,10 +102,11 @@ class InfectStatistic {
         container = new Container();
         logFilesMap = new HashMap<>();
     }
-    // deal one line of log file
+    /** deal one line of log file **/
     public boolean dealOneLineOfLogFile(String line) {
-        String data [] = line.split(" ");
-        if (data[0].substring(0,2).equals("//")) {
+        String[] data = line.split(" ");
+        String beginStr = data[0].substring(0,2);
+        if (beginStr.equals(Lib.skip)) {
             return false;
         }
         // get province record
@@ -118,26 +118,27 @@ class InfectStatistic {
         }
         // get number
         int num = CommonUtil.parserStringToInt(data[data.length - 1]);
+        int[] dataLength = {3, 4, 5};
         // handle data
-        if (data.length == 3) {
-            if (data[1].equals("死亡")) {
+        if (data.length == dataLength[0]) {
+            if (data[1].equals(Lib.dead)) {
                 this.addDeadNum(record, num);
-            } else if (data[1].equals("治愈")) {
+            } else if (data[1].equals(Lib.cure)) {
                 this.addCureNum(record, num);
             }
-        } else if (data.length == 4) {
-            if (data[1].equals("新增")) {
-                if (data[2].equals("感染患者")) {
+        } else if (data.length == dataLength[1]) {
+            if (data[1].equals(Lib.newAdd)) {
+                if (data[2].equals(Lib.ip)) {
                     this.addIpNum(record, num);
-                } else if (data[2].equals("疑似患者")) {
+                } else if (data[2].equals(Lib.sp)) {
                     this.addSpNum(record, num);
                 }
-            } else if (data[1].equals("疑似患者")) {
+            } else if (data[1].equals(Lib.sp)) {
                 this.spTurnToIp(record, num);
-            } else if (data[1].equals("排除")) {
+            } else if (data[1].equals(Lib.exclude)) {
                 this.excludeSp(record, num);
             }
-        } else if (data.length == 5) {
+        } else if (data.length == dataLength[2]) {
             Record infectedRecord = container.getRecord(data[3]);
             if (infectedRecord == null) {
                 infectedRecord = new Record();
@@ -148,7 +149,7 @@ class InfectStatistic {
         }
         return true;
     }
-    // read log file
+    /** read log file **/
     public void readLogFile() throws IOException {
         int index = 0;
         for (Map.Entry<String, File> entry : logFilesMap.entrySet()) {
@@ -170,13 +171,13 @@ class InfectStatistic {
             }
         }
     }
-    // write out file
+    /** write out file **/
     public void writeOutFile() throws IOException {
         String outFilePath = cmdArgs.getOutFilePath();
         BufferedWriter bw = null;
         try {
             bw = CommonUtil.newBufferWriter(outFilePath);
-            if (!cmdArgs.hasProvince() || cmdArgs.getProvinces().contains("全国")) {
+            if (!cmdArgs.hasProvince() || cmdArgs.getProvinces().contains(Lib.countryStr)) {
                 country.writeRecordToFile(bw, cmdArgs.getTypes());
             }
             container.writeContainerToFile(bw, cmdArgs.getTypes(), cmdArgs.getProvinces());
@@ -196,7 +197,7 @@ class InfectStatistic {
             return;
         }
         infectStatistic.setLogFilesMap(CommonUtil.getFiles(cmdArgs.getLogFilePath(),cmdArgs.getDate(),
-                InfectStatistic.logFileRegex));
+                Lib.logFileRegex));
         infectStatistic.readLogFile();
         infectStatistic.writeOutFile();
     }
@@ -204,7 +205,7 @@ class InfectStatistic {
 
 class Container {
 
-    Map<String, Record> recordMap;// provinceName -> Record
+    Map<String, Record> recordMap;
     public Container() {
         recordMap = new HashMap<>();
     }
@@ -241,7 +242,7 @@ class Container {
         recordMap = CommonUtil.sortMapByKey(recordMap, mapKeyComparator);
     }
 
-    // write container's message to file
+    /** write container's message to file **/
     public void writeContainerToFile(BufferedWriter bw,
                                      Vector<String> types, Vector<String> provinces) throws IOException {
         // sort by province's pingying
@@ -261,12 +262,18 @@ class Container {
 
 class Record {
 
+    /**
+     * ipNum infection patients number
+     * spNum suspected patients number
+     * cureNum cure people number
+     * deadNum dead people number
+     * **/
     private String provinceName;
-    private int ipNum;// infection patients number
-    private int spNum;// suspected patients number
-    private int cureNum;// cure people number
-    private int deadNum;//  dead people number
-    // Set and Get Method
+    private int ipNum;
+    private int spNum;
+    private int cureNum;
+    private int deadNum;
+    /** Set and Get Method **/
     public String getProvinceName() {
         return provinceName;
     }
@@ -320,13 +327,13 @@ class Record {
     public void incDeadNum(int num) { this.deadNum += num; }
 
     public void setAll(String provinceName, int sp, int ip, int dead, int cure) {
-        this.setProvinceName("福建");
+        this.setProvinceName(provinceName);
         this.setSpNum(sp);
         this.setIpNum(ip);
         this.setDeadNum(dead);
         this.setCureNum(cure);
     }
-    // r1 equals to r2 return true
+    /** r1 equals to r2 return true **/
     public boolean compareTo(Record r2) {
         if (r2 == null) {
             return false;
@@ -334,19 +341,22 @@ class Record {
             return true;
         } else if (!(this.getProvinceName().equals(r2.getProvinceName()))) {
             return false;
-        } else if (!(this.getDeadNum() == r2.getDeadNum())) {
+        } else if (this.getDeadNum() != r2.getDeadNum()) {
             return false;
-        } else if (!(this.getCureNum() == r2.getCureNum())) {
+        } else if (this.getCureNum() != r2.getCureNum()) {
             return false;
-        } else if (!(this.getSpNum() == r2.getSpNum())) {
+        } else if (this.getSpNum() != r2.getSpNum()) {
             return false;
-        } else if (!(this.getIpNum() == r2.getIpNum())) {
+        } else if (this.getIpNum() != r2.getIpNum()) {
             return false;
         }
         return true;
     }
-    // write record's message to file
-    // [ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 ，dead：死亡患者]
+
+    /**
+     * write record's message to file
+     * [ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 dead：死亡患者]
+      */
     public void writeRecordToFile(BufferedWriter bw, Vector<String> types) throws IOException {
         String provinceRecord = "";
         if (types == null || types.size() == 0) {
@@ -358,13 +368,13 @@ class Record {
         } else {
             provinceRecord = this.getProvinceName();
             for (String str : types) {
-                if (str.equals("ip")) {
+                if (str.equals(Lib.allType[0])) {
                     provinceRecord += " 感染患者" + this.getIpNum() + "人 ";
-                } else if (str.equals("sp")) {
+                } else if (str.equals(Lib.allType[1])) {
                     provinceRecord += " 疑似患者" + this.getSpNum() + "人 ";
-                } else if (str.equals("cure")) {
+                } else if (str.equals(Lib.allType[2])) {
                     provinceRecord += " 治愈" + this.getCureNum() + "人 ";
-                } else if (str.equals("dead")) {
+                } else if (str.equals(Lib.allType[3])) {
                     provinceRecord += " 死亡" + this.getDeadNum() + "人 ";
                 }
             }
@@ -373,7 +383,7 @@ class Record {
         bw.write(provinceRecord);
         bw.flush();
     }
-    // show record's message
+    /** show record's message **/
     public void showRecordMessage() {
         String provinceRecord = this.getProvinceName() + " 感染患者"
                 + this.getIpNum() +"人 "
@@ -383,7 +393,7 @@ class Record {
         provinceRecord += "\r\n";
         System.out.println(provinceRecord);
     }
-    // Constructor
+    /** Constructor **/
     public Record() {
         this.provinceName = "";
         this.ipNum = 0;
@@ -393,13 +403,14 @@ class Record {
     }
 }
 
+@SuppressWarnings("ALL")
 class CmdArgs {
     private String logFilePath;
     private String outFilePath;
     private String date;
     private Vector<String> types;
     private Vector<String> provinces;
-    // Constructor
+    /** Constructor **/
     public CmdArgs() {
         this.types = new Vector<String>();
         this.provinces = new Vector<String>();
@@ -409,7 +420,7 @@ class CmdArgs {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         this.date = sdf.format(now);
     }
-    // Set and Get Method
+    /** Set and Get Method **/
     public String getLogFilePath() {
         return logFilePath;
     }
@@ -478,7 +489,7 @@ class CmdArgs {
         }
         int i = 0;
         while (i < args.length) {
-            if (args[i].equals("list")) {
+            if ("list".equals(args[i])) {
                 i++;
                 break;
             }
@@ -489,7 +500,7 @@ class CmdArgs {
             return false;
         }
         for (; i < args.length; ++i) {
-            if (args[i].equals("-log")) {
+            if ("-log".equals(args[i])) {
                 File file = new File(args[++i]);
                 if (file.isDirectory()) {
                     this.setLogFilePath(args[i]);
@@ -497,17 +508,12 @@ class CmdArgs {
                     System.out.println("你必须指定日志文件夹的全路径");
                     return false;
                 }
-            } else if (args[i].equals("-out")) {
+            } else if ("-out".equals(args[i])) {
                 File file = new File(args[++i]);
-                if (file.isFile()) {
-                    this.setOutFilePath(args[i]);
-                } else {
-                    System.out.println("你必须指定输出文件的全路径");
-                    return false;
-                }
-            } else if (args[i].equals("-date")) {
+                this.setOutFilePath(args[i]);
+            } else if ("-date".equals(args[i])) {
                 this.setDate(args[++i]);
-            } else if (args[i].equals("-type")) {
+            } else if ("-type".equals(args[i])) {
                 while (i < args.length) {
                     if ((i + 1) >= args.length || args[i + 1].charAt(0) == '-') {
                         break;
@@ -515,13 +521,13 @@ class CmdArgs {
                         this.addType(args[++i]);
                     }
                 }
-            } else if (args[i].equals("-province")) {
+            } else if ("-province".equals(args[i])) {
                 while (i < args.length) {
                     if ((i + 1) >= args.length || args[i + 1].charAt(0) == '-') {
                         break;
                     } else {
                         this.addProvince(args[++i]);
-                        if (!args[i].equals("全国")) {
+                        if (!"全国".equals(args[i])) {
                             Record record = new Record();
                             record.setProvinceName(args[i]);
                             infectStatistic.getContainer().addRecord(record);

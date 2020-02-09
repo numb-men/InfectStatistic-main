@@ -16,7 +16,7 @@ class CommonUtilTest {
         CmdArgs cmdArgs = infectStatistic.getCmdArgs();
         cmdArgs.handleArgs(CmdArgsTest.args1, infectStatistic);
         infectStatistic.setLogFilesMap(CommonUtil.getFiles(cmdArgs.getLogFilePath(),cmdArgs.getDate(),
-                InfectStatistic.logFileRegex));
+                Lib.logFileRegex));
         // Ensure files are read in chronological order
         Map<String, File> fileMap = infectStatistic.getLogFilesMap();
         String preDate = "2000-02-02";
@@ -36,8 +36,8 @@ class CommonUtilTest {
     void compareDate() throws ParseException {
         String dateStr1 = "2020-02-08";// dateStr cannot exceed current time
         String dateStr2 = "2020-02-06";// dateStr cannot exceed current time
-        // return true if dateStr1 > dateStr2
-        assert(CommonUtil.compareDate(dateStr1, dateStr2));
+        // if dateStr1 > dateStr2 return int > 0
+        assert(CommonUtil.compareDate(dateStr1, dateStr2) > 0);
     }
 
     @Test
