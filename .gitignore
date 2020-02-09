@@ -12,3 +12,5 @@ InfectStatistic-example.iml
 
 #输出文件夹
 /out/
+#测试文件夹
+/test/

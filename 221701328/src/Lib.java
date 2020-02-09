@@ -9,7 +9,7 @@ import java.util.Map;
  *程序执行过程中需要的一些静态方法
  *
  * @author herokilito@outlook.com
- * @version 0.6
+ * @version 0.7
  * @since 2020.02
  */
 public class Lib {
@@ -61,10 +61,28 @@ public class Lib {
     }
 
     /**
-     *帮助文档，当执行 “java 程序名” 或者 ”java 程序名 list“ 时显示的内容
+     *帮助文档，当执行 “java 程序名”时显示的内容
      */
-    public static void help(){   //help message in here
-        System.out.println("");
+    public static void help(){
+        System.out.println("用法：java <主类名> list [args...]");
+        System.out.println("（执行list命令）");
+    }
+
+    /**
+     *帮助文档，当执行  ”java 程序名 list“ 时显示的内容
+     */
+    public static void helpList(){
+        System.out.println("list用法：java <主类名> list [args...]");
+        System.out.println("args：-log <日志目录绝对路径>");
+        System.out.println("（给定日志文件目录---必带参数）");
+        System.out.println("或：-out <输出文件绝对路径>");
+        System.out.println("（给定日志输出目录---必带参数）");
+        System.out.println("或：-date <日期>");
+        System.out.println("（统计指定日期之前（包括指定日期）的日志文件---可选参数 日期格式 xxxx-xx-xx 如 2020-01-1-01）");
+        System.out.println("或：-type [ip sp cure dead]");
+        System.out.println("（给定输出类型---可选参数 类型可选 ip sp cure dead 可多选）");
+        System.out.println("或：-province [省1 省2 省3...]");
+        System.out.println("（给定输出省份数据---可选参数 省份可多选 使用简称 如 福建省 输入 福建）");
     }
 
     /**

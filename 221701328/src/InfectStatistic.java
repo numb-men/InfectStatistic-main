@@ -9,10 +9,60 @@ import java.util.*;
  * TODO
  *
  * @author herokilito@outlook.com
- * @version 0.6
+ * @version 0.7
  * @since 2020.02
  */
 class InfectStatistic {
+
+    Order order;
+
+    public static void main(String[] args) {
+        InfectStatistic infectStatistic = new InfectStatistic();
+        if(args.length == 0){
+            Lib.help();
+            System.exit(0);
+        }
+        infectStatistic.takeOrder(args[0]);
+        infectStatistic.placeOrder(args);
+    }
+
+    /**
+     * 判断命令类型并创建实例
+     * @param cmd 传入的命令
+     */
+    public void takeOrder(String cmd){
+        switch (cmd){
+            case "list":
+                order = new ListOrder();
+                break;
+            default:
+                System.out.println("\"" + cmd + "\"无效的命令");
+                System.exit(1);
+        }
+    }
+
+    /**
+     * 执行命令
+     * @param args 参数列表
+     */
+    public void placeOrder(String[] args){
+        order.execute(args);
+    }
+
+}
+
+/**
+ * 命令接口
+ */
+interface Order {
+
+    void execute(String[] args);
+}
+
+/**
+ * list命令类
+ */
+class ListOrder implements Order {
 
     /*一些常量*/
     private final String INFECTION_PATIENT = "感染患者";
@@ -35,8 +85,8 @@ class InfectStatistic {
     private String logParam;
     private String outParam;
     private String dateParam;
-    private ArrayList<String> typeParams;
-    private ArrayList<String> provinceParams;
+    private List<String> typeParams;
+    private List<String> provinceParams;
 
     /*用于保存各省份疫情信息*/
     private Map<String, List<Integer>> statistics;
@@ -48,7 +98,7 @@ class InfectStatistic {
     private Map<String,Integer> outType;
 
     /*构造方法*/
-    public InfectStatistic(){
+    public ListOrder(){
         hasLog = false;
         hasOut = false;
         hasDate = false;
@@ -65,75 +115,62 @@ class InfectStatistic {
         Lib.mapInit(statistics);
     }
 
-    public static void main(String[] args) {
-        InfectStatistic infectStatistic = new InfectStatistic();
-        infectStatistic.execute(args);
-    }
-
     /**
      *解析参数，保存，设定默认值，并调用相应的方法
      * @param args 传递给main方法的参数
      */
+    @Override
     public void execute(String[] args) {
-        if(args.length == 0){
-            Lib.help();    //显示提示信息
+        if(args.length == 1){
+            Lib.helpList();    //显示提示信息
             System.exit(0);
         }
         /*分离参数*/
-        switch (args[0]){
-            case "list":
-                int i = 1;
-                while(i < args.length){
-                    switch (args[i]){
-                        case "-log":
-                            hasLog = true;
-                            if(++i >= args.length){
-                                System.out.println("-log参数缺少参数值");
-                                System.exit(1);
-                            }
-                            logParam = args[i++];
-                            break;
-                        case "-out":
-                            hasOut = true;
-                            if(++i >= args.length){
-                                System.out.println("-out参数缺少参数值");
-                                System.exit(1);
-                            }
-                            outParam = args[i++];
-                            break;
-                        case "-date":
-                            hasDate = true;
-                            if(++i >= args.length){
-                                System.out.println("-date参数缺少参数值");
-                                System.exit(1);
-                            }
-                            dateParam = args[i++];
-                            break;
-                        case  "-type":
-                            hasType = true;
-                            while(++i < args.length && !args[i].equals("-log") && !args[i].equals("-out") && !args[i].equals("-date")
-                                    && !args[i].equals("-province")){
-                                typeParams.add(args[i]);
-                            }
-                            break;
-                        case  "-province":
-                            hasProvince = true;
-                            while(++i < args.length && !args[i].equals("-log") && !args[i].equals("-out") && !args[i].equals("-date")
-                                    && !args[i].equals("-type")){
-                                provinceParams.add(args[i]);
-                            }
-                            break;
-                        default:
-                            System.out.println("\"" + args[i] + "\"无法解析的参数");
-                            System.exit(1);
-                            break;
+        int i = 1;
+        while (i < args.length) {
+            switch (args[i]) {
+                case "-log":
+                    hasLog = true;
+                    if (++i >= args.length) {  //如果-log后面没有给参数值
+                        System.out.println("-log参数缺少参数值");
+                        System.exit(1);
                     }
-                }
-                break;
-            //case something:此处可扩展其他命令
-            default:
-                System.out.println(args[0] + " 无效的命令");
-                System.exit(1);
+                    logParam = args[i++];      //-log后面跟着的参数为-log的参数值
+                    break;
+                case "-out":
+                    hasOut = true;
+                    if (++i >= args.length) {  //如果-out后面没有给参数值
+                        System.out.println("-out参数缺少参数值");
+                        System.exit(1);
+                    }
+                    outParam = args[i++];      //-out后面跟着的参数为-out的参数值
+                    break;
+                case "-date":
+                    hasDate = true;
+                    if (++i >= args.length) {  //如果-date后面没有给参数值
+                        System.out.println("-date参数缺少参数值");
+                        System.exit(1);
+                    }
+                    dateParam = args[i++];     //-date后面跟着的参数为-date的参数值
+                    break;
+                case "-type":
+                    hasType = true;
+                    while (++i < args.length && !args[i].equals("-log") && !args[i].equals("-out") && !args[i].equals("-date")
+                            && !args[i].equals("-province")) {   //-type的参数值范围
+                        typeParams.add(args[i]);
+                    }
+                    break;
+                case "-province":
+                    hasProvince = true;
+                    while (++i < args.length && !args[i].equals("-log") && !args[i].equals("-out") && !args[i].equals("-date")
+                            && !args[i].equals("-type")) {       //-province的参数值范围
+                        provinceParams.add(args[i]);
+                    }
+                    break;
+                default:
+                    System.out.println("\"" + args[i] + "\"无法解析的参数");
+                    System.exit(1);
+            }
         }
         /*执行相应的方法*/
         if(!hasLog){  //log必须有
@@ -216,49 +253,50 @@ class InfectStatistic {
             List<Integer> nationalData = statistics.get("全国"); //全国数据
             for (File log : logList) {
                 Date logDate = dateFormat.parse(log.getName().substring(0, log.getName().indexOf('.')));
-                if(logDate.compareTo(paramDate) <= 0){  //判断日志文件的日期是否小于等于给定日期
-                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(log), StandardCharsets.UTF_8));
-                    String dataRow;
-                    while((dataRow = reader.readLine()) != null){
-                        if(dataRow.startsWith("//")) { //忽略注释行
-                            continue;
-                        }
-                        String[] data = dataRow.split(" ");  //分割数据行
-                        List<Integer> provinceData = statistics.get(data[0]);   //当前行的省份数据
-                        List<Integer> destProvince;   //用于处理流入
-                        switch (data[1]) {
-                            case INCREMENT:  //处理新增
-                                if (data[2].equals(INFECTION_PATIENT)) {  //新增感染
-                                    increaseInf(nationalData, provinceData, Lib.parseData(data[3]));
-                                } else {                                  //新增疑似
-                                    increaseSus(nationalData, provinceData, Lib.parseData(data[3]));
-                                }
-                                break;
-                            case EXCLUDE:  //处理排除疑似
-                                excludeSus(nationalData, provinceData, Lib.parseData(data[3]));
-                                break;
-                            case CURE:  //处理治愈
-                                cure(nationalData,provinceData,Lib.parseData(data[2]));
-                                break;
-                            case DEAD:  //处理死亡
-                                dead(nationalData,provinceData,Lib.parseData(data[2]));
-                                break;
-                            case INFECTION_PATIENT:  //处理感染患者流入
-                                destProvince = statistics.get(data[3]);
-                                infInflow(provinceData,destProvince,Lib.parseData(data[4]));
-                                break;
-                            case SUSPECTED_PATIENT:
-                                if(data[2].equals(INFLOW)){   //处理疑似患者流入
-                                    destProvince = statistics.get(data[3]);
-                                    susInflow(provinceData,destProvince,Lib.parseData(data[4]));
-                                } else if(data[2].equals(DIAGNOSE)) {  //处理确诊
-                                    diagnose(nationalData,provinceData,Lib.parseData(data[3]));
-                                }
-                                break;
+                if(logDate.compareTo(paramDate) > 0) {  //判断日志文件的日期是否小于等于给定日期
+                    continue;
+                }
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(log), StandardCharsets.UTF_8));
+                String dataRow;
+                while((dataRow = reader.readLine()) != null){
+                    if(dataRow.startsWith("//")) { //忽略注释行
+                        continue;
+                    }
+                    String[] data = dataRow.split(" ");  //分割数据行
+                    List<Integer> provinceData = statistics.get(data[0]);   //当前行的省份数据
+                    List<Integer> destProvince;   //用于处理流入
+                    switch (data[1]) {
+                        case INCREMENT:  //处理新增
+                            if (data[2].equals(INFECTION_PATIENT)) {  //新增感染
+                                increaseInf(nationalData, provinceData, Lib.parseData(data[3]));
+                            } else {                                  //新增疑似
+                                increaseSus(nationalData, provinceData, Lib.parseData(data[3]));
                             }
-                        }
+                            break;
+                        case EXCLUDE:  //处理排除疑似
+                            excludeSus(nationalData, provinceData, Lib.parseData(data[3]));
+                            break;
+                        case CURE:  //处理治愈
+                            cure(nationalData,provinceData,Lib.parseData(data[2]));
+                            break;
+                        case DEAD:  //处理死亡
+                            dead(nationalData,provinceData,Lib.parseData(data[2]));
+                            break;
+                        case INFECTION_PATIENT:  //处理感染患者流入
+                            destProvince = statistics.get(data[3]);
+                            infInflow(provinceData,destProvince,Lib.parseData(data[4]));
+                            break;
+                        case SUSPECTED_PATIENT:
+                            if(data[2].equals(INFLOW)){   //处理疑似患者流入
+                                destProvince = statistics.get(data[3]);
+                                susInflow(provinceData,destProvince,Lib.parseData(data[4]));
+                            } else if(data[2].equals(DIAGNOSE)) {  //处理确诊
+                                diagnose(nationalData,provinceData,Lib.parseData(data[3]));
+                            }
+                            break;
                     }
                 }
+            }
         }catch (Exception e){
             System.out.println(e.getMessage());
             System.exit(1);
@@ -277,7 +315,7 @@ class InfectStatistic {
      *执行-type命令参数
      * @param types -type命令参数后面的具体参数值数组
      */
-    private void doType(ArrayList<String> types){
+    private void doType(List<String> types){
         Map<String,Integer> newOutType = new LinkedHashMap<>();
         for (String key : statistics.keySet()){
             List<Integer> oldData = statistics.get(key);
@@ -315,7 +353,7 @@ class InfectStatistic {
      *执行-province命令参数
      * @param provinces -province命令参数后面的具体参数值数组
      */
-    private void doProvince(ArrayList<String> provinces){
+    private void doProvince(List<String> provinces){
         Map<String,List<Integer>> newStatistics = new LinkedHashMap<>();
         for(String province : provinces){
             newStatistics.put(province,statistics.get(province));
