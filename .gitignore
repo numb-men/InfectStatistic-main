@@ -10,5 +10,6 @@ gen
 .idea/
 InfectStatistic-example.iml
 
+
 *.class
 *.txt
