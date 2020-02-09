@@ -8,7 +8,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
         CommandFactoryTest.class,
-        ListCheckerTest.class
+        ListCheckerTest.class,
+        CommandLineTest.class,
 })
 public class SuiteTest {
 }
