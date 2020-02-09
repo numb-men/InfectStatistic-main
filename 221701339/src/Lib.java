@@ -481,10 +481,10 @@ class InfectStatistician {
                 throw new InfectStatisticException("日期超出范围,已知范围:" + minDate + "至" + maxDate);
             }
         }
+        InfectFileReader reader = new InfectFileReader();
+        InfectDataParser parser = new InfectDataParser();
         dateFilePairs.parallelStream().forEach((dateFile) -> {
             try {
-                InfectFileReader reader = new InfectFileReader();
-                InfectDataParser parser = new InfectDataParser();
                 Collection<InfectionItem> items = parser.parse(reader.read(dateFile.getValue()));
                 data.add(new Pair<>(dateFile.getKey(), items));
             } catch (IOException | InfectDataParseException e) {
