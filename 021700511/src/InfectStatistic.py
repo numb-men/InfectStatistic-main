@@ -2,7 +2,11 @@ import argparse
 import os
 import re
 import sys
+import locale
+import functools
 from datetime import date as _date
+
+locale.setlocale(locale.LC_COLLATE, 'zh_CN.UTF-8')
 
 
 def get_date(year, month, day):
@@ -141,7 +145,7 @@ class InfectStatistic:
                 out_file.writelines(self._write_str('全国', data['全国']) + '\n')
                 data.pop('全国')
             province_list = list(data.keys())
-            province_list.sort(reverse=True)
+            province_list.sort(key=functools.cmp_to_key(locale.strcoll))
             for province in province_list:
                 out_file.writelines(self._write_str(province, data[province]) + '\n')
             out_file.writelines('// 该文档并非真实数据，仅供测试使用\n')
