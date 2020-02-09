@@ -488,1170 +488,1303 @@ class InfectStatistic {
         }
     }
 
+    /**
+     * RegexUtil
+     * TODO
+     *
+     * @author 221701412_theTuring
+     * @version v 1.0.0
+     * @description 正则工具类 用正则表达式用于提取文本
+     * 提取类型共八种
+     * 1、<省> 新增 感染患者 n人
+     * 2、<省> 新增 疑似患者 n人
+     * 3、<省1> 感染患者 流入 <省2> n人
+     * 4、<省1> 疑似患者 流入 <省2> n人
+     * 5、<省> 死亡 n人
+     * 6、<省> 治愈 n人
+     * 7、<省> 疑似患者 确诊感染 n人
+     * 8、<省> 排除 疑似患者 n人
+     * @since 2020.2.7
+     */
+    public static class RegexUtil {
+
+        //用于匹配类型的字符串
+        String type1 = "\\W+ 新增 感染患者 \\d+人";
+        String type2 = "\\W+ 新增 疑似患者 \\d+人";
+        String type3 = "\\W+ 感染患者 流入 \\W+ \\d+人";
+        String type4 = "\\W+ 疑似患者 流入 \\W+ \\d+人";
+        String type5 = "\\W+ 死亡 \\d+人";
+        String type6 = "\\W+ 治愈 \\d+人";
+        String type7 = "\\W+ 疑似患者 确诊感染 \\d+人";
+        String type8 = "\\W+ 排除 疑似患者 \\d+人";
+
+        public String getType1() {
+            return type1;
+        }
+
+        public void setType1(String type1) {
+            this.type1 = type1;
+        }
+
+        public String getType2() {
+            return type2;
+        }
+
+        public void setType2(String type2) {
+            this.type2 = type2;
+        }
+
+        public String getType3() {
+            return type3;
+        }
+
+        public void setType3(String type3) {
+            this.type3 = type3;
+        }
+
+        public String getType4() {
+            return type4;
+        }
+
+        public void setType4(String type4) {
+            this.type4 = type4;
+        }
+
+        public String getType5() {
+            return type5;
+        }
+
+        public void setType5(String type5) {
+            this.type5 = type5;
+        }
+
+        public String getType6() {
+            return type6;
+        }
+
+        public void setType6(String type6) {
+            this.type6 = type6;
+        }
+
+        public String getType7() {
+            return type7;
+        }
+
+        public void setType7(String type7) {
+            this.type7 = type7;
+        }
+
+        public String getType8() {
+            return type8;
+        }
+
+        public void setType8(String type8) {
+            this.type8 = type8;
+        }
+
         /**
-         * RegexUtil
+         * pattern
          * TODO
-         *
+         * @description 用于封装正则提取的参数的类
          * @author 221701412_theTuring
          * @version v 1.0.0
-         * @description 正则工具类 用正则表达式用于提取文本
-         * 提取类型共八种
-         * 1、<省> 新增 感染患者 n人
-         * 2、<省> 新增 疑似患者 n人
-         * 3、<省1> 感染患者 流入 <省2> n人
-         * 4、<省1> 疑似患者 流入 <省2> n人
-         * 5、<省> 死亡 n人
-         * 6、<省> 治愈 n人
-         * 7、<省> 疑似患者 确诊感染 n人
-         * 8、<省> 排除 疑似患者 n人
          * @since 2020.2.7
          */
-        public static class RegexUtil {
+        static class RegexParameter{
 
-            //用于匹配类型的字符串
-            String type1 = "\\W+ 新增 感染患者 \\d+人";
-            String type2 = "\\W+ 新增 疑似患者 \\d+人";
-            String type3 = "\\W+ 感染患者 流入 \\W+ \\d+人";
-            String type4 = "\\W+ 疑似患者 流入 \\W+ \\d+人";
-            String type5 = "\\W+ 死亡 \\d+人";
-            String type6 = "\\W+ 治愈 \\d+人";
-            String type7 = "\\W+ 疑似患者 确诊感染 \\d+人";
-            String type8 = "\\W+ 排除 疑似患者 \\d+人";
+            String pattern1;
 
-            public String getType1() {
-                return type1;
+            String pattern2;
+
+            int pattern3;
+
+            public String getPattern1() {
+                return pattern1;
             }
 
-            public void setType1(String type1) {
-                this.type1 = type1;
+            public void setPattern1(String pattern1) {
+                this.pattern1 = pattern1;
             }
 
-            public String getType2() {
-                return type2;
+            public String getPattern2() {
+                return pattern2;
             }
 
-            public void setType2(String type2) {
-                this.type2 = type2;
+            public void setPattern2(String pattern2) {
+                this.pattern2 = pattern2;
             }
 
-            public String getType3() {
-                return type3;
+            public int getPattern3() {
+                return pattern3;
             }
 
-            public void setType3(String type3) {
-                this.type3 = type3;
+            public void setPattern3(int pattern3) {
+                this.pattern3 = pattern3;
             }
-
-            public String getType4() {
-                return type4;
-            }
-
-            public void setType4(String type4) {
-                this.type4 = type4;
-            }
-
-            public String getType5() {
-                return type5;
-            }
-
-            public void setType5(String type5) {
-                this.type5 = type5;
-            }
-
-            public String getType6() {
-                return type6;
-            }
-
-            public void setType6(String type6) {
-                this.type6 = type6;
-            }
-
-            public String getType7() {
-                return type7;
-            }
-
-            public void setType7(String type7) {
-                this.type7 = type7;
-            }
-
-            public String getType8() {
-                return type8;
-            }
-
-            public void setType8(String type8) {
-                this.type8 = type8;
-            }
-
-            /**
-             * pattern
-             * TODO
-             * @description 用于封装正则提取的参数的类
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.7
-             */
-            static class RegexParameter{
-
-                String pattern1;
-
-                String pattern2;
-
-                int pattern3;
-
-                public String getPattern1() {
-                    return pattern1;
-                }
-
-                public void setPattern1(String pattern1) {
-                    this.pattern1 = pattern1;
-                }
-
-                public String getPattern2() {
-                    return pattern2;
-                }
-
-                public void setPattern2(String pattern2) {
-                    this.pattern2 = pattern2;
-                }
-
-                public int getPattern3() {
-                    return pattern3;
-                }
-
-                public void setPattern3(int pattern3) {
-                    this.pattern3 = pattern3;
-                }
-            }
-
-            /**
-             * getAddIp(String text)
-             * TODO
-             * @description 获得类型 1.<省> 新增 感染患者 n人
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.7
-             * @return RegexParameter <省>+n
-             */
-            public static RegexParameter getAddIp(String text) {
-                Pattern pattern1 = Pattern.compile("(.*) 新增");
-                Pattern pattern2 = Pattern.compile("感染患者 (.*)人");
-                return getString(text, pattern1, pattern2);
-            }
-
-            /**
-             * getAddSp(String text)
-             * TODO
-             * @description 获得类型 2、<省> 新增 疑似患者 n人
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.7
-             * @return RegexParameter <省>+n
-             */
-            public static RegexParameter getAddSp(String text) {
-                Pattern pattern1 = Pattern.compile("(.*) 新增");
-                Pattern pattern2 = Pattern.compile("疑似患者 (.*)人");
-                return getString(text, pattern1, pattern2);
-            }
-
-            /**
-             * getAddSp(String text)
-             * TODO
-             * @description 获得类型 3、<省1> 感染患者 流入 <省2> n人
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.7
-             * @return RegexParameter <省1>+n+<省2>
-             */
-            public static RegexParameter getEmptiesIp(String text) {
-                Pattern pattern1 = Pattern.compile("(.*) 感染患者");
-                Pattern pattern2 = Pattern.compile("流入 (.*) \\d+人");
-                Pattern pattern3 = Pattern.compile("\\W+ (.*)人");
-                return getString(text, pattern1, pattern2, pattern3);
-            }
-
-            /**
-             * getEmptiesSp(String text)
-             * TODO
-             * @description 获得类型 4、<省1> 疑似患者 流入 <省2> n人
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.7
-             * @return RegexParameter <省1>+n+<省2>
-             */
-            public static RegexParameter getEmptiesSp(String text) {
-                Pattern pattern1 = Pattern.compile("(.*) 疑似患者");
-                Pattern pattern2 = Pattern.compile("流入 (.*) \\d+人");
-                Pattern pattern3 = Pattern.compile("\\W+ (.*)人");
-                return getString(text, pattern1, pattern2, pattern3);
-            }
-
-
-            /**
-             * getDead(String text)
-             * TODO
-             * @description 获得类型 5、<省> 死亡 n人
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.7
-             * @return RegexParameter <省>+n
-             */
-            public static RegexParameter getDead(String text) {
-                Pattern pattern1 = Pattern.compile("(.*) 死亡");
-                Pattern pattern2 = Pattern.compile("死亡 (.*)人");
-                return getString(text, pattern1, pattern2);
-            }
-
-            /**
-             * getCure(String text)
-             * TODO
-             * @description 获得类型 6、<省> 治愈 n人
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.7
-             * @return RegexParameter <省>+n
-             */
-            public static RegexParameter getCure(String text) {
-                Pattern pattern1 = Pattern.compile("(.*) 治愈");
-                Pattern pattern2 = Pattern.compile("治愈 (.*)人");
-                return getString(text, pattern1, pattern2);
-            }
-
-            /**
-             * getSpToIp(String text)
-             * TODO
-             * @description 获得类型 7、<省> 疑似患者 确诊感染 n人
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.7
-             * @return RegexParameter <省>+n
-             */
-            public static RegexParameter getSpToIp(String text) {
-                Pattern pattern1 = Pattern.compile("(.*) 疑似患者");
-                Pattern pattern2 = Pattern.compile("确诊感染 (.*)人");
-                return getString(text, pattern1, pattern2);
-            }
-
-            /**
-             * getRemoveSp(String text)
-             * TODO
-             * @description 获得类型 8、<省> 排除 疑似患者 n人
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.7
-             * @return RegexParameter <省>+n
-             */
-            public static RegexParameter getRemoveSp(String text) {
-                Pattern pattern1 = Pattern.compile("(.*) 排除");
-                Pattern pattern2 = Pattern.compile("疑似患者 (.*)人");
-                return getString(text, pattern1, pattern2);
-            }
-
-            private static RegexParameter getString(String text, Pattern pattern1, Pattern pattern2) {
-
-                //实例封装参数的类
-                RegexParameter regexParameter =new RegexParameter();
-
-                Matcher matcher1 = pattern1.matcher(text);
-                Matcher matcher2 = pattern2.matcher(text);
-                //String str = null;
-                if (matcher1.find()) {
-                    ///str = matcher1.group(1);
-                    regexParameter.setPattern1(matcher1.group(1));
-                }
-                if (matcher2.find()) {
-                    //插入空格方便后续使用
-                    //str += " ";
-                    ///str += matcher2.group(1);
-                    regexParameter.setPattern3(Integer.parseInt(matcher2.group(1)));
-                }
-                return regexParameter;
-            }
-
-            private static RegexParameter getString(String text, Pattern pattern1, Pattern pattern2, Pattern pattern3) {
-
-                //实例封装参数的类
-                RegexParameter regexParameter =new RegexParameter();
-
-                Matcher matcher1 = pattern1.matcher(text);
-                Matcher matcher2 = pattern2.matcher(text);
-                Matcher matcher3 = pattern3.matcher(text);
-                //String str = null;
-                if (matcher1.find()) {
-                    //str = matcher1.group(1);
-                    regexParameter.setPattern1(matcher1.group(1));
-                }
-                if (matcher2.find()) {
-                    //插入空格方便后续使用
-                    //str += " ";
-                    ///str += matcher2.group(1);
-                    regexParameter.setPattern2(matcher2.group(1));
-                }
-                if (matcher3.find()) {
-                    //插入空格方便后续使用
-                    //str += " ";
-                    //str += matcher3.group(1);
-                    regexParameter.setPattern3(Integer.parseInt(matcher3.group(1)));
-                }
-                return regexParameter;
-            }
-
-
         }
 
         /**
-         * LogUtil
+         * getAddIp(String text)
          * TODO
-         *
+         * @description 获得类型 1.<省> 新增 感染患者 n人
          * @author 221701412_theTuring
          * @version v 1.0.0
-         * @description Log文件连接工具类
+         * @since 2020.2.7
+         * @return RegexParameter <省>+n
+         */
+        public static RegexParameter getAddIp(String text) {
+            Pattern pattern1 = Pattern.compile("(.*) 新增");
+            Pattern pattern2 = Pattern.compile("感染患者 (.*)人");
+            return getString(text, pattern1, pattern2);
+        }
+
+        /**
+         * getAddSp(String text)
+         * TODO
+         * @description 获得类型 2、<省> 新增 疑似患者 n人
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.7
+         * @return RegexParameter <省>+n
+         */
+        public static RegexParameter getAddSp(String text) {
+            Pattern pattern1 = Pattern.compile("(.*) 新增");
+            Pattern pattern2 = Pattern.compile("疑似患者 (.*)人");
+            return getString(text, pattern1, pattern2);
+        }
+
+        /**
+         * getAddSp(String text)
+         * TODO
+         * @description 获得类型 3、<省1> 感染患者 流入 <省2> n人
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.7
+         * @return RegexParameter <省1>+n+<省2>
+         */
+        public static RegexParameter getEmptiesIp(String text) {
+            Pattern pattern1 = Pattern.compile("(.*) 感染患者");
+            Pattern pattern2 = Pattern.compile("流入 (.*) \\d+人");
+            Pattern pattern3 = Pattern.compile("\\W+ (.*)人");
+            return getString(text, pattern1, pattern2, pattern3);
+        }
+
+        /**
+         * getEmptiesSp(String text)
+         * TODO
+         * @description 获得类型 4、<省1> 疑似患者 流入 <省2> n人
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.7
+         * @return RegexParameter <省1>+n+<省2>
+         */
+        public static RegexParameter getEmptiesSp(String text) {
+            Pattern pattern1 = Pattern.compile("(.*) 疑似患者");
+            Pattern pattern2 = Pattern.compile("流入 (.*) \\d+人");
+            Pattern pattern3 = Pattern.compile("\\W+ (.*)人");
+            return getString(text, pattern1, pattern2, pattern3);
+        }
+
+
+        /**
+         * getDead(String text)
+         * TODO
+         * @description 获得类型 5、<省> 死亡 n人
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.7
+         * @return RegexParameter <省>+n
+         */
+        public static RegexParameter getDead(String text) {
+            Pattern pattern1 = Pattern.compile("(.*) 死亡");
+            Pattern pattern2 = Pattern.compile("死亡 (.*)人");
+            return getString(text, pattern1, pattern2);
+        }
+
+        /**
+         * getCure(String text)
+         * TODO
+         * @description 获得类型 6、<省> 治愈 n人
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.7
+         * @return RegexParameter <省>+n
+         */
+        public static RegexParameter getCure(String text) {
+            Pattern pattern1 = Pattern.compile("(.*) 治愈");
+            Pattern pattern2 = Pattern.compile("治愈 (.*)人");
+            return getString(text, pattern1, pattern2);
+        }
+
+        /**
+         * getSpToIp(String text)
+         * TODO
+         * @description 获得类型 7、<省> 疑似患者 确诊感染 n人
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.7
+         * @return RegexParameter <省>+n
+         */
+        public static RegexParameter getSpToIp(String text) {
+            Pattern pattern1 = Pattern.compile("(.*) 疑似患者");
+            Pattern pattern2 = Pattern.compile("确诊感染 (.*)人");
+            return getString(text, pattern1, pattern2);
+        }
+
+        /**
+         * getRemoveSp(String text)
+         * TODO
+         * @description 获得类型 8、<省> 排除 疑似患者 n人
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.7
+         * @return RegexParameter <省>+n
+         */
+        public static RegexParameter getRemoveSp(String text) {
+            Pattern pattern1 = Pattern.compile("(.*) 排除");
+            Pattern pattern2 = Pattern.compile("疑似患者 (.*)人");
+            return getString(text, pattern1, pattern2);
+        }
+
+        private static RegexParameter getString(String text, Pattern pattern1, Pattern pattern2) {
+
+            //实例封装参数的类
+            RegexParameter regexParameter =new RegexParameter();
+
+            Matcher matcher1 = pattern1.matcher(text);
+            Matcher matcher2 = pattern2.matcher(text);
+            //String str = null;
+            if (matcher1.find()) {
+                ///str = matcher1.group(1);
+                regexParameter.setPattern1(matcher1.group(1));
+            }
+            if (matcher2.find()) {
+                //插入空格方便后续使用
+                //str += " ";
+                ///str += matcher2.group(1);
+                regexParameter.setPattern3(Integer.parseInt(matcher2.group(1)));
+            }
+            return regexParameter;
+        }
+
+        private static RegexParameter getString(String text, Pattern pattern1, Pattern pattern2, Pattern pattern3) {
+
+            //实例封装参数的类
+            RegexParameter regexParameter =new RegexParameter();
+
+            Matcher matcher1 = pattern1.matcher(text);
+            Matcher matcher2 = pattern2.matcher(text);
+            Matcher matcher3 = pattern3.matcher(text);
+            //String str = null;
+            if (matcher1.find()) {
+                //str = matcher1.group(1);
+                regexParameter.setPattern1(matcher1.group(1));
+            }
+            if (matcher2.find()) {
+                //插入空格方便后续使用
+                //str += " ";
+                ///str += matcher2.group(1);
+                regexParameter.setPattern2(matcher2.group(1));
+            }
+            if (matcher3.find()) {
+                //插入空格方便后续使用
+                //str += " ";
+                //str += matcher3.group(1);
+                regexParameter.setPattern3(Integer.parseInt(matcher3.group(1)));
+            }
+            return regexParameter;
+        }
+
+
+    }
+
+    /**
+     * LogUtil
+     * TODO
+     *
+     * @author 221701412_theTuring
+     * @version v 1.0.0
+     * @description Log文件连接工具类
+     * @since 2020.2.8
+     */
+    static class LogUtil {
+
+        /**
+         * InfectResult
+         * TODO
+         * @description 疫情解析结果对应的实体类
+         * 输出结果对应为
+         * province ip         sp       cure    dead
+         * 全国 感染患者15人 疑似患者22人 治愈2人 死亡1人
+         * 福建 感染患者5人 疑似患者7人 治愈0人 死亡0人
+         * 湖北 感染患者10人 疑似患者15人 治愈2人 死亡1人
+         * @author 221701412_theTuring
+         * @version v 1.0.0
          * @since 2020.2.8
          */
-        static class LogUtil {
+        static class InfectResult{
 
-            /**
-             * InfectResult
-             * TODO
-             * @description 疫情解析结果对应的实体类
-             * 输出结果对应为
-             * province ip         sp       cure    dead
-             * 全国 感染患者15人 疑似患者22人 治愈2人 死亡1人
-             * 福建 感染患者5人 疑似患者7人 治愈0人 死亡0人
-             * 湖北 感染患者10人 疑似患者15人 治愈2人 死亡1人
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.8
-             */
-            static class InfectResult{
+            String province;
 
-                String province;
+            int ip;
 
-                int ip;
+            int sp;
 
-                int sp;
+            int cure;
 
-                int cure;
+            int dead;
 
-                int dead;
+            public InfectResult(){
+            }
 
-                public InfectResult(){
-                }
-
-                public InfectResult(String province, int ip, int sp, int cure, int dead) {
-                    super();
-                    this.province = province;
-                    this.ip = ip;
-                    this.sp = sp;
-                    this.dead = dead;
-                }
+            public InfectResult(String province, int ip, int sp, int cure, int dead) {
+                super();
+                this.province = province;
+                this.ip = ip;
+                this.sp = sp;
+                this.dead = dead;
+            }
 
 
-                public String getProvince() {
-                    return province;
-                }
+            public String getProvince() {
+                return province;
+            }
 
-                public void setProvince(String province) {
-                    this.province = province;
-                }
+            public void setProvince(String province) {
+                this.province = province;
+            }
 
-                public int getIp() {
-                    return ip;
-                }
+            public int getIp() {
+                return ip;
+            }
 
-                public void setIp(int ip) {
-                    this.ip = ip;
-                }
+            public void setIp(int ip) {
+                this.ip = ip;
+            }
 
-                public int getSp() {
-                    return sp;
-                }
+            public int getSp() {
+                return sp;
+            }
 
-                public void setSp(int sp) {
-                    this.sp = sp;
-                }
+            public void setSp(int sp) {
+                this.sp = sp;
+            }
 
-                public int getCure() {
-                    return cure;
-                }
+            public int getCure() {
+                return cure;
+            }
 
-                public void setCure(int cure) {
-                    this.cure = cure;
-                }
+            public void setCure(int cure) {
+                this.cure = cure;
+            }
 
-                public int getDead() {
-                    return dead;
-                }
+            public int getDead() {
+                return dead;
+            }
 
-                public void setDead(int dead) {
-                    this.dead = dead;
-                }
-
-                /**
-                 * toResultString()
-                 * TODO
-                 * @description toResultString方法
-                 * province + " " + "感染患者" + ip + "人" + "疑似患者" + sp + "人"+ "治愈" + cure + "人"+ "死亡" + dead + "人"的格式写入txt
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 * @return String
-                 */
-                public String toResultString() {
-                    return province + " " + "感染患者" + ip + "人" + " " + "疑似患者" + sp + "人" + " " +"治愈" + cure + "人" + " " + "死亡" + dead + "人";
-                }
-
-                /**
-                 * toString()
-                 * TODO
-                 * @description 覆写toString方法
-                 * province + " " + ip +  " " + sp  + " "  + cure + " " + dead的格式
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 * @return String
-                 */
-                @Override
-                public String toString() {
-                    return province + " " + ip +  " " + sp  + " "  + cure + " " + dead;
-                }
+            public void setDead(int dead) {
+                this.dead = dead;
             }
 
             /**
-             * ListUtil
+             * toResultString()
              * TODO
-             * @description List工具类
+             * @description toResultString方法
+             * province + " " + "感染患者" + ip + "人" + "疑似患者" + sp + "人"+ "治愈" + cure + "人"+ "死亡" + dead + "人"的格式写入txt
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.8
+             * @return String
+             */
+            public String toResultString() {
+                return province + " " + "感染患者" + ip + "人" + " " + "疑似患者" + sp + "人" + " " +"治愈" + cure + "人" + " " + "死亡" + dead + "人";
+            }
+
+            /**
+             * toString()
+             * TODO
+             * @description 覆写toString方法
+             * province + " " + ip +  " " + sp  + " "  + cure + " " + dead的格式
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.8
+             * @return String
+             */
+            @Override
+            public String toString() {
+                return province + " " + ip +  " " + sp  + " "  + cure + " " + dead;
+            }
+        }
+
+        /**
+         * ListUtil
+         * TODO
+         * @description List工具类
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.8
+         */
+        static class ListUtil{
+
+            /**
+             * mergeList (List<InfectResult> list)
+             * TODO
+             * @description 合并List<InfectResult>的相同类
              * @author 221701412_theTuring
              * @version v 1.0.0
              * @since 2020.2.8
              */
-            static class ListUtil{
-
-                /**
-                 * mergeList (List<InfectResult> list)
-                 * TODO
-                 * @description 合并List<InfectResult>的相同类
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 */
-                public static List<InfectResult> mergeList (List<InfectResult> a, boolean flag) {
-                    List<InfectResult> list = new ArrayList<>();
-                    InfectResult r1 = new InfectResult();
-                    InfectResult r2 = new InfectResult();
-                    InfectResult r3 = new InfectResult();
-                    r3.setProvince("全国");
-                    r1 = a.get(0);
-                    for (InfectResult aa : a) {
-                        r3.setIp(r3.getIp() + aa.getIp());
-                        r3.setSp(r3.getSp() + aa.getSp());
-                        r3.setCure(r3.getCure() + aa.getCure());
-                        r3.setDead(r3.getDead() + aa.getDead());
-                        if (compare(aa, r1)) {
-                            if (r2.getProvince() != null ) {
-                                r2.setIp(r2.getIp() + aa.getIp());
-                                r2.setSp(r2.getSp() + aa.getSp());
-                                r2.setCure(r2.getCure() + aa.getCure());
-                                r2.setDead(r2.getDead() + aa.getDead());
-                            }else if (r2.getProvince()==null) {
-                                r2=r1;
-                            }
-
-                        } else {
-                            list.add(r2);
-                            r1 = aa;
+            public static List<InfectResult> mergeList (List<InfectResult> a, boolean flag) {
+                List<InfectResult> list = new ArrayList<>();
+                InfectResult r1 = new InfectResult();
+                InfectResult r2 = new InfectResult();
+                InfectResult r3 = new InfectResult();
+                r3.setProvince("全国");
+                r1 = a.get(0);
+                for (InfectResult aa : a) {
+                    r3.setIp(r3.getIp() + aa.getIp());
+                    r3.setSp(r3.getSp() + aa.getSp());
+                    r3.setCure(r3.getCure() + aa.getCure());
+                    r3.setDead(r3.getDead() + aa.getDead());
+                    if (compare(aa, r1)) {
+                        if (r2.getProvince() != null ) {
+                            r2.setIp(r2.getIp() + aa.getIp());
+                            r2.setSp(r2.getSp() + aa.getSp());
+                            r2.setCure(r2.getCure() + aa.getCure());
+                            r2.setDead(r2.getDead() + aa.getDead());
+                        }else if (r2.getProvince()==null) {
                             r2=r1;
                         }
-                    }
-                    //如果最后一项，只出现一次
-                    if (!list.contains(r1)) {
-                        list.add(r1);
-                    }
-                    if (flag != true) {
-                        r3.setIp(r3.getIp() / 2);
-                        r3.setSp(r3.getSp() / 2);
-                        r3.setDead(r3.getDead() / 2);
-                        r3.setCure(r3.getCure() / 2);
-                    }
-                    list.add(r3);
-                    return list;
-                }
 
-                //对象内部比较
-                public static boolean compare(Object o1, Object o2) {
-                    InfectResult a = (InfectResult) o1;
-                    InfectResult a2 = (InfectResult) o2;
-
-                    if (a.getProvince().equals(a2.getProvince())) {
-                        return true;
-                    }
-                    return false;
-                }
-
-                // 自定义比较器
-                static class comparator implements  Comparator {
-                    public int compare(Object object1, Object object2) {// 实现接口中的方法
-                        InfectResult a1 = (InfectResult) object1; // 强制转换
-                        InfectResult a2 = (InfectResult) object2;
-                        return a1.getProvince().compareTo(a2.getProvince());
+                    } else {
+                        list.add(r2);
+                        r1 = aa;
+                        r2=r1;
                     }
                 }
+                //如果最后一项，只出现一次
+                if (!list.contains(r1)) {
+                    list.add(r1);
+                }
+                if (flag != true) {
+                    r3.setIp(r3.getIp() / 2);
+                    r3.setSp(r3.getSp() / 2);
+                    r3.setDead(r3.getDead() / 2);
+                    r3.setCure(r3.getCure() / 2);
+                }
+                list.add(r3);
+                return list;
             }
 
-            /**
-             * ResultUtil
-             * TODO
-             * @description 正则匹配结果对应的工具类
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.8
-             */
-            static class ResultUtil{
+            //对象内部比较
+            public static boolean compare(Object o1, Object o2) {
+                InfectResult a = (InfectResult) o1;
+                InfectResult a2 = (InfectResult) o2;
 
-                /**
-                 * getIpResult(String text)
-                 * TODO
-                 * @description 获得感染患者的结果
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 * @return InfectResult
-                 */
-                public static InfectResult getIpResult(String text) {
-
-                    //实例化疫情结果
-                    InfectResult infectResult = new InfectResult();
-
-                    //实例化正则参数
-                    RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
-
-                    regexParameter = RegexUtil.getAddIp(text);
-                    infectResult.setProvince(regexParameter.getPattern1());
-                    infectResult.setIp(regexParameter.getPattern3());
-
-                    return infectResult;
+                if (a.getProvince().equals(a2.getProvince())) {
+                    return true;
                 }
-
-                /**
-                 * getSpResult(String text)
-                 * TODO
-                 * @description 获得疑似患者的结果
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 * @return InfectResult
-                 */
-                public static InfectResult getSpResult(String text) {
-
-                    //实例化疫情结果
-                    InfectResult infectResult = new InfectResult();
-
-                    //实例化正则参数
-                    RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
-
-                    regexParameter = RegexUtil.getAddSp(text);
-                    infectResult.setProvince(regexParameter.getPattern1());
-                    infectResult.setSp(regexParameter.getPattern3());
-
-                    return infectResult;
-                }
-
-                /**
-                 * getEmptiesIpResult(String text)
-                 * TODO
-                 * @description 获得流出感染患者的结果
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 * @return InfectResult
-                 */
-                public static List<InfectResult> getEmptiesIpResult(String text) {
-
-                    List<InfectResult> list = new ArrayList<>();
-
-                    //实例化正则参数
-                    RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
-
-                    //实例化疫情结果（流出）
-                    LogUtil.InfectResult infectResult1 = new LogUtil.InfectResult();
-
-                    //实例化疫情结果（流入）
-                    LogUtil.InfectResult infectResult2 = new LogUtil.InfectResult();
-
-                    regexParameter = RegexUtil.getEmptiesIp(text);
-
-                    infectResult1.setProvince(regexParameter.getPattern1());
-                    infectResult1.setIp(-regexParameter.getPattern3());
-
-                    infectResult2.setProvince(regexParameter.getPattern2());
-                    infectResult2.setIp(regexParameter.getPattern3());
-
-                    list.add(infectResult1);
-                    list.add(infectResult2);
-
-                    return list;
-                }
-
-                /**
-                 * getEmptiesSpResult(String text)
-                 * TODO
-                 * @description 获得流出疑似患者的结果
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 * @return InfectResult
-                 */
-                public static List<InfectResult> getEmptiesSpResult(String text) {
-
-                    List<InfectResult> list = new ArrayList<>();
-
-                    //实例化正则参数
-                    RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
-
-                    //实例化疫情结果（流出）
-                    LogUtil.InfectResult infectResult1 = new LogUtil.InfectResult();
-
-                    //实例化疫情结果（流入）
-                    LogUtil.InfectResult infectResult2 = new LogUtil.InfectResult();
-
-                    regexParameter = RegexUtil.getEmptiesSp(text);
-
-                    infectResult1.setProvince(regexParameter.getPattern1());
-                    infectResult1.setSp(-regexParameter.getPattern3());
-
-                    infectResult2.setProvince(regexParameter.getPattern2());
-                    infectResult2.setSp(regexParameter.getPattern3());
-
-                    list.add(infectResult1);
-                    list.add(infectResult2);
-
-                    return list;
-                }
-
-                /**
-                 * getDeadResult(String text)
-                 * TODO
-                 * @description 获得死亡患者的结果
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 * @return InfectResult
-                 */
-                public static InfectResult getDeadResult(String text) {
-
-                    //实例化疫情结果
-                    InfectResult infectResult = new InfectResult();
-
-                    //实例化正则参数
-                    RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
-
-                    regexParameter = RegexUtil.getDead(text);
-
-                    infectResult.setProvince(regexParameter.getPattern1());
-                    infectResult.setIp(-regexParameter.getPattern3());
-                    infectResult.setDead(regexParameter.getPattern3());
-
-                    return infectResult;
-                }
-
-                /**
-                 * getCureResult(String text)
-                 * TODO
-                 * @description 获得治愈患者的结果
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 * @return InfectResult
-                 */
-                public static InfectResult getCureResult(String text) {
-
-                    //实例化疫情结果
-                    InfectResult infectResult = new InfectResult();
-
-                    //实例化正则参数
-                    RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
-
-                    regexParameter = RegexUtil.getCure(text);
-
-                    infectResult.setProvince(regexParameter.getPattern1());
-                    infectResult.setIp(-regexParameter.getPattern3());
-                    infectResult.setCure(regexParameter.getPattern3());
-
-                    return infectResult;
-                }
-
-                /**
-                 * getSpToIpResult(String text)
-                 * TODO
-                 * @description 获得确诊患者的结果
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 * @return InfectResult
-                 */
-                public static InfectResult getSpToIpResult(String text) {
-
-                    //实例化疫情结果
-                    InfectResult infectResult = new InfectResult();
-
-                    //实例化正则参数
-                    RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
-
-                    regexParameter = RegexUtil.getSpToIp(text);
-
-                    infectResult.setProvince(regexParameter.getPattern1());
-                    infectResult.setSp(-regexParameter.getPattern3());
-                    infectResult.setIp(regexParameter.getPattern3());
-
-                    return infectResult;
-                }
-
-                /**
-                 * getRemoveSpResult(String text)
-                 * TODO
-                 * @description 获得排除患者的结果
-                 * @author 221701412_theTuring
-                 * @version v 1.0.0
-                 * @since 2020.2.8
-                 * @return InfectResult
-                 */
-                public static InfectResult getRemoveSpResult(String text) {
-
-                    //实例化疫情结果
-                    InfectResult infectResult = new InfectResult();
-
-                    //实例化正则参数
-                    RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
-
-                    regexParameter = RegexUtil.getRemoveSp(text);
-
-                    infectResult.setProvince(regexParameter.getPattern1());
-                    infectResult.setSp(-regexParameter.getPattern3());
-
-                    return infectResult;
-                }
-
+                return false;
             }
 
+            // 自定义比较器
+            static class comparator implements  Comparator {
+                public int compare(Object object1, Object object2) {// 实现接口中的方法
+                    InfectResult a1 = (InfectResult) object1; // 强制转换
+                    InfectResult a2 = (InfectResult) object2;
+                    return a1.getProvince().compareTo(a2.getProvince());
+                }
+            }
         }
 
         /**
-         * LogDao
+         * ResultUtil
          * TODO
-         *
+         * @description 正则匹配结果对应的工具类
          * @author 221701412_theTuring
          * @version v 1.0.0
-         * @description Log文件控制类
          * @since 2020.2.8
          */
-        static class LogDao {
+        static class ResultUtil{
 
             /**
-             * readFileByLines(String fileName)
+             * getIpResult(String text)
              * TODO
-             * @description 以行为单位读取文件内容，一次读一整行以匹配正则（初始化log文件）
+             * @description 获得感染患者的结果
              * @author 221701412_theTuring
              * @version v 1.0.0
              * @since 2020.2.8
-             *
+             * @return InfectResult
              */
-            public static List<LogUtil.InfectResult> initLog(String fileName)  {
+            public static InfectResult getIpResult(String text) {
 
-                //实例化正则工具类
-                RegexUtil regexUtil = new RegexUtil();
+                //实例化疫情结果
+                InfectResult infectResult = new InfectResult();
 
                 //实例化正则参数
                 RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
 
-                //List<InfectResult> 存入疫情信息
-                List<LogUtil.InfectResult> list = new ArrayList<>();
-                List<LogUtil.InfectResult> last = new ArrayList<>();
-                List<LogUtil.InfectResult> merge = new ArrayList<>();
+                regexParameter = RegexUtil.getAddIp(text);
+                infectResult.setProvince(regexParameter.getPattern1());
+                infectResult.setIp(regexParameter.getPattern3());
 
-                File file = new File(fileName);
-
-                //如果为文件
-                if(file.isFile()) {
-                    BufferedReader reader = null;
-
-                    try {
-                        System.out.println("以行为单位读取文件内容，一次读一整行：");
-                        reader = new BufferedReader(new FileReader(file));
-                        String tempString = null;
-                        int line = 1;
-                        // 一次读入一行，直到读入null为文件结束
-                        while ((tempString = reader.readLine()) != null) {
-
-                            //匹配类型 1.<省> 新增 感染患者 n人
-                            if (tempString.matches(regexUtil.getType1())) {
-                                list.add(LogUtil.ResultUtil.getIpResult(tempString));
-                            }
-
-                            //匹配类型 2.<省> 新增 疑似患者 n人
-                            else if (tempString.matches(regexUtil.getType2())) {
-                                list.add(LogUtil.ResultUtil.getSpResult(tempString));
-                            }
-
-                            //匹配类型 3.<省1> 感染患者 流入 <省2> n人
-                            else if (tempString.matches(regexUtil.getType3())) {
-                                list.addAll(LogUtil.ResultUtil.getEmptiesIpResult(tempString));
-                            }
-
-                            //匹配类型 4.<省1> 疑似患者 流入 <省2> n人
-                            else if (tempString.matches(regexUtil.getType4())) {
-                                list.addAll(LogUtil.ResultUtil.getEmptiesSpResult(tempString));
-                            }
-
-                            //匹配类型 5.<省> 死亡 n人
-                            else if (tempString.matches(regexUtil.getType5())) {
-                                list.add(LogUtil.ResultUtil.getDeadResult(tempString));
-                            }
-
-                            //匹配类型 6.<省> 治愈 n人
-                            else if (tempString.matches(regexUtil.getType6())) {
-                                list.add(LogUtil.ResultUtil.getCureResult(tempString));
-                            }
-
-                            //匹配类型 7.<省> 疑似患者 确诊感染 n人
-                            else if (tempString.matches(regexUtil.getType7())) {
-                                list.add(LogUtil.ResultUtil.getSpToIpResult(tempString));
-                            }
-
-                            //匹配类型 8.<省> 排除 疑似患者 n人
-                            else if (tempString.matches(regexUtil.getType8())) {
-                                list.add(LogUtil.ResultUtil.getRemoveSpResult(tempString));
-                            }
-
-                            // 显示行号
-                            System.out.println("line " + line + ": " + tempString);
-                            line++;
-                        }
-                        reader.close();
-
-                        Collections.sort(list, new LogUtil.ListUtil.comparator());
-                        last = LogUtil.ListUtil.mergeList(list,true);
-
-                        for (LogUtil.InfectResult temp : last) {
-                            System.out.println(temp.toString());
-                        }
-
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (reader != null) {
-                            try {
-                                reader.close();
-                            } catch (IOException e1) {
-                            }
-                        }
-                    }
-                }
-                //如果为文件目录
-                else if(file.isDirectory()){
-                    List<String> paths = getFiles(fileName);
-                    for(String file_path :paths){
-                        merge.addAll(initLog(file_path));
-                    }
-                    Collections.sort(merge, new LogUtil.ListUtil.comparator());
-                    last = LogUtil.ListUtil.mergeList(merge,false);
-                }
-                return last;
+                return infectResult;
             }
 
             /**
-             * outLog(String fileName)
+             * getSpResult(String text)
              * TODO
-             * @description 输出log解析结果
+             * @description 获得疑似患者的结果
              * @author 221701412_theTuring
              * @version v 1.0.0
-             * @since 2020.2.9
-             * @return void
+             * @since 2020.2.8
+             * @return InfectResult
              */
-            public static void outLog(String fileName, String out_path, String commandline, List<String> province, List<String> type) throws IOException {
+            public static InfectResult getSpResult(String text) {
 
-                //获取所有行
-                List<LogUtil.InfectResult> list = sortResultByProvince(fileName);
+                //实例化疫情结果
+                InfectResult infectResult = new InfectResult();
 
-                BufferedWriter out = null;
+                //实例化正则参数
+                RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
 
-                String ip = "";
-                String sp = "";
-                String cure = "";
-                String dead = "";
+                regexParameter = RegexUtil.getAddSp(text);
+                infectResult.setProvince(regexParameter.getPattern1());
+                infectResult.setSp(regexParameter.getPattern3());
+
+                return infectResult;
+            }
+
+            /**
+             * getEmptiesIpResult(String text)
+             * TODO
+             * @description 获得流出感染患者的结果
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.8
+             * @return InfectResult
+             */
+            public static List<InfectResult> getEmptiesIpResult(String text) {
+
+                List<InfectResult> list = new ArrayList<>();
+
+                //实例化正则参数
+                RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+
+                //实例化疫情结果（流出）
+                LogUtil.InfectResult infectResult1 = new LogUtil.InfectResult();
+
+                //实例化疫情结果（流入）
+                LogUtil.InfectResult infectResult2 = new LogUtil.InfectResult();
+
+                regexParameter = RegexUtil.getEmptiesIp(text);
+
+                infectResult1.setProvince(regexParameter.getPattern1());
+                infectResult1.setIp(-regexParameter.getPattern3());
+
+                infectResult2.setProvince(regexParameter.getPattern2());
+                infectResult2.setIp(regexParameter.getPattern3());
+
+                list.add(infectResult1);
+                list.add(infectResult2);
+
+                return list;
+            }
+
+            /**
+             * getEmptiesSpResult(String text)
+             * TODO
+             * @description 获得流出疑似患者的结果
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.8
+             * @return InfectResult
+             */
+            public static List<InfectResult> getEmptiesSpResult(String text) {
+
+                List<InfectResult> list = new ArrayList<>();
+
+                //实例化正则参数
+                RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+
+                //实例化疫情结果（流出）
+                LogUtil.InfectResult infectResult1 = new LogUtil.InfectResult();
+
+                //实例化疫情结果（流入）
+                LogUtil.InfectResult infectResult2 = new LogUtil.InfectResult();
+
+                regexParameter = RegexUtil.getEmptiesSp(text);
+
+                infectResult1.setProvince(regexParameter.getPattern1());
+                infectResult1.setSp(-regexParameter.getPattern3());
+
+                infectResult2.setProvince(regexParameter.getPattern2());
+                infectResult2.setSp(regexParameter.getPattern3());
+
+                list.add(infectResult1);
+                list.add(infectResult2);
+
+                return list;
+            }
+
+            /**
+             * getDeadResult(String text)
+             * TODO
+             * @description 获得死亡患者的结果
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.8
+             * @return InfectResult
+             */
+            public static InfectResult getDeadResult(String text) {
+
+                //实例化疫情结果
+                InfectResult infectResult = new InfectResult();
+
+                //实例化正则参数
+                RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+
+                regexParameter = RegexUtil.getDead(text);
+
+                infectResult.setProvince(regexParameter.getPattern1());
+                infectResult.setIp(-regexParameter.getPattern3());
+                infectResult.setDead(regexParameter.getPattern3());
+
+                return infectResult;
+            }
+
+            /**
+             * getCureResult(String text)
+             * TODO
+             * @description 获得治愈患者的结果
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.8
+             * @return InfectResult
+             */
+            public static InfectResult getCureResult(String text) {
+
+                //实例化疫情结果
+                InfectResult infectResult = new InfectResult();
+
+                //实例化正则参数
+                RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+
+                regexParameter = RegexUtil.getCure(text);
+
+                infectResult.setProvince(regexParameter.getPattern1());
+                infectResult.setIp(-regexParameter.getPattern3());
+                infectResult.setCure(regexParameter.getPattern3());
+
+                return infectResult;
+            }
+
+            /**
+             * getSpToIpResult(String text)
+             * TODO
+             * @description 获得确诊患者的结果
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.8
+             * @return InfectResult
+             */
+            public static InfectResult getSpToIpResult(String text) {
+
+                //实例化疫情结果
+                InfectResult infectResult = new InfectResult();
+
+                //实例化正则参数
+                RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+
+                regexParameter = RegexUtil.getSpToIp(text);
+
+                infectResult.setProvince(regexParameter.getPattern1());
+                infectResult.setSp(-regexParameter.getPattern3());
+                infectResult.setIp(regexParameter.getPattern3());
+
+                return infectResult;
+            }
+
+            /**
+             * getRemoveSpResult(String text)
+             * TODO
+             * @description 获得排除患者的结果
+             * @author 221701412_theTuring
+             * @version v 1.0.0
+             * @since 2020.2.8
+             * @return InfectResult
+             */
+            public static InfectResult getRemoveSpResult(String text) {
+
+                //实例化疫情结果
+                InfectResult infectResult = new InfectResult();
+
+                //实例化正则参数
+                RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+
+                regexParameter = RegexUtil.getRemoveSp(text);
+
+                infectResult.setProvince(regexParameter.getPattern1());
+                infectResult.setSp(-regexParameter.getPattern3());
+
+                return infectResult;
+            }
+
+        }
+
+    }
+
+    /**
+     * LogDao
+     * TODO
+     *
+     * @author 221701412_theTuring
+     * @version v 1.0.0
+     * @description Log文件控制类
+     * @since 2020.2.8
+     */
+    static class LogDao {
+
+        /**
+         * readFileByLines(String fileName)
+         * TODO
+         * @description 以行为单位读取文件内容，一次读一整行以匹配正则（初始化log文件）
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.8
+         *
+         */
+        public static List<LogUtil.InfectResult> initLog(String fileName, String date)  {
+
+            //实例化正则工具类
+            RegexUtil regexUtil = new RegexUtil();
+
+            //实例化正则参数
+            RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+
+            //List<InfectResult> 存入疫情信息
+            List<LogUtil.InfectResult> list = new ArrayList<>();
+            List<LogUtil.InfectResult> last = new ArrayList<>();
+            List<LogUtil.InfectResult> merge = new ArrayList<>();
+
+            File file = new File(fileName);
+
+            //如果为文件
+            if(file.isFile()) {
+                BufferedReader reader = null;
 
                 try {
-                    out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out_path, true)));//true追加
-                    for (int i=0; i<list.size(); i++){
-                        if(province != null){
-                            for (String s : province) {
-                                if (list.get(i).getProvince().equals(s)) {
-                                    if (type != null){
-                                        for (String str : type) {
-                                            if (str.equals("ip")) {
-                                                ip = " 感染患者" + list.get(i).getIp() + "人";
-                                            }
-                                            else if (str.equals("sp")) {
-                                                sp = " 疑似患者" + list.get(i).getSp() + "人";
-                                            }
-                                            else if (str.equals("cure")) {
-                                                cure = " 治愈" + list.get(i).getCure() + "人";
-                                            }
-                                            if (str.equals("dead")) {
-                                                dead = " 死亡" + list.get(i).getDead() + "人";
-                                            }
-                                        }
-                                        out.write(list.get(i).getProvince() + ip + sp + cure + dead + "\n");
-                                    }
-                                    else {
-                                        out.write(list.get(i).toResultString() + "\n");
-                                    }
-                                }
-                            }
+                    System.out.println("以行为单位读取文件内容，一次读一整行：");
+                    reader = new BufferedReader(new FileReader(file));
+                    String tempString = null;
+                    int line = 1;
+                    // 一次读入一行，直到读入null为文件结束
+                    while ((tempString = reader.readLine()) != null) {
+
+                        //匹配类型 1.<省> 新增 感染患者 n人
+                        if (tempString.matches(regexUtil.getType1())) {
+                            list.add(LogUtil.ResultUtil.getIpResult(tempString));
                         }
-                        else{
-                            if (type != null){
-                                for (String s : type) {
-                                    if (s.equals("ip")) {
-                                        ip = " 感染患者" + list.get(i).getIp() + "人";
-                                    }
-                                    else if (s.equals("sp")) {
-                                        sp = " 疑似患者" + list.get(i).getSp() + "人";
-                                    }
-                                    else if (s.equals("cure")) {
-                                        cure = " 治愈" + list.get(i).getCure() + "人";
-                                    }
-                                    if (s.equals("dead")) {
-                                        dead = " 死亡" + list.get(i).getDead() + "人";
-                                    }
-                                }
-                                out.write(list.get(i).getProvince() + ip + sp + cure + dead + "\n");
-                            }
-                            else {
-                                out.write(list.get(i).toResultString() + "\n");
-                            }
+
+                        //匹配类型 2.<省> 新增 疑似患者 n人
+                        else if (tempString.matches(regexUtil.getType2())) {
+                            list.add(LogUtil.ResultUtil.getSpResult(tempString));
                         }
+
+                        //匹配类型 3.<省1> 感染患者 流入 <省2> n人
+                        else if (tempString.matches(regexUtil.getType3())) {
+                            list.addAll(LogUtil.ResultUtil.getEmptiesIpResult(tempString));
+                        }
+
+                        //匹配类型 4.<省1> 疑似患者 流入 <省2> n人
+                        else if (tempString.matches(regexUtil.getType4())) {
+                            list.addAll(LogUtil.ResultUtil.getEmptiesSpResult(tempString));
+                        }
+
+                        //匹配类型 5.<省> 死亡 n人
+                        else if (tempString.matches(regexUtil.getType5())) {
+                            list.add(LogUtil.ResultUtil.getDeadResult(tempString));
+                        }
+
+                        //匹配类型 6.<省> 治愈 n人
+                        else if (tempString.matches(regexUtil.getType6())) {
+                            list.add(LogUtil.ResultUtil.getCureResult(tempString));
+                        }
+
+                        //匹配类型 7.<省> 疑似患者 确诊感染 n人
+                        else if (tempString.matches(regexUtil.getType7())) {
+                            list.add(LogUtil.ResultUtil.getSpToIpResult(tempString));
+                        }
+
+                        //匹配类型 8.<省> 排除 疑似患者 n人
+                        else if (tempString.matches(regexUtil.getType8())) {
+                            list.add(LogUtil.ResultUtil.getRemoveSpResult(tempString));
+                        }
+
+                        // 显示行号
+                        System.out.println("line " + line + ": " + tempString);
+                        line++;
                     }
-                    out.write("// 该文档并非真实数据，仅供测试使用" + "\n");
-                    out.write("// 命令：" + commandline + "\n");
+                    reader.close();
+
+                    Collections.sort(list, new LogUtil.ListUtil.comparator());
+                    last = LogUtil.ListUtil.mergeList(list,true);
+
+                    for (LogUtil.InfectResult temp : last) {
+                        System.out.println(temp.toString());
+                    }
+
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    if (out != null) {
+                    if (reader != null) {
                         try {
-                            out.close();
+                            reader.close();
                         } catch (IOException e1) {
                         }
                     }
                 }
-
-
             }
+            //如果为文件目录
+            else if(file.isDirectory()){
+                List<String> paths = getFiles(fileName);
+                for(String file_path :paths){
 
-            /**
-             * sortResultByProvince(String fileName)
-             * TODO
-             * @description 文件排序（全国总是排第一个，别的省按拼音先后排序）
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.8
-             * @return List<LogUtil.InfectResult>
-             */
-            public static List<LogUtil.InfectResult> sortResultByProvince(String fileName) throws IOException {
+                    //获得第一个点的位置
+                    int index = file_path.indexOf("\\");
+                    //根据第一个点的位置 获得第二个点的位置
+                    index = file_path.indexOf("\\", index+1);
+                    //根据第二个点的位置，截取 字符串。得到结果 result
+                    String result = file_path.substring(index);
+                    //截取\之后字符串
+                    String str1 = result.substring(0, result.indexOf("\\"));
+                    String str2 = result.substring(str1.length()+1, result.length());
+                    //截取.之前字符串
+                    str2 = str2.substring(0, str2.indexOf("."));
 
-                //获取所有行
-                List<LogUtil.InfectResult> list = initLog(fileName);
+                    System.out.println(str2);
 
-                //定义排序后的
-                List<LogUtil.InfectResult> sort_list = new ArrayList<>();
+                    int res = str2.compareTo(date);
 
-                //Comparator接口中文排序
-                Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
+                    if(date.equals("default")) res = 0;
 
-                String[] newArray = new String[list.size()];
-                String temp = null;
-
-                for(int i = 0 ; i<= list.size()-1 ; i++){
-
-                    if (list.get(i).getProvince().equals("全国")){
-                        temp = list.get(i).toString();
-                    }
-                    newArray[i] = list.get(i).toString();
-
+                    if (res>0) continue;
+                    merge.addAll(initLog(file_path, null));
                 }
-
-                LogUtil.InfectResult temp_infectResult = new LogUtil.InfectResult();
-
-                //拆分存入
-                String[] temp_arr = temp.split(" ");
-
-                temp_infectResult.setProvince(temp_arr[0]);
-                temp_infectResult.setIp(Integer.parseInt(temp_arr[1]));
-                temp_infectResult.setSp(Integer.parseInt(temp_arr[2]));
-                temp_infectResult.setCure(Integer.parseInt(temp_arr[3]));
-                temp_infectResult.setDead(Integer.parseInt(temp_arr[4]));
-
-                //插入
-                sort_list.add(temp_infectResult);
-
-                //进行排序
-                Arrays.sort(newArray,com);
-
-                for(String i:newArray){
-
-                    LogUtil.InfectResult infectResult = new LogUtil.InfectResult();
-
-
-                    //拆分存入
-                    String[] arr = i.split(" ");
-                    if (arr.length > 4) {
-
-                        if(arr[0].equals("全国")) continue;
-                        infectResult.setProvince(arr[0]);
-                        infectResult.setIp(Integer.parseInt(arr[1]));
-                        infectResult.setSp(Integer.parseInt(arr[2]));
-                        infectResult.setCure(Integer.parseInt(arr[3]));
-                        infectResult.setDead(Integer.parseInt(arr[4]));
-
-                        //插入
-                        sort_list.add(infectResult);
-                    }
-                }
-
-                return sort_list;
-
+                Collections.sort(merge, new LogUtil.ListUtil.comparator());
+                last = LogUtil.ListUtil.mergeList(merge,false);
             }
+            return last;
+        }
 
-            /**
-             * getFiles(String path)
-             * TODO
-             * @description 获得文件目录下的所有文件
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.8
-             * @return List<String>
-             */
-            public static List<String> getFiles(String path) {
-                List<String> files = new ArrayList<String>();
-                File file = new File(path);
-                File[] tempList = file.listFiles();
+        /**
+         * outLog(String fileName)
+         * TODO
+         * @description 输出log解析结果
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.9
+         * @return void
+         */
+        public static void outLog(String fileName, String out_path, String commandline, List<String> province, List<String> type, String date) throws IOException {
 
-                for (int i = 0; i < tempList.length; i++) {
-                    if (tempList[i].isFile()) {
-                        files.add(tempList[i].toString());
-                        //文件名，不包含路径
-                        //String fileName = tempList[i].getName();
+            //获取所有行
+            List<LogUtil.InfectResult> list = sortResultByProvince(fileName, date);
+
+            BufferedWriter out = null;
+
+            String ip = "";
+            String sp = "";
+            String cure = "";
+            String dead = "";
+
+            String province_not_found = "";
+            List<String> sr = new ArrayList<>();
+
+            try {
+                out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out_path, true)));//true追加
+                for (int i=0; i<list.size(); i++){
+                    if(province != null){
+                        for (String s : province) {
+                            if (list.get(i).getProvince().equals(s)) {
+                                sr.add(s);
+                                System.out.println(s);
+                                if (type != null){
+                                    for (String str : type) {
+                                        if (str.equals("ip")) {
+                                            ip = " 感染患者" + list.get(i).getIp() + "人";
+                                        }
+                                        else if (str.equals("sp")) {
+                                            sp = " 疑似患者" + list.get(i).getSp() + "人";
+                                        }
+                                        else if (str.equals("cure")) {
+                                            cure = " 治愈" + list.get(i).getCure() + "人";
+                                        }
+                                        if (str.equals("dead")) {
+                                            dead = " 死亡" + list.get(i).getDead() + "人";
+                                        }
+                                    }
+                                    out.write(list.get(i).getProvince() + ip + sp + cure + dead + "\n");
+                                }
+                                else {
+                                    out.write(list.get(i).toResultString() + "\n");
+                                }
+                            }
+//                            else{
+//                                for (String p : province) {
+//                                    for (String pp : sr) {
+//                                        if (!p.equals(pp)) {
+//                                            pr.add(p);
+//                                        }
+//                                    }
+//                                }
+//                                if (type != null){
+//                                    for (String str : type) {
+//                                        if (str.equals("ip")) {
+//                                            ip = " 感染患者" + 0 + "人";
+//                                        }
+//                                        else if (str.equals("sp")) {
+//                                            sp = " 疑似患者" + 0 + "人";
+//                                        }
+//                                        else if (str.equals("cure")) {
+//                                            cure = " 治愈" + 0 + "人";
+//                                        }
+//                                        if (str.equals("dead")) {
+//                                            dead = " 死亡" + 0 + "人";
+//                                        }
+//                                    }
+//                                    for(int j = 0 ; j<pr.size(); j++){
+//                                        province_not_found = pr.get(j) + ip + sp + cure + dead + "\n";
+//                                    }
+//
+//                                }
+//                                else{
+//                                    for (String p : province) {
+//                                        for (String pp : sr) {
+//                                            if (!p.equals(pp)) {
+//                                                pr.add(p);
+//                                            }
+//                                        }
+//                                    }
+//                                    for(int j = 0 ; j<pr.size(); j++) {
+//                                        province_not_found = pr.get(j) + " 感染患者0人" + " 疑似患者0人" + " 治愈0人" + " 死亡0人" + "\n";
+//                                    }
+//                                }
+//                            }
+                        }
                     }
-                    if (tempList[i].isDirectory()) {
-                        //这里就不递归了，
+                    else{
+                        if (type != null){
+                            for (String s : type) {
+                                if (s.equals("ip")) {
+                                    ip = " 感染患者" + list.get(i).getIp() + "人";
+                                }
+                                else if (s.equals("sp")) {
+                                    sp = " 疑似患者" + list.get(i).getSp() + "人";
+                                }
+                                else if (s.equals("cure")) {
+                                    cure = " 治愈" + list.get(i).getCure() + "人";
+                                }
+                                if (s.equals("dead")) {
+                                    dead = " 死亡" + list.get(i).getDead() + "人";
+                                }
+                            }
+                            out.write(list.get(i).getProvince() + ip + sp + cure + dead + "\n");
+                        }
+                        else {
+
+                            out.write(list.get(i).toResultString() + "\n");
+                        }
                     }
                 }
-                return files;
+                for (int i = 0; i < province.size(); i++) {
+                    for(String p :sr){
+                        if(p.equals(province.get(i))) {
+                            province.remove(i);
+                        }
+                    }
+                }
+
+                if (type != null){
+                    for (String str : type) {
+                        if (str.equals("ip")) {
+                            ip = " 感染患者" + 0 + "人";
+                        }
+                        else if (str.equals("sp")) {
+                            sp = " 疑似患者" + 0 + "人";
+                        }
+                        else if (str.equals("cure")) {
+                            cure = " 治愈" + 0 + "人";
+                        }
+                        if (str.equals("dead")) {
+                            dead = " 死亡" + 0 + "人";
+                        }
+                    }
+                    for(int j = 0 ; j<province.size(); j++){
+                        province_not_found = province.get(j) + ip + sp + cure + dead + "\n";
+                    }
+
+                }
+                else{
+
+                    for(int j = 0 ; j<province.size(); j++) {
+                        province_not_found = province.get(j) + " 感染患者0人" + " 疑似患者0人" + " 治愈0人" + " 死亡0人" + "\n";
+                    }
+
+                }
+
+                System.out.println(province.size());
+
+                out.write(province_not_found);
+                out.write("// 该文档并非真实数据，仅供测试使用" + "\n");
+                out.write("// 命令：" + commandline + "\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e1) {
+                    }
+                }
             }
 
 
         }
 
         /**
-         * CommandLine
+         * sortResultByProvince(String fileName)
          * TODO
-         *
+         * @description 文件排序（全国总是排第一个，别的省按拼音先后排序）
          * @author 221701412_theTuring
          * @version v 1.0.0
-         * @description 命令行启动类
-         * @since
+         * @since 2020.2.8
+         * @return List<LogUtil.InfectResult>
          */
-        static class CommandLineApplication {
+        public static List<LogUtil.InfectResult> sortResultByProvince(String fileName, String date) throws IOException {
+
+            //获取所有行
+            List<LogUtil.InfectResult> list = initLog(fileName, date);
+
+            //定义排序后的
+            List<LogUtil.InfectResult> sort_list = new ArrayList<>();
+
+            //Comparator接口中文排序
+            Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
+
+            String[] newArray = new String[list.size()];
+            String temp = null;
+
+            for(int i = 0 ; i<= list.size()-1 ; i++){
+
+                if (list.get(i).getProvince().equals("全国")){
+                    temp = list.get(i).toString();
+                }
+                newArray[i] = list.get(i).toString();
+
+            }
+
+            LogUtil.InfectResult temp_infectResult = new LogUtil.InfectResult();
+
+            //拆分存入
+            String[] temp_arr = temp.split(" ");
+
+            temp_infectResult.setProvince(temp_arr[0]);
+            temp_infectResult.setIp(Integer.parseInt(temp_arr[1]));
+            temp_infectResult.setSp(Integer.parseInt(temp_arr[2]));
+            temp_infectResult.setCure(Integer.parseInt(temp_arr[3]));
+            temp_infectResult.setDead(Integer.parseInt(temp_arr[4]));
+
+            //插入
+            sort_list.add(temp_infectResult);
+
+            //进行排序
+            Arrays.sort(newArray,com);
+
+            for(String i:newArray){
+
+                LogUtil.InfectResult infectResult = new LogUtil.InfectResult();
 
 
-            /**
-             * CommandLineApplication(List<String> commandline)
-             * TODO
-             * @description 命令行启动 读入->解析->实现功能
-             * @author 221701412_theTuring
-             * @version v 1.0.0
-             * @since 2020.2.9
-             * @return void
-             */
-            public void Application(List<String> list, String commandline) throws IOException {
+                //拆分存入
+                String[] arr = i.split(" ");
+                if (arr.length > 4) {
 
-                //实例化命令行对应对象
-                CommandLine commandLine = new CommandLine();
+                    if(arr[0].equals("全国")) continue;
+                    infectResult.setProvince(arr[0]);
+                    infectResult.setIp(Integer.parseInt(arr[1]));
+                    infectResult.setSp(Integer.parseInt(arr[2]));
+                    infectResult.setCure(Integer.parseInt(arr[3]));
+                    infectResult.setDead(Integer.parseInt(arr[4]));
 
-                //实例化命令行解析类
-                CommandLineAnalytic commandLineAnalytic = new CommandLineAnalytic();
+                    //插入
+                    sort_list.add(infectResult);
+                }
+            }
 
-                commandLine = commandLineAnalytic.Analytic(list);
+            return sort_list;
 
-                String in_path = null;
+        }
 
-                String out_path = null;
+        /**
+         * getFiles(String path)
+         * TODO
+         * @description 获得文件目录下的所有文件
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.8
+         * @return List<String>
+         */
+        public static List<String> getFiles(String path) {
+            List<String> files = new ArrayList<String>();
+            File file = new File(path);
+            File[] tempList = file.listFiles();
 
-                List<String> province = new ArrayList<>();
+            for (int i = 0; i < tempList.length; i++) {
+                if (tempList[i].isFile()) {
+                    files.add(tempList[i].toString());
+                    //文件名，不包含路径
+                    //String fileName = tempList[i].getName();
+                }
+                if (tempList[i].isDirectory()) {
+                    //这里就不递归了，
+                }
+            }
+            return files;
+        }
 
-                List<String> type = new ArrayList<>();
 
-                if(commandLine.getCommand().isList()){
-                    if (commandLine.getArguments().isLog()){
-                        if(commandLine.getArguments().isDate()){
-                            in_path = commandLine.getArguments().getLog_content() + commandLine.getArguments().getDate_content() + ".log.txt";
-                        }
-                        else {
+    }
+
+    /**
+     * CommandLine
+     * TODO
+     *
+     * @author 221701412_theTuring
+     * @version v 1.0.0
+     * @description 命令行启动类
+     * @since
+     */
+    static class CommandLineApplication {
+
+
+        /**
+         * CommandLineApplication(List<String> commandline)
+         * TODO
+         * @description 命令行启动 读入->解析->实现功能
+         * @author 221701412_theTuring
+         * @version v 1.0.0
+         * @since 2020.2.9
+         * @return void
+         */
+        public void Application(List<String> list, String commandline) throws IOException {
+
+            //实例化命令行对应对象
+            CommandLine commandLine = new CommandLine();
+
+            //实例化命令行解析类
+            CommandLineAnalytic commandLineAnalytic = new CommandLineAnalytic();
+
+            commandLine = commandLineAnalytic.Analytic(list);
+
+            String in_path = null;
+
+            String out_path = null;
+
+            String date = null;
+
+            List<String> province = new ArrayList<>();
+
+            List<String> type = new ArrayList<>();
+
+            if(commandLine.getCommand().isList()){
+                if (commandLine.getArguments().isLog()){
+                    if(commandLine.getArguments().isDate()){
+                        if(commandLine.getArguments().getDate_content()!=null) {
                             in_path = commandLine.getArguments().getLog_content();
+                            date = commandLine.getArguments().getDate_content();
+                            System.out.println(date);
                         }
                     }
-                    if (commandLine.getArguments().isOut()){
-                        out_path = commandLine.getArguments().getOut_content();
+                    else {
+                        in_path = commandLine.getArguments().getLog_content();
                     }
-                    if (commandLine.getArguments().isType()){
+                }
+                if (commandLine.getArguments().isOut()){
+                    out_path = commandLine.getArguments().getOut_content();
+                }
+                if (commandLine.getArguments().isType()){
 
-                        if (commandLine.getArguments().isProvince()){
-                            province.addAll(commandLine.getArguments().getProvince_content());
-                            for(int i=0; i<commandLine.getArguments().getTypeOption().size(); i++){
-                                type.add(commandLine.getArguments().getTypeOption().get(i).getName());
-                            }
-                        }
-                        else{
-                            province = null;
+                    if (commandLine.getArguments().isProvince()){
+                        province.addAll(commandLine.getArguments().getProvince_content());
+                        for(int i=0; i<commandLine.getArguments().getTypeOption().size(); i++){
+                            type.add(commandLine.getArguments().getTypeOption().get(i).getName());
                         }
                     }
                     else{
-                        type = null;
-                        if (commandLine.getArguments().isProvince()){
-                            province.addAll(commandLine.getArguments().getProvince_content());
-                        }
-                        else{
-                            province = null;
-                        }
-
+                        province = null;
+                    }
+                }
+                else{
+                    type = null;
+                    if (commandLine.getArguments().isProvince()){
+                        province.addAll(commandLine.getArguments().getProvince_content());
+                    }
+                    else{
+                        province = null;
                     }
 
                 }
 
-                LogDao.sortResultByProvince(in_path);
-
-                LogDao.outLog(in_path, out_path, commandline, province, type);
-
             }
+
+            LogDao.sortResultByProvince(in_path, date);
+
+            LogDao.outLog(in_path, out_path, commandline, province, type, date);
 
         }
 
-        public static void main(String[] args) throws IOException {
+    }
 
-            String commandline = "";
+    public static void main(String[] args) throws IOException {
 
-            for(int i=3;i<args.length;i++){
-                commandline += args[i] + " ";
-            }
+        String commandline = "";
 
-            List<String> list = new ArrayList<>();
-
-            for (String temp : args) {
-                list.add(temp);
-            }
-
-            CommandLineApplication commandLineApplication = new CommandLineApplication();
-            commandLineApplication.Application(list, commandline);
-
+        for(int i=3;i<args.length;i++){
+            commandline += args[i] + " ";
         }
+
+        List<String> list = new ArrayList<>();
+
+        for (String temp : args) {
+            list.add(temp);
+        }
+
+        int index = 0;
+
+        //处理-date后不设置则默认为所提供日志最新的一天。你需要确保你处理了指定日期之前的所有log文件
+        if(list.get(list.size()-1).equals("-date"))
+        {
+            list.add("default");
+        }
+        else {
+            for (int i = 0; i < list.size(); i++) {
+                String temp = list.get(i);
+                if (temp.equals("-date")) {
+                    String content = list.get(i + 1);
+                    if (content.substring(0, 1).equals("-")) {
+                        index = i;
+                    }
+                }
+            }
+        }
+
+        list.add(index+1, "default");
+
+        CommandLineApplication commandLineApplication = new CommandLineApplication();
+        commandLineApplication.Application(list, commandline);
+
+    }
 
 }
