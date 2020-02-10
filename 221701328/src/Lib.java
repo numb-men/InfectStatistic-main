@@ -115,4 +115,15 @@ public class Lib {
         }
         return fileList;
     }
+
+    public static class Exit extends RuntimeException{
+
+        public Exit(){
+            super();
+        }
+
+        public Exit(String msg){
+            super(msg);
+        }
+    }
 }

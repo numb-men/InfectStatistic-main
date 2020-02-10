@@ -18,26 +18,29 @@ class InfectStatistic {
 
     public static void main(String[] args) {
         InfectStatistic infectStatistic = new InfectStatistic();
-        if(args.length == 0){
-            Lib.help();
-            System.exit(0);
+        try {
+            if(args.length == 0){
+                Lib.help();
+                throw new Lib.Exit();
+            }
+            infectStatistic.takeOrder(args[0]);
+            infectStatistic.placeOrder(args);
+        }catch (Lib.Exit exit){
+            System.out.println(exit.getMessage());
         }
-        infectStatistic.takeOrder(args[0]);
-        infectStatistic.placeOrder(args);
     }
 
     /**
      * 判断命令类型并创建实例
      * @param cmd 传入的命令
      */
-    public void takeOrder(String cmd){
+    public void takeOrder(String cmd) throws Lib.Exit {
         switch (cmd){
             case "list":
                 order = new ListOrder();
                 break;
             default:
-                System.out.println("\"" + cmd + "\"无效的命令");
-                System.exit(1);
+                throw new Lib.Exit("\"" + cmd + "\"无效的命令");
         }
     }
 
@@ -45,7 +48,7 @@ class InfectStatistic {
      * 执行命令
      * @param args 参数列表
      */
-    public void placeOrder(String[] args){
+    public void placeOrder(String[] args) throws Lib.Exit {
         order.execute(args);
     }
 
@@ -94,8 +97,9 @@ class ListOrder implements Order {
     /*日志目录*/
     private File logDirectory;
 
-    /*指定输出那些类型数据*/
+    /*输出哪些类型数据和输出哪些省份*/
     private Map<String,Integer> outType;
+    private List<String> outProvince;
 
     /*构造方法*/
     public ListOrder(){
@@ -112,6 +116,8 @@ class ListOrder implements Order {
         outType.put(SUSPECTED_PATIENT,1);
         outType.put(CURE,2);
         outType.put(DEAD,3);
+        outProvince = new ArrayList<>();
+        outProvince.add("全国");
         Lib.mapInit(statistics);
     }
 
@@ -120,7 +126,7 @@ class ListOrder implements Order {
      * @param args 传递给main方法的参数
      */
     @Override
-    public void execute(String[] args) {
+    public void execute(String[] args) throws Lib.Exit {
         if(args.length == 1){
             Lib.helpList();    //显示提示信息
             System.exit(0);
@@ -132,24 +138,21 @@ class ListOrder implements Order {
                 case "-log":
                     hasLog = true;
                     if (++i >= args.length) {  //如果-log后面没有给参数值
-                        System.out.println("-log参数缺少参数值");
-                        System.exit(1);
+                        throw new Lib.Exit("-log参数缺少参数值");
                     }
                     logParam = args[i++];      //-log后面跟着的参数为-log的参数值
                     break;
                 case "-out":
                     hasOut = true;
                     if (++i >= args.length) {  //如果-out后面没有给参数值
-                        System.out.println("-out参数缺少参数值");
-                        System.exit(1);
+                        throw new Lib.Exit("-out参数缺少参数值");
                     }
                     outParam = args[i++];      //-out后面跟着的参数为-out的参数值
                     break;
                 case "-date":
                     hasDate = true;
                     if (++i >= args.length) {  //如果-date后面没有给参数值
-                        System.out.println("-date参数缺少参数值");
-                        System.exit(1);
+                        throw new Lib.Exit("-date参数缺少参数值");
                     }
                     dateParam = args[i++];     //-date后面跟着的参数为-date的参数值
                     break;
@@ -168,18 +171,15 @@ class ListOrder implements Order {
                     }
                     break;
                 default:
-                    System.out.println("\"" + args[i] + "\"无法解析的参数");
-                    System.exit(1);
+                    throw new Lib.Exit("\"" + args[i] + "\"无法解析的参数");
             }
         }
         /*执行相应的方法*/
         if(!hasLog){  //log必须有
-            System.out.println("缺少-log参数");
-            System.exit(1);
+            throw new Lib.Exit("缺少-log参数");
         }
         if(!hasOut){  //out必须有
-            System.out.println("缺少-out参数");
-            System.exit(1);
+            throw new Lib.Exit("缺少-out参数");
         }
         if(!hasDate){  //如果没有data参数
             dateParam=new SimpleDateFormat("yyyy-MM-dd").format(new Date()); //当前日期
@@ -199,11 +199,10 @@ class ListOrder implements Order {
      *执行-log命令参数 读取log文件夹
      * @param logPath -log参数后面的log文件路径
      */
-    private void doLog(String logPath){
+    private void doLog(String logPath) throws Lib.Exit {
         logDirectory = new File(logPath);  //读取路径
         if(!logDirectory.exists()){
-            System.out.println("\"-log\" " + logDirectory + " 无法解析的路径");
-            System.exit(1);
+            throw new Lib.Exit("\"-log\" " + logDirectory + " 无法解析的路径");
         }
     }
 
@@ -211,12 +210,15 @@ class ListOrder implements Order {
      *执行-out命令参数
      * @param outPath -out参数后面的输出路径
      */
-    private void doOut(String outPath){
+    private void doOut(String outPath) throws Lib.Exit {
         File outFile = new File(outPath);
         FileWriter writer = null;    //字符输出流
         try {
             writer = new FileWriter(outFile);
             for(String province : statistics.keySet()){   //遍历统计数据
+                if(!outProvince.contains(province)){
+                    continue;
+                }
                 List<Integer> data = statistics.get(province);
                 writer.write(province + "    ");
                 for(String type : outType.keySet()){
@@ -226,8 +228,7 @@ class ListOrder implements Order {
             }
             writer.flush();
         }catch (Exception e){
-            System.out.println("\"out\" " + e.getMessage());   //出现错误提示并退出程序
-            System.exit(1);
+            throw new Lib.Exit("\"out\" " + e.getMessage());
         }finally {
             try {
                 if (writer != null) {
@@ -243,7 +244,7 @@ class ListOrder implements Order {
      *执行-date命令参数 计算当日疫情状况
      * @param date -date参数后面的具体日期
      */
-    private void doDate(String date){
+    private void doDate(String date) throws Lib.Exit {
         List<File> logList = Lib.getLogFiles(logDirectory);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date paramDate;
@@ -263,6 +264,9 @@ class ListOrder implements Order {
                         continue;
                     }
                     String[] data = dataRow.split(" ");  //分割数据行
+                    if(!outProvince.contains(data[0])){
+                        outProvince.add(data[0]);
+                    }
                     List<Integer> provinceData = statistics.get(data[0]);   //当前行的省份数据
                     List<Integer> destProvince;   //用于处理流入
                     switch (data[1]) {
@@ -298,8 +302,7 @@ class ListOrder implements Order {
                 }
             }
         }catch (Exception e){
-            System.out.println(e.getMessage());
-            System.exit(1);
+            throw new Lib.Exit(e.getMessage());
         }finally {
             try{
                 if (reader != null) {
@@ -315,7 +318,7 @@ class ListOrder implements Order {
      *执行-type命令参数
      * @param types -type命令参数后面的具体参数值数组
      */
-    private void doType(List<String> types){
+    private void doType(List<String> types) throws Lib.Exit {
         Map<String,Integer> newOutType = new LinkedHashMap<>();
         for (String key : statistics.keySet()){
             List<Integer> oldData = statistics.get(key);
@@ -340,8 +343,7 @@ class ListOrder implements Order {
                         newOutType.put(DEAD,index++);
                         break;
                     default:
-                        System.out.println("\"-type\" 无法解析的类型 " + type);
-                        System.exit(1);
+                        throw new Lib.Exit("\"-type\" 无法解析的类型 " + type);
                 }
             }
             outType = newOutType;
@@ -354,11 +356,7 @@ class ListOrder implements Order {
      * @param provinces -province命令参数后面的具体参数值数组
      */
     private void doProvince(List<String> provinces){
-        Map<String,List<Integer>> newStatistics = new LinkedHashMap<>();
-        for(String province : provinces){
-            newStatistics.put(province,statistics.get(province));
-        }
-        statistics = newStatistics;
+        outProvince = provinces;
     }
 
     /**
