@@ -1,4 +1,11 @@
-from .src.InfectStatistic import InfectStatistic
+try:
+    from .src.InfectStatistic import InfectStatistic
+except ModuleNotFoundError:
+    from src.InfectStatistic import InfectStatistic
+# 由于模块机制，在pycharm中使用自带的单元测试引入方式应该为
+# from .src.InfectStatistic import InfectStatistic
+# 若直接运行本函数，则使用
+# from src.InfectStatistic import InfectStatistic
 import unittest
 import os
 import warnings
