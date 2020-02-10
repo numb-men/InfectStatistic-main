@@ -75,8 +75,7 @@ class InfectStatistic {
         }
     }
     public static province init(){//初始化province类
-        province pro = new province(null,0,0,0,0);
-        return pro;
+        return new province(null,0,0,0,0);
     }
     //建立HashMap，把命令参数和参数值分开
     private static HashMap<String, String[]> parseArgs(String[] args) {
@@ -120,6 +119,7 @@ class InfectStatistic {
     private static void func(HashMap<String, String[]> parseArgs) throws ParseException {
         ArrayList<province> list = new ArrayList<>();//完整的省份列表
         ArrayList<province> list1 = new ArrayList<>();//经过-province筛选后的列表
+        String temp = null;//用来存放-type后的语句段
         if(parseArgs.isEmpty()){
             return;
         }
@@ -152,39 +152,17 @@ class InfectStatistic {
             System.out.println("log参数格式错误！");
             return;
         }
-        if (parseArgs.containsKey("-type")){
-            String[] type = parseArgs.get("-type");
-            for(int i = 0; i < type.length; i++){//判断非法参数值
-                if(!type[i].equals("ip") && !type[i].equals("sp") && !type[i].equals("cure") && !type[i].equals("dead")){
-                    System.out.println("输入的参数值非法！");
-                    return;
-                }
-                for(int j = i + 1; j < type.length; j++){
-                    if(type[i].equals(type[j])){
-                        System.out.println("输入的参数值不能相同！");
-                        return;
-                    }
-                }
-            }
-            /*for(int i = 0; i < type.length; i++){
-                switch (type[i]){
-                    case "ip":{
-
-                    }
-                }
-            }*/
-        }
         if (parseArgs.containsKey("-province")){
             String[] provinces = parseArgs.get("-province");
-            for(int i = 0; i < provinces.length; i++){
+            for (String province : provinces) {
                 int j;
-                for(j = 0; j < list.size(); j++){
-                    if(provinces[i].equals(list.get(j).getName())){//从list中找到和-province参数值相同的省份
+                for (j = 0; j < list.size(); j++) {
+                    if (province.equals(list.get(j).getName())) {//从list中找到和-province参数值相同的省份
                         list1.add(list.get(j));//把选定的省份加入筛选过后的列表里
                         break;
                     }
-                    if(j == list.size() - 1){//list中不存在该省份时新建
-                        province pro = new province(provinces[i],0,0,0,0);
+                    if (j == list.size() - 1) {//list中不存在该省份时新建
+                        province pro = new province(province, 0, 0, 0, 0);
                         list1.add(pro);
                     }
                 }
@@ -196,9 +174,51 @@ class InfectStatistic {
         if (parseArgs.containsKey("-out") && parseArgs.get("-out").length == 1){
             String[] filePath = parseArgs.get("-out");
             initFile(filePath[0]);
-            for(int i = 0;i < list1.size(); i++){
-                writeStringToFile(filePath[0], list1.get(i).printResult());//暂时输出的是全部省份信息
+            if (parseArgs.containsKey("-type")){
+                String[] type = parseArgs.get("-type");
+                for(int i = 0; i < type.length; i++){//判断非法参数值
+                    if(!type[i].equals("ip") && !type[i].equals("sp") && !type[i].equals("cure") && !type[i].equals("dead")){
+                        System.out.println("输入的参数值非法！");
+                        return;
+                    }
+                    for(int j = i + 1; j < type.length; j++){
+                        if(type[i].equals(type[j])){
+                            System.out.println("输入的参数值不能相同！");
+                            return;
+                        }
+                    }
+                }
+                for (InfectStatistic.province province : list1) {
+                    temp = province.getName();
+                    for (String s : type) {
+                        switch (s) {
+                            case "ip":{
+                                temp += province.printIp();
+                                break;
+                            }
+                            case "sp": {
+                                temp += province.printSp();
+                                break;
+                            }
+                            case "cure":{
+                                temp += province.printCure();
+                                break;
+                            }
+                            case "dead": {
+                                temp += province.printDead();
+                                break;
+                            }
+                        }
+                    }
+                    writeStringToFile(filePath[0], temp);//输出temp拼接成的语句
+                }
             }
+            else{
+                for (InfectStatistic.province province : list1) {
+                    writeStringToFile(filePath[0], province.printResult());//没有-type则输出完整语句
+                }
+            }
+            writeStringToFile(filePath[0],"// 该文档并非真实数据，仅供测试使用");
             System.out.println("写入文件"+filePath[0]+"成功！");
         }
         else {
@@ -474,7 +494,7 @@ class InfectStatistic {
     }
     public static void main(String[] args) throws ParseException {
         String cmdLine = "list -date 2020-01-27 -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log" +
-                " -type ip sp -out G:/output.txt -province 全国 福建 上海";
+                " -type ip -out G:/output.txt -province 全国 福建 上海";
         args = cmdLine.split(" ");
         HashMap<String, String[]> parseArgs = parseArgs(args);
         func(parseArgs);
