@@ -60,6 +60,18 @@ class InfectStatistic {
         public String printResult(){
             return name+" 感染患者"+ip+"人"+" 疑似患者"+sp+"人"+ " 治愈"+cure+"人"+" 死亡"+dead+"人";
         }
+        public String printIp(){
+            return " 感染患者"+ip+"人";
+        }
+        public String printSp(){
+            return " 疑似患者"+sp+"人";
+        }
+        public String printCure(){
+            return " 治愈"+cure+"人";
+        }
+        public String printDead(){
+            return " 死亡"+dead+"人";
+        }
     }
     public static province init(){//初始化province类
         province pro = new province(null,0,0,0,0);
@@ -105,7 +117,8 @@ class InfectStatistic {
     }
     //命令对应的行为
     private static void func(HashMap<String, String[]> parseArgs){
-        ArrayList<province> list = new ArrayList<>();
+        ArrayList<province> list = new ArrayList<>();//完整的省份列表
+        ArrayList<province> list1 = new ArrayList<>();//经过-province筛选后的列表
         if(parseArgs.isEmpty()){
             return;
         }
@@ -114,24 +127,12 @@ class InfectStatistic {
             String[] allContent = readFile(path[0]);//读取文件夹下的文件
             list = match(allContent);//对内容分析返回结果
             sortProvince(list);
-            for(int i = 0;i < list.size(); i++){
+            /*for(int i = 0;i < list.size(); i++){
                 System.out.println(list.get(i).printResult());
-            }
+            }*/
         }
         else {
             System.out.println("log参数格式错误！");
-            return;
-        }
-        if (parseArgs.containsKey("-out") && parseArgs.get("-out").length == 1){
-            String[] filePath = parseArgs.get("-out");
-            initFile(filePath[0]);
-            for(int i = 0;i < list.size(); i++){
-                writeStringToFile(filePath[0], list.get(i).printResult());//暂时输出的是全部省份信息
-            }
-            System.out.println("写入文件"+filePath[0]+"成功！");
-        }
-        else {
-            System.out.println("out参数格式错误！");
             return;
         }
         if (parseArgs.containsKey("-date")){
@@ -139,13 +140,53 @@ class InfectStatistic {
         }
         if (parseArgs.containsKey("-type")){
             String[] type = parseArgs.get("-type");
+            for(int i = 0; i < type.length; i++){//判断非法参数值
+                if(!type[i].equals("ip") && !type[i].equals("sp") && !type[i].equals("cure") && !type[i].equals("dead")){
+                    System.out.println("输入的参数值非法！");
+                    return;
+                }
+                for(int j = i + 1; j < type.length; j++){
+                    if(type[i].equals(type[j])){
+                        System.out.println("输入的参数值不能相同！");
+                        return;
+                    }
+                }
+            }
+            /*for(int i = 0; i < type.length; i++){
+                switch (type[i]){
+                    case "ip":{
 
+                    }
+                }
+            }*/
         }
         if (parseArgs.containsKey("-province")){
-
+            String[] provinces = parseArgs.get("-province");
+            for(int i = 0; i < provinces.length; i++){
+                for(int j = 0; j < list.size(); j++){
+                    if(provinces[i].equals(list.get(j).getName())){//从list中找到和-province参数值相同的省份
+                        list1.add(list.get(j));//把选定的省份加入筛选过后的列表里
+                    }
+                }
+            }
+        }
+        else{
+            list1 = list;
+        }
+        if (parseArgs.containsKey("-out") && parseArgs.get("-out").length == 1){
+            String[] filePath = parseArgs.get("-out");
+            initFile(filePath[0]);
+            for(int i = 0;i < list1.size(); i++){
+                writeStringToFile(filePath[0], list1.get(i).printResult());//暂时输出的是全部省份信息
+            }
+            System.out.println("写入文件"+filePath[0]+"成功！");
+        }
+        else {
+            System.out.println("out参数格式错误！");
+            return;
         }
     }
-    //将省份排序
+    //将省份排序(未实现)
     private static void sortProvince(ArrayList<province> list){
         //Comparator<String> comparator = Collator.getInstance(Locale.CHINA);
         Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);
@@ -406,7 +447,7 @@ class InfectStatistic {
     }
     public static void main(String[] args) {
         String cmdLine = "list -date -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log" +
-                " -type ip sp -out G:/output.txt";
+                " -type ip sp -out G:/output.txt -province 全国 福建";
         args = cmdLine.split(" ");
         HashMap<String, String[]> parseArgs = parseArgs(args);
         func(parseArgs);
