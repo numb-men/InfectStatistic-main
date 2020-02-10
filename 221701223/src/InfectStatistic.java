@@ -7,8 +7,8 @@
  */
 public class InfectStatistic {
     public static void main(String[] args) {
-        for (String str : args) {
-            System.out.println(str);
-        }
+        ArgumentParser parser = new ArgumentParser(args);
+        Command command = parser.makeCommand();
+        command.show();
     }
 }
