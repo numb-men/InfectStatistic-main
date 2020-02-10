@@ -441,7 +441,7 @@ class InfectStatistic {
                         break;
                     case "-type":
                         arguments.setType(true);
-                        ArrayList<CommandLine.TypeOptionDto> arrayList = new ArrayList<>();
+                        ArrayList<CommandLine.TypeOptionDto> arrayList = new ArrayList<InfectStatistic.CommandLine.TypeOptionDto>();
                         for (int j = i; j < list.size(); j++) {
                             String type = list.get(j);
                             if (!type.substring(0, 1).equals('-')) {
@@ -471,7 +471,7 @@ class InfectStatistic {
                         break;
                     case "-province":
                         arguments.setProvince(true);
-                        ArrayList<String> p_list = new ArrayList<>();
+                        ArrayList<String> p_list = new ArrayList<String>();
                         for (int j = i+1; j < list.size(); j++) {
                             String province = list.get(j);
                             if (!province.substring(0, 1).equals('-')) {
@@ -935,7 +935,7 @@ class InfectStatistic {
              * @since 2020.2.8
              */
             public static List<InfectResult> mergeList (List<InfectResult> a, boolean flag) {
-                List<InfectResult> list = new ArrayList<>();
+                List<InfectResult> list = new ArrayList<InfectResult>();
                 InfectResult r1 = new InfectResult();
                 InfectResult r2 = new InfectResult();
                 InfectResult r3 = new InfectResult();
@@ -1066,7 +1066,7 @@ class InfectStatistic {
              */
             public static List<InfectResult> getEmptiesIpResult(String text) {
 
-                List<InfectResult> list = new ArrayList<>();
+                List<InfectResult> list = new ArrayList<InfectResult>();
 
                 //实例化正则参数
                 RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
@@ -1102,7 +1102,7 @@ class InfectStatistic {
              */
             public static List<InfectResult> getEmptiesSpResult(String text) {
 
-                List<InfectResult> list = new ArrayList<>();
+                List<InfectResult> list = new ArrayList<InfectResult>();
 
                 //实例化正则参数
                 RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
@@ -1263,9 +1263,9 @@ class InfectStatistic {
             RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
 
             //List<InfectResult> 存入疫情信息
-            List<LogUtil.InfectResult> list = new ArrayList<>();
-            List<LogUtil.InfectResult> last = new ArrayList<>();
-            List<LogUtil.InfectResult> merge = new ArrayList<>();
+            List<LogUtil.InfectResult> list = new ArrayList<LogUtil.InfectResult>();
+            List<LogUtil.InfectResult> last = new ArrayList<LogUtil.InfectResult>();
+            List<LogUtil.InfectResult> merge = new ArrayList<LogUtil.InfectResult>();
 
             File file = new File(fileName);
 
@@ -1394,13 +1394,10 @@ class InfectStatistic {
 
             BufferedWriter out = null;
 
-            String ip = "";
-            String sp = "";
-            String cure = "";
-            String dead = "";
+            String type_temp = "";
 
             String province_not_found = "";
-            List<String> sr = new ArrayList<>();
+            List<String> sr = new ArrayList<String>();
 
             try {
                 out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out_path, true)));//true追加
@@ -1413,19 +1410,20 @@ class InfectStatistic {
                                 if (type != null){
                                     for (String str : type) {
                                         if (str.equals("ip")) {
-                                            ip = " 感染患者" + list.get(i).getIp() + "人";
+                                            type_temp += " 感染患者" + list.get(i).getIp() + "人";
                                         }
                                         else if (str.equals("sp")) {
-                                            sp = " 疑似患者" + list.get(i).getSp() + "人";
+                                            type_temp += " 疑似患者" + list.get(i).getSp() + "人";
                                         }
                                         else if (str.equals("cure")) {
-                                            cure = " 治愈" + list.get(i).getCure() + "人";
+                                            type_temp += " 治愈" + list.get(i).getCure() + "人";
                                         }
                                         if (str.equals("dead")) {
-                                            dead = " 死亡" + list.get(i).getDead() + "人";
+                                            type_temp += " 死亡" + list.get(i).getDead() + "人";
                                         }
                                     }
-                                    out.write(list.get(i).getProvince() + ip + sp + cure + dead + "\n");
+                                    out.write(list.get(i).getProvince() + type_temp + "\n");
+                                    type_temp = "";
                                 }
                                 else {
                                     out.write(list.get(i).toResultString() + "\n");
@@ -1478,19 +1476,20 @@ class InfectStatistic {
                         if (type != null){
                             for (String s : type) {
                                 if (s.equals("ip")) {
-                                    ip = " 感染患者" + list.get(i).getIp() + "人";
+                                    type_temp += " 感染患者" + list.get(i).getIp() + "人";
                                 }
                                 else if (s.equals("sp")) {
-                                    sp = " 疑似患者" + list.get(i).getSp() + "人";
+                                    type_temp += " 疑似患者" + list.get(i).getSp() + "人";
                                 }
                                 else if (s.equals("cure")) {
-                                    cure = " 治愈" + list.get(i).getCure() + "人";
+                                    type_temp += " 治愈" + list.get(i).getCure() + "人";
                                 }
                                 if (s.equals("dead")) {
-                                    dead = " 死亡" + list.get(i).getDead() + "人";
+                                    type_temp += " 死亡" + list.get(i).getDead() + "人";
                                 }
                             }
-                            out.write(list.get(i).getProvince() + ip + sp + cure + dead + "\n");
+                            out.write(list.get(i).getProvince() + type_temp + "\n");
+                            type_temp = "";
                         }
                         else {
 
@@ -1509,20 +1508,21 @@ class InfectStatistic {
                 if (type != null){
                     for (String str : type) {
                         if (str.equals("ip")) {
-                            ip = " 感染患者" + 0 + "人";
+                            type_temp += " 感染患者" + 0 + "人";
                         }
                         else if (str.equals("sp")) {
-                            sp = " 疑似患者" + 0 + "人";
+                            type_temp += " 疑似患者" + 0 + "人";
                         }
                         else if (str.equals("cure")) {
-                            cure = " 治愈" + 0 + "人";
+                            type_temp += " 治愈" + 0 + "人";
                         }
                         if (str.equals("dead")) {
-                            dead = " 死亡" + 0 + "人";
+                            type_temp += " 死亡" + 0 + "人";
                         }
                     }
                     for(int j = 0 ; j<province.size(); j++){
-                        province_not_found = province.get(j) + ip + sp + cure + dead + "\n";
+                        province_not_found = province.get(j) + type_temp  + "\n";
+                        out.write(province_not_found);
                     }
 
                 }
@@ -1530,13 +1530,13 @@ class InfectStatistic {
 
                     for(int j = 0 ; j<province.size(); j++) {
                         province_not_found = province.get(j) + " 感染患者0人" + " 疑似患者0人" + " 治愈0人" + " 死亡0人" + "\n";
+                        out.write(province_not_found);
                     }
 
                 }
 
                 System.out.println(province.size());
 
-                out.write(province_not_found);
                 out.write("// 该文档并非真实数据，仅供测试使用" + "\n");
                 out.write("// 命令：" + commandline + "\n");
             } catch (IOException e) {
@@ -1568,7 +1568,7 @@ class InfectStatistic {
             List<LogUtil.InfectResult> list = initLog(fileName, date);
 
             //定义排序后的
-            List<LogUtil.InfectResult> sort_list = new ArrayList<>();
+            List<LogUtil.InfectResult> sort_list = new ArrayList<LogUtil.InfectResult>();
 
             //Comparator接口中文排序
             Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
@@ -1694,9 +1694,9 @@ class InfectStatistic {
 
             String date = null;
 
-            List<String> province = new ArrayList<>();
+            List<String> province = new ArrayList<String>();
 
-            List<String> type = new ArrayList<>();
+            List<String> type = new ArrayList<String>();
 
             if(commandLine.getCommand().isList()){
                 if (commandLine.getArguments().isLog()){
@@ -1755,7 +1755,7 @@ class InfectStatistic {
             commandline += args[i] + " ";
         }
 
-        List<String> list = new ArrayList<>();
+        List<String> list = new ArrayList<String>();
 
         for (String temp : args) {
             list.add(temp);
