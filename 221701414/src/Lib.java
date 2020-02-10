@@ -23,7 +23,38 @@ public class Lib {
      * 执行命令
      */
     public void execute() throws FileNotFoundException {
-
+        if (this.args == null) {
+            return;
+        }
+        CmdArgs cmdArgs = new CmdArgs(this.args);
+        //比较是否为 list 命令
+        if (!cmdArgs.getCmd().equals(MyList.params[0])) {
+            throw new UnsupportedOperationException("命令输入错误");
+        }
+        MyList list = new MyList(cmdArgs);
+        ControlCommand controlCommand = new ControlCommand();
+        //list -log
+        if (cmdArgs.has(MyList.params[1])) {
+            controlCommand.setCommands(0, new ListLogCommand(list));
+        }
+        //list -date
+        if (cmdArgs.has(MyList.params[2])) {
+            controlCommand.setCommands(1, new ListDateCommand(list));
+        }
+        //list -province
+        if (cmdArgs.has(MyList.params[3])) {
+            controlCommand.setCommands(2, new ListProvinceCommand(list));
+        }
+        //list -type
+        if (cmdArgs.has(MyList.params[4])) {
+            controlCommand.setCommands(3, new ListTypeCommand(list));
+        }
+        //list -out 输出在最后执行
+        if (cmdArgs.has(MyList.params[5])) {
+            controlCommand.setCommands(4, new ListOutCommand(list));
+        }
+        //执行全部命令
+        controlCommand.sureExecuteAll();
     }
 }
 
@@ -189,7 +220,197 @@ class CmdArgs {
     //---------------------------getter/setter------------------------------------
 }
 
+//------------------------------命令模式实现list命令--------------↓-----------------------
 
+/**
+ * list命令
+ */
+class MyList {
+    /**
+     * list命令的参数
+     */
+    public final static String[] params = {"list", "-log", "-date", "-province", "-type", "-out"};
+
+    /**
+     * 输入的命令
+     */
+    private CmdArgs cmdArgs;
+
+    public MyList(CmdArgs cmdArgs) {
+        this.cmdArgs = cmdArgs;
+    }
+
+    /**
+     *
+     */
+    public void log() throws FileNotFoundException {
+        if (cmdArgs == null) {
+            return;
+        }
+        String logValue = cmdArgs.getArgVal(params[1]);
+        if (logValue != null) {
+            String content = FileOperate.readFile(logValue);
+            if (content != null) {
+                String[] logLine = content.split("#");
+
+            }
+        }
+        throw new FileNotFoundException("日志文件不存在");
+    }
+
+    public void out() {
+        //
+    }
+
+    public void date() {
+        //
+    }
+
+    public void type() {
+
+    }
+
+    public void province() {
+        //
+    }
+}
+
+/**
+ * 命令的接口
+ */
+interface Command {
+    void execute() throws FileNotFoundException;
+}
+
+/**
+ * list -log
+ */
+class ListLogCommand implements Command {
+    private MyList list;
+
+    public ListLogCommand(MyList list) {
+        this.list = list;
+    }
+
+    @Override
+    public void execute() throws FileNotFoundException {
+        list.log();
+    }
+}
+
+/**
+ * list -out
+ */
+class ListOutCommand implements Command {
+    private MyList list;
+
+    public ListOutCommand(MyList list) {
+        this.list = list;
+    }
+
+    @Override
+    public void execute() {
+        list.out();
+    }
+}
+
+/**
+ * list -date
+ */
+class ListDateCommand implements Command {
+    private MyList list;
+
+    public ListDateCommand(MyList list) {
+        this.list = list;
+    }
+
+    @Override
+    public void execute() {
+        list.date();
+    }
+}
+
+/**
+ * list -type
+ */
+class ListTypeCommand implements Command {
+    /**
+     * list命令的参数 -type ，对应的值
+     */
+    private final static String[] typeValue = {"ip", "sp", "cure", "dead"};
+
+    private MyList list;
+
+    public ListTypeCommand(MyList list) {
+        this.list = list;
+    }
+
+    @Override
+    public void execute() {
+        list.type();
+    }
+}
+
+/**
+ * list -province
+ */
+class ListProvinceCommand implements Command {
+    /**
+     * list命令的参数 -province，对应的值
+     */
+    private final static String[] provinceValue = {"安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州",
+            "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海",
+            "山东", "山西", "陕西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
+
+    private MyList list;
+
+    public ListProvinceCommand(MyList list) {
+        this.list = list;
+    }
+
+    @Override
+    public void execute() {
+        list.province();
+    }
+}
+
+/**
+ * 命令控制
+ */
+class ControlCommand {
+    private static final int CONTROL_SIZE = 5;
+
+    private Command[] commands;
+
+    public ControlCommand() {
+        commands = new Command[CONTROL_SIZE];
+    }
+
+    /**
+     * 添加一条待执行命令
+     */
+    public void setCommands(int index, Command command) {
+        commands[index] = command;
+    }
+
+    /**
+     * 一条命令确认开始执行
+     */
+    public void sureExecute(int index) throws FileNotFoundException {
+        commands[index].execute();
+    }
+
+    /**
+     * 全部命令确认开始执行
+     */
+    public void sureExecuteAll() throws FileNotFoundException {
+        for (int i = commands.length; i >= 0; i--) {
+            commands[i].execute();
+        }
+    }
+}
+
+//------------------------------命令模式实现list命令------------------↑-------------------
 
 /**
  * FileOperate
@@ -255,8 +476,5 @@ class FileOperate {
         }
     }
 }
-
-
-
 
 
