@@ -66,8 +66,9 @@ class InfectStatistic {
         return pro;
     }
     //建立HashMap，把命令参数和参数值分开
-    private static HashMap<String, String> parseArgs(String[] args) {
-        HashMap<String, String> tmp = new HashMap<String, String>();
+    private static HashMap<String, String[]> parseArgs(String[] args) {
+        HashMap<String, String[]> tmp = new HashMap<String, String[]>();
+        ArrayList<String> arrValue = new ArrayList<>();
         String key = null;
         //判断命令是否为list
         if(args.length == 0){
@@ -82,30 +83,35 @@ class InfectStatistic {
         for (int i = 1; i<args.length; i++){
             String arg = args[i];
             if (arg.startsWith("-")){
-                if (key == null){
-                    key = arg;
+                if (key != null){
+                    String[] argsValue = new String[arrValue.size()];
+                    arrValue.toArray(argsValue);
+                    tmp.put(key,argsValue);
+                    arrValue.clear();
                 }
-                else{
-                    tmp.put(key,null);
-                    key = arg;
-                }
+                key = arg;
             }
             else {
-                tmp.put(key, arg);
-                key = null;
+                arrValue.add(arg);
             }
+        }
+        if(key != null){
+            String[] argsValue = new String[arrValue.size()];
+            arrValue.toArray(argsValue);
+            tmp.put(key,argsValue);
+            arrValue.clear();
         }
        return tmp;
     }
     //命令对应的行为
-    private static void func(HashMap<String, String> parseArgs){
+    private static void func(HashMap<String, String[]> parseArgs){
         ArrayList<province> list = new ArrayList<>();
         if(parseArgs.isEmpty()){
             return;
         }
-        if (parseArgs.containsKey("-log")){
-            String path = parseArgs.get("-log");
-            String[] allContent = readFile(path);//读取文件夹下的文件
+        if (parseArgs.containsKey("-log") && parseArgs.get("-log").length == 1){
+            String[] path = parseArgs.get("-log");
+            String[] allContent = readFile(path[0]);//读取文件夹下的文件
             list = match(allContent);//对内容分析返回结果
             sortProvince(list);
             for(int i = 0;i < list.size(); i++){
@@ -113,34 +119,27 @@ class InfectStatistic {
             }
         }
         else {
-            System.out.println("必须附带log参数！");
+            System.out.println("log参数格式错误！");
             return;
         }
-        if (parseArgs.containsKey("-out")){
-            String filePath = parseArgs.get("-out");
-            initFile(filePath);
+        if (parseArgs.containsKey("-out") && parseArgs.get("-out").length == 1){
+            String[] filePath = parseArgs.get("-out");
+            initFile(filePath[0]);
             for(int i = 0;i < list.size(); i++){
-                writeStringToFile(filePath, list.get(i).printResult());
+                writeStringToFile(filePath[0], list.get(i).printResult());//暂时输出的是全部省份信息
             }
-            System.out.println("写入文件"+filePath+"成功！");
-
+            System.out.println("写入文件"+filePath[0]+"成功！");
         }
         else {
-            System.out.println("必须附带out参数！");
+            System.out.println("out参数格式错误！");
             return;
         }
         if (parseArgs.containsKey("-date")){
 
         }
         if (parseArgs.containsKey("-type")){
-            String type = parseArgs.get("-type");
-            switch (type){
-                case "ip":break;
-                case "sp":break;
-                case "cure":break;
-                case "dead":break;
-                default:
-            }
+            String[] type = parseArgs.get("-type");
+
         }
         if (parseArgs.containsKey("-province")){
 
@@ -406,9 +405,10 @@ class InfectStatistic {
         return convertSuccess;
     }
     public static void main(String[] args) {
-        String cmdLine = "list -date -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log -out G:/output.txt";
+        String cmdLine = "list -date -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log" +
+                " -type ip sp -out G:/output.txt";
         args = cmdLine.split(" ");
-        HashMap<String, String> parseArgs = parseArgs(args);
+        HashMap<String, String[]> parseArgs = parseArgs(args);
         func(parseArgs);
     }
 }
