@@ -9,3 +9,6 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+021700511/test_InfectStatistic.py
+021700511/log/test_log/
+021700511/result/test_result/
