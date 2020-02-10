@@ -1,8 +1,7 @@
 import java.io.*;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,6 +70,10 @@ class InfectStatistic {
         HashMap<String, String> tmp = new HashMap<String, String>();
         String key = null;
         //判断命令是否为list
+        if(args.length == 0){
+            System.out.println("必须含有命令list！");
+            return tmp;
+        }
         if (!args[0].equals("list")) {
             System.out.println("该命令不存在！");
             return tmp;
@@ -96,17 +99,30 @@ class InfectStatistic {
     }
     //命令对应的行为
     private static void func(HashMap<String, String> parseArgs){
+        ArrayList<province> list = new ArrayList<>();
+        if(parseArgs.isEmpty()){
+            return;
+        }
         if (parseArgs.containsKey("-log")){
             String path = parseArgs.get("-log");
             String[] allContent = readFile(path);//读取文件夹下的文件
-            ArrayList<province> list = match(allContent);//对内容分析返回结果
-
+            list = match(allContent);//对内容分析返回结果
+            sortProvince(list);
+            for(int i = 0;i < list.size(); i++){
+                System.out.println(list.get(i).printResult());
+            }
         }
         else {
             System.out.println("必须附带log参数！");
             return;
         }
         if (parseArgs.containsKey("-out")){
+            String filePath = parseArgs.get("-out");
+            initFile(filePath);
+            for(int i = 0;i < list.size(); i++){
+                writeStringToFile(filePath, list.get(i).printResult());
+            }
+            System.out.println("写入文件"+filePath+"成功！");
 
         }
         else {
@@ -130,7 +146,39 @@ class InfectStatistic {
 
         }
     }
-
+    //将省份排序
+    private static void sortProvince(ArrayList<province> list){
+        //Comparator<String> comparator = Collator.getInstance(Locale.CHINA);
+        Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);
+        /*for(int i = 0; i < list.size() - 1; i++){
+            cmp.compare(list.get(i).getName(),list.get(i+1).getName());
+        }*/
+    }
+    //清空文件内容
+    private static void initFile(String filePath){
+        FileWriter writer;
+        try {
+            writer = new FileWriter(filePath);
+            writer.write("");//清空原文件内容
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    //将字符串写入文件
+    private static void writeStringToFile(String filePath, String str) {
+        try {
+            FileWriter fw = new FileWriter(filePath, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(str);
+            bw.write("\n");
+            bw.close();
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     //判断list中是否含有指定name属性的province
     private static boolean isListName(ArrayList<province> list, String name){
         for(int i = 0; i < list.size(); i++){
@@ -142,10 +190,8 @@ class InfectStatistic {
     }
     //对读取到的内容正则匹配
     private static ArrayList<province> match(String[] allContent){
-        //String[] result = new String[allContent.length];
-        ArrayList<province> list = new ArrayList<province>();
+        ArrayList<province> list = new ArrayList<>();
         try{
-
             for(int i = 0; i<allContent.length; i++){
                 BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(allContent[i].getBytes())));
                 String s;
@@ -283,11 +329,20 @@ class InfectStatistic {
                     }
                 }
             }
+            int allIp = 0;
+            int allSp = 0;
+            int allCure = 0;
+            int allDead = 0;
+            for(int i = 0; i < list.size(); i++){
+                allIp += list.get(i).getIp();
+                allSp += list.get(i).getSp();
+                allCure += list.get(i).getCure();
+                allDead += list.get(i).getDead();
+            }
+            province country = new province("全国", allIp, allSp, allCure, allDead );
+            list.add(country);
         }catch (Exception e){
             e.printStackTrace();
-        }
-        for(int i = 0;i < list.size(); i++){
-            System.out.println(list.get(i).printResult());
         }
         return list;
     }
@@ -300,7 +355,6 @@ class InfectStatistic {
             File file = new File(String.valueOf(allPath.get(i)));
             String content = txt2String(file);
             allContent[i] = content;
-            //System.out.println(allContent[i]);
         }
         return allContent;
     }
@@ -308,7 +362,7 @@ class InfectStatistic {
     private static String txt2String(File file) {
         StringBuilder result = new StringBuilder();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));// 构造一个BufferedReader类来读取文件
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));// 构造一个BufferedReader类来读取文件
             String s = null;
             while ((s = br.readLine()) != null && !s.startsWith("//")) {// 使用readLine方法，一次读一行
                 result.append(System.lineSeparator() + s);
@@ -352,11 +406,9 @@ class InfectStatistic {
         return convertSuccess;
     }
     public static void main(String[] args) {
-        String cmdLine = "list -date -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log -out D:/output.txt";
+        String cmdLine = "list -date -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log -out G:/output.txt";
         args = cmdLine.split(" ");
         HashMap<String, String> parseArgs = parseArgs(args);
-        //System.out.println(parseArgs);
-
         func(parseArgs);
     }
 }
