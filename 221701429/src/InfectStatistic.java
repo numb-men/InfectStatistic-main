@@ -1,5 +1,6 @@
 import java.io.*;
 import java.text.Collator;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -116,27 +117,40 @@ class InfectStatistic {
        return tmp;
     }
     //命令对应的行为
-    private static void func(HashMap<String, String[]> parseArgs){
+    private static void func(HashMap<String, String[]> parseArgs) throws ParseException {
         ArrayList<province> list = new ArrayList<>();//完整的省份列表
         ArrayList<province> list1 = new ArrayList<>();//经过-province筛选后的列表
         if(parseArgs.isEmpty()){
             return;
         }
         if (parseArgs.containsKey("-log") && parseArgs.get("-log").length == 1){
-            String[] path = parseArgs.get("-log");
-            String[] allContent = readFile(path[0]);//读取文件夹下的文件
-            list = match(allContent);//对内容分析返回结果
+            if (parseArgs.containsKey("-date") && parseArgs.get("-date").length == 1){
+                String date = parseArgs.get("-date")[0];
+                if(!isValidDate(date)){
+                    System.out.println("date参数值的日期格式不正确,正确格式：yyyy-MM-dd");
+                    return;
+                }
+                String[] path = parseArgs.get("-log");
+                String[] allContent = readFile(path[0],date);//读取文件夹下的文件
+                list = match(allContent);//对内容分析返回结果
+            }
+            else if(parseArgs.get("-date").length > 1){
+                System.out.println("-ate参数值只能存在一个！");
+                return;
+            }
+            else{
+                String[] path = parseArgs.get("-log");
+                Date currentTime = new Date();
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String currentDate = simpleDateFormat.format(currentTime);
+                String[] allContent = readFile(path[0],currentDate);//读取文件夹下的文件
+                list = match(allContent);//对内容分析返回结果
+            }
             sortProvince(list);
-            /*for(int i = 0;i < list.size(); i++){
-                System.out.println(list.get(i).printResult());
-            }*/
         }
         else {
             System.out.println("log参数格式错误！");
             return;
-        }
-        if (parseArgs.containsKey("-date")){
-
         }
         if (parseArgs.containsKey("-type")){
             String[] type = parseArgs.get("-type");
@@ -163,9 +177,15 @@ class InfectStatistic {
         if (parseArgs.containsKey("-province")){
             String[] provinces = parseArgs.get("-province");
             for(int i = 0; i < provinces.length; i++){
-                for(int j = 0; j < list.size(); j++){
+                int j;
+                for(j = 0; j < list.size(); j++){
                     if(provinces[i].equals(list.get(j).getName())){//从list中找到和-province参数值相同的省份
                         list1.add(list.get(j));//把选定的省份加入筛选过后的列表里
+                        break;
+                    }
+                    if(j == list.size() - 1){//list中不存在该省份时新建
+                        province pro = new province(provinces[i],0,0,0,0);
+                        list1.add(pro);
                     }
                 }
             }
@@ -387,9 +407,9 @@ class InfectStatistic {
         return list;
     }
     //读取目录下的日志
-    private static String[] readFile(String path){
+    private static String[] readFile(String path,String date) throws ParseException {
         File all = new File(path);
-        List allPath = getFile(all);
+        List allPath = getFile(all,date);
         String[] allContent = new String[allPath.size()];
         for (int i = 0; i < allPath.size(); i++){
             File file = new File(String.valueOf(allPath.get(i)));
@@ -414,18 +434,18 @@ class InfectStatistic {
         return result.toString();
     }
     // 读取文件夹下所有文件名
-    private static List getFile(File file) {
+    private static List getFile(File file, String date) throws ParseException {
         List listLocal = new ArrayList<>();
         if (file != null) {
             File[] f = file.listFiles();
             if (f != null) {
-                for (int i = 0; i < f.length; i++) {
+                for (File value : f) {
                     //getFile(f[i]);
-                    String str = String.valueOf(f[i]);
+                    String str = String.valueOf(value);
                     String str1 = str.substring(str.length() - 18, str.length() - 8);
                     String str2 = str.substring(str.length() - 8);
-                    if(isValidDate(str1) && str2.matches(".log.txt")){//判断文件名是否符合标准
-                        listLocal.add(f[i]);
+                    if (isValidDate(str1) && str2.matches(".log.txt") && isBefore(str1, date)) {//判断文件名是否符合标准
+                        listLocal.add(value);
                     }
                 }
             }
@@ -435,7 +455,7 @@ class InfectStatistic {
     //判断字符串是否为日期格式
     private static boolean isValidDate(String str) {
         boolean convertSuccess = true;
-        // 指定日期格式为四位年/两位月份/两位日期，注意yyyy/MM/dd区分大小写；
+        // 指定日期格式为四位年/两位月份/两位日期，注意yyyy-MM-dd区分大小写；
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         try {
             format.setLenient(false);
@@ -445,9 +465,16 @@ class InfectStatistic {
         }
         return convertSuccess;
     }
-    public static void main(String[] args) {
-        String cmdLine = "list -date -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log" +
-                " -type ip sp -out G:/output.txt -province 全国 福建";
+    //比较日期前后，time1日期比time2前则返回true，否则返回false
+    private static boolean isBefore(String time1, String time2) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd");
+        Date date1 =  simpleDateFormat.parse(time1);
+        Date date2 =  simpleDateFormat.parse(time2);
+        return !date1.after(date2);
+    }
+    public static void main(String[] args) throws ParseException {
+        String cmdLine = "list -date 2020-01-27 -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log" +
+                " -type ip sp -out G:/output.txt -province 全国 福建 上海";
         args = cmdLine.split(" ");
         HashMap<String, String[]> parseArgs = parseArgs(args);
         func(parseArgs);
