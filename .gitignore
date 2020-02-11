@@ -5,8 +5,8 @@
 # IntelliJ project files
 .idea
 *.iml
-out
-lib
+/out
+/lib
 gen
 .idea/
 InfectStatistic-example.iml
