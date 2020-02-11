@@ -8,7 +8,7 @@
  */
 import org.junit.Test;
 
-import javax.xml.crypto.Data;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -46,13 +46,12 @@ public class InfectStatistic {
     }
 
     public static String getTheLatestDate() {
-        String latestTime = "";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return simpleDateFormat.format(new Date());
     }
 
     public void commandAnalyze(String[] commands) throws CommandErrorException {
-        if(InfectStatistic.commands.contains(commands[0]))
+        if(!InfectStatistic.commands.contains(commands[0]))
         {
             throw new CommandErrorException();
         }
@@ -62,10 +61,6 @@ public class InfectStatistic {
             int i;
             int count = 0;
             for (i = 1; i <= commands.length; i++) {
-                if(commands[i].contains("-") && !ListCommand.command.contains(commands[i]))
-                {
-                    throw new CommandErrorException();
-                }
                 if(i == commands.length)
                 {
                     if(params.isEmpty())
@@ -74,6 +69,10 @@ public class InfectStatistic {
                     }
                     listCommand.listMap.put(command,params);
                     break;
+                }
+                if(commands[i].charAt(0) == '-' && !ListCommand.command.contains(commands[i]))
+                {
+                    throw new CommandErrorException();
                 }
                 if(!commands[i].equals(command) && !"".equals(command) && ListCommand.command.contains(commands[i]))
                 {
@@ -97,16 +96,50 @@ public class InfectStatistic {
             }
         }
     }
+    public void fileRead() throws IOException {
+        String input = listCommand.listMap.get("-log").get(0);
+        String output = listCommand.listMap.get("-out").get(0);
+        String tempString="";
+        BufferedReader reader = new BufferedReader(new FileReader(input));
+        //BufferedWriter writer = new BufferedWriter(new FileWriter(output));
+        if(listCommand.listMap.containsKey("-date"))
+        {
+            input += listCommand.listMap.get("-date") + ".log.txt";
+
+        }
+        else
+        {
+            input += getTheLatestDate() + ".log.txt";
+        }
+        if(!listCommand.listMap.containsKey("-type") && !listCommand.listMap.containsKey("-province")) {
+
+            while ((tempString = reader.readLine()) != null) {
+                System.out.println(stringProcessing(tempString));
+                //writer.write();
+                //writer.newLine();
+            }
+            //writer.flush();
+            reader.close();
+            //writer.close();
+        }
+
+    }
+
+    public String stringProcessing(String ch)
+    {
+        return ch;
+    }
+
 
 
     @Test
     public void unitTest()
     {
         List<String> list = new ArrayList<>();
-        list.add("list -date 2020-01-22 -log D:/log/ -out D:/output.txt");
-        list.add("list -type sp cure -province 福建 -log D:/log/ -out D:/output.txt");
+        list.add("list -date 2020-01-22 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:/output.txt");
+        //list.add("list -type sp cure -province 福建 -log D:/log/ -out D:/output.txt");
         //list.add("change -date 2020-01-22 -log D:/log/ -out D:/output.txt");
-        list.add("list -typesp cure -log D:/log/ -out D:/output.txt");
+        //list.add("list -typesp cure -log D:/log/ -out D:/output.txt");
         //list.add("list -type sp cure -province -log D:/log/ -out D:/output.txt");
         for(String command:list) {
             String[] commands = command.split(" ");
@@ -125,6 +158,7 @@ public class InfectStatistic {
                     System.out.println("");
                 }
                 System.out.println("-------------------------------");
+               // fileRead();
             }catch (CommandErrorException e){
                 System.out.println("您输入的命令出现错误，请重新输入!");
                 exit(-1);
