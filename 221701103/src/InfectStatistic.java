@@ -14,27 +14,27 @@ import java.util.Arrays;
  * InfectStatistic
  * TODO
  *
- * @author è¡¡å¤©å®‡
+ * @author ºâÌìÓî
  * @version 1.0
  * 
  */
-public class array {
-	static int count=0;//å·²æœ‰æ•°æ®çš„æ¡æ•°
+public class InfectStatistic {
+	static int count=0;//ÒÑÓĞÊı¾İµÄÌõÊı
 	
     public static void main(String[] args) throws IOException {   	
     	cmdArgs cmd=new cmdArgs(args);
-    	int i=cmd.hasParam("-date");//å­˜å‘½ä»¤çš„ç´¢å¼•
-    	if(i!=-1) {//æœ‰æŒ‡å®šæ—¥æœŸ
+    	int i=cmd.hasParam("-date");//´æÃüÁîµÄË÷Òı
+    	if(i!=-1) {//ÓĞÖ¸¶¨ÈÕÆÚ
     		readLog(args[i+1],true);
     	}  
     }
    
-static class line{//ç»Ÿè®¡ä¹‹åçš„ç—…ä¾‹æ¯æ¡çš„ç»“æ„
-	String location;//åœ°ç†ä½ç½®
-	int grhz;//æ„ŸæŸ“æ‚£è€…äººæ•°
-	int yshz;//ç–‘ä¼¼æ‚£è€…äººæ•°
-	int recover;//æ²»æ„ˆäººæ•°
-	int dead;//æ­»äº¡äººæ•°
+static class line{//Í³¼ÆÖ®ºóµÄ²¡ÀıÃ¿ÌõµÄ½á¹¹
+	String location;//µØÀíÎ»ÖÃ
+	int grhz;//¸ĞÈ¾»¼ÕßÈËÊı
+	int yshz;//ÒÉËÆ»¼ÕßÈËÊı
+	int recover;//ÖÎÓúÈËÊı
+	int dead;//ËÀÍöÈËÊı
 	
 	line(String plocation,int pgrhz,int pyshz,int precover,int pdead){
 		location=plocation;
@@ -48,16 +48,16 @@ static class line{//ç»Ÿè®¡ä¹‹åçš„ç—…ä¾‹æ¯æ¡çš„ç»“æ„
 	}
 
 	/*
-              * åŠŸèƒ½ï¼šæ‰“å°ä¸€æ¡ç»Ÿè®¡ç–«æƒ…ä¿¡æ¯
-              * è¾“å…¥å‚æ•°ï¼šæ— 
-              *è¿”å›å€¼ï¼šä¿¡æ¯å­—ç¬¦ä¸²
+              * ¹¦ÄÜ£º´òÓ¡Ò»ÌõÍ³¼ÆÒßÇéĞÅÏ¢
+              * ÊäÈë²ÎÊı£ºÎŞ
+              *·µ»ØÖµ£ºĞÅÏ¢×Ö·û´®
     */
 	String printline() {
-		return(location+" æ„ŸæŸ“æ‚£è€…"+grhz+"äºº ç–‘ä¼¼æ‚£è€…"+yshz+"äºº æ²»æ„ˆ"+recover+"äºº æ­»äº¡"+dead+"äºº");
+		return(location+" ¸ĞÈ¾»¼Õß"+grhz+"ÈË ÒÉËÆ»¼Õß"+yshz+"ÈË ÖÎÓú"+recover+"ÈË ËÀÍö"+dead+"ÈË");
 	}
 }
 
-static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
+static class cmdArgs {//»ñÈ¡Ê¹ÓÃÃüÁî
     String[] args;
     
     cmdArgs(String[] passargs) {
@@ -65,9 +65,9 @@ static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
     }
     
     /*
-                     * åŠŸèƒ½ï¼šåˆ¤æ–­æ˜¯å¦å­˜åœ¨æŸå‘½ä»¤
-                     * è¾“å…¥å‚æ•°ï¼šéœ€è¦æŸ¥éªŒçš„å‘½ä»¤
-                     *è¿”å›å€¼ï¼šè¯¥å‘½ä»¤çš„ç´¢å¼•intå€¼ï¼Œå¦‚æœæ²¡æœ‰è¯¥å‘½ä»¤åˆ™è¿”å›-1
+                     * ¹¦ÄÜ£ºÅĞ¶ÏÊÇ·ñ´æÔÚÄ³ÃüÁî
+                     * ÊäÈë²ÎÊı£ºĞèÒª²éÑéµÄÃüÁî
+                     *·µ»ØÖµ£º¸ÃÃüÁîµÄË÷ÒıintÖµ£¬Èç¹ûÃ»ÓĞ¸ÃÃüÁîÔò·µ»Ø-1
     */
     int hasParam(String key) {
         for(int i=0;i<args.length;i++) {
@@ -80,9 +80,9 @@ static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
 }
 
      /*
-              * åŠŸèƒ½ï¼šåˆ¤æ–­æ—¥æœŸçš„åˆæ³•æ€§
-              * è¾“å…¥å‚æ•°ï¼šæœ€æ–°æ›´æ–°æ—¥å¿—çš„æ—¶é—´ï¼Œå¾…éªŒè¯æ—¥æœŸå­—ç¬¦ä¸²
-              *è¿”å›å€¼ï¼štrue,false
+              * ¹¦ÄÜ£ºÅĞ¶ÏÈÕÆÚµÄºÏ·¨ĞÔ
+              * ÊäÈë²ÎÊı£º×îĞÂ¸üĞÂÈÕÖ¾µÄÊ±¼ä£¬´ıÑéÖ¤ÈÕÆÚ×Ö·û´®
+              *·µ»ØÖµ£ºtrue,false
     */
     static boolean isCorrectdate(String lastdate,String date) {
     	if(isBefore(lastdate,date)) {
@@ -94,22 +94,22 @@ static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
     }
     
      /*
-     * åŠŸèƒ½ï¼šæ¯”è¾ƒæ—¥æœŸå¤§å°
-     * è¾“å…¥å‚æ•°ï¼šä¸¤ä¸ªéœ€è¦æ¯”è¾ƒçš„æ—¥æœŸå­—ç¬¦ä¸²
-     *è¿”å›å€¼ï¼šå‰<åè¿”å›trueï¼Œå‰>åè¿”å›false
+     * ¹¦ÄÜ£º±È½ÏÈÕÆÚ´óĞ¡
+     * ÊäÈë²ÎÊı£ºÁ½¸öĞèÒª±È½ÏµÄÈÕÆÚ×Ö·û´®
+     *·µ»ØÖµ£ºÇ°<ºó·µ»Øtrue£¬Ç°>ºó·µ»Øfalse
     */
     static boolean isBefore(String date1,String date2) {
     	String[] dsp1=date1.split("-");
-    	String[] dsp2=date2.split("-");//åˆ†å‰²å¹´æœˆæ—¥
-    	if(dsp1[0].compareTo(dsp2[0])>0) {//å¹´ä»½è¿‡å¤§
+    	String[] dsp2=date2.split("-");//·Ö¸îÄêÔÂÈÕ
+    	if(dsp1[0].compareTo(dsp2[0])>0) {//Äê·İ¹ı´ó
     		return false;
     	}
-    	else if(dsp1[0].equals(dsp2[0])){//å¹´ä»½ç›¸ç­‰
-    		if(dsp1[1].compareTo(dsp2[1])>0) {//æœˆä»½è¿‡å¤§
+    	else if(dsp1[0].equals(dsp2[0])){//Äê·İÏàµÈ
+    		if(dsp1[1].compareTo(dsp2[1])>0) {//ÔÂ·İ¹ı´ó
     			return false;
     		}
-    		else if(dsp1[1].equals(dsp2[1])) {//æœˆä»½ç›¸ç­‰
-    			if(dsp1[2].compareTo(dsp2[2])>0) {//æ—¥æœŸè¿‡å¤§
+    		else if(dsp1[1].equals(dsp2[1])) {//ÔÂ·İÏàµÈ
+    			if(dsp1[2].compareTo(dsp2[2])>0) {//ÈÕÆÚ¹ı´ó
     				return false;
     			}
     			else {
@@ -126,28 +126,28 @@ static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
     }
     
     /*
-              * åŠŸèƒ½ï¼šè·å–æœ€æ–°æ—¥å¿—çš„æ—¶é—´
-              * è¾“å…¥å‚æ•°ï¼šæ— 
-              *è¿”å›å€¼ï¼šæ—¥æœŸå­—ç¬¦ä¸²
+              * ¹¦ÄÜ£º»ñÈ¡×îĞÂÈÕÖ¾µÄÊ±¼ä
+              * ÊäÈë²ÎÊı£ºÎŞ
+              *·µ»ØÖµ£ºÈÕÆÚ×Ö·û´®
     */
     static String getLastdate() {
     	String date="";
     	File file = new File("d:/log/");
-        String[] filename = file.list();//è·å–æ‰€æœ‰æ—¥å¿—æ–‡ä»¶å      
+        String[] filename = file.list();//»ñÈ¡ËùÓĞÈÕÖ¾ÎÄ¼şÃû      
     	date=filename[filename.length-1].substring(0,10);    	
     	return date;
     }
     
     /*
-     * åŠŸèƒ½ï¼šè·å–æŒ‡å®šæ—¥æœŸæ–‡ä»¶åœ¨æ‰€æœ‰æ—¥å¿—ä¸­çš„ç´¢å¼•
-     * è¾“å…¥å‚æ•°ï¼šæŒ‡å®šæ—¥æœŸå­—ç¬¦ä¸²
-     *è¿”å›å€¼ï¼šç´¢å¼•intå€¼
+     * ¹¦ÄÜ£º»ñÈ¡Ö¸¶¨ÈÕÆÚÎÄ¼şÔÚËùÓĞÈÕÖ¾ÖĞµÄË÷Òı
+     * ÊäÈë²ÎÊı£ºÖ¸¶¨ÈÕÆÚ×Ö·û´®
+     *·µ»ØÖµ£ºË÷ÒıintÖµ
     */
     static int findPot(String date) {
     	File file = new File("d:/log/");
-        String[] filename = file.list();//è·å–æ‰€æœ‰æ—¥å¿—æ–‡ä»¶å      
+        String[] filename = file.list();//»ñÈ¡ËùÓĞÈÕÖ¾ÎÄ¼şÃû      
     	for(int i=0;i<filename.length;i++) {
-    		String datecut=filename[i].substring(0,10);//åªè·å–æ–‡ä»¶åå‰çš„æ—¥æœŸ
+    		String datecut=filename[i].substring(0,10);//Ö»»ñÈ¡ÎÄ¼şÃûÇ°µÄÈÕÆÚ
     		if(date.equals(datecut)) {
     			return i;
     		}
@@ -156,47 +156,47 @@ static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
     }
         
       /*
-     * åŠŸèƒ½ï¼šè¯»å–logæ–‡ä»¶
-     * è¾“å…¥å‚æ•°ï¼šæŒ‡å®šçš„è¾“å‡ºæ—¥æœŸï¼Œæ˜¯å¦æŒ‡å®šè¾“å‡ºæ—¥æœŸ
-     *è¿”å›å€¼ï¼šæ— 
+     * ¹¦ÄÜ£º¶ÁÈ¡logÎÄ¼ş
+     * ÊäÈë²ÎÊı£ºÖ¸¶¨µÄÊä³öÈÕÆÚ£¬ÊÇ·ñÖ¸¶¨Êä³öÈÕÆÚ
+     *·µ»ØÖµ£ºÎŞ
     */
     static void readLog(String date,boolean hasDate) throws IOException {
-    	line[] all=new line[34];//åˆå§‹åŒ–ç»“æœ
+    	line[] all=new line[34];//³õÊ¼»¯½á¹û
 	    for(int j=0;j<34;j++) {
 	    	all[j]=new line();
 	    }
     	if(hasDate==true) {
-    		if(isCorrectdate(getLastdate(),date)) {//æ£€éªŒè¾“å…¥æ—¥æœŸæ­£ç¡®æ€§
-    			int i=0;//æ§åˆ¶æ—¥å¿—è¯»å–ç´¢å¼•
+    		if(isCorrectdate(getLastdate(),date)) {//¼ìÑéÊäÈëÈÕÆÚÕıÈ·ĞÔ
+    			int i=0;//¿ØÖÆÈÕÖ¾¶ÁÈ¡Ë÷Òı
     			File file = new File("d:/log/");
-    			String[] filename = file.list();//è·å–æ‰€æœ‰æ—¥å¿—æ–‡ä»¶å  			    
+    			String[] filename = file.list();//»ñÈ¡ËùÓĞÈÕÖ¾ÎÄ¼şÃû  			    
     			while(i<=findPot(date)) {   			
 					FileInputStream fs=new FileInputStream("d:/log/"+filename[i]);
 				    InputStreamReader is=new InputStreamReader(fs);
 				    BufferedReader br=new BufferedReader(is);
 				    String s="";				    
-				    while((s=br.readLine())!=null){//ä¸€è¡Œä¸€è¡Œè¯»
-					    String[] sp =s.split(" ");//åˆ†éš”å¼€çš„å­—ç¬¦ä¸²
+				    while((s=br.readLine())!=null){//Ò»ĞĞÒ»ĞĞ¶Á
+					    String[] sp =s.split(" ");//·Ö¸ô¿ªµÄ×Ö·û´®
 					    statistics(sp,all);          	
 		    	    }
 				    br.close();
 		    	}
     		}
-    		else {//æ—¥æœŸä¸æ­£ç¡®
-    			System.out.print("è¾“å…¥çš„æ—¥æœŸè¶…å‡ºèŒƒå›´ï¼Œè¯·é‡æ–°å‘½ä»¤ï¼");
+    		else {//ÈÕÆÚ²»ÕıÈ·
+    			System.out.print("ÊäÈëµÄÈÕÆÚ³¬³ö·¶Î§£¬ÇëÖØĞÂÃüÁî£¡");
     		}
     	}
-    	else {//æ²¡è¾“å…¥æŒ‡å®šæ—¥æœŸ
-    		int i=0;//æ§åˆ¶æ—¥å¿—è¯»å–ç´¢å¼•
+    	else {//Ã»ÊäÈëÖ¸¶¨ÈÕÆÚ
+    		int i=0;//¿ØÖÆÈÕÖ¾¶ÁÈ¡Ë÷Òı
 			File file = new File("d:/log/");
-			String[] filename = file.list();//è·å–æ‰€æœ‰æ—¥å¿—æ–‡ä»¶å  
+			String[] filename = file.list();//»ñÈ¡ËùÓĞÈÕÖ¾ÎÄ¼şÃû  
 			while(i<filename.length) {   			
 				FileInputStream fs=new FileInputStream("d:/log/"+filename[i]);
 			    InputStreamReader is=new InputStreamReader(fs);
 			    BufferedReader br=new BufferedReader(is);
 			    String s="";				    
-			    while((s=br.readLine())!=null){//ä¸€è¡Œä¸€è¡Œè¯»
-				    String[] sp =s.split(" ");//åˆ†éš”å¼€çš„å­—ç¬¦ä¸²
+			    while((s=br.readLine())!=null){//Ò»ĞĞÒ»ĞĞ¶Á
+				    String[] sp =s.split(" ");//·Ö¸ô¿ªµÄ×Ö·û´®
 				    statistics(sp,all);          	
 	    	    }
 			    br.close();
@@ -206,72 +206,72 @@ static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
     }
        
      /*
-	     * åŠŸèƒ½ï¼šç»Ÿè®¡å„åœ°çš„æƒ…å†µ
-	     * è¾“å…¥å‚æ•°ï¼šæ—¥å¿—é‡Œæ¯è¡Œçš„å­—ç¬¦ä¸²æ•°ç»„ï¼Œæ€»çš„è®°å½•æ•°ç»„
-	     *è¿”å›å€¼ï¼šæ— 
+	     * ¹¦ÄÜ£ºÍ³¼Æ¸÷µØµÄÇé¿ö
+	     * ÊäÈë²ÎÊı£ºÈÕÖ¾ÀïÃ¿ĞĞµÄ×Ö·û´®Êı×é£¬×ÜµÄ¼ÇÂ¼Êı×é
+	     *·µ»ØÖµ£ºÎŞ
     */
     static void statistics(String[] sp,line[] all) {   	
     	String location="";    	
     	location=sp[0];
     	line line1;
-    	if(!isExistlocation(location,all)) {//ä¸å­˜åœ¨å¯¹åº”è¯¥çœçš„è®°å½•
-    		line1=new line(location,0,0,0,0);//æ–°å»ºæ•°æ®æ¡   		
+    	if(!isExistlocation(location,all)) {//²»´æÔÚ¶ÔÓ¦¸ÃÊ¡µÄ¼ÇÂ¼
+    		line1=new line(location,0,0,0,0);//ĞÂ½¨Êı¾İÌõ   		
     		all[count]=line1;
     		count++;
     	}
     	else {
-    		line1=getLine(location,all);//è·å¾—åŸæœ‰çš„æ•°æ®æ¡
+    		line1=getLine(location,all);//»ñµÃÔ­ÓĞµÄÊı¾İÌõ
     	}    	
-    	if(sp[1].equals("æ–°å¢")) {
-    		if(sp[2].equals("æ„ŸæŸ“æ‚£è€…")) {//è·å¾—æ„ŸæŸ“äººæ•°
+    	if(sp[1].equals("ĞÂÔö")) {
+    		if(sp[2].equals("¸ĞÈ¾»¼Õß")) {//»ñµÃ¸ĞÈ¾ÈËÊı
     			line1.grhz+=Integer.valueOf(sp[3].substring(0,sp[3].length()-1));
     		}
-    		else {//ç–‘ä¼¼æ‚£è€…
+    		else {//ÒÉËÆ»¼Õß
     			line1.yshz+=Integer.valueOf(sp[3].substring(0,sp[3].length()-1));
     		}
     	}
-    	else if(sp[1].equals("æ­»äº¡")) {
+    	else if(sp[1].equals("ËÀÍö")) {
     		line1.dead+=Integer.valueOf(sp[2].substring(0,sp[2].length()-1));
     	}
-    	else if(sp[1].equals("æ²»æ„ˆ")) {
+    	else if(sp[1].equals("ÖÎÓú")) {
     		line1.recover+=Integer.valueOf(sp[2].substring(0,sp[2].length()-1));
     	}
-    	else if(sp[1].equals("ç–‘ä¼¼æ‚£è€…")) {
-    		if(sp[2].equals("ç¡®è¯Šæ„ŸæŸ“")){
-    			int change=Integer.valueOf(sp[3].substring(0,sp[2].length()-1));//æ”¹å˜äººæ•°
+    	else if(sp[1].equals("ÒÉËÆ»¼Õß")) {
+    		if(sp[2].equals("È·Õï¸ĞÈ¾")){
+    			int change=Integer.valueOf(sp[3].substring(0,sp[2].length()-1));//¸Ä±äÈËÊı
     			line1.grhz+=change;
     			line1.yshz-=change; 			
     		}
-    		else {//æµå…¥æƒ…å†µ
-    			String tolocation=sp[3];//æµå…¥çœ
-    			int change=Integer.valueOf(sp[4].substring(0,sp[4].length()-1));//æ”¹å˜äººæ•°
+    		else {//Á÷ÈëÇé¿ö
+    			String tolocation=sp[3];//Á÷ÈëÊ¡
+    			int change=Integer.valueOf(sp[4].substring(0,sp[4].length()-1));//¸Ä±äÈËÊı
     			line line2;
-    	    	if(!isExistlocation(tolocation,all)) {//ä¸å­˜åœ¨å¯¹åº”è¯¥çœçš„è®°å½•
-    	    		line2=new line(tolocation,0,0,0,0);//æ–°å»ºæ•°æ®æ¡
+    	    	if(!isExistlocation(tolocation,all)) {//²»´æÔÚ¶ÔÓ¦¸ÃÊ¡µÄ¼ÇÂ¼
+    	    		line2=new line(tolocation,0,0,0,0);//ĞÂ½¨Êı¾İÌõ
     	    		all[count]=line2;
     	    		count++;
     	    	}
     	    	else {
-    	    		line2=getLine(tolocation,all);//è·å¾—åŸæœ‰çš„æ•°æ®æ¡
+    	    		line2=getLine(tolocation,all);//»ñµÃÔ­ÓĞµÄÊı¾İÌõ
     	    	}
     			line1.yshz-=change;
     			line2.yshz+=change;
     		}
     	}
-    	else if(sp[1].equals("æ’é™¤")) {
+    	else if(sp[1].equals("ÅÅ³ı")) {
     		line1.yshz-=Integer.valueOf(sp[3].substring(0,sp[3].length()-1));   		
     	}
-    	else {//æ„ŸæŸ“æ‚£è€…æµå…¥æƒ…å†µ
-    		String tolocation=sp[3];//æµå…¥çœ
-			int change=Integer.valueOf(sp[4].substring(0,sp[4].length()-1));//æ”¹å˜äººæ•°
+    	else {//¸ĞÈ¾»¼ÕßÁ÷ÈëÇé¿ö
+    		String tolocation=sp[3];//Á÷ÈëÊ¡
+			int change=Integer.valueOf(sp[4].substring(0,sp[4].length()-1));//¸Ä±äÈËÊı
 			line line2;
-	    	if(!isExistlocation(tolocation,all)) {//ä¸å­˜åœ¨å¯¹åº”è¯¥çœçš„è®°å½•
-	    		line2=new line(tolocation,0,0,0,0);//æ–°å»ºæ•°æ®æ¡
+	    	if(!isExistlocation(tolocation,all)) {//²»´æÔÚ¶ÔÓ¦¸ÃÊ¡µÄ¼ÇÂ¼
+	    		line2=new line(tolocation,0,0,0,0);//ĞÂ½¨Êı¾İÌõ
 	    		all[count]=line2;
 	    		count++;
 	    	}
 	    	else {
-	    		line2=getLine(tolocation,all);//è·å¾—åŸæœ‰çš„æ•°æ®æ¡
+	    		line2=getLine(tolocation,all);//»ñµÃÔ­ÓĞµÄÊı¾İÌõ
 	    	}
 			line1.grhz-=change;
 			line2.grhz+=change;   		
@@ -279,9 +279,9 @@ static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
     }
     
      /*
-              * åŠŸèƒ½ï¼šæ‰¾å‡ºæŒ‡å®šåœ°å€æ˜¯å¦å·²ç»å­˜åœ¨è®°å½•
-              * è¾“å…¥å‚æ•°ï¼šçœçš„åå­—ï¼Œæ€»çš„è®°å½•æ•°ç»„
-              *è¿”å›å€¼ï¼štrue,false
+              * ¹¦ÄÜ£ºÕÒ³öÖ¸¶¨µØÖ·ÊÇ·ñÒÑ¾­´æÔÚ¼ÇÂ¼
+              * ÊäÈë²ÎÊı£ºÊ¡µÄÃû×Ö£¬×ÜµÄ¼ÇÂ¼Êı×é
+              *·µ»ØÖµ£ºtrue,false
     */
     static boolean isExistlocation(String location,line[] all) {
     	for(int i=0;i<count;i++) {
@@ -293,9 +293,9 @@ static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
     }
     
      /*
-              * åŠŸèƒ½ï¼šæ‰¾å‡ºæŒ‡å®šåœ°å€çš„è®°å½•
-              * è¾“å…¥å‚æ•°ï¼šçœçš„åå­—ï¼Œæ€»çš„è®°å½•æ•°ç»„
-              *è¿”å›å€¼ï¼šä¸€æ¡è®°å½•
+              * ¹¦ÄÜ£ºÕÒ³öÖ¸¶¨µØÖ·µÄ¼ÇÂ¼
+              * ÊäÈë²ÎÊı£ºÊ¡µÄÃû×Ö£¬×ÜµÄ¼ÇÂ¼Êı×é
+              *·µ»ØÖµ£ºÒ»Ìõ¼ÇÂ¼
     */  
     static line getLine(String location,line[] all) {
     	for(int i=0;i<count;i++) {
@@ -303,31 +303,31 @@ static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
     			return all[i];
     		}
     	}
-    	return null;//ä¸ä¼šç”¨åˆ°
+    	return null;//²»»áÓÃµ½
     }
     
      /*
-     * åŠŸèƒ½ï¼šæŠŠæ‰€æœ‰è®°å½•è¾“å‡ºåˆ°txtæ–‡ä»¶
-     * è¾“å…¥å‚æ•°ï¼šæ€»çš„è®°å½•æ•°ç»„all
-     *è¿”å›å€¼ï¼šæ— 
+     * ¹¦ÄÜ£º°ÑËùÓĞ¼ÇÂ¼Êä³öµ½txtÎÄ¼ş
+     * ÊäÈë²ÎÊı£º×ÜµÄ¼ÇÂ¼Êı×éall
+     *·µ»ØÖµ£ºÎŞ
     */
     static void printtxt(line[] all) throws IOException {
     	File f = new File("d:\\output.txt");
         BufferedWriter output = new BufferedWriter(new FileWriter(f,true));
-        for(int i=0;i<count;i++) {//å†™å…¥ç»Ÿè®¡æ•°æ®
+        for(int i=0;i<count;i++) {//Ğ´ÈëÍ³¼ÆÊı¾İ
         	output.write(all[i].printline() + "\n");
         }
     	output.close();
     }
     
      /*
-     * åŠŸèƒ½ï¼šæ‹¼éŸ³é¡ºåºæ’åºallæ•°ç»„
-     * è¾“å…¥å‚æ•°ï¼šæ€»çš„è®°å½•æ•°ç»„all
-     *è¿”å›å€¼ï¼šæ’åºå¥½çš„allæ•°ç»„
+     * ¹¦ÄÜ£ºÆ´ÒôË³ĞòÅÅĞòallÊı×é
+     * ÊäÈë²ÎÊı£º×ÜµÄ¼ÇÂ¼Êı×éall
+     *·µ»ØÖµ£ºÅÅĞòºÃµÄallÊı×é
     */
     static line[] sortline(line[] all) {
     	String[] location=new String[count];
-    	line[] result=new line[34];//æ’åºåç»“æœ
+    	line[] result=new line[34];//ÅÅĞòºó½á¹û
 	    for(int j=0;j<34;j++) {
 	    	result[j]=new line();
 	    }
@@ -336,7 +336,7 @@ static class cmdArgs {//è·å–ä½¿ç”¨å‘½ä»¤
     	}    	
         Collator cmp = Collator.getInstance(java.util.Locale.CHINA);
         Arrays.sort(location, cmp);
-        int j=0;//æ§åˆ¶çœä»½æ‹¼éŸ³é¡ºåºç´¢å¼•
+        int j=0;//¿ØÖÆÊ¡·İÆ´ÒôË³ĞòË÷Òı
         while(j<count) {
         	int i=0;
         	while(i<count) {
