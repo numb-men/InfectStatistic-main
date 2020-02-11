@@ -777,7 +777,7 @@ class InfectStatistician {
             }
         }
 
-        String formatString = getFormatString(types) + System.lineSeparator();
+        String formatString = getFormatString(types) + "\n";
         try (BufferedWriter writer =
                  new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(fileName)), encoding))) {
             ArrayList<String> provinceList;
