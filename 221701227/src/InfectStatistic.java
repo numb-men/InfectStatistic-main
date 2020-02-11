@@ -38,9 +38,7 @@ public class InfectStatistic {
     }
 
     ListCommand listCommand = new ListCommand();
-
     static List<String> commands = new ArrayList<>();
-
     static {
         commands.add("list");
     }
@@ -96,21 +94,29 @@ public class InfectStatistic {
             }
         }
     }
-    public void fileRead() throws IOException {
+    public void fileRead(String[] commands) throws IOException {
         String input = listCommand.listMap.get("-log").get(0);
         String output = listCommand.listMap.get("-out").get(0);
         String tempString="";
-        BufferedReader reader = new BufferedReader(new FileReader(input));
+        String command = "";
         //BufferedWriter writer = new BufferedWriter(new FileWriter(output));
         if(listCommand.listMap.containsKey("-date"))
         {
-            input += listCommand.listMap.get("-date") + ".log.txt";
+            String date = listCommand.listMap.get("-date").get(0);
+            input += "\\"+ date + ".log.txt";
 
         }
         else
         {
             input += getTheLatestDate() + ".log.txt";
         }
+        System.out.println(input);
+        for(String ch:commands)
+        {
+            command += ch + " ";
+        }
+        System.out.println(command);
+        BufferedReader reader = new BufferedReader(new FileReader(input));
         if(!listCommand.listMap.containsKey("-type") && !listCommand.listMap.containsKey("-province")) {
 
             while ((tempString = reader.readLine()) != null) {
@@ -158,10 +164,12 @@ public class InfectStatistic {
                     System.out.println("");
                 }
                 System.out.println("-------------------------------");
-               // fileRead();
+                fileRead(commands);
             }catch (CommandErrorException e){
                 System.out.println("您输入的命令出现错误，请重新输入!");
                 exit(-1);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
