@@ -1,3 +1,5 @@
+import java.util.regex.Pattern;
+
 /**
  * InfectStatistic
  * TODO
@@ -9,48 +11,77 @@
 class InfectStatistic {
 		
 		static String[] provinces= {
-				"È«¹ú",
-				"°²»Õ",
-				"±±¾©",
-				"ÖØÇì",
-				"¸£½¨",
-				"¸ÊËà",
-				"¹ã¶«",
-				"¹ãÎ÷",
-				"¹óÖİ",
-				"º£ÄÏ",
-				"ºÓ±±",
-				"ºÓÄÏ",
-				"ºÚÁú½­",
-				"ºş±±",
-				"ºşÄÏ",
-				"¼ªÁÖ",
-				"½­ËÕ",
-				"½­Î÷",
-				"ÁÉÄş",
-				"ÄÚÃÉ¹Å",
-				"ÄşÏÄ",
-				"Çàº£",
-				"É½¶«",
-				"É½Î÷",
-				"ÉÂÎ÷",
-				"ÉÏº£",
-				"ËÄ´¨",
-				"Ìì½ò",
-				"Î÷²Ø",
-				"ĞÂ½®",
-				"ÔÆÄÏ",
-				"Õã½­"};
+				"å…¨å›½",
+				"å®‰å¾½",
+				"åŒ—äº¬",
+				"é‡åº†",
+				"ç¦å»º",
+				"ç”˜è‚ƒ",
+				"å¹¿ä¸œ",
+				"å¹¿è¥¿",
+				"è´µå·",
+				"æµ·å—",
+				"æ²³åŒ—",
+				"æ²³å—",
+				"é»‘é¾™æ±Ÿ",
+				"æ¹–åŒ—",
+				"æ¹–å—",
+				"å‰æ—",
+				"æ±Ÿè‹",
+				"æ±Ÿè¥¿",
+				"è¾½å®",
+				"å†…è’™å¤",
+				"å®å¤",
+				"é’æµ·",
+				"å±±ä¸œ",
+				"å±±è¥¿",
+				"é™•è¥¿",
+				"ä¸Šæµ·",
+				"å››å·",
+				"å¤©æ´¥",
+				"è¥¿è—",
+				"æ–°ç–†",
+				"äº‘å—",
+				"æµ™æ±Ÿ"};
 		
 		int[] ip=new int[32];
 		int[] sp=new int[32];
 		int[] cure=new int[32];
 		int[] dead=new int[32];
 		
+		//çœä»½å¯¹åº”ä¸‹æ ‡
+		public int proToInt(String p)
+		{
+			
+			return 0;
+		}
+		
+	
+    	
+	 static String type1="\\w+ æ–°å¢ æ„ŸæŸ“æ‚£è€… \\d+äºº";
+		String type2="\\w+ æ–°å¢ ç–‘ä¼¼æ‚£è€… \\d+äºº";
+		String type3="\\w+ æ„ŸæŸ“æ‚£è€… æµå…¥ \\w+ \\d+äºº";
+		String type4="\\w+ ç–‘ä¼¼æ‚£è€… æµå…¥ \\w+ \\d+äºº";
+		String type5="\\w+ æ­»äº¡ \\d+äºº";
+		String type6="\\w+ æ²»æ„ˆ \\d+äºº";
+		String type7="\\w+ ç–‘ä¼¼æ‚£è€… ç¡®è¯Šæ„ŸæŸ“ \\d+äºº";
+		String type8="\\w+ æ’é™¤ ç–‘ä¼¼æ‚£è€… \\d+äºº";
+		
+		public static String[] getAddIp(String text)
+		{
+			Pattern pattern1=Pattern.compile("(.*) æ–°å¢");
+			Pattern pattern2=Pattern.compile("æ–°");
+			return pattern2.split(text);//getString(pattern1,pattern2);
+		}
+    
 		 public static void main(String args[ ])
 		    {
-		       System.out.println(provinces[31]);
-		    } // ·½·¨main½áÊø
+			 
+			 String x="å…¨å›½ æ–°å¢ æ„ŸæŸ“æ‚£è€… 1äºº";
+			 getAddIp(x);
+					
+		       System.out.println(getAddIp(x)[0]);
+		    }// æ–¹æ³•mainç»“æŸ
 		
 		
 	
