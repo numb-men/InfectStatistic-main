@@ -15,7 +15,7 @@ import java.util.Arrays;
  * TODO
  *
  * @author 衡天宇
- * @version 4.0
+ * @version 5.0
  * 
  */
 public class InfectStatistic {
@@ -26,6 +26,7 @@ public class InfectStatistic {
 	static line[] result=new line[34];//总的排序后结果
     static line[] proresult=new line[34];//筛选省份后的排序后结果
     static String topath=new String();//输出文档路径
+    static String frompath=new String();//log文件路径
     	
     public static void main(String[] args) throws IOException {
 	    for(int j=0;j<34;j++) {
@@ -38,7 +39,9 @@ public class InfectStatistic {
     	int hasPro=cmd.hasParam("-province");//检查是否有province命令
     	int hasType=cmd.hasParam("-type");//检查是否有类型命令
     	int hasPath=cmd.hasParam("-out");//获取输出路径索引
+    	int hasLog=cmd.hasParam("-log");//获取log路径索引
     	getTopath(args,hasPath);
+    	getFrompath(args,hasLog);
     	if(hasDate!=-1) {//有指定日期
     		readLog(args[hasDate+1],true);  
     		if(hasPro!=-1) {//有指定省份
@@ -125,7 +128,7 @@ public class InfectStatistic {
 	    }    
 	}
 
-     /*
+    /*
               * 功能：判断日期的合法性
               * 输入参数：最新更新日志的时间，待验证日期字符串
               *返回值：true,false
@@ -148,6 +151,16 @@ public class InfectStatistic {
     	int i=pos+1;//获得路径所在索引   
 		topath=args[i];
 		//System.out.print(topath);
+    }    
+    
+    /*
+     * 功能：获取日志文档位置
+     * 输入参数：命令行String数组，-log命令所在索引
+     *返回值：无
+    */
+    static void getFrompath(String[] args,int pos) {
+    	int i=pos+1;//获得路径所在索引   
+		frompath=args[i];
     }    
     
     /*
@@ -189,7 +202,7 @@ public class InfectStatistic {
     */
     static String getLastdate() {
     	String date="";
-    	File file = new File("d:/log/");
+    	File file = new File(frompath);
         String[] filename = file.list();//获取所有日志文件名      
     	date=filename[filename.length-1].substring(0,10);    	
     	return date;
@@ -201,7 +214,7 @@ public class InfectStatistic {
      *返回值：索引int值
     */
     static int findPot(String date) {
-    	File file = new File("d:/log/");
+    	File file = new File(frompath);
         String[] filename = file.list();//获取所有日志文件名      
     	for(int i=0;i<filename.length-1;i++) {
     		String datecut1=filename[i].substring(0,10);//只获取文件名前的日期
@@ -222,20 +235,18 @@ public class InfectStatistic {
     /*
      * 功能：读取log文件
      * 输入参数：指定的输出日期，是否指定输出日期
-     *返回值：无
+     *返回值：无"d:/log/"
     */
     static void readLog(String date,boolean hasDate) throws IOException {
     	//System.out.print("1");
-    	if(hasDate==true) {
-    			
+    	if(hasDate==true) {    			
     		if(isCorrectdate(getLastdate(),date)) {//检验输入日期正确性
     			int i=0;//控制日志读取索引
-    			File file = new File("d:/log/");
-    			String[] filename = file.list();//获取所有日志文件名 
-    				    
+    			File file = new File(frompath);
+    			String[] filename = file.list();//获取所有日志文件名     				    
     			while(i<=findPot(date)) { 
     				//System.out.print(findPot(date));			
-					FileInputStream fs=new FileInputStream("d:/log/"+filename[i]);
+					FileInputStream fs=new FileInputStream(frompath+filename[i]);
 				    InputStreamReader is=new InputStreamReader(fs,"UTF-8");
 				    BufferedReader br=new BufferedReader(is);
 				    String s="";				    
@@ -259,10 +270,10 @@ public class InfectStatistic {
     	}
     	else {//没输入指定日期
     		int i=0;//控制日志读取索引
-			File file = new File("d:/log/");
+			File file = new File(frompath);
 			String[] filename = file.list();//获取所有日志文件名  
 			while(i<filename.length) {   			
-				FileInputStream fs=new FileInputStream("d:/log/"+filename[i]);
+				FileInputStream fs=new FileInputStream(frompath+filename[i]);
 			    InputStreamReader is=new InputStreamReader(fs,"UTF-8");
 			    BufferedReader br=new BufferedReader(is);
 			    String s="";				    
