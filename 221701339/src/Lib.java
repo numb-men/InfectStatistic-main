@@ -459,7 +459,7 @@ class InfectStatistician {
 
         File[] files = targetDir.listFiles((dir, name) -> name.matches(FILE_NAME_PATTERN));
         if (files == null) {
-            return;
+            throw new InfectStatisticException(path + " 指定目录的下没有命名符合规范日志文件");
         }
         this.data = new Vector<>(files.length);
         List<Pair<LocalDate, File>> dateFilePairs = new LinkedList<>();
