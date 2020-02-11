@@ -1,7 +1,13 @@
 
 import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Lib
@@ -28,29 +34,29 @@ public class Lib {
         }
         CmdArgs cmdArgs = new CmdArgs(this.args);
         //比较是否为 list 命令
-        if (!cmdArgs.getCmd().equals(MyList.params[0])) {
+        if (!cmdArgs.getCmd().equals(MyList.PARAMS[0])) {
             throw new UnsupportedOperationException("命令输入错误");
         }
         MyList list = new MyList(cmdArgs);
         ControlCommand controlCommand = new ControlCommand();
         //list -log
-        if (cmdArgs.has(MyList.params[1])) {
+        if (cmdArgs.has(MyList.PARAMS[1])) {
             controlCommand.setCommands(0, new ListLogCommand(list));
         }
         //list -date
-        if (cmdArgs.has(MyList.params[2])) {
+        if (cmdArgs.has(MyList.PARAMS[2])) {
             controlCommand.setCommands(1, new ListDateCommand(list));
         }
         //list -province
-        if (cmdArgs.has(MyList.params[3])) {
+        if (cmdArgs.has(MyList.PARAMS[3])) {
             controlCommand.setCommands(2, new ListProvinceCommand(list));
         }
         //list -type
-        if (cmdArgs.has(MyList.params[4])) {
+        if (cmdArgs.has(MyList.PARAMS[4])) {
             controlCommand.setCommands(3, new ListTypeCommand(list));
         }
         //list -out 输出在最后执行
-        if (cmdArgs.has(MyList.params[5])) {
+        if (cmdArgs.has(MyList.PARAMS[5])) {
             controlCommand.setCommands(4, new ListOutCommand(list));
         }
         //执行全部命令
@@ -229,49 +235,151 @@ class MyList {
     /**
      * list命令的参数
      */
-    public final static String[] params = {"list", "-log", "-date", "-province", "-type", "-out"};
+    public final static String[] PARAMS = {"list", "-log", "-date", "-province", "-type", "-out"};
+
+    /**
+     * list命令的参数 -province，对应的值
+     */
+    private String[] provinceValue;
+
+    private final static String REMIND = "// 该文档并非真实数据，仅供测试使用";
 
     /**
      * 输入的命令
      */
     private CmdArgs cmdArgs;
 
+    /**
+     * list 操作的省份对象
+     */
+    public LinkedHashMap<String, ProvinceStatus> linkedHashMap;
+
+    /**
+     * 需要输出的类型和顺序
+     */
+    private String[] outType;
+
+    /**
+     * 需要处理的log文件
+     */
+    private ArrayList<String> logPath;
+
+    /**
+     * 日志的目录
+     */
+    private String dir;
+
     public MyList(CmdArgs cmdArgs) {
         this.cmdArgs = cmdArgs;
+        this.linkedHashMap = new LinkedHashMap<>();
+        //默认顺序，感染 疑似 治愈 死亡
+        this.outType = new String[]{"ip", "sp", "cure", "dead"};
+        //默认省份
+        this.provinceValue = new String[]{"全国", "安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州",
+                "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海",
+                "山东", "山西", "陕西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
     }
 
     /**
-     *
+     * 实现 list -log
      */
-    public void log() throws FileNotFoundException {
-        if (cmdArgs == null) {
+    public void log() {
+        if (this.cmdArgs == null) {
             return;
         }
-        String logValue = cmdArgs.getArgVal(params[1]);
+        String logValue = this.cmdArgs.getArgVal(PARAMS[1]);
         if (logValue != null) {
-            String content = FileOperate.readFile(logValue);
-            if (content != null) {
-                String[] logLine = content.split("#");
-
-            }
+            dir = logValue;
         }
-        throw new FileNotFoundException("日志文件不存在");
     }
 
+    /**
+     * 实现 list -out
+     */
     public void out() {
-        //
+        AbstractLogLineType abstractLogLineType = getChainOfLogLine();
+        for(int i=0;i<this.logPath.size();i++){
+            String content = FileOperate.readFile(this.logPath.get(i));
+            if (content != null) {
+                String[] logLine = content.split("#");
+                for (int j = 0; j < logLine.length; j++) {
+                    //处理日志行
+                    abstractLogLineType.matchLogLine(logLine[j], this.linkedHashMap);
+                }
+            }
+        }
+
+        for (String key : this.linkedHashMap.keySet()) {
+            System.out.println(key);
+            ProvinceStatus provinceStatus = this.linkedHashMap.get(key);
+
+        }
     }
 
     public void date() {
-        //
+        if (this.cmdArgs == null || this.dir == null) {
+            return;
+        }
+        logPath = FileOperate.getAllFileName(dir);
+        //-date 参数日期
+        String dateValue = this.cmdArgs.getArgVal(PARAMS[2]);
+        if (dateValue == null) {
+            return;
+        }
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        //当前日期
+        String todayStr = today.format(fmt);
+
+        if (!LocalDate.parse(dateValue).isAfter(LocalDate.parse(todayStr))) {
+            for (int i = 0; i < this.logPath.size(); i++) {
+                String dateStr = this.logPath.get(i).split(".")[0];
+                //文件名的日期
+                if (LocalDate.parse(dateStr).isAfter(LocalDate.parse(dateValue))) {
+                    this.logPath.remove(i);
+                }
+            }
+        }
+        throw new UnsupportedOperationException("日期输入错误");
     }
 
     public void type() {
-
+        if (this.cmdArgs == null || this.cmdArgs.getArgVal(PARAMS[4]) == null) {
+            return;
+        }
+        outType = this.cmdArgs.getArgVals(PARAMS[4]);
     }
 
     public void province() {
-        //
+        if (this.cmdArgs == null||this.cmdArgs.getArgVals(PARAMS[3])==null) {
+            return;
+        }
+        provinceValue=this.cmdArgs.getArgVals(PARAMS[3]);
+    }
+
+    /**
+     * 形成责任链
+     */
+    public static AbstractLogLineType getChainOfLogLine() {
+        NewInfectorLogLine newInfectorLogLine = new NewInfectorLogLine(AbstractLogLineType.LOGLINE_TYPE[0]);
+        NewSuspectLogLine newSuspectLogLine = new NewSuspectLogLine(AbstractLogLineType.LOGLINE_TYPE[1]);
+        InInfectorLogLine inInfectorLogLine = new InInfectorLogLine(AbstractLogLineType.LOGLINE_TYPE[2]);
+        InSuspectLogLine inSuspectLogLine = new InSuspectLogLine(AbstractLogLineType.LOGLINE_TYPE[3]);
+        DeathLogLine deathLogLine = new DeathLogLine(AbstractLogLineType.LOGLINE_TYPE[4]);
+        CureLogLine cureLogLine = new CureLogLine(AbstractLogLineType.LOGLINE_TYPE[5]);
+        DefiniteLogLine definiteLogLine = new DefiniteLogLine(AbstractLogLineType.LOGLINE_TYPE[6]);
+        ExcludeLogLine excludeLogLine = new ExcludeLogLine(AbstractLogLineType.LOGLINE_TYPE[7]);
+
+        newInfectorLogLine.setNextLogType(newSuspectLogLine);
+        newSuspectLogLine.setNextLogType(inInfectorLogLine);
+        inInfectorLogLine.setNextLogType(inSuspectLogLine);
+        inSuspectLogLine.setNextLogType(deathLogLine);
+        deathLogLine.setNextLogType(cureLogLine);
+        cureLogLine.setNextLogType(definiteLogLine);
+        definiteLogLine.setNextLogType(excludeLogLine);
+
+        return newInfectorLogLine;
     }
 }
 
@@ -355,13 +463,6 @@ class ListTypeCommand implements Command {
  * list -province
  */
 class ListProvinceCommand implements Command {
-    /**
-     * list命令的参数 -province，对应的值
-     */
-    private final static String[] provinceValue = {"安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州",
-            "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海",
-            "山东", "山西", "陕西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
-
     private MyList list;
 
     public ListProvinceCommand(MyList list) {
@@ -475,6 +576,269 @@ class FileOperate {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 获取指定目录的所有文件
+     *
+     * @param dir 文件目录
+     * @return 文件目录下面的所有文件名
+     */
+    public static ArrayList<String> getAllFileName(String dir) {
+        ArrayList<String> fileList = new ArrayList<String>();
+        File file = new File(dir);
+        if (file != null) {
+            File[] tempList = file.listFiles();
+            for (int i = 0; i < tempList.length; i++) {
+                if (tempList[i].isFile()) {
+                    fileList.add(tempList[i].getName());
+                }
+            }
+            return fileList;
+        }
+        return null;
+    }
 }
 
+//----------------------------责任链模式匹配8种不同的日志行-------------↓------------------
+
+/**
+ * 日志行
+ */
+abstract class AbstractLogLineType {
+
+    public final static String[] LOGLINE_TYPE = {
+            "/(\\S+) 新增 感染患者 (\\d+)人/",
+            "/(\\S+) 新增 疑似患者 (\\d+)人/",
+            "/(\\S+) 感染患者 流入 (\\S+) (\\d+)人/",
+            "/(\\S+) 疑似患者 流入 (\\S+) (\\d+)人/",
+            "/(\\S+) 死亡 (\\d+)人/",
+            "/(\\S+) 治愈 (\\d+)人/",
+            "/(\\S+) 疑似患者 确诊感染 (\\d+)人/",
+            "/(\\S+) 排除 疑似患者 (\\d+)人/"
+    };
+
+    /**
+     * 日志行对应的正则表达式
+     */
+    protected String logLineTypeRegExp;
+
+    /**
+     * 责任链中的下一个元素
+     */
+    protected AbstractLogLineType nextLogLineType;
+
+    public void setNextLogType(AbstractLogLineType nextLogLineType) {
+        this.nextLogLineType = nextLogLineType;
+    }
+
+    public void matchLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+        if (logLineStr.matches(logLineTypeRegExp)) {
+            executeLogLine(logLineStr, linkedHashMap);
+            return;
+        }
+        if (nextLogLineType != null) {
+            nextLogLineType.matchLogLine(logLineStr, linkedHashMap);
+        }
+    }
+
+    protected abstract void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap);
+
+}
+
+/**
+ * <省> 新增 感染患者 n 人
+ */
+class NewInfectorLogLine extends AbstractLogLineType {
+    public NewInfectorLogLine(String logLineTypeRegExp) {
+        this.logLineTypeRegExp = logLineTypeRegExp;
+    }
+
+    @Override
+    protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+
+    }
+}
+
+/**
+ * <省> 新增 疑似患者 n 人
+ */
+class NewSuspectLogLine extends AbstractLogLineType {
+    public NewSuspectLogLine(String logLineTypeRegExp) {
+        this.logLineTypeRegExp = logLineTypeRegExp;
+    }
+
+    @Override
+    protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+
+    }
+}
+
+/**
+ * <省1> 感染患者 流入 <省2> n人
+ */
+class InInfectorLogLine extends AbstractLogLineType {
+    public InInfectorLogLine(String logLineTypeRegExp) {
+        this.logLineTypeRegExp = logLineTypeRegExp;
+    }
+
+    @Override
+    protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+
+    }
+}
+
+/**
+ * <省1> 疑似患者 流入 <省2> n人
+ */
+class InSuspectLogLine extends AbstractLogLineType {
+    public InSuspectLogLine(String logLineTypeRegExp) {
+        this.logLineTypeRegExp = logLineTypeRegExp;
+    }
+
+    @Override
+    protected void executeLogLine(String logLineSt, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+
+    }
+}
+
+/**
+ * <省> 死亡 n人
+ */
+class DeathLogLine extends AbstractLogLineType {
+    public DeathLogLine(String logLineTypeRegExp) {
+        this.logLineTypeRegExp = logLineTypeRegExp;
+    }
+
+    @Override
+    protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+
+    }
+}
+
+/**
+ * <省> 治愈 n人
+ */
+class CureLogLine extends AbstractLogLineType {
+    public CureLogLine(String logLineTypeRegExp) {
+        this.logLineTypeRegExp = logLineTypeRegExp;
+    }
+
+    @Override
+    protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+
+    }
+}
+
+/**
+ * <省> 疑似患者 确诊感染 n人
+ */
+class DefiniteLogLine extends AbstractLogLineType {
+    public DefiniteLogLine(String logLineTypeRegExp) {
+        this.logLineTypeRegExp = logLineTypeRegExp;
+    }
+
+    @Override
+    protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+
+    }
+}
+
+/**
+ * <省> 排除 疑似患者 n人
+ */
+class ExcludeLogLine extends AbstractLogLineType {
+    public ExcludeLogLine(String logLineTypeRegExp) {
+        this.logLineTypeRegExp = logLineTypeRegExp;
+    }
+
+    @Override
+    protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+
+    }
+}
+
+//----------------------------责任链模式匹配8种不同的日志行----------------↑---------------
+
+/**
+ * 省/全国类，
+ */
+class ProvinceStatus {
+    /**
+     * 省份名称，包括“全国”
+     */
+    private String name;
+
+    /**
+     * 感染患者数量
+     */
+    private int infect;
+
+    /**
+     * 疑似患者数量
+     */
+    private int suspect;
+
+    /**
+     * 治愈患者数量
+     */
+    private int cure;
+
+    /**
+     * 死亡患者数量
+     */
+    private int death;
+
+    public ProvinceStatus(String name) {
+        this.name = name;
+        // 默认等于 0
+        this.infect = 0;
+        this.suspect = 0;
+        this.cure = 0;
+        this.death = 0;
+    }
+
+    //-----------------------------------setter/getter----------------------↓-------------------------------------
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getInfect() {
+        return infect;
+    }
+
+    public void setInfect(int infect) {
+        this.infect = infect;
+    }
+
+    public int getSuspect() {
+        return suspect;
+    }
+
+    public void setSuspect(int suspect) {
+        this.suspect = suspect;
+    }
+
+    public int getCure() {
+        return cure;
+    }
+
+    public void setCure(int cure) {
+        this.cure = cure;
+    }
+
+    public int getDeath() {
+        return death;
+    }
+
+    public void setDeath(int death) {
+        this.death = death;
+    }
+
+    //-----------------------------------setter/getter----------------------↑-------------------------------------
+}
 
