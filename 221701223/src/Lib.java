@@ -1,5 +1,10 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,10 +14,10 @@ import java.util.HashSet;
 
 /**
  * Lib
- * TODO 解析命令行参数
+ * TODO 解析log文件
  *
  * @author 叶博宁
- * @version 0.1
+ * @version 0.2
  * @since xxx
  */
 
@@ -42,6 +47,13 @@ public class Lib {
         return true;
     }
 
+    /**
+     * Gets index from strings *
+     *
+     * @param strings strings
+     * @param target  target
+     * @return the index from strings
+     */
     public static int getIndexFromStrings(String[] strings, String target) {
         for (int i = 0; i < strings.length; i++) {
             if (target.equals(strings[i])) {
@@ -148,7 +160,10 @@ class RecordContainer {
  */
 class ArgumentParser {
 
-    public static final HashSet<String> COMMAND_LIST = new HashSet<String>() {{
+    /**
+     * COMMAND_LIST
+     */
+    public static final HashSet<String> COMMAND_LIST = new HashSet<>() {{
         add("-date");
         add("-type");
         add("-province");
@@ -173,6 +188,11 @@ class ArgumentParser {
         this.originalArguments = args;
     }
 
+    /**
+     * Make command command
+     *
+     * @return the command
+     */
     public Command makeCommand() {
         String date = getDate();
         String logPath = originalArguments[getIndexOfCommand("-log") + 1];
@@ -181,6 +201,14 @@ class ArgumentParser {
         ArrayList<String> provinceList = getProvinces();
 
         return new Command(logPath, outPah, date, patientType, provinceList);
+    }
+
+    public FileTools makeFileTools() {
+        String date = getDate();
+        String logPath = originalArguments[getIndexOfCommand("-log") + 1];
+        String outPah = originalArguments[getIndexOfCommand("-out") + 1];
+
+        return new FileTools(date, logPath, outPah);
     }
 
     private int getIndexOfCommand(String command) {
@@ -205,12 +233,13 @@ class ArgumentParser {
         }
     }
 
+    @NotNull
     private ArrayList<String> getPatientType() {
 
         int index = getIndexOfCommand("-type");
         //index<0表明命令行参数中不含-type命令，就在type数组写一个"null"然后返回
         if (index < 0) {
-            return new ArrayList<String>(1) {{
+            return new ArrayList<>(1) {{
                 add("所有");
             }};
         }
@@ -220,13 +249,13 @@ class ArgumentParser {
             System.exit(-1);
         }
 
-        HashMap<String, String> patientTypeMap = new HashMap<String, String>(4) {{
+        HashMap<String, String> patientTypeMap = new HashMap<>(4) {{
             put("ip", "感染患者");
             put("sp", "疑似患者");
             put("cure", "治愈");
             put("dead", "死亡");
         }};
-        ArrayList<String> patientTypeList = new ArrayList<String>();
+        ArrayList<String> patientTypeList = new ArrayList<>();
 
         while (true) {
             //传入的参数和可用参数列表进行比对，get方法不返回null则取出参数对应的中文字符串加入List
@@ -247,7 +276,7 @@ class ArgumentParser {
         int index = getIndexOfCommand("-province");
         //index<0表明命令行参数中不含-province命令，在province数组写默认的选项"全国"
         if (index < 0) {
-            return new ArrayList<String>(1) {{
+            return new ArrayList<>(1) {{
                 add("全国");
             }};
         }
@@ -257,7 +286,7 @@ class ArgumentParser {
             System.exit(-1);
         }
 
-        ArrayList<String> provinceList = new ArrayList<String>();
+        ArrayList<String> provinceList = new ArrayList<>();
 
         while (true) {
             //传入的参数和可用参数列表进行比对，get方法不返回null则取出参数对应的中文字符串加入List
@@ -282,27 +311,133 @@ class Command {
      * Date
      */
     String date;
-    String log;
-    String out;
+    /**
+     * Log path
+     */
+    String logPath;
+    /**
+     * Out path
+     */
+    String outPath;
+    /**
+     * Type
+     */
     ArrayList<String> type;
+    /**
+     * Province
+     */
     ArrayList<String> province;
 
+    /**
+     * Command
+     *
+     * @param logPath      log path
+     * @param outPath      out path
+     * @param date         date
+     * @param patientType  patient type
+     * @param provinceList province list
+     */
     Command(String logPath, String outPath, String date, ArrayList<String> patientType, ArrayList<String> provinceList) {
         this.date = date;
-        this.log = logPath;
-        this.out = outPath;
+        this.logPath = logPath;
+        this.outPath = outPath;
         this.type = patientType;
         this.province = provinceList;
     }
 
+    /**
+     * Gets file name filter *
+     *
+     * @return the file name filter
+     */
+    public String getFileNameFilter() {
+        //只有在确定命令中有-date参数才能调用这个方法
+        return date + ".log.txt";
+    }
+
+    /**
+     * Show
+     */
     public void show() {
         System.out.println(date);
-        System.out.println(log);
-        System.out.println(out);
         for (String s : type) {
             System.out.println(s);
         }
         for (String s : province) {
+            System.out.println(s);
+        }
+    }
+}
+
+/**
+ * File tools
+ */
+class FileTools {
+
+    /**
+     * LOG_FILTER
+     * 用正则表达式比转换为Date对象更快一点
+     */
+    public final static String LOG_FILTER = "(19|20)[0-9][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]).log.txt";
+    /**
+     * Date
+     */
+    String newestFileName = "";
+    /**
+     * Log path
+     * log文件存放的目录
+     */
+    String logPath;
+    /**
+     * Out path
+     * 统计结果输出的完整路径（包括文件名）
+     */
+    String outPath;
+    ArrayList<String> fileList;
+
+    public FileTools(String date, String logPath, String outPath) {
+
+        this.logPath = logPath;
+        this.outPath = outPath;
+        if ("null".equals(date)) {
+            initFileList();
+        } else {
+            this.newestFileName = date + ".log.txt";
+            initFileListWithDateLimit();
+        }
+    }
+
+    private void initFileList() {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(logPath))) {
+            fileList = new ArrayList<>() {{
+                for (Path path : stream) {
+                    if (path.getFileName().toString().matches(LOG_FILTER)) {
+                        add(path.getFileName().toString());
+                    }
+                }
+            }};
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initFileListWithDateLimit() {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(logPath))) {
+            fileList = new ArrayList<>() {{
+                for (Path path : stream) {
+                    String name = path.getFileName().toString();
+                    if (name.matches(LOG_FILTER) && name.compareTo(newestFileName) <= 0) {
+                        add(path.getFileName().toString());
+                    }
+                }
+            }};
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void show() {
+        for (String s : fileList) {
             System.out.println(s);
         }
     }
