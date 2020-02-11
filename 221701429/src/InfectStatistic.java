@@ -116,7 +116,7 @@ class InfectStatistic {
        return tmp;
     }
     //命令对应的行为
-    private static void func(HashMap<String, String[]> parseArgs) throws ParseException {
+    private static void func(HashMap<String, String[]> parseArgs,String[] args) throws ParseException {
         ArrayList<province> list = new ArrayList<>();//完整的省份列表
         ArrayList<province> list1 = new ArrayList<>();//经过-province筛选后的列表
         String temp = null;//用来存放-type后的语句段
@@ -222,6 +222,11 @@ class InfectStatistic {
                 }
             }
             writeStringToFile(filePath[0],"// 该文档并非真实数据，仅供测试使用");
+            String args1 = "";
+            for (String arg : args) {
+                args1 += " " + arg;
+            }
+            writeStringToFile(filePath[0], "//"+args1);
             System.out.println("写入文件"+filePath[0]+"成功！");
         }
         else {
@@ -517,6 +522,6 @@ class InfectStatistic {
                 " -out G:/output.txt";
         args = cmdLine.split(" ");
         HashMap<String, String[]> parseArgs = parseArgs(args);
-        func(parseArgs);
+        func(parseArgs,args);
     }
 }
