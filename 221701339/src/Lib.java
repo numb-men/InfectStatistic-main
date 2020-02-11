@@ -17,6 +17,12 @@ import java.util.*;
 public class Lib {
 }
 
+/**
+ * 表示一个参数，包括选项名，参数值
+ *
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class Parameter {
     private String name;
     private Object value;
@@ -46,6 +52,12 @@ class Parameter {
     }
 }
 
+/**
+ * 表示一个参数读取的规则
+ *
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class ParameterRule {
     private final boolean valueRequired;
     private final boolean multivalued;
@@ -64,7 +76,20 @@ class ParameterRule {
     }
 }
 
+/**
+ * 参数转换器帮助类
+ *
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class ParameterHelper {
+    /**
+     * 将String[]组成的参数转化为List<Parameter>，可以指定参数读取的规则
+     *
+     * @param args    需要转换的参数列表
+     * @param ruleMap 指定读取参数的规则
+     * @return 返回转化后的参数
+     */
     public static List<Parameter> resolve(final String[] args, final Map<String, ParameterRule> ruleMap) {
         List<Parameter> parameters = new LinkedList<>();
         int i = 0;
@@ -107,6 +132,12 @@ class ParameterHelper {
     }
 }
 
+/**
+ * 表示命令执行出错时的异常
+ *
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class CommandInvokeErrorException extends Exception {
     public CommandInvokeErrorException() {
     }
@@ -120,6 +151,11 @@ class CommandInvokeErrorException extends Exception {
     }
 }
 
+/**
+ * 一个可执行的命令，所有命令都实现此接口
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 interface Command {
     /**
      * 使用指定的参数执行命令
@@ -130,6 +166,12 @@ interface Command {
     void invoke(String[] args) throws CommandInvokeErrorException;
 }
 
+/**
+ * 表示一个命令管理器，用于管理和执行命令
+ *
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class CommandManager {
     private Map<String, Command> map;
 
@@ -137,6 +179,14 @@ class CommandManager {
         this.map = new HashMap<>();
     }
 
+    /**
+     * 按名称注册一个命令
+     *
+     * @param name    命令名
+     * @param command 要注册的命令
+     * @return 如果之前已注册同名命令，则返回该命令，否则返回null
+     * @throws java.lang.NullPointerException 当参数name或者参数command为null抛出
+     */
     public Command register(String name, Command command) {
         if (name == null) {
             throw new NullPointerException("name");
@@ -147,6 +197,13 @@ class CommandManager {
         return map.put(name, command);
     }
 
+    /**
+     * 通过名称取消注册一个命令
+     *
+     * @param name 命令名
+     * @return 如果指定名称的命令存在，则返回该命令，否则返回null
+     * @throws java.lang.NullPointerException 当参数name为null抛出
+     */
     public Command unregister(String name) {
         if (name == null) {
             throw new NullPointerException("name");
@@ -154,6 +211,15 @@ class CommandManager {
         return map.remove(name);
     }
 
+    /**
+     * 通过读取参数来执行一个命令
+     *
+     * @param args 参数列表
+     * @throws CommandInvokeErrorException        当执行命令法神错误时抛出
+     * @throws java.lang.NullPointerException     当参数args为null抛出
+     * @throws java.lang.IllegalArgumentException 当数args.length < 1抛出
+     * @throws java.lang.IllegalArgumentException 解析出来的命名未注册抛出
+     */
     public void invoke(String[] args) throws CommandInvokeErrorException {
         if (args == null) {
             throw new NullPointerException("args");
@@ -170,6 +236,11 @@ class CommandManager {
     }
 }
 
+/**
+ * 表示一个list命令
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class ListCommand implements Command {
     private Parameter log;
     private Parameter out;
@@ -193,6 +264,11 @@ class ListCommand implements Command {
         }
     }
 
+    /**
+     * 用于真正执行命令的方法
+     *
+     * @throws InfectStatisticException
+     */
     protected void invoke() throws InfectStatisticException {
         InfectStatistician statistician = new InfectStatistician();
         List<String> provinces = null;
@@ -220,20 +296,29 @@ class ListCommand implements Command {
         RULES.put("-date", new ParameterRule(true, false));
     }
 
+    /**
+     * 将命令参数信息置为null
+     */
     protected void clear() {
         log = out = date = type = province = null;
         parameters = null;
     }
 
     /**
-     * 处理未知参数。当prepare()方法遇到未能处理<code>RULES</code>指定选项时候调用。
+     * 处理未知参数。当prepare()方法遇到未能处理RULES指定选项时候调用。
      *
      * @param parameter 要处理的未知参数
+     * @throws java.lang.IllegalArgumentException 默认行为：无条件抛出
      */
     protected void handleUnknownOption(Parameter parameter) {
         throw new IllegalArgumentException("意外的输入 " + parameter.getValue());
     }
 
+    /**
+     * 对参数进行二次处理
+     *
+     * @throws java.lang.IllegalArgumentException 处理日期参数出错或处理到无法识别的选项抛出
+     */
     protected void prepare() {
         for (Parameter parameter : parameters) {
             if (parameter.getName() == null) {
@@ -268,6 +353,11 @@ class ListCommand implements Command {
         }
     }
 
+    /**
+     * 指示命令是否能正常执行
+     *
+     * @return 如果命令可以执行返回true，否则返回false
+     */
     protected boolean canInvoke() {
         if (log == null || out == null) {
             throw new IllegalArgumentException("-log 和 -out 选项必须指定");
@@ -276,18 +366,38 @@ class ListCommand implements Command {
     }
 }
 
-
+/**
+ * 表示一个日志文件读取器，用于将文件内容转化为String数组
+ *
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class InfectFileReader {
     private final String ENCODING;
 
+    /**
+     * 创建InfectFileReader，默认读取文件时编码类型为：UTF-8
+     */
     public InfectFileReader() {
         this("UTF-8");
     }
 
+    /**
+     * 创建InfectFileReader，并指读取文件时编码类型
+     *
+     * @param encoding 文件编码类型
+     */
     public InfectFileReader(String encoding) {
         ENCODING = encoding;
     }
 
+    /**
+     * 将文件内容转化为字符串数组
+     *
+     * @param file 要处理的文件
+     * @return 文件内容按行分g割个后String数组
+     * @throws IOException 当读取文件时发生错误时抛出
+     */
     public String[] read(File file) throws IOException {
         long length = file.length();
         byte[] content = new byte[(int) length];
@@ -298,6 +408,11 @@ class InfectFileReader {
     }
 }
 
+/**
+ * 用于存储一个地区确诊、疑似感染、治愈和死亡人数
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class InfectionItem {
     public String name;
     public int patient;
@@ -317,7 +432,20 @@ class InfectionItem {
     }
 }
 
+/**
+ * 获取InfectionItem帮助类
+ *
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class InfectionItemHelper {
+    /**
+     * 从指定Map表和索引获取指定InfectionItem，如存在则创建并初始化，加入到该Map表
+     *
+     * @param map      存储InfectionItem表
+     * @param itemName 索引名称
+     * @return 返回指定索引的对象
+     */
     public static InfectionItem getOrCreateItem(Map<String, InfectionItem> map, String itemName) {
         if (map.containsKey(itemName)) {
             return map.get(itemName);
@@ -333,6 +461,11 @@ class InfectionItemHelper {
     }
 }
 
+/**
+ * 表示日志数据转换时的异常
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class InfectDataParseException extends RuntimeException {
     public InfectDataParseException() {
     }
@@ -346,6 +479,11 @@ class InfectDataParseException extends RuntimeException {
     }
 }
 
+/**
+ * 表示一个用把字符串数组对象转化为InfectionItem集合的转换器
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class InfectDataParser {
     private static final String CHINESE_CHAR = "[\\u4e00-\\u9fa5]";
     private static final String ANNOTATION = "\\s*//.*";
@@ -360,6 +498,12 @@ class InfectDataParser {
     private final String SUSPECT_INFLOW =
         CHINESE_CHAR + "+\\s+疑似患者\\s+流入\\s+" + CHINESE_CHAR + "+\\s+\\d+人\\s*";
 
+    /**
+     * 处理未知行内容
+     *
+     * @param row 要处理的行
+     * @throws InfectDataParseException 默认行为：当改行不是注释行时
+     */
     protected void handleUnknownRow(String row) {
         if (row.matches(ANNOTATION)) {
             return;
@@ -367,6 +511,12 @@ class InfectDataParser {
         throw new InfectDataParseException("不能识别的内容:" + row);
     }
 
+    /**
+     * 读取所有String数组内容，并转化为InfectionItem集合
+     *
+     * @param rows 要处理String数组内容
+     * @return 转化后InfectionItem集合
+     */
     public Collection<InfectionItem> parse(String[] rows) {
         Map<String, InfectionItem> map = new HashMap<>(256);
         for (String row : rows) {
@@ -414,6 +564,13 @@ class InfectDataParser {
         return map.values();
     }
 
+    /**
+     * 将符合的形式“[0-9]+人”字符串中读取获取人数并转化为数字
+     *
+     * @param attr 要转换的字符串
+     * @return 获取到的数字
+     * @throws InfectDataParseException 当数据转换出错时抛出
+     */
     protected int getNumberByAttr(String attr) {
         try {
             return Integer.parseInt(attr.substring(0, attr.length() - 1));
@@ -423,6 +580,11 @@ class InfectDataParser {
     }
 }
 
+/**
+ * 表示在处理日志数据出现错误的异常
+ * @author Xue_Feng
+ * @version V1.0.0
+ */
 class InfectStatisticException extends Exception {
     public InfectStatisticException() {
     }
@@ -436,8 +598,12 @@ class InfectStatisticException extends Exception {
     }
 }
 
+/**
+ * 用于读取日志文件、处理数据并输出的处理类
+ * @author Xue_Feng
+ * @version V1.0.1
+ */
 class InfectStatistician {
-
     private static final String FILE_NAME_PATTERN = "\\d{4}-\\d{2}-\\d{2}.log.txt";
     private static final String ANNOTATION = "// 该文档并非真实数据，仅供测试使用";
     private static final Collection<String> APPROVED_TYPES = Arrays.asList("ip", "sp", "cure", "dead");
@@ -448,6 +614,13 @@ class InfectStatistician {
     private LocalDate maxDate;
     protected Vector<Pair<LocalDate, Collection<InfectionItem>>> data;
 
+    /**
+     * 从指定目录读取所有符合规范日志文件，转换成可供处理输出的数据
+     *
+     * @param path    日志文件所在目录
+     * @param endDate 指定处理到哪一天的日志文件
+     * @throws InfectStatisticException 当目录不存在或者不是一个目录，未找到命名符合规范日志文件，日期超出范围抛出
+     */
     public void readDataFrom(String path, LocalDate endDate) throws InfectStatisticException {
         ready = false;
         File targetDir = new File(path);
@@ -494,6 +667,11 @@ class InfectStatistician {
         ready = true;
     }
 
+    /**
+     * 维护读取日志文件的日期区间
+     *
+     * @param date 读取到日志文件的日期
+     */
     private void maintainDateBound(LocalDate date) {
         if (minDate != null) {
             if (minDate.isAfter(date)) {
@@ -511,6 +689,13 @@ class InfectStatistician {
         }
     }
 
+    /**
+     * 通过指定的类型拼接格式化字符串
+     *
+     * @param types 指定类型集合
+     * @return 返回拼接后的字符串
+     * @throws InfectStatisticException 当类型集合中中含有不支持的拼接的类型抛出
+     */
     protected String getFormatString(Collection<String> types) throws InfectStatisticException {
         if (types == null) {
             types = APPROVED_TYPES;
@@ -538,6 +723,13 @@ class InfectStatistician {
         return buffer.toString();
     }
 
+    /**
+     * 使用InfectionItem内部信息格式化指定format格式的字符串
+     *
+     * @param format 格式化字符串
+     * @param item   提供的InfectionItem信息
+     * @return 格式化后的字符串
+     */
     protected String format(String format, InfectionItem item) {
         return String.format(format,
             item.name,
@@ -547,6 +739,16 @@ class InfectStatistician {
             item.dead);
     }
 
+    /**
+     * 通过指定省份集合、类型集合、编码格式，输出数据并按输出指定文件
+     *
+     * @param provinces 要输出的省份集合
+     * @param types     要输出数据的类型集合
+     * @param fileName  输出文件名
+     * @param encoding  编码格式
+     * @throws InfectStatisticException 当readDataFrom方法为正常执行、类型含有不支持的类的类型集合、
+     *                                  输出文件发生错误时抛出
+     */
     public void formatAndSave(Collection<String> provinces, Collection<String> types, String fileName, String encoding)
         throws InfectStatisticException {
         if (!ready) {
@@ -582,8 +784,6 @@ class InfectStatistician {
                  new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(fileName)), encoding))) {
             ArrayList<String> provinceList;
             boolean allRequired = false;
-
-
             if (provinces != null) {
                 if (provinces.contains(all.name)) {
                     provinces.remove(all.name);
