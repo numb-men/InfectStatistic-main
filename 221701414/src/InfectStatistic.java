@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
  */
 class InfectStatistic {
     public static void main(String[] args){
-        String cmdLine = "list -date 2020-01-22 -log D:/log/ -out D:/output.txt";
+        String cmdLine = "list -log D:\\log\\ -out D:\\ListOut2.txt -date 2020-01-22 -province 福建 河北";
         args = cmdLine.split(" ");
         Lib lib=new Lib(args);
         try{

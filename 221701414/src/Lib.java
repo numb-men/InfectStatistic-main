@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Lib
@@ -40,25 +42,15 @@ public class Lib {
         MyList list = new MyList(cmdArgs);
         ControlCommand controlCommand = new ControlCommand();
         //list -log
-        if (cmdArgs.has(MyList.PARAMS[1])) {
-            controlCommand.setCommands(0, new ListLogCommand(list));
-        }
+        controlCommand.setCommands(0, new ListLogCommand(list));
         //list -date
-        if (cmdArgs.has(MyList.PARAMS[2])) {
-            controlCommand.setCommands(1, new ListDateCommand(list));
-        }
+        controlCommand.setCommands(1, new ListDateCommand(list));
         //list -province
-        if (cmdArgs.has(MyList.PARAMS[3])) {
-            controlCommand.setCommands(2, new ListProvinceCommand(list));
-        }
+        controlCommand.setCommands(2, new ListProvinceCommand(list));
         //list -type
-        if (cmdArgs.has(MyList.PARAMS[4])) {
-            controlCommand.setCommands(3, new ListTypeCommand(list));
-        }
+        controlCommand.setCommands(3, new ListTypeCommand(list));
         //list -out 输出在最后执行
-        if (cmdArgs.has(MyList.PARAMS[5])) {
-            controlCommand.setCommands(4, new ListOutCommand(list));
-        }
+        controlCommand.setCommands(4, new ListOutCommand(list));
         //执行全部命令
         controlCommand.sureExecuteAll();
     }
@@ -242,7 +234,7 @@ class MyList {
      */
     private String[] provinceValue;
 
-    private final static String REMIND = "// 该文档并非真实数据，仅供测试使用";
+    private final static String REMIND = "\n// 该文档并非真实数据，仅供测试使用";
 
     /**
      * 输入的命令
@@ -268,6 +260,11 @@ class MyList {
      * 日志的目录
      */
     private String dir;
+
+    /**
+     * 输出的路径
+     */
+    private String outPath;
 
     public MyList(CmdArgs cmdArgs) {
         this.cmdArgs = cmdArgs;
@@ -297,9 +294,13 @@ class MyList {
      * 实现 list -out
      */
     public void out() {
+        if (this.cmdArgs == null || this.dir == null) {
+            return;
+        }
+        this.outPath = this.cmdArgs.getArgVal(PARAMS[5]);
         AbstractLogLineType abstractLogLineType = getChainOfLogLine();
-        for(int i=0;i<this.logPath.size();i++){
-            String content = FileOperate.readFile(this.logPath.get(i));
+        for (int i = 0; i < this.logPath.size(); i++) {
+            String content = FileOperate.readFile(this.dir + this.logPath.get(i));
             if (content != null) {
                 String[] logLine = content.split("#");
                 for (int j = 0; j < logLine.length; j++) {
@@ -309,24 +310,53 @@ class MyList {
             }
         }
 
-        for (String key : this.linkedHashMap.keySet()) {
-            System.out.println(key);
-            ProvinceStatus provinceStatus = this.linkedHashMap.get(key);
-
+        String outStr = "";
+        ProvinceStatus provinceStatusAll = new ProvinceStatus(this.provinceValue[0]);
+        for (int i = 1; i < this.provinceValue.length; i++) {
+            if (this.linkedHashMap.containsKey(this.provinceValue[i])) {
+                int infect = this.linkedHashMap.get(this.provinceValue[i]).getInfect();
+                int suspect = this.linkedHashMap.get(this.provinceValue[i]).getSuspect();
+                int cure = this.linkedHashMap.get(this.provinceValue[i]).getCure();
+                int death = this.linkedHashMap.get(this.provinceValue[i]).getDeath();
+                provinceStatusAll.setInfect(provinceStatusAll.getInfect() + infect);
+                provinceStatusAll.setSuspect(provinceStatusAll.getSuspect() + suspect);
+                provinceStatusAll.setCure(provinceStatusAll.getCure() + cure);
+                provinceStatusAll.setDeath(provinceStatusAll.getDeath() + death);
+                outStr += "\n" + this.linkedHashMap.get(this.provinceValue[i]).getName() + " "
+                        + "感染患者" + infect + "人" + " "
+                        + "疑似患者" + suspect + "人" + " "
+                        + "治愈" + cure + "人" + " "
+                        + "死亡" + death + "人";
+            }
         }
+        String provinceStatusAllStr = provinceStatusAll.getName() + " "
+                + "感染患者" + provinceStatusAll.getInfect() + "人" + " "
+                + "疑似患者" + provinceStatusAll.getSuspect() + "人" + " "
+                + "治愈" + provinceStatusAll.getCure() + "人" + " "
+                + "死亡" + provinceStatusAll.getDeath() + "人";
+        outStr = provinceStatusAllStr + outStr;
+        outStr+=REMIND;
+
+
+        FileOperate.writeTxt(outPath,outStr);
     }
 
+    /**
+     * 实现 list -date
+     */
     public void date() {
         if (this.cmdArgs == null || this.dir == null) {
             return;
         }
         logPath = FileOperate.getAllFileName(dir);
+        if (logPath == null) {
+            return;
+        }
         //-date 参数日期
         String dateValue = this.cmdArgs.getArgVal(PARAMS[2]);
         if (dateValue == null) {
             return;
         }
-
         LocalDate today = LocalDate.now();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         //当前日期
@@ -334,16 +364,24 @@ class MyList {
 
         if (!LocalDate.parse(dateValue).isAfter(LocalDate.parse(todayStr))) {
             for (int i = 0; i < this.logPath.size(); i++) {
-                String dateStr = this.logPath.get(i).split(".")[0];
-                //文件名的日期
-                if (LocalDate.parse(dateStr).isAfter(LocalDate.parse(dateValue))) {
-                    this.logPath.remove(i);
+                String[] dateStrNum = this.logPath.get(i).split("\\.");
+                if (dateStrNum != null && dateStrNum.length > 0) {
+                    String dateStr = dateStrNum[0];
+                    //文件名的日期
+                    if (LocalDate.parse(dateStr).isAfter(LocalDate.parse(dateValue))) {
+                        this.logPath.remove(i);
+                        i--;
+                    }
                 }
             }
+            return;
         }
         throw new UnsupportedOperationException("日期输入错误");
     }
 
+    /**
+     * 实现 list -type
+     */
     public void type() {
         if (this.cmdArgs == null || this.cmdArgs.getArgVal(PARAMS[4]) == null) {
             return;
@@ -351,11 +389,14 @@ class MyList {
         outType = this.cmdArgs.getArgVals(PARAMS[4]);
     }
 
+    /**
+     * 实现 list -province
+     */
     public void province() {
-        if (this.cmdArgs == null||this.cmdArgs.getArgVals(PARAMS[3])==null) {
+        if (this.cmdArgs == null || this.cmdArgs.getArgVals(PARAMS[3]) == null) {
             return;
         }
-        provinceValue=this.cmdArgs.getArgVals(PARAMS[3]);
+        provinceValue = this.cmdArgs.getArgVals(PARAMS[3]);
     }
 
     /**
@@ -370,6 +411,7 @@ class MyList {
         CureLogLine cureLogLine = new CureLogLine(AbstractLogLineType.LOGLINE_TYPE[5]);
         DefiniteLogLine definiteLogLine = new DefiniteLogLine(AbstractLogLineType.LOGLINE_TYPE[6]);
         ExcludeLogLine excludeLogLine = new ExcludeLogLine(AbstractLogLineType.LOGLINE_TYPE[7]);
+        MismatchingLogLine mismatchingLogLine = new MismatchingLogLine(AbstractLogLineType.LOGLINE_TYPE[8]);
 
         newInfectorLogLine.setNextLogType(newSuspectLogLine);
         newSuspectLogLine.setNextLogType(inInfectorLogLine);
@@ -378,6 +420,7 @@ class MyList {
         deathLogLine.setNextLogType(cureLogLine);
         cureLogLine.setNextLogType(definiteLogLine);
         definiteLogLine.setNextLogType(excludeLogLine);
+        excludeLogLine.setNextLogType(mismatchingLogLine);
 
         return newInfectorLogLine;
     }
@@ -401,7 +444,7 @@ class ListLogCommand implements Command {
     }
 
     @Override
-    public void execute() throws FileNotFoundException {
+    public void execute() {
         list.log();
     }
 }
@@ -484,14 +527,14 @@ class ControlCommand {
     private Command[] commands;
 
     public ControlCommand() {
-        commands = new Command[CONTROL_SIZE];
+        this.commands = new Command[CONTROL_SIZE];
     }
 
     /**
      * 添加一条待执行命令
      */
     public void setCommands(int index, Command command) {
-        commands[index] = command;
+        this.commands[index] = command;
     }
 
     /**
@@ -505,7 +548,7 @@ class ControlCommand {
      * 全部命令确认开始执行
      */
     public void sureExecuteAll() throws FileNotFoundException {
-        for (int i = commands.length; i >= 0; i--) {
+        for (int i = 0; i < commands.length; i++) {
             commands[i].execute();
         }
     }
@@ -531,9 +574,8 @@ class FileOperate {
      * @return 每行内容用 # 分隔的String
      */
     public static String readFile(String path) {
-
         File file = new File(path);
-        if (file.isFile() && file.exists()) {
+        if (file != null) {
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
                 InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -607,14 +649,15 @@ class FileOperate {
 abstract class AbstractLogLineType {
 
     public final static String[] LOGLINE_TYPE = {
-            "/(\\S+) 新增 感染患者 (\\d+)人/",
-            "/(\\S+) 新增 疑似患者 (\\d+)人/",
-            "/(\\S+) 感染患者 流入 (\\S+) (\\d+)人/",
-            "/(\\S+) 疑似患者 流入 (\\S+) (\\d+)人/",
-            "/(\\S+) 死亡 (\\d+)人/",
-            "/(\\S+) 治愈 (\\d+)人/",
-            "/(\\S+) 疑似患者 确诊感染 (\\d+)人/",
-            "/(\\S+) 排除 疑似患者 (\\d+)人/"
+            "(\\S+) 新增 感染患者 (\\d+)人",
+            "(\\S+) 新增 疑似患者 (\\d+)人",
+            "(\\S+) 感染患者 流入 (\\S+) (\\d+)人",
+            "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人",
+            "(\\S+) 死亡 (\\d+)人",
+            "(\\S+) 治愈 (\\d+)人",
+            "(\\S+) 疑似患者 确诊感染 (\\d+)人",
+            "(\\S+) 排除 疑似患者 (\\d+)人",
+            "([\\s\\S]*)"
     };
 
     /**
@@ -655,7 +698,21 @@ class NewInfectorLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-
+        System.out.println(logLineStr);
+        Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[0]);
+        Matcher matcher = pattern.matcher(logLineStr);
+        if (matcher.find()) {
+            String province = matcher.group(1);
+            int num = Integer.parseInt(matcher.group(2));
+            System.out.println(province);
+            System.out.println(num);
+            if (!linkedHashMap.containsKey(province)) {
+                linkedHashMap.put(province, new ProvinceStatus(province));
+            }
+            ProvinceStatus provinceStatus = linkedHashMap.get(province);
+            provinceStatus.setInfect(provinceStatus.getInfect() + num);
+            linkedHashMap.put(province, provinceStatus);
+        }
     }
 }
 
@@ -669,7 +726,21 @@ class NewSuspectLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-
+        System.out.println(logLineStr);
+        Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[1]);
+        Matcher matcher = pattern.matcher(logLineStr);
+        if (matcher.find()) {
+            String province = matcher.group(1);
+            int num = Integer.parseInt(matcher.group(2));
+            System.out.println(province);
+            System.out.println(num);
+            if (!linkedHashMap.containsKey(province)) {
+                linkedHashMap.put(province, new ProvinceStatus(province));
+            }
+            ProvinceStatus provinceStatus = linkedHashMap.get(province);
+            provinceStatus.setSuspect(provinceStatus.getSuspect() + num);
+            linkedHashMap.put(province, provinceStatus);
+        }
     }
 }
 
@@ -683,7 +754,37 @@ class InInfectorLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-
+        System.out.println(logLineStr);
+        Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[2]);
+        Matcher matcher = pattern.matcher(logLineStr);
+        if (matcher.find()) {
+            String provinceA = matcher.group(1);
+            String provinceB = matcher.group(2);
+            int num = Integer.parseInt(matcher.group(3));
+            System.out.println(provinceA);
+            System.out.println(provinceB);
+            System.out.println(num);
+            if (linkedHashMap.containsKey(provinceA)) {
+                if (linkedHashMap.containsKey(provinceB)) {
+                    //
+                } else {
+                    linkedHashMap.put(provinceB, new ProvinceStatus(provinceB));
+                }
+            } else {
+                if (linkedHashMap.containsKey(provinceB)) {
+                    linkedHashMap.put(provinceA, new ProvinceStatus(provinceA));
+                } else {
+                    linkedHashMap.put(provinceB, new ProvinceStatus(provinceB));
+                    linkedHashMap.put(provinceA, new ProvinceStatus(provinceA));
+                }
+            }
+            ProvinceStatus provinceStatusA = linkedHashMap.get(provinceA);
+            ProvinceStatus provinceStatusB = linkedHashMap.get(provinceB);
+            provinceStatusA.setInfect(provinceStatusA.getInfect() - num);
+            provinceStatusB.setInfect(provinceStatusB.getInfect() + num);
+            linkedHashMap.put(provinceA, provinceStatusA);
+            linkedHashMap.put(provinceB, provinceStatusB);
+        }
     }
 }
 
@@ -696,8 +797,38 @@ class InSuspectLogLine extends AbstractLogLineType {
     }
 
     @Override
-    protected void executeLogLine(String logLineSt, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-
+    protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+        System.out.println(logLineStr);
+        Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[3]);
+        Matcher matcher = pattern.matcher(logLineStr);
+        if (matcher.find()) {
+            String provinceA = matcher.group(1);
+            String provinceB = matcher.group(2);
+            int num = Integer.parseInt(matcher.group(3));
+            System.out.println(provinceA);
+            System.out.println(provinceB);
+            System.out.println(num);
+            if (linkedHashMap.containsKey(provinceA)) {
+                if (linkedHashMap.containsKey(provinceB)) {
+                    //
+                } else {
+                    linkedHashMap.put(provinceB, new ProvinceStatus(provinceB));
+                }
+            } else {
+                if (linkedHashMap.containsKey(provinceB)) {
+                    linkedHashMap.put(provinceA, new ProvinceStatus(provinceA));
+                } else {
+                    linkedHashMap.put(provinceB, new ProvinceStatus(provinceB));
+                    linkedHashMap.put(provinceA, new ProvinceStatus(provinceA));
+                }
+            }
+            ProvinceStatus provinceStatusA = linkedHashMap.get(provinceA);
+            ProvinceStatus provinceStatusB = linkedHashMap.get(provinceB);
+            provinceStatusA.setSuspect(provinceStatusA.getSuspect() - num);
+            provinceStatusB.setSuspect(provinceStatusB.getSuspect() + num);
+            linkedHashMap.put(provinceA, provinceStatusA);
+            linkedHashMap.put(provinceB, provinceStatusB);
+        }
     }
 }
 
@@ -711,7 +842,22 @@ class DeathLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-
+        System.out.println(logLineStr);
+        Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[4]);
+        Matcher matcher = pattern.matcher(logLineStr);
+        if (matcher.find()) {
+            String province = matcher.group(1);
+            int num = Integer.parseInt(matcher.group(2));
+            System.out.println(province);
+            System.out.println(num);
+            if (!linkedHashMap.containsKey(province)) {
+                linkedHashMap.put(province, new ProvinceStatus(province));
+            }
+            ProvinceStatus provinceStatus = linkedHashMap.get(province);
+            provinceStatus.setDeath(provinceStatus.getDeath() + num);
+            provinceStatus.setInfect(provinceStatus.getInfect() - num);
+            linkedHashMap.put(province, provinceStatus);
+        }
     }
 }
 
@@ -725,7 +871,22 @@ class CureLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-
+        System.out.println(logLineStr);
+        Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[5]);
+        Matcher matcher = pattern.matcher(logLineStr);
+        if (matcher.find()) {
+            String province = matcher.group(1);
+            int num = Integer.parseInt(matcher.group(2));
+            System.out.println(province);
+            System.out.println(num);
+            if (!linkedHashMap.containsKey(province)) {
+                linkedHashMap.put(province, new ProvinceStatus(province));
+            }
+            ProvinceStatus provinceStatus = linkedHashMap.get(province);
+            provinceStatus.setCure(provinceStatus.getCure() + num);
+            provinceStatus.setInfect(provinceStatus.getInfect() - num);
+            linkedHashMap.put(province, provinceStatus);
+        }
     }
 }
 
@@ -739,7 +900,22 @@ class DefiniteLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-
+        System.out.println(logLineStr);
+        Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[6]);
+        Matcher matcher = pattern.matcher(logLineStr);
+        if (matcher.find()) {
+            String province = matcher.group(1);
+            int num = Integer.parseInt(matcher.group(2));
+            System.out.println(province);
+            System.out.println(num);
+            if (!linkedHashMap.containsKey(province)) {
+                linkedHashMap.put(province, new ProvinceStatus(province));
+            }
+            ProvinceStatus provinceStatus = linkedHashMap.get(province);
+            provinceStatus.setInfect(provinceStatus.getInfect() + num);
+            provinceStatus.setSuspect(provinceStatus.getSuspect() - num);
+            linkedHashMap.put(province, provinceStatus);
+        }
     }
 }
 
@@ -753,7 +929,35 @@ class ExcludeLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+        System.out.println(logLineStr);
+        Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[7]);
+        Matcher matcher = pattern.matcher(logLineStr);
+        if (matcher.find()) {
+            String province = matcher.group(1);
+            int num = Integer.parseInt(matcher.group(2));
+            System.out.println(province);
+            System.out.println(num);
+            if (!linkedHashMap.containsKey(province)) {
+                linkedHashMap.put(province, new ProvinceStatus(province));
+            }
+            ProvinceStatus provinceStatus = linkedHashMap.get(province);
+            provinceStatus.setSuspect(provinceStatus.getSuspect() - num);
+            linkedHashMap.put(province, provinceStatus);
+        }
+    }
+}
 
+/**
+ * 不匹配的情况
+ */
+class MismatchingLogLine extends AbstractLogLineType {
+    public MismatchingLogLine(String logLineTypeRegExp) {
+        this.logLineTypeRegExp = logLineTypeRegExp;
+    }
+
+    @Override
+    protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+        System.out.println("不匹配:" + logLineStr);
     }
 }
 
@@ -840,5 +1044,17 @@ class ProvinceStatus {
     }
 
     //-----------------------------------setter/getter----------------------↑-------------------------------------
+
+
+    @Override
+    public String toString() {
+        return "ProvinceStatus{" +
+                "name='" + name + '\'' +
+                ", infect=" + infect +
+                ", suspect=" + suspect +
+                ", cure=" + cure +
+                ", death=" + death +
+                '}';
+    }
 }
 
