@@ -8,11 +8,9 @@ import java.util.*;
 
 /**
  * Lib
- * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author Xue_Feng
+ * @version V1.0.0
  */
 public class Lib {
 }
@@ -607,7 +605,7 @@ class InfectStatistician {
     private static final String FILE_NAME_PATTERN = "\\d{4}-\\d{2}-\\d{2}.log.txt";
     private static final String ANNOTATION = "// 该文档并非真实数据，仅供测试使用";
     private static final Collection<String> APPROVED_TYPES = Arrays.asList("ip", "sp", "cure", "dead");
-    private final static Comparator<Object> DEFAULT_COMPARE = Collator.getInstance(java.util.Locale.CHINA);
+    private final static Comparator<String> DEFAULT_COMPARE = new ProvinceComparator();
     private boolean ready = false;
     private LocalDate endDate;
     private LocalDate minDate;
@@ -822,4 +820,60 @@ class InfectStatistician {
     }
 
 
+}
+
+/**
+ * 省份名称排序器
+ *
+ * @author Xue_Feng
+ * @version V1.0.1
+ */
+class ProvinceComparator implements Comparator<String> {
+    private static final Map<String, Integer> MAP = new HashMap<>();
+    private final static Comparator<Object> DEFAULT_COMPARE = Collator.getInstance(java.util.Locale.CHINA);
+
+    static {
+        MAP.put("安徽", 0);
+        MAP.put("北京", 1);
+        MAP.put("重庆", 2);
+        MAP.put("福建", 3);
+        MAP.put("甘肃", 4);
+        MAP.put("广东", 5);
+        MAP.put("广西", 6);
+        MAP.put("贵州", 7);
+        MAP.put("海南", 8);
+        MAP.put("河北", 9);
+        MAP.put("河南", 10);
+        MAP.put("黑龙江", 11);
+        MAP.put("湖北", 12);
+        MAP.put("湖南", 13);
+        MAP.put("吉林", 14);
+        MAP.put("江苏", 15);
+        MAP.put("江西", 16);
+        MAP.put("辽宁", 17);
+        MAP.put("内蒙古", 18);
+        MAP.put("宁夏", 19);
+        MAP.put("青海", 20);
+        MAP.put("山东", 21);
+        MAP.put("山西", 22);
+        MAP.put("陕西", 23);
+        MAP.put("上海", 24);
+        MAP.put("四川", 25);
+        MAP.put("天津", 26);
+        MAP.put("西藏", 27);
+        MAP.put("新疆", 28);
+        MAP.put("云南", 29);
+        MAP.put("浙江", 30);
+    }
+
+    @Override
+    public int compare(String o1, String o2) {
+        Integer i1 = MAP.get(o1);
+        Integer i2 = MAP.get(o2);
+        if (i1 != null && i2 != null) {
+            return i1 - i2;
+        } else {
+            return DEFAULT_COMPARE.compare(o1, o2);
+        }
+    }
 }

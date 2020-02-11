@@ -1,10 +1,8 @@
 /**
  * InfectStatistic
- * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author Xue_Feng
+ * @version V1.0.0
  */
 class InfectStatistic {
     public static void main(String[] args) {
