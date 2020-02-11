@@ -15,7 +15,7 @@ import java.util.Arrays;
  * TODO
  *
  * @author 衡天宇
- * @version 2.0
+ * @version 3.0
  * 
  */
 public class InfectStatistic {
@@ -24,8 +24,8 @@ public class InfectStatistic {
 	static int seltypecount=0;////所筛选指定类型的个数
 	static line[] all=new line[34];//初始化结果
 	static line[] result=new line[34];//总的排序后结果
-    static line[] proresult=new line[34];//筛选省份后的排序后结果    
-	
+    static line[] proresult=new line[34];//筛选省份后的排序后结果
+    	
     public static void main(String[] args) throws IOException {
 	    for(int j=0;j<34;j++) {
 	    	all[j]=new line();
@@ -35,14 +35,23 @@ public class InfectStatistic {
     	cmdArgs cmd=new cmdArgs(args);
     	int hasDate=cmd.hasParam("-date");//存命令的索引
     	int hasPro=cmd.hasParam("-province");//检查是否有province命令
+    	int hasType=cmd.hasParam("-type");//检查是否有类型命令
     	if(hasDate!=-1) {//有指定日期
     		readLog(args[hasDate+1],true);  
     		if(hasPro!=-1) {//有指定省份
     			String[] province=selectPro(args,hasPro);    			
     			line[] a=selectMes(province);   			 			
     			line[] b=sortline1(a,selcount);
-    			printSel(b);    			
-    		}   		
+    			printSel(b);
+    			if(hasType!=-1) {//有指定类型
+        			String[] type=selectType(args,hasType);
+        			printSelpart(proresult,type,selcount);
+    			}
+    		}
+    		else if(hasType!=-1) {//有指定类型未指定省份
+    			String[] type=selectType(args,hasType);
+    			printSelpart(result,type,count);
+			}    		
     	}
     	else {
     		readLog(args[hasDate+1],false);   		
@@ -50,11 +59,20 @@ public class InfectStatistic {
     			String[] province=selectPro(args,hasPro);    			
     			line[] a=selectMes(province);  			
     			line[] b=sortline1(a,selcount);
-    			printSel(b);    			
-    		}   		
-    	}   	
-    }
-    
+    			printSel(b);
+    			if(hasType!=-1) {//有指定类型和省份
+        			String[] type=selectType(args,hasType);
+        			printSelpart(proresult,type,selcount);
+    			}
+    		}
+    		else if(hasType!=-1) {//有指定类型未指定省份
+    			String[] type=selectType(args,hasType);
+    			printSelpart(result,type,count);
+			}
+    	}
+    	
+    }    
+
 	static class line{//统计之后的病例每条的结构
 		String location;//地理位置
 		int grhz;//感染患者人数
@@ -72,7 +90,6 @@ public class InfectStatistic {
 		
 		line(){		
 		}
-		
 		/*
 	              * 功能：打印一条统计疫情信息
 	              * 输入参数：无
@@ -105,7 +122,7 @@ public class InfectStatistic {
 	    }    
 	}
 
-    /*
+     /*
               * 功能：判断日期的合法性
               * 输入参数：最新更新日志的时间，待验证日期字符串
               *返回值：true,false
@@ -194,11 +211,14 @@ public class InfectStatistic {
      *返回值：无
     */
     static void readLog(String date,boolean hasDate) throws IOException {
-    	if(hasDate==true) {    			
+    	//System.out.print("1");
+    	if(hasDate==true) {
+    			
     		if(isCorrectdate(getLastdate(),date)) {//检验输入日期正确性
     			int i=0;//控制日志读取索引
     			File file = new File("d:/log/");
-    			String[] filename = file.list();//获取所有日志文件名     				    
+    			String[] filename = file.list();//获取所有日志文件名 
+    				    
     			while(i<=findPot(date)) { 
     				//System.out.print(findPot(date));			
 					FileInputStream fs=new FileInputStream("d:/log/"+filename[i]);
@@ -325,7 +345,7 @@ public class InfectStatistic {
     	}
     }
     
-    /*
+     /*
               * 功能：找出指定地址是否已经存在记录
               * 输入参数：省的名字，总的记录数组
               *返回值：true,false
@@ -339,7 +359,7 @@ public class InfectStatistic {
     	return false;    	
     }
     
-    /*
+     /*
               * 功能：找出指定地址的记录
               * 输入参数：省的名字，总的记录数组
               *返回值：一条记录
@@ -387,6 +407,7 @@ public class InfectStatistic {
     static line[] sortline(line[] wannasort,int num) {
     	String[] location=new String[num];
     	//System.out.print(num+"\n");
+
     	for(int i=0;i<num;i++) {
     		location[i]=wannasort[i].location;
     		
@@ -408,14 +429,17 @@ public class InfectStatistic {
 	        	i++;
         	}
         }
+        /*for(i=0;i<num;i++) {
+    		System.out.print(result[i].printline());
+    	} */ 
         return result;
     }
     
     /*
-     * 功能：拼音顺序排序line数组（拣选过省份的数组）
+     * 功能：拼音顺序排序line数组（拣选省份后的）
      * 输入参数：记录数组,排序数组个数
      *返回值：排序好的数组
-    */     
+    */
     static line[] sortline1(line[] wannasort,int num) {
     	String[] location=new String[num];
     	int i=0; 
@@ -424,7 +448,7 @@ public class InfectStatistic {
     		aa[i]=new line();
     	}
     	for(i=0;i<num;i++) {
-    		location[i]=wannasort[i].location;
+    		location[i]=wannasort[i].location;   		
     	}    	
         Collator cmp = Collator.getInstance(java.util.Locale.CHINA);
         Arrays.sort(location, cmp);
@@ -442,10 +466,10 @@ public class InfectStatistic {
         		i=-1;
         	}
         	i++;
-    	}
+    	}    
         return aa;
-    }  
-     
+    }
+    
     /*
      * 功能：拣选省疫情信息
      * 输入参数：字符串省的名称,要搜索的省的个数
@@ -458,7 +482,7 @@ public class InfectStatistic {
         line[] aftersel=new line[selcount];//筛选之后的信息数组 
         for(i=0;i<selcount;i++) {
         	aftersel[i]=new line();
-        }     
+        }
         i=0;
         while(j<selcount) {
         while(i<count) {
@@ -485,7 +509,7 @@ public class InfectStatistic {
 	    		}
         		if(j==selcount) {
 	        			break;
-	        	}
+	        		}
         	}
         	i++;
         }
@@ -508,6 +532,22 @@ public class InfectStatistic {
 			i++;
 		}    	    	
     	return province;
+    }
+    
+    /*
+     * 功能：判断所拣选的类型有哪些
+     * 输入参数：命令字符串数组args，type命令所在索引
+     * 返回值：类型字符串数组
+    */
+    static String[] selectType(String[] args,int pos) {
+    	String[] type=new String[4];   
+    	int i=pos+1;    	
+		while(args[i].charAt(0)!='-'&&i<args.length) {//不是命令
+			type[seltypecount]=args[i];
+			seltypecount++;
+			i++;
+		}    
+    	return type;
     }
       
     /*
@@ -569,8 +609,55 @@ public class InfectStatistic {
         		proresult[i]=selresult[i];
         	}	
     	}
-    }   
+    }
+    
+	/*
+	     * 功能：输出筛选类型后的结果
+	     * 输入参数：要输出的数据数组line，指定类型的String数组，输出的line数组长度
+	     * 返回值：无
+	*/
+    //location+" 感染患者"+grhz+"人 疑似患者"+yshz+"人 治愈"+recover+"人 死亡"+dead+"人"
+	static void printSelpart(line[] selresult,String[] type,int len) throws IOException {
+		File f = new File("d:\\output.txt");
+	    BufferedWriter output = new BufferedWriter(new FileWriter(f,false));
+	    int j=0;//控制输出line的索引
+	    int flag=0;//标注该类型是否是第一个，考虑带省份的问题
+	    //output.write("当日情况："+"\n");
+	    while(j<len) {
+	    	flag=0;
+		    for(int i=0;i<seltypecount;i++) {
+		    	if(type[i].equals("ip")) {
+		    		if(flag==0) {//本类型是第一个
+		    			output.write(selresult[j].location+" ");
+		    		}
+			    	output.write("感染患者"+selresult[j].grhz+"人 ");
+			    	flag=1;			    		
+		    	}
+		    	if(type[i].equals("sp")) {
+		    		if(flag==0) {//本类型是第一个
+		    			output.write(selresult[j].location+" ");
+		    		}
+			    	output.write("疑似患者"+selresult[j].yshz+"人 ");
+			    	flag=1;			    		
+		    	}
+		    	if(type[i].equals("cure")) {
+		    		if(flag==0) {//本类型是第一个
+		    			output.write(selresult[j].location+" ");
+		    		}
+			    	output.write("治愈"+selresult[j].recover+"人 ");
+			    	flag=1;			    		
+		    	}
+		    	if(type[i].equals("dead")) {
+		    		if(flag==0) {//本类型是第一个
+		    			output.write(selresult[j].location+" ");
+		    		}
+			    	output.write("死亡"+selresult[j].dead+"人 ");
+			    	flag=1;			    		
+		    	}
+		    }
+		    j++;
+		    output.write("\n");
+	    }
+		output.close();
+	}    
 }
-
-
-
