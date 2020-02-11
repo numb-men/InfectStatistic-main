@@ -15,7 +15,7 @@ import java.util.Arrays;
  * TODO
  *
  * @author 衡天宇
- * @version 3.0
+ * @version 4.0
  * 
  */
 public class InfectStatistic {
@@ -25,6 +25,7 @@ public class InfectStatistic {
 	static line[] all=new line[34];//初始化结果
 	static line[] result=new line[34];//总的排序后结果
     static line[] proresult=new line[34];//筛选省份后的排序后结果
+    static String topath=new String();//输出文档路径
     	
     public static void main(String[] args) throws IOException {
 	    for(int j=0;j<34;j++) {
@@ -36,6 +37,8 @@ public class InfectStatistic {
     	int hasDate=cmd.hasParam("-date");//存命令的索引
     	int hasPro=cmd.hasParam("-province");//检查是否有province命令
     	int hasType=cmd.hasParam("-type");//检查是否有类型命令
+    	int hasPath=cmd.hasParam("-out");//获取输出路径索引
+    	getTopath(args,hasPath);
     	if(hasDate!=-1) {//有指定日期
     		readLog(args[hasDate+1],true);  
     		if(hasPro!=-1) {//有指定省份
@@ -136,7 +139,18 @@ public class InfectStatistic {
     	}
     }
     
-     /*
+    /*
+     * 功能：获取输出文档位置
+     * 输入参数：命令行String数组，-out命令所在索引
+     *返回值：无
+    */
+    static void getTopath(String[] args,int pos) {
+    	int i=pos+1;//获得路径所在索引   
+		topath=args[i];
+		//System.out.print(topath);
+    }    
+    
+    /*
      * 功能：比较日期大小
      * 输入参数：两个需要比较的日期字符串
      *返回值：前<后返回true，前>后返回false
@@ -379,7 +393,7 @@ public class InfectStatistic {
      *返回值：无
     */
     static void printtxt(line[] result) throws IOException {
-    	File f = new File("d:\\output.txt");
+    	File f = new File(topath);
         BufferedWriter output = new BufferedWriter(new FileWriter(f,false));
         int sumg=0;//全国感染患者总数
         int sumy=0;//全国疑似患者总数
@@ -406,11 +420,8 @@ public class InfectStatistic {
     */
     static line[] sortline(line[] wannasort,int num) {
     	String[] location=new String[num];
-    	//System.out.print(num+"\n");
-
     	for(int i=0;i<num;i++) {
-    		location[i]=wannasort[i].location;
-    		
+    		location[i]=wannasort[i].location;    		
     	}    	
         Collator cmp = Collator.getInstance(java.util.Locale.CHINA);
         Arrays.sort(location, cmp);
@@ -428,10 +439,7 @@ public class InfectStatistic {
 	        	}
 	        	i++;
         	}
-        }
-        /*for(i=0;i<num;i++) {
-    		System.out.print(result[i].printline());
-    	} */ 
+        } 
         return result;
     }
     
@@ -458,8 +466,7 @@ public class InfectStatistic {
         	if(wannasort[i].location.equals(location[j])) {
         		aa[j]=wannasort[i];
         		//System.out.print(aa[j].printline()+"  \n");
-        		j++;
-        		
+        		j++;       		
         		if(j>=num) {
         			break;
         		}
@@ -576,7 +583,7 @@ public class InfectStatistic {
     */
     static void printSel(line[] selresult) throws IOException {
     	int flag=-1;//全国信息的索引位置
-    	File f = new File("d:\\output.txt");
+    	File f = new File(topath);
         BufferedWriter output = new BufferedWriter(new FileWriter(f,false));       
         //output.write("当日情况："+"\n");
         for(int i=0;i<selcount;i++) {//挑出全国信息放在首位
@@ -618,7 +625,7 @@ public class InfectStatistic {
 	*/
     //location+" 感染患者"+grhz+"人 疑似患者"+yshz+"人 治愈"+recover+"人 死亡"+dead+"人"
 	static void printSelpart(line[] selresult,String[] type,int len) throws IOException {
-		File f = new File("d:\\output.txt");
+		File f = new File(topath);
 	    BufferedWriter output = new BufferedWriter(new FileWriter(f,false));
 	    int j=0;//控制输出line的索引
 	    int flag=0;//标注该类型是否是第一个，考虑带省份的问题
