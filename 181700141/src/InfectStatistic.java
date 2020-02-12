@@ -1,10 +1,11 @@
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 /**
  * InfectStatistic
  * TODO
  *
- * @author 181700141_ºô½Ğ¶ßÀ²AÃÎ
+ * @author 181700141_å‘¼å«å“†å•¦Aæ¢¦
  * @version xxx
  * @since xxx
  */
@@ -25,31 +26,45 @@ class InfectStatistic {
             }
 
         } else {
-            System.out.println("²»´æÔÚ" + args[0] + "Ö¸Áî");
+            System.out.println("ä¸å­˜åœ¨" + args[0] + "æŒ‡ä»¤");
         }
 
     }
 }
 
-//´¦ÀílistÃüÁî
+//å½“å‚æ•°æˆ–å‚æ•°å€¼éæ³•æ—¶å°†æŠ›å‡ºè¯¥å¼‚å¸¸ç±»
+class IllegalException extends Exception {
+    // è®°å½•é”™è¯¯åŸå› 
+    private String message;
+
+    public IllegalException(String tMessage) {
+        message = tMessage;
+    }
+
+    public String toString() {
+        return message;
+    }
+}
+
+//å¤„ç†listå‘½ä»¤
 class ListCommand {
-  // ´´½¨°üº¬²ÎÊı´¦ÀíÀàµÄ¼¯ºÏ
+  // åˆ›å»ºåŒ…å«å‚æ•°å¤„ç†ç±»çš„é›†åˆ
   private List<AbstractListHandler> handlers = new ArrayList<AbstractListHandler>();
 
   /**
-   * -log Ö¸¶¨ÈÕÖ¾Ä¿Â¼µÄÎ»ÖÃ£¬¸ÃÏî±Ø»á¸½´ø£¬ÇëÖ±½ÓÊ¹ÓÃ´«ÈëµÄÂ·¾¶£¬¶ø²»ÊÇ×Ô¼ºÉèÖÃÂ·¾¶ ¡£
+   * -log æŒ‡å®šæ—¥å¿—ç›®å½•çš„ä½ç½®ï¼Œè¯¥é¡¹å¿…ä¼šé™„å¸¦ï¼Œè¯·ç›´æ¥ä½¿ç”¨ä¼ å…¥çš„è·¯å¾„ï¼Œè€Œä¸æ˜¯è‡ªå·±è®¾ç½®è·¯å¾„ ã€‚
    * 
-   * -out Ö¸¶¨Êä³öÎÄ¼şÂ·¾¶ºÍÎÄ¼şÃû£¬¸ÃÏî±Ø»á¸½´ø£¬ÇëÖ±½ÓÊ¹ÓÃ´«ÈëµÄÂ·¾¶£¬¶ø²»ÊÇ×Ô¼ºÉèÖÃÂ·¾¶ ¡£
+   * -out æŒ‡å®šè¾“å‡ºæ–‡ä»¶è·¯å¾„å’Œæ–‡ä»¶åï¼Œè¯¥é¡¹å¿…ä¼šé™„å¸¦ï¼Œè¯·ç›´æ¥ä½¿ç”¨ä¼ å…¥çš„è·¯å¾„ï¼Œè€Œä¸æ˜¯è‡ªå·±è®¾ç½®è·¯å¾„ ã€‚
    * 
-   * -date Ö¸¶¨ÈÕÆÚ£¬²»ÉèÖÃÔòÄ¬ÈÏÎªËùÌá¹©ÈÕÖ¾×îĞÂµÄÒ»Ìì¡£ÄãĞèÒªÈ·±£Äã´¦ÀíÁËÖ¸¶¨ÈÕÆÚÖ®Ç°µÄËùÓĞlogÎÄ¼ş¡£
+   * -date æŒ‡å®šæ—¥æœŸï¼Œä¸è®¾ç½®åˆ™é»˜è®¤ä¸ºæ‰€æä¾›æ—¥å¿—æœ€æ–°çš„ä¸€å¤©ã€‚ä½ éœ€è¦ç¡®ä¿ä½ å¤„ç†äº†æŒ‡å®šæ—¥æœŸä¹‹å‰çš„æ‰€æœ‰logæ–‡ä»¶ã€‚
    * 
-   * -type ¿ÉÑ¡Ôñ[ip£º infection patients ¸ĞÈ¾»¼Õß£¬sp£º suspected patients ÒÉËÆ»¼Õß£¬cure£ºÖÎÓú
-   * £¬dead£ºËÀÍö»¼Õß]£¬ Ê¹ÓÃËõĞ´Ñ¡Ôñ£¬Èç -type ip ±íÊ¾Ö»ÁĞ³ö¸ĞÈ¾»¼ÕßµÄÇé¿ö£¬-type sp cureÔò»á°´Ë³Ğò¡¾sp,
-   * cure¡¿ÁĞ³öÒÉËÆ»¼ÕßºÍÖÎÓú»¼ÕßµÄÇé¿ö£¬ ²»Ö¸¶¨¸ÃÏîÄ¬ÈÏ»áÁĞ³öËùÓĞÇé¿ö¡£
+   * -type å¯é€‰æ‹©[ipï¼š infection patients æ„ŸæŸ“æ‚£è€…ï¼Œspï¼š suspected patients ç–‘ä¼¼æ‚£è€…ï¼Œcureï¼šæ²»æ„ˆ
+   * ï¼Œdeadï¼šæ­»äº¡æ‚£è€…]ï¼Œ ä½¿ç”¨ç¼©å†™é€‰æ‹©ï¼Œå¦‚ -type ip è¡¨ç¤ºåªåˆ—å‡ºæ„ŸæŸ“æ‚£è€…çš„æƒ…å†µï¼Œ-type sp cureåˆ™ä¼šæŒ‰é¡ºåºã€sp,
+   * cureã€‘åˆ—å‡ºç–‘ä¼¼æ‚£è€…å’Œæ²»æ„ˆæ‚£è€…çš„æƒ…å†µï¼Œ ä¸æŒ‡å®šè¯¥é¡¹é»˜è®¤ä¼šåˆ—å‡ºæ‰€æœ‰æƒ…å†µã€‚
    * 
-   * -province Ö¸¶¨ÁĞ³öµÄÊ¡£¬Èç-province ¸£½¨£¬ÔòÖ»ÁĞ³ö¸£½¨£¬-province È«¹ú Õã½­ÔòÖ»»áÁĞ³öÈ«¹ú¡¢Õã½­¡£
+   * -province æŒ‡å®šåˆ—å‡ºçš„çœï¼Œå¦‚-province ç¦å»ºï¼Œåˆ™åªåˆ—å‡ºç¦å»ºï¼Œ-province å…¨å›½ æµ™æ±Ÿåˆ™åªä¼šåˆ—å‡ºå…¨å›½ã€æµ™æ±Ÿã€‚
    * 
-   * ÏÂÃæµÄ²¼¶û±äÁ¿½«±êÊ¶ÊÇ·ñÒÑ¾­´´½¨Ëù¶ÔÓ¦µÄ²ÎÊı´¦ÀíÀà¡£
+   * ä¸‹é¢çš„å¸ƒå°”å˜é‡å°†æ ‡è¯†æ˜¯å¦å·²ç»åˆ›å»ºæ‰€å¯¹åº”çš„å‚æ•°å¤„ç†ç±»ã€‚
    */
   private boolean logIsExist = false;
   private boolean outIsExist = false;
@@ -58,23 +73,23 @@ class ListCommand {
   private boolean provinceIsExist = false;
 
   /**
-   * ´¦ÀílistÃüÁîµÄ¸÷²ÎÊı£¬¶Ô¸÷¸ö²ÎÊı³õÊ¼»¯Æä´¦ÀíÀà¡£
+   * å¤„ç†listå‘½ä»¤çš„å„å‚æ•°ï¼Œå¯¹å„ä¸ªå‚æ•°åˆå§‹åŒ–å…¶å¤„ç†ç±»ã€‚
    * 
-   * @param ÓÃ»§ÊäÈëµÄÃüÁî£¬º¬list
-   * @throws Èç¹û³õ²½½âÎölistÃüÁîÈç£ºlistÃüÁîÎ´Ìá¹©¸Ã²ÎÊıµÄÖ´ĞĞ·½·¨ Í¬Ò»²ÎÊı³öÏÖ¶à´Î£¬±ØĞë´æÔÚµÄ²ÎÊı²»´æÔÚÊ±½«Å×³öIllegalException
+   * @param ç”¨æˆ·è¾“å…¥çš„å‘½ä»¤ï¼Œå«list
+   * @throws å¦‚æœåˆæ­¥è§£ælistå‘½ä»¤å¦‚ï¼šlistå‘½ä»¤æœªæä¾›è¯¥å‚æ•°çš„æ‰§è¡Œæ–¹æ³• åŒä¸€å‚æ•°å‡ºç°å¤šæ¬¡ï¼Œå¿…é¡»å­˜åœ¨çš„å‚æ•°ä¸å­˜åœ¨æ—¶å°†æŠ›å‡ºIllegalException
    */
   public void dealParameter(String[] args) throws IllegalException {
       int l = args.length;
-      // ´æ´¢²ÎÊıÖµ
+      // å­˜å‚¨å‚æ•°å€¼
       String[] parameterValues;
       for (int i = 1; i < l; i++) {
           switch (args[i]) {
           case "-log":
               if (logIsExist)
-                  throw new IllegalException("´íÎó£¬ÖØ¸´³öÏÖ -log²ÎÊı");
+                  throw new IllegalException("é”™è¯¯ï¼Œé‡å¤å‡ºç° -logå‚æ•°");
               if (i == l - 1 || args[i + 1].charAt(0) == '-')
-                  throw new IllegalException("´íÎó£¬Î´Ìá¹©-log²ÎÊıÖµ");
-              // ´´½¨´¦Àílog²ÎÊıµÄ¶ÔÏó
+                  throw new IllegalException("é”™è¯¯ï¼Œæœªæä¾›-logå‚æ•°å€¼");
+              // åˆ›å»ºå¤„ç†logå‚æ•°çš„å¯¹è±¡
               logIsExist = true;
               parameterValues = new String[1];
               parameterValues[0] = args[++i];
@@ -82,10 +97,10 @@ class ListCommand {
               break;
           case "-out":
               if (outIsExist)
-                  throw new IllegalException("´íÎó£¬ÖØ¸´³öÏÖ-out²ÎÊı");
+                  throw new IllegalException("é”™è¯¯ï¼Œé‡å¤å‡ºç°-outå‚æ•°");
               if (i == l - 1 || args[i + 1].charAt(0) == '-')
-                  throw new IllegalException("´íÎó£¬Î´Ìá¹©-out²ÎÊıÖµ");
-              // ´´½¨´¦Àíout²ÎÊıµÄ¶ÔÏó
+                  throw new IllegalException("é”™è¯¯ï¼Œæœªæä¾›-outå‚æ•°å€¼");
+              // åˆ›å»ºå¤„ç†outå‚æ•°çš„å¯¹è±¡
               outIsExist = true;
               parameterValues = new String[1];
               parameterValues[0] = args[++i];
@@ -102,15 +117,15 @@ class ListCommand {
               break;
           default:
               if (args[i].charAt(0) == '-')
-                  throw new IllegalException("´íÎó£¬listÃüÁî²»Ö§³Ö" + args[i] + "²ÎÊı");
-              throw new IllegalException("´íÎó£¬²ÎÊıÖµ" + args[i] + "·Ç·¨");
+                  throw new IllegalException("é”™è¯¯ï¼Œlistå‘½ä»¤ä¸æ”¯æŒ" + args[i] + "å‚æ•°");
+              throw new IllegalException("é”™è¯¯ï¼Œå‚æ•°å€¼" + args[i] + "éæ³•");
           }// end of switch
       } // end of for
       if (!logIsExist && !outIsExist)
-          throw new IllegalException("´íÎó£¬²ÎÊı-log¼°-outÒªÇó±ØĞë´æÔÚ");
+          throw new IllegalException("é”™è¯¯ï¼Œå‚æ•°-logåŠ-outè¦æ±‚å¿…é¡»å­˜åœ¨");
   }
 
-  // Ö´ĞĞ¸÷²ÎÊıËùÒªÇóµÄ²Ù×÷
+  // æ‰§è¡Œå„å‚æ•°æ‰€è¦æ±‚çš„æ“ä½œ
   public void carryOutActions() throws Exception {
       for (AbstractListHandler handler : handlers) {
           handler.handle();
@@ -119,36 +134,47 @@ class ListCommand {
 
 }
 
-//´¦ÀílistÃüÁî¸÷²ÎÊıµÄÀàµÄ»ùÀà
+//å¤„ç†listå‘½ä»¤å„å‚æ•°çš„ç±»çš„åŸºç±»
 abstract class AbstractListHandler {
-  // ¼ÇÂ¼²ÎÊıÖµ
+  // è®°å½•å‚æ•°å€¼
   protected String[] parameterValues;
-  // ÏÂÒ»¸ö´¦ÀíÀà
-  protected AbstractListHandler nextHandler;
 
-  // ÅĞ¶Ï²ÎÊıÖµÊÇ·ñºÏ·¨
+  // åˆ¤æ–­å‚æ•°å€¼æ˜¯å¦åˆæ³•
   // public abstract boolean isLegal();
-  // ´¦Àí¸Ã²ÎÊıËùÒªÇóµÄ²Ù×÷
+  // å¤„ç†è¯¥å‚æ•°æ‰€è¦æ±‚çš„æ“ä½œ
   public abstract void handle() throws Exception;
 }
 
-/**
-* ´¦ÀílistÃüÁîlog²ÎÊıµÄÀà
-*/
+//å¤„ç†listå‘½ä»¤logå‚æ•°çš„ç±»
 class LogHandler extends AbstractListHandler {
   public LogHandler(String[] tParameterValues) {
       parameterValues = tParameterValues;
   }
 
   /**
-   * ´¦Àí-log²ÎÊıËùÒªÇóµÄ²Ù×÷
+   * å¤„ç†-logå‚æ•°æ‰€è¦æ±‚çš„æ“ä½œ
    * 
    * @throws Exception
    */
   public void handle() throws Exception {
       File file = new File(parameterValues[0]);
       if (!file.exists() && file.isDirectory())
-          throw new IllegalException("´íÎó£¬¸ÃÈÕÖ¾Ä¿Â¼²»´æÔÚ");
+          throw new IllegalException("é”™è¯¯ï¼Œè¯¥æ—¥å¿—ç›®å½•ä¸å­˜åœ¨");
   }
 }
+
+//å¤„ç†listå‘½ä»¤outå‚æ•°çš„ç±»
+class OutHandler extends AbstractListHandler {
+    public OutHandler(String[] tParameterValues) {
+        parameterValues = tParameterValues;
+    }
+
+    /**
+     * 
+     */
+    public void handle() throws Exception {
+
+    }
+}
+
 
