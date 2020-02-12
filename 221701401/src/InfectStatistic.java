@@ -1,4 +1,3 @@
-
 import java.io.*;
 
 /**
@@ -63,5 +62,59 @@ class LogHandle {
         //writer.write("zdfkjsdlf");
         writer.flush();
         writer.close();
+	}
+}
+
+//日志结果类
+class LogResult {
+	private String province;//省份
+	private int ip;
+	private int sp;
+	private int cure;
+	private int dead;
+	
+	LogResult() {
+		ip=sp=cure=dead=0;
+		province="";
+	}
+	
+	void setProvince (String pro) {
+		province=pro;
+	}
+	
+	String getProvince () {
+		return province;
+	}
+	
+	void setIp (int i) {
+		ip=i;
+	}
+	
+	int getIp () {
+		return ip;
+	}
+	
+	void setSp (int s) {
+		sp=s;
+	}
+	
+	int getSp () {
+		return sp;
+	}
+	
+	void setCure (int c) {
+		cure=c;
+	}
+	
+	int getCure () {
+		return cure;
+	}
+	
+	void setDead (int d) {
+		dead=d;
+	}
+	
+	int getDead () {
+		return dead;
 	}
 }
