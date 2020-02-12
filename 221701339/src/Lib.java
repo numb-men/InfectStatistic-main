@@ -399,7 +399,7 @@ class InfectFileReader {
     public String[] read(File file) throws IOException {
         long length = file.length();
         byte[] content = new byte[(int) length];
-        try (FileInputStream in = new FileInputStream(file)) {
+        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file), 10 * 1024)) {
             in.read(content);
         }
         return new String(content, ENCODING).split("\r?\n");
