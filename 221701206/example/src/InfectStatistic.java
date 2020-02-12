@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,8 +34,13 @@ public class InfectStatistic
     	System.out.println(use.StatisticLink.get(0).Comfirmed);
         System.out.println("helloworld");
         */
-    	
+    	//文件处理模块测试
     	FileHandleTool.HandleFile();
+    	
+    	/*数据获取模块测试
+    	DataGet a = new DataGet();
+    	a.getData("湖北省 新增 感染患者 15人");
+    	*/
     }
 }
 
@@ -42,7 +48,7 @@ public class InfectStatistic
 /**
  * DataCompareTool
  * @description 日期工具类
- * @author 221701206_�ǾŰ�
+ * @author 221701206_是九啊
  * @version 1.0
  * @since 2020.2.10
  */
@@ -87,7 +93,7 @@ class DateCompareTool
 			DateOutbound = true;
 		if(DateOutbound)
 		{
-			System.out.println("���ڳ�����Χ");
+			System.out.println("日期超过范围");
 			System.exit(1);
 		}
 		return FileName;
@@ -122,8 +128,21 @@ class FileHandleTool
 					{
 						if(line.equals(""))
 							continue;
+						if(Pattern.matches("//.*", line))
+							continue;
 						else
-							System.out.println(line);
+						{
+							DataGet Use = new DataGet();
+							Use.getData(line);
+							if(Use.Type == 1 || Use.Type == 2)
+								System.out.println(Use.Type + " " + Use.Province1 + " " + Use.Number);
+							if(Use.Type == 3 || Use.Type == 4)
+								System.out.println(Use.Type + " " + Use.Province1 + " " + Use.Province2 + " " + Use.Number);
+							if(Use.Type == 5 || Use.Type == 6)
+								System.out.println(Use.Type + " " + Use.Province1 + " " + Use.Number);
+							if(Use.Type == 7 || Use.Type == 8)
+								System.out.println(Use.Type + " " + Use.Province1 + " " + Use.Number);
+						}
 					}
 				}
 				catch(IOException e)
@@ -142,23 +161,108 @@ class FileHandleTool
 }
 
 /**
- * RegexTool
+ * DataGet
  * TODO
- * @description 正则表达筛选工具类
+ * @description 数据处理实体类，用于处理每行记录，获取其中数据
  * @author 221701206_是九啊
  * @version 1.0
  * @since 2020.2.10
  */
-class RegexTool
+class DataGet
 {
-	static int i = 1;
+	int Type;
+	/*
+	 * Type
+	 * @description 每行记录一共可分为八种类型，分别对应数字索引1~8，根据不同类型，最终产生不同数据
+	 * 1、<省> 新增 感染患者 n人
+	   2、<省> 新增 疑似患者 n人
+	   3、<省1> 感染患者 流入 <省2> n人
+	   4、<省1> 疑似患者 流入 <省2> n人
+	   5、<省> 死亡 n人
+	   6、<省> 治愈 n人
+	   7、<省> 疑似患者 确诊感染 n人
+	   8、<省> 排除 疑似患者 n人
+	 */
+	String Province1;
+	String Province2;
+	int Number;
+	
+	public DataGet()
+	{
+		this.Type = 0;
+		this.Province1 = "";
+		this.Province2 = "";
+		this.Number = 0;
+	}
+	
+	/**
+	 * getData
+	 * @description 根据正则表达式匹配每行的模式，获取相应数据用于统计
+	 * @author 221701206_是九啊
+	 * @version 1.0
+	 * @since 2020.2.11
+	 */
+	public void getData(String line)
+	{
+		String Type1 = "\\W+ 新增 感染患者 \\d+人";
+		String Type2 = "\\W+ 新增 疑似患者 \\d+人";
+		String Type3 = "\\W+ 感染患者 流入 \\W+ \\d+人";
+		String Type4 = "\\W+ 疑似患者 流入 \\W+ \\d+人";
+		String Type5 = "\\W+ 死亡 \\d+人";
+		String Type6 = "\\W+ 治愈 \\d+人";
+		String Type7 = "\\W+ 疑似患者 确诊感染 \\d+人";
+		String Type8 = "\\W+ 排除 疑似患者 \\d+人";
+		
+		if(Pattern.matches(Type1, line))
+			this.Type = 1;
+		if(Pattern.matches(Type2, line))
+			this.Type = 2;
+		if(Pattern.matches(Type3, line))
+			this.Type = 3;
+		if(Pattern.matches(Type4, line))
+			this.Type = 4;
+		if(Pattern.matches(Type5, line))
+			this.Type = 5;
+		if(Pattern.matches(Type6, line))
+			this.Type = 6;
+		if(Pattern.matches(Type7, line))
+			this.Type = 7;
+		if(Pattern.matches(Type8, line))
+			this.Type = 8;
+		
+		String[] SplitLine = line.split(" ");
+		if(this.Type == 1 || this.Type == 2)
+		{
+			this.Province1 = SplitLine[0];
+			this.Number = Integer.valueOf(SplitLine[3].split("人")[0]);
+		}
+		
+		if(this.Type == 3 || this.Type == 4)
+		{
+			this.Province1 = SplitLine[0];
+			this.Province2 = SplitLine[3];
+			this.Number = Integer.valueOf(SplitLine[4].split("人")[0]);
+		}
+		
+		if(this.Type == 5 || this.Type == 6)
+		{
+			this.Province1 = SplitLine[0];
+			this.Number = Integer.valueOf(SplitLine[2].split("人")[0]);
+		}
+		
+		if(this.Type == 7 || this.Type == 8)
+		{
+			this.Province1 = SplitLine[0];
+			this.Number = Integer.valueOf(SplitLine[3].split("人")[0]);
+		}
+	}
 }
 
 /**
- * StaticTool
+ * StatisticResult
  * TODO
  * @description 统计数字实体类
- * @author 221701206_�ǾŰ�
+ * @author 221701206_是九啊
  * @version 1.0
  * @since 2020.2.10
  */
@@ -181,7 +285,7 @@ class StatisticResult
 	}
 	public void Statistic()
 	{
-		StatisticLink.get(0).Comfirmed += RegexTool.i;
+		//StatisticLink.get(0).Comfirmed += RegexTool.i;
 	}
 	
 	
