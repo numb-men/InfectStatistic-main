@@ -30,6 +30,11 @@ import java.util.HashSet;
  */
 public class Lib {
 
+    public static final String[] PROVINCE_LIST = {"全国", "安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州",
+        "哈尔滨", "海南", "河北", "河南", "湖北", "湖南", "吉林", "江苏", "江西", "内蒙古", "宁夏", "青海", "山东", "山西",
+        "山西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"
+    };
+
     /**
      * Validate format of date string boolean
      *
@@ -65,71 +70,60 @@ public class Lib {
     }
 }
 
+class RecordElement {
+    int intValue = 0;
+    String stringValue = "";
+}
+
 /**
  * Record
  */
 class Record {
-    /**
-     * Int infected
-     */
-    Integer intInfected = 0;
-    /**
-     * Int suspected
-     */
-    Integer intSuspected = 0;
-    /**
-     * Int cured
-     */
-    Integer intCured = 0;
-    /**
-     * Int dead
-     */
-    Integer intDead = 0;
 
-    /**
-     * Str infected
-     */
-    String strInfected = "";
-    /**
-     * Str suspected
-     */
-    String strSuspected = "";
-    /**
-     * Str cured
-     */
-    String strCured = "";
-    /**
-     * Str dead
-     */
-    String strDead = "";
+    RecordElement infected;
+    RecordElement suspected;
+    RecordElement cured;
+    RecordElement dead;
+    private String province = "";
 
-    /**
-     * Gets record string *
-     *
-     * @param record record
-     * @return the record string
-     */
-    public static String getRecordString(Record record) {
-        return "感染患者" + record.strInfected + record.intInfected + "人 疑似患者"
-            + record.strSuspected + record.intSuspected + "人 治愈" + record.strCured
-            + record.intCured + "人 死亡" + record.strDead + record.intDead;
+    public Record(String province) {
+        this.province = province;
     }
 
-    /**
-     * Update record *
-     *
-     * @param strAttribute str attribute
-     * @param intAttribute int attribute
-     * @param value        value
-     */
-    public void updateRecord(String strAttribute, Integer intAttribute, Integer value) {
-        if ("".equals(strAttribute) || value < 0) {
-            strAttribute += value.toString();
-        } else {
-            strAttribute += "+" + value.toString();
-        }
-        intAttribute += value;
+    public String getProvince() {
+        return this.province;
     }
+
+    public void updateInfected(int number) {
+        infected.intValue += number;
+        infected.stringValue += number;
+    }
+
+    public void updateSuspected(int number) {
+        suspected.intValue += number;
+        suspected.stringValue += number;
+    }
+
+    public void updateCured(int number) {
+        cured.intValue += number;
+        cured.stringValue += number;
+
+        //治愈数增加了，感染数就要同步减少
+        updateInfected(-number);
+    }
+
+    public void updateDead(int number) {
+        dead.intValue += number;
+        dead.stringValue += number;
+
+        //治愈数增加了，感染数就要同步减少
+        updateInfected(-number);
+    }
+
+    //    public static String getRecordString(Record record) {
+//
+//    }
+
 
 //    String getRecordString(){
 //        return "感染患者"infected.toString()
@@ -144,7 +138,68 @@ class RecordContainer {
     /**
      * Container
      */
-    HashMap<String, Record> container;
+    ArrayList<Record> container;
+
+    public void init() {
+        container = new ArrayList<>() {{
+            for (String province : Lib.PROVINCE_LIST) {
+                add(new Record(province));
+            }
+        }};
+    }
+
+    private void updateRecord(String province, String patientType, int number) {
+        for (int i = 0; i < container.size(); i++) {
+            if (province.trim().equals(container.get(i).getProvince())) {
+                switch (patientType.trim()) {
+                    case "治愈":
+                        container.get(i).updateCured(number);
+                        break;
+                    case "死亡":
+
+                        break;
+                    default:
+                        System.err.println("读取log错误，可能含有非法字符。");
+                        System.exit(-2);
+                        break;
+                }
+            }
+        }
+    }
+
+    private void updateRecord(String province, int operation, String patientType, int number) {
+
+    }
+
+    private void updateRecord(String province1, String patientType, String province2, int number) {
+
+    }
+
+    public void parseSingleLine(String line) {
+        //将一行log用空格分隔成字符串数组
+        String[] splited = line.split(" ");
+
+        switch (splited.length) {
+            case 3:
+
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            default:
+                break;
+        }
+    }
+
+    private boolean exists(String province) {
+        for (Record record : container) {
+            if (province.equals(record.getProvince())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Gets record by province *
@@ -171,10 +226,7 @@ class ArgumentParser {
         add("-log");
         add("-out");
     }};
-    private static final String[] PROVINCE_LIST = {"全国", "安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州",
-        "哈尔滨", "海南", "河北", "河南", "湖北", "湖南", "吉林", "江苏", "江西", "内蒙古", "宁夏", "青海", "山东", "山西",
-        "山西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"
-    };
+
     /**
      * Original arguments
      */
@@ -223,8 +275,6 @@ class ArgumentParser {
         if (index < 0) {
             return "null";
         }
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
         if (Lib.validateFormatOfDateString(originalArguments[index + 1])) {
             return originalArguments[index + 1];
@@ -291,7 +341,7 @@ class ArgumentParser {
 
         while (true) {
             //传入的参数和可用参数列表进行比对，get方法不返回null则取出参数对应的中文字符串加入List
-            if (Lib.getIndexFromStrings(PROVINCE_LIST, originalArguments[index + 1]) >= 0) {
+            if (Lib.getIndexFromStrings(Lib.PROVINCE_LIST, originalArguments[index + 1]) >= 0) {
                 provinceList.add(originalArguments[index + 1]);
                 index++;
             } else {
@@ -379,7 +429,9 @@ class FileTools {
      * LOG_FILTER
      * 用正则表达式比转换为Date对象更快一点
      */
-    public final static String LOG_FILTER = "(19|20)[0-9][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]).log.txt";
+    public final static String FILE_NAME_FILTER = "(19|20)[0-9][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]).log.txt";
+
+    public final static String LOG_FILTER_LENGTH_3 = "[\u4e00-\u9fa5]";
     /**
      * Date
      */
@@ -412,34 +464,11 @@ class FileTools {
         }
     }
 
-    public void readFile() {
-        try {
-            for (String fileName : fileList) {
-                BufferedReader reader = Files.newBufferedReader(Paths.get(logPath + fileName));
-                System.out.println(fileName + ":");
-                String read = null;
-                while ((read = reader.readLine()) != null) {
-                    String[] line = read.split(" ");
-                    if ("//".equals(line[0])) {
-                        continue;
-                    }
-                    for (String o : line) {
-                        System.out.print(o + " ");
-                    }
-                    System.out.println();
-                }
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void initFileList() {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(logPath))) {
             fileList = new ArrayList<>() {{
                 for (Path path : stream) {
-                    if (path.getFileName().toString().matches(LOG_FILTER)) {
+                    if (path.getFileName().toString().matches(FILE_NAME_FILTER)) {
                         add(path.getFileName().toString());
                     }
                 }
@@ -454,7 +483,7 @@ class FileTools {
             fileList = new ArrayList<>() {{
                 for (Path path : stream) {
                     String name = path.getFileName().toString();
-                    if (name.matches(LOG_FILTER) && name.compareTo(newestFileName) <= 0) {
+                    if (name.matches(FILE_NAME_FILTER) && name.compareTo(newestFileName) <= 0) {
                         add(path.getFileName().toString());
                     }
                 }
@@ -463,6 +492,35 @@ class FileTools {
             e.printStackTrace();
         }
     }
+
+    public void readFile() {
+        try {
+            //makeRecordContainer
+            for (String fileName : fileList) {
+                BufferedReader reader = Files.newBufferedReader(Paths.get(logPath + fileName));
+                System.out.println(fileName + ":");
+                String read = null;
+                while ((read = reader.readLine()) != null) {
+                    String[] line = read.split(" ");
+                    /*
+                    recordContainer.parse(line)
+                    */
+                    if ("//".equals(line[0])) {
+                        continue;
+                    }
+                    //System.out.println(" length=" + line.length);
+                    for (String o : line) {
+                        System.out.print(o + " ");
+                        //System.out.print(o.replaceAll("[\u4e00-\u9fa5]+", "").trim() + 1 + " ");
+                    }
+                    System.out.println();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void show() {
         for (String s : fileList) {
