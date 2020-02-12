@@ -102,7 +102,7 @@
 
   1. 方法体内的根据变量定义，逻辑部分进行适当的插入一行空行，进行逻辑部分划分。
   2. 执行语句组、变量的定义语句组、不同的业务逻辑之间或者不同的语义之间插入一个空行。
-  3. 不以分隔为目的空行插入多行空行。
+  3. 不以分隔为目的空行插入多行（2行以上）空行。
 
   
 
@@ -119,8 +119,6 @@
      
 
 - 其他规则
-
-  1. 空格规则
 
      1. 左大括号前不换行，左大括号后换行。
 
@@ -140,7 +138,8 @@
         public static void main(String args[]) {
         	String say = "hello";
         	int flag = 0;
-        	if (flag == 0) {
+        	boolean ready=false;
+        	if (flag == 0 && !ready) {
         		System.out.println(say);
         	}
         	if (flag == 1) {
