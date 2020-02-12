@@ -114,21 +114,4 @@ public class ListCheckerTest {
 
         assertDoesNotThrow(()->checker.checkType(types));
     }
-
-    @Test
-    public void checkProvince() {
-        List<String> provinces = new ArrayList<>();
-        provinces.add("全国");
-        provinces.add("福建");
-        provinces.add("武汉");
-
-        assertDoesNotThrow(()->checker.checkProvince(provinces));
-    }
-
-    @Test
-    public void checkProvinceNull() {
-        List<String> provinces = new ArrayList<>();
-
-        assertDoesNotThrow(()->checker.checkProvince(provinces));
-    }
 }

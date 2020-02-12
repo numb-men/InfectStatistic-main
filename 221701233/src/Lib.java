@@ -1,9 +1,11 @@
-import java.io.File;
+import sun.security.x509.AttributeNameEnumeration;
+
+import java.io.*;
+import java.lang.reflect.Array;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Lib
@@ -14,62 +16,6 @@ import java.util.List;
  * @since 1.0
  */
 public class Lib {
-}
-
-/**
- * 命令工厂
- */
-class CommandFactory {
-
-    /**
-     * 通过反射执行相应方法获取命令对象
-     *
-     * @param name     命令名
-     * @param receiver 命令接受者
-     * @return 相应方法执行后获取的命令对象
-     * @throws Exception 不存在相应命令对象
-     */
-    public Command getCommand(String name, CommandReceiver receiver) throws Exception {
-        return (Command) this.getClass().getMethod(name.toLowerCase(), Class.forName("CommandReceiver"))
-                .invoke(this, receiver);
-    }
-
-    public Command list(CommandReceiver receiver) {
-        return new ListCommand(receiver);
-    }
-
-    // 在此处扩展命令...
-}
-
-/**
- * 命令接口
- */
-interface Command {
-
-    void execute(CommandLine commandLine) throws Exception;
-
-}
-
-/**
- * list命令
- */
-class ListCommand implements Command {
-
-    private CommandReceiver receiver;
-
-    private ListChecker checker;
-
-    public ListCommand(CommandReceiver receiver) {
-        checker = new ListChecker();
-        this.receiver = receiver;
-    }
-
-    @Override
-    public void execute(CommandLine commandLine) throws Exception {
-        checker.check(commandLine);
-        receiver.list(checker.getCmd());
-    }
-
 }
 
 /**
@@ -146,32 +92,74 @@ class CommandLine {
 }
 
 /**
- * list命令检查器，检查完毕后生成最终的命令格式
+ * 命令工厂
+ */
+class CommandFactory {
+
+    /**
+     * 通过反射执行相应方法获取命令对象
+     *
+     * @param name     命令名
+     * @param receiver 命令接受者
+     * @return 相应方法执行后获取的命令对象
+     * @throws Exception 不存在相应命令对象
+     */
+    public Command getCommand(String name, CommandReceiver receiver) throws Exception {
+        return (Command) this.getClass().getMethod(name.toLowerCase(), Class.forName("CommandReceiver"))
+                .invoke(this, receiver);
+    }
+
+    public Command list(CommandReceiver receiver) {
+        return new ListCommand(receiver);
+    }
+
+    // 在此处扩展命令...
+}
+
+/**
+ * 命令接口
+ */
+interface Command {
+
+    void execute(CommandLine commandLine) throws Exception;
+
+}
+
+/**
+ * list命令
+ */
+class ListCommand implements Command {
+
+    private CommandReceiver receiver;
+
+    private ListChecker checker;
+
+    public ListCommand(CommandReceiver receiver) {
+        checker = new ListChecker();
+        this.receiver = receiver;
+    }
+
+    @Override
+    public void execute(CommandLine commandLine) throws Exception {
+        checker.check(commandLine);
+        receiver.list(ListCommandUtil.Mapper(commandLine));
+    }
+
+}
+
+/**
+ * list命令检查器
  */
 class ListChecker {
 
-    HashMap<String, Object> cmd;
-
-    ListChecker() {
-        cmd = new HashMap<>();
-    }
-
     public void check(CommandLine line) throws Exception {
+        // 检查参数
         checkLog(line.getValue("-log"));
         checkOut(line.getValue("-out"));
         checkDate(line.getValue("-date"));
         checkType(line.getValues("-type"));
-        checkProvince(line.getValues("-province"));
     }
 
-    /**
-     * 最终的命令格式
-     *
-     * @return
-     */
-    public HashMap<String, Object> getCmd() {
-        return cmd;
-    }
 
     /**
      * 检查日志路径
@@ -190,8 +178,6 @@ class ListChecker {
         if (!receiverDir.isDirectory()) {
             throw new Exception("\"" + receiverPath + "\" is not a directory.");
         }
-
-        cmd.put("-log", receiverDir);
     }
 
     /**
@@ -212,8 +198,6 @@ class ListChecker {
         if (!outFile.isFile()) {
             throw new Exception("\"" + outPath + "\" is not a file.");
         }
-
-        cmd.put("-out", outFile);
     }
 
     /**
@@ -226,7 +210,6 @@ class ListChecker {
 
         Date defaultDate = new Date();
         if (dateStr == null) {
-            cmd.put("-date", defaultDate);
             return;
         }
 
@@ -237,8 +220,6 @@ class ListChecker {
         if (argDate.after(defaultDate)) {
             throw new Exception(format.format(argDate) + " is later than current time：" + format.format(defaultDate));
         }
-
-        cmd.put("-date", argDate);
     }
 
     /**
@@ -255,7 +236,6 @@ class ListChecker {
         defaultTypes.add("dead");
 
         if (argTypes.size() == 0) {
-            cmd.put("-type", defaultTypes);
             return;
         }
 
@@ -264,17 +244,116 @@ class ListChecker {
                 throw new Exception("Unknown type：" + type);
             }
         }
+    }
+}
 
-        cmd.put("-type", argTypes);
+/**
+ * List命令实体
+ */
+class ListCommandUtil {
+
+    public List<String> log;
+
+    public File out;
+
+    public Date date = new Date();
+
+    public List<String> type = new ArrayList<>(Arrays.asList("ip", "sp", "cure", "dead"));
+
+    public List<String> province;
+
+    /**
+     * 将CommandLine映射成ListCommandUtil
+     *
+     * @param line
+     * @return
+     */
+    public static ListCommandUtil Mapper(CommandLine line) {
+        ListCommandUtil util = new ListCommandUtil();
+
+        util.out = new File(line.getValue("-out"));
+
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            util.date = format.parse(line.getValue("-date"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        util.log = LogReader.readLog(util.date, new File(line.getValue("-log")));
+
+        List<String> types = line.getValues("-type");
+        if (types.size() != 0) {
+            util.type = types;
+        }
+
+        util.province = line.getValues("-province");
+
+        return util;
+    }
+}
+
+/**
+ * 日志读取器
+ */
+class LogReader {
+
+    /**
+     * 从日志文件名中提取日期
+     *
+     * @param file 日志文件
+     * @return 日志日期
+     */
+    private static String getLogDate(File file) {
+        String fileName = file.getName();
+        return fileName.substring(0, fileName.lastIndexOf(".log.txt"));
     }
 
     /**
-     * 检查省份
+     * 获取指定日期之前的所有log
      *
-     * @param line
+     * @param requiredDate 指定日期
+     * @param logDir       日志文件所在目录
+     * @return 指定日期之前的所有log列表
      */
-    public void checkProvince(List<String> line) {
-        cmd.put("-province", line);
+    public static List<String> readLog(Date requiredDate, File logDir) {
+
+        File[] fileList = logDir.listFiles();
+        List<String> logLines = new ArrayList<>();
+
+        for (File file : fileList) {
+            if (file.isFile()) {
+                Date logDate;
+
+                // 过滤日期不规范的日志文件
+                try {
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                    format.setLenient(false);
+                    logDate = format.parse(getLogDate(file));
+                } catch (Exception e) {
+                    continue;
+                }
+
+                // 过滤指定日期之后的日志
+                if (!logDate.after(requiredDate)) {
+                    try (FileReader fr = new FileReader(file.getAbsolutePath());
+                         BufferedReader bf = new BufferedReader(fr)) {
+                        String line;
+                        // 按行读取
+                        while ((line = bf.readLine()) != null) {
+                            // 过滤注解
+                            if (!line.substring(0, 2).equals("//")) {
+                                logLines.add(line);
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        return logLines;
     }
 }
 
@@ -286,9 +365,9 @@ class CommandReceiver {
     /**
      * list命令
      *
-     * @param cmd 检查器生成的命令格式
+     * @param util
      */
-    public void list(HashMap<String, Object> cmd) {
+    public void list(ListCommandUtil util) {
         // TODO 根据命令参数统计疫情
     }
 
