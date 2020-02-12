@@ -10,6 +10,7 @@ import static java.util.stream.Collectors.toMap;
 /**
  * Lib
  * TODO
+ * Lib
  * CommonUtil
  * @author 岳逾先
  * @version 1.1.1
@@ -26,6 +27,9 @@ public class Lib {
     public static String countryStr = "全国";
     public static String skip = "//";
     public static String[] allType = {"ip", "sp", "cure", "dead"};
+    public static Map<String, String>  PolyphoneMap = new HashMap<String, String>(1){
+        {put("重庆", "冲");}
+    };
 }
 
 class CommonUtil {
