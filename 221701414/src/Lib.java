@@ -230,11 +230,24 @@ class MyList {
     public final static String[] PARAMS = {"list", "-log", "-date", "-province", "-type", "-out"};
 
     /**
+     * list命令的参数 -type ，对应的值
+     */
+    public final static String[] TYPE_VALUE = {"ip", "sp", "cure", "dead"};
+
+    /**
+     * list 命令的参数 -province，对应的值
+     */
+    public final static String[] PROCINCE_VALUE = {"全国", "安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州",
+            "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海",
+            "山东", "山西", "陕西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
+
+
+    /**
      * list命令的参数 -province，对应的值
      */
     private String[] provinceValue;
 
-    private final static String REMIND = "\n// 该文档并非真实数据，仅供测试使用";
+    private final static String REMIND = "// 该文档并非真实数据，仅供测试使用";
 
     /**
      * 输入的命令
@@ -270,11 +283,7 @@ class MyList {
         this.cmdArgs = cmdArgs;
         this.linkedHashMap = new LinkedHashMap<>();
         //默认顺序，感染 疑似 治愈 死亡
-        this.outType = new String[]{"ip", "sp", "cure", "dead"};
-        //默认省份
-        this.provinceValue = new String[]{"全国", "安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州",
-                "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海",
-                "山东", "山西", "陕西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
+        this.outType = TYPE_VALUE;
     }
 
     /**
@@ -298,47 +307,24 @@ class MyList {
             return;
         }
         this.outPath = this.cmdArgs.getArgVal(PARAMS[5]);
-        AbstractLogLineType abstractLogLineType = getChainOfLogLine();
-        for (int i = 0; i < this.logPath.size(); i++) {
-            String content = FileOperate.readFile(this.dir + this.logPath.get(i));
-            if (content != null) {
-                String[] logLine = content.split("#");
-                for (int j = 0; j < logLine.length; j++) {
-                    //处理日志行
-                    abstractLogLineType.matchLogLine(logLine[j], this.linkedHashMap);
-                }
-            }
+        if (this.outPath == null) {
+            return;
         }
 
-        String outStr = "";
-        ProvinceStatus provinceStatusAll = new ProvinceStatus(this.provinceValue[0]);
-        for (int i = 1; i < this.provinceValue.length; i++) {
-            if (this.linkedHashMap.containsKey(this.provinceValue[i])) {
-                int infect = this.linkedHashMap.get(this.provinceValue[i]).getInfect();
-                int suspect = this.linkedHashMap.get(this.provinceValue[i]).getSuspect();
-                int cure = this.linkedHashMap.get(this.provinceValue[i]).getCure();
-                int death = this.linkedHashMap.get(this.provinceValue[i]).getDeath();
-                provinceStatusAll.setInfect(provinceStatusAll.getInfect() + infect);
-                provinceStatusAll.setSuspect(provinceStatusAll.getSuspect() + suspect);
-                provinceStatusAll.setCure(provinceStatusAll.getCure() + cure);
-                provinceStatusAll.setDeath(provinceStatusAll.getDeath() + death);
-                outStr += "\n" + this.linkedHashMap.get(this.provinceValue[i]).getName() + " "
-                        + "感染患者" + infect + "人" + " "
-                        + "疑似患者" + suspect + "人" + " "
-                        + "治愈" + cure + "人" + " "
-                        + "死亡" + death + "人";
-            }
-        }
-        String provinceStatusAllStr = provinceStatusAll.getName() + " "
-                + "感染患者" + provinceStatusAll.getInfect() + "人" + " "
-                + "疑似患者" + provinceStatusAll.getSuspect() + "人" + " "
-                + "治愈" + provinceStatusAll.getCure() + "人" + " "
-                + "死亡" + provinceStatusAll.getDeath() + "人";
-        outStr = provinceStatusAllStr + outStr;
-        outStr+=REMIND;
+        //读入日志信息
+        readLog();
 
+        //将 “全国” 的信息添加进 this.linkedHashMap
+        getProvinceStatusAll();
 
-        FileOperate.writeTxt(outPath,outStr);
+        //删除不需要输出的省份
+        deleteNotOutputProvicne();
+
+        //获取需要输出的信息
+        String outStr = getOutStr();
+
+        //将输出信息写入文件
+        FileOperate.writeTxt(outPath, outStr);
     }
 
     /**
@@ -348,6 +334,60 @@ class MyList {
         if (this.cmdArgs == null || this.dir == null) {
             return;
         }
+        getLogPath();
+    }
+
+    /**
+     * 实现 list -type
+     */
+    public void type() {
+        if (this.cmdArgs == null || this.cmdArgs.getArgVal(PARAMS[4]) == null) {
+            return;
+        }
+        outType = this.cmdArgs.getArgVals(PARAMS[4]);
+    }
+
+    /**
+     * 实现 list -province
+     */
+    public void province() {
+        if (this.cmdArgs == null) {
+            return;
+        }
+        //注意：如果 -pvovince 缺省，这里的值为空
+        this.provinceValue = this.cmdArgs.getArgVals(PARAMS[3]);
+    }
+
+    /**
+     * 形成责任链
+     */
+    private static AbstractLogLineType getChainOfLogLine() {
+        NewInfectorLogLine newInfectorLogLine = new NewInfectorLogLine(AbstractLogLineType.LOGLINE_TYPE[0]);
+        NewSuspectLogLine newSuspectLogLine = new NewSuspectLogLine(AbstractLogLineType.LOGLINE_TYPE[1]);
+        InInfectorLogLine inInfectorLogLine = new InInfectorLogLine(AbstractLogLineType.LOGLINE_TYPE[2]);
+        InSuspectLogLine inSuspectLogLine = new InSuspectLogLine(AbstractLogLineType.LOGLINE_TYPE[3]);
+        DeathLogLine deathLogLine = new DeathLogLine(AbstractLogLineType.LOGLINE_TYPE[4]);
+        CureLogLine cureLogLine = new CureLogLine(AbstractLogLineType.LOGLINE_TYPE[5]);
+        DefiniteLogLine definiteLogLine = new DefiniteLogLine(AbstractLogLineType.LOGLINE_TYPE[6]);
+        ExcludeLogLine excludeLogLine = new ExcludeLogLine(AbstractLogLineType.LOGLINE_TYPE[7]);
+        MismatchingLogLine mismatchingLogLine = new MismatchingLogLine(AbstractLogLineType.LOGLINE_TYPE[8]);
+
+        newInfectorLogLine.setNextLogType(newSuspectLogLine);
+        newSuspectLogLine.setNextLogType(inInfectorLogLine);
+        inInfectorLogLine.setNextLogType(inSuspectLogLine);
+        inSuspectLogLine.setNextLogType(deathLogLine);
+        deathLogLine.setNextLogType(cureLogLine);
+        cureLogLine.setNextLogType(definiteLogLine);
+        definiteLogLine.setNextLogType(excludeLogLine);
+        excludeLogLine.setNextLogType(mismatchingLogLine);
+
+        return newInfectorLogLine;
+    }
+
+    /**
+     * 获取需要读入的log日志路径
+     */
+    private void getLogPath() {
         logPath = FileOperate.getAllFileName(dir);
         if (logPath == null) {
             return;
@@ -380,49 +420,83 @@ class MyList {
     }
 
     /**
-     * 实现 list -type
+     * 读入日志信息
      */
-    public void type() {
-        if (this.cmdArgs == null || this.cmdArgs.getArgVal(PARAMS[4]) == null) {
-            return;
+    private void readLog() {
+        AbstractLogLineType abstractLogLineType = getChainOfLogLine();
+        for (int i = 0; i < this.logPath.size(); i++) {
+            String content = FileOperate.readFile(this.dir + this.logPath.get(i));
+            if (content != null) {
+                String[] logLine = content.split("#");
+                for (int j = 0; j < logLine.length; j++) {
+                    //处理日志行
+                    abstractLogLineType.matchLogLine(logLine[j], this.linkedHashMap);
+                }
+            }
         }
-        outType = this.cmdArgs.getArgVals(PARAMS[4]);
+    }
+
+
+    /**
+     * 获取全国的数据
+     */
+    private void getProvinceStatusAll() {
+        ProvinceStatus provinceStatusAll = new ProvinceStatus(PROCINCE_VALUE[0]);
+        for (String provinceStatusKey : this.linkedHashMap.keySet()) {
+            ProvinceStatus provinceStatus = this.linkedHashMap.get(provinceStatusKey);
+
+            int infect = provinceStatus.getInfect();
+            int suspect = provinceStatus.getSuspect();
+            int cure = provinceStatus.getCure();
+            int death = provinceStatus.getDeath();
+            provinceStatusAll.setInfect(provinceStatusAll.getInfect() + infect);
+            provinceStatusAll.setSuspect(provinceStatusAll.getSuspect() + suspect);
+            provinceStatusAll.setCure(provinceStatusAll.getCure() + cure);
+            provinceStatusAll.setDeath(provinceStatusAll.getDeath() + death);
+        }
+        this.linkedHashMap.put(PROCINCE_VALUE[0], provinceStatusAll);
     }
 
     /**
-     * 实现 list -province
+     * 删除不需要输出的省份
      */
-    public void province() {
-        if (this.cmdArgs == null || this.cmdArgs.getArgVals(PARAMS[3]) == null) {
-            return;
+    private void deleteNotOutputProvicne() {
+        if (this.provinceValue != null) {
+            boolean flag;
+            //删除不需要输出的省份
+            for (String provinceStatusKey : this.linkedHashMap.keySet()) {
+                ProvinceStatus provinceStatus = this.linkedHashMap.get(provinceStatusKey);
+                flag = false;
+                for (int i = 0; i < this.provinceValue.length; i++) {
+                    //-province 的参数值和 “全国”，不删除
+                    if (provinceStatus.getName().equals(this.provinceValue[i])
+                            || provinceStatus.getName().equals(PROCINCE_VALUE[0])) {
+                        flag = true;
+                    }
+                }
+                if (!flag) {
+                    this.linkedHashMap.remove(provinceStatusKey);
+                }
+            }
         }
-        provinceValue = this.cmdArgs.getArgVals(PARAMS[3]);
     }
 
     /**
-     * 形成责任链
+     * 获取需要输出的信息
      */
-    public static AbstractLogLineType getChainOfLogLine() {
-        NewInfectorLogLine newInfectorLogLine = new NewInfectorLogLine(AbstractLogLineType.LOGLINE_TYPE[0]);
-        NewSuspectLogLine newSuspectLogLine = new NewSuspectLogLine(AbstractLogLineType.LOGLINE_TYPE[1]);
-        InInfectorLogLine inInfectorLogLine = new InInfectorLogLine(AbstractLogLineType.LOGLINE_TYPE[2]);
-        InSuspectLogLine inSuspectLogLine = new InSuspectLogLine(AbstractLogLineType.LOGLINE_TYPE[3]);
-        DeathLogLine deathLogLine = new DeathLogLine(AbstractLogLineType.LOGLINE_TYPE[4]);
-        CureLogLine cureLogLine = new CureLogLine(AbstractLogLineType.LOGLINE_TYPE[5]);
-        DefiniteLogLine definiteLogLine = new DefiniteLogLine(AbstractLogLineType.LOGLINE_TYPE[6]);
-        ExcludeLogLine excludeLogLine = new ExcludeLogLine(AbstractLogLineType.LOGLINE_TYPE[7]);
-        MismatchingLogLine mismatchingLogLine = new MismatchingLogLine(AbstractLogLineType.LOGLINE_TYPE[8]);
-
-        newInfectorLogLine.setNextLogType(newSuspectLogLine);
-        newSuspectLogLine.setNextLogType(inInfectorLogLine);
-        inInfectorLogLine.setNextLogType(inSuspectLogLine);
-        inSuspectLogLine.setNextLogType(deathLogLine);
-        deathLogLine.setNextLogType(cureLogLine);
-        cureLogLine.setNextLogType(definiteLogLine);
-        definiteLogLine.setNextLogType(excludeLogLine);
-        excludeLogLine.setNextLogType(mismatchingLogLine);
-
-        return newInfectorLogLine;
+    private String getOutStr() {
+        String outStr = "";
+        for (int i = 0; i < PROCINCE_VALUE.length; i++) {
+            if (this.linkedHashMap.containsKey(PROCINCE_VALUE[i])) {
+                outStr+=PROCINCE_VALUE[i];
+                for (int k = 0; k < this.outType.length; k++) {
+                    outStr += this.linkedHashMap.get(PROCINCE_VALUE[i]).getOutTypeStr(this.outType[k]);
+                }
+                outStr += "\n";
+            }
+        }
+        outStr += REMIND;
+        return outStr;
     }
 }
 
@@ -485,10 +559,6 @@ class ListDateCommand implements Command {
  * list -type
  */
 class ListTypeCommand implements Command {
-    /**
-     * list命令的参数 -type ，对应的值
-     */
-    private final static String[] typeValue = {"ip", "sp", "cure", "dead"};
 
     private MyList list;
 
@@ -999,6 +1069,24 @@ class ProvinceStatus {
         this.suspect = 0;
         this.cure = 0;
         this.death = 0;
+    }
+
+    /**
+     *
+     */
+    public String getOutTypeStr(String typeValue) {
+        switch (typeValue) {
+            case "ip":
+                return " " + "感染患者" + this.infect + "人";
+            case "sp":
+                return " " + "疑似患者" + this.suspect + "人";
+            case "cure":
+                return " " + "治愈" + this.cure + "人";
+            case "dead":
+                return " " + "死亡" + this.death + "人";
+            default:
+                throw new IllegalStateException("Unexpected value: " + typeValue);
+        }
     }
 
     //-----------------------------------setter/getter----------------------↓-------------------------------------
