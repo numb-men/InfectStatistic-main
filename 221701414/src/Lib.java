@@ -1,11 +1,9 @@
 
 import java.io.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
@@ -13,10 +11,9 @@ import java.util.regex.Pattern;
 
 /**
  * Lib
- * TODO
  *
  * @author 221701414 黎家泽
- * @version xxx
+ * @version 1.0
  * @since 2020年2月6日15:28:23
  */
 public class Lib {
@@ -29,6 +26,8 @@ public class Lib {
 
     /**
      * 执行命令
+     *
+     * @throws FileNotFoundException
      */
     public void execute() throws FileNotFoundException {
         if (this.args == null) {
@@ -39,6 +38,11 @@ public class Lib {
         if (!cmdArgs.getCmd().equals(MyList.PARAMS[0])) {
             throw new UnsupportedOperationException("命令输入错误");
         }
+        /*
+         * list命令的参数，按照：list -log -date -province -type -out的顺序执行，
+         * 如果一个非必要参数缺省：-date -type -province,
+         * 仍然按照顺序执行缺省参数的默认值
+         * */
         MyList list = new MyList(cmdArgs);
         ControlCommand controlCommand = new ControlCommand();
         //list -log
@@ -60,23 +64,23 @@ public class Lib {
  * 解析命令行参数
  *
  * @author 221701414 黎家泽
- * @version xxx
+ * @version 1.0
  * @since 2020年2月8日16:20:58
  */
 class CmdArgs {
-
     /**
-     * 用于存放命令行参数的键值对
+     * 用于存放命令行参数的键值对，比如：
+     * key="-log" value="D:\log\"
      */
     private HashMap<String, String[]> argMap = new HashMap<>();
 
     /**
-     * 命令数组
+     * 输入的命令数组
      */
     private String[] args;
 
     /**
-     * 传入命令行参数数组构造
+     * 传入命令数组构造
      *
      * @param args
      */
@@ -86,7 +90,7 @@ class CmdArgs {
     }
 
     /**
-     * 传入命令行参数字符串构造
+     * 传入命令字符串构造
      */
     public CmdArgs(String argsStr) {
         this(argsStr.split(" "));
@@ -142,21 +146,12 @@ class CmdArgs {
     }
 
     /**
-     * 遍历文件的命令，调用闭包
-     *
-     * @param fileName
-     */
-    public static void eachLine(String fileName) {
-        //...
-    }
-
-    /**
      * 获取命令
      *
      * @return
      */
     public String getCmd() {
-        return this.args != null && this.args.length >= 0 ? this.args[0].toString() : null;
+        return this.args != null && this.args.length >= 0 ? this.args[0] : null;
     }
 
     /**
@@ -168,7 +163,7 @@ class CmdArgs {
     public String getArgVal(String key) {
         if (this.argMap.containsKey(key)) {
             return this.argMap.get(key) != null && this.argMap.get(key).length >= 0 ?
-                    this.argMap.get(key)[0].toString() : null;
+                    this.argMap.get(key)[0] : null;
         }
         return null;
     }
@@ -197,7 +192,7 @@ class CmdArgs {
         return this.argMap.containsKey(key);
     }
 
-    //---------------------------getter/setter------------------------------------
+    //---------------------------getter/setter-----------------↓-------------------
 
     public HashMap<String, String[]> getArgMap() {
         return argMap;
@@ -215,7 +210,7 @@ class CmdArgs {
         this.args = args;
     }
 
-    //---------------------------getter/setter------------------------------------
+    //---------------------------getter/setter----------------↑--------------------
 }
 
 //------------------------------命令模式实现list命令--------------↓-----------------------
@@ -230,24 +225,51 @@ class MyList {
     public final static String[] PARAMS = {"list", "-log", "-date", "-province", "-type", "-out"};
 
     /**
-     * list命令的参数 -type ，对应的值
+     * list命令的参数 -type ，对应的所有值
      */
     public final static String[] TYPE_VALUE = {"ip", "sp", "cure", "dead"};
 
     /**
-     * list 命令的参数 -province，对应的值
+     * list 命令的参数 -province，对应的所有值
      */
-    public final static String[] PROCINCE_VALUE = {"全国", "安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州",
+    public final static String[] PROCINCE_VALUE = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州",
             "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海",
-            "山东", "山西", "陕西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
+            "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
 
+    /**
+     * 输出文件末尾需要添加的说明信息
+     */
+    private final static String REMIND = "// 该文档并非真实数据，仅供测试使用";
+
+    /**
+     * 日志的目录
+     * -log 参数
+     */
+    private String dir;
+
+    /**
+     * 需要处理的log文件地址
+     * -date 参数处理后，得到的需要处理的log文件地址
+     */
+    private ArrayList<String> logPath;
 
     /**
      * list命令的参数 -province，对应的值
+     * -province 参数
      */
     private String[] provinceValue;
 
-    private final static String REMIND = "// 该文档并非真实数据，仅供测试使用";
+    /**
+     * 需要输出的类型和顺序
+     * -type 参数
+     */
+    private String[] outType;
+
+    /**
+     * 输出的路径
+     * -out 参数
+     */
+    private String outPath;
 
     /**
      * 输入的命令
@@ -255,29 +277,12 @@ class MyList {
     private CmdArgs cmdArgs;
 
     /**
-     * list 操作的省份对象
+     * list命令操作的日志含有的省份，以及 -provice 参数含有的省份，包括 “全国”
+     * 通过键值对存放，比如：
+     * key="全国" value=ProvinceStatus对象
      */
     public LinkedHashMap<String, ProvinceStatus> linkedHashMap;
 
-    /**
-     * 需要输出的类型和顺序
-     */
-    private String[] outType;
-
-    /**
-     * 需要处理的log文件
-     */
-    private ArrayList<String> logPath;
-
-    /**
-     * 日志的目录
-     */
-    private String dir;
-
-    /**
-     * 输出的路径
-     */
-    private String outPath;
 
     public MyList(CmdArgs cmdArgs) {
         this.cmdArgs = cmdArgs;
@@ -297,6 +302,44 @@ class MyList {
         if (logValue != null) {
             dir = logValue;
         }
+    }
+
+    /**
+     * 实现 list -date
+     *
+     * @throws FileNotFoundException
+     */
+    public void date() throws FileNotFoundException {
+        if (this.cmdArgs == null || this.dir == null) {
+            return;
+        }
+        getLogPath();
+    }
+
+    /**
+     * 实现 list -province
+     */
+    public void province() {
+        if (this.cmdArgs == null) {
+            return;
+        }
+        //注意：如果 -pvovince 缺省，这里的值为空
+        this.provinceValue = this.cmdArgs.getArgVals(PARAMS[3]);
+        if (this.provinceValue != null) {
+            for (int i = 0; i < this.provinceValue.length; i++) {
+                this.linkedHashMap.put(this.provinceValue[i], new ProvinceStatus(this.provinceValue[i]));
+            }
+        }
+    }
+
+    /**
+     * 实现 list -type
+     */
+    public void type() {
+        if (this.cmdArgs == null || this.cmdArgs.getArgVal(PARAMS[4]) == null) {
+            return;
+        }
+        outType = this.cmdArgs.getArgVals(PARAMS[4]);
     }
 
     /**
@@ -328,37 +371,6 @@ class MyList {
     }
 
     /**
-     * 实现 list -date
-     */
-    public void date() {
-        if (this.cmdArgs == null || this.dir == null) {
-            return;
-        }
-        getLogPath();
-    }
-
-    /**
-     * 实现 list -type
-     */
-    public void type() {
-        if (this.cmdArgs == null || this.cmdArgs.getArgVal(PARAMS[4]) == null) {
-            return;
-        }
-        outType = this.cmdArgs.getArgVals(PARAMS[4]);
-    }
-
-    /**
-     * 实现 list -province
-     */
-    public void province() {
-        if (this.cmdArgs == null) {
-            return;
-        }
-        //注意：如果 -pvovince 缺省，这里的值为空
-        this.provinceValue = this.cmdArgs.getArgVals(PARAMS[3]);
-    }
-
-    /**
      * 形成责任链
      */
     private static AbstractLogLineType getChainOfLogLine() {
@@ -386,28 +398,27 @@ class MyList {
 
     /**
      * 获取需要读入的log日志路径
+     *
+     * @throws FileNotFoundException
      */
-    private void getLogPath() {
+    private void getLogPath() throws FileNotFoundException {
         logPath = FileOperate.getAllFileName(dir);
-        if (logPath == null) {
-            return;
-        }
         //-date 参数日期
         String dateValue = this.cmdArgs.getArgVal(PARAMS[2]);
         if (dateValue == null) {
+            //使用logPath
             return;
         }
+        //当前日期
         LocalDate today = LocalDate.now();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        //当前日期
         String todayStr = today.format(fmt);
-
+        //日期比较
         if (!LocalDate.parse(dateValue).isAfter(LocalDate.parse(todayStr))) {
             for (int i = 0; i < this.logPath.size(); i++) {
                 String[] dateStrNum = this.logPath.get(i).split("\\.");
                 if (dateStrNum != null && dateStrNum.length > 0) {
                     String dateStr = dateStrNum[0];
-                    //文件名的日期
                     if (LocalDate.parse(dateStr).isAfter(LocalDate.parse(dateValue))) {
                         this.logPath.remove(i);
                         i--;
@@ -438,7 +449,7 @@ class MyList {
 
 
     /**
-     * 获取全国的数据
+     * 获取 “全国” 的数据
      */
     private void getProvinceStatusAll() {
         ProvinceStatus provinceStatusAll = new ProvinceStatus(PROCINCE_VALUE[0]);
@@ -463,20 +474,21 @@ class MyList {
     private void deleteNotOutputProvicne() {
         if (this.provinceValue != null) {
             boolean flag;
-            //删除不需要输出的省份
+            ArrayList<String> tempList = new ArrayList<>();
             for (String provinceStatusKey : this.linkedHashMap.keySet()) {
                 ProvinceStatus provinceStatus = this.linkedHashMap.get(provinceStatusKey);
                 flag = false;
                 for (int i = 0; i < this.provinceValue.length; i++) {
-                    //-province 的参数值和 “全国”，不删除
-                    if (provinceStatus.getName().equals(this.provinceValue[i])
-                            || provinceStatus.getName().equals(PROCINCE_VALUE[0])) {
+                    if (provinceStatus.getName().equals(this.provinceValue[i])) {
                         flag = true;
                     }
                 }
                 if (!flag) {
-                    this.linkedHashMap.remove(provinceStatusKey);
+                    tempList.add(provinceStatusKey);
                 }
+            }
+            for (int i = 0; i < tempList.size(); i++) {
+                this.linkedHashMap.remove(tempList.get(i));
             }
         }
     }
@@ -488,7 +500,7 @@ class MyList {
         String outStr = "";
         for (int i = 0; i < PROCINCE_VALUE.length; i++) {
             if (this.linkedHashMap.containsKey(PROCINCE_VALUE[i])) {
-                outStr+=PROCINCE_VALUE[i];
+                outStr += PROCINCE_VALUE[i];
                 for (int k = 0; k < this.outType.length; k++) {
                     outStr += this.linkedHashMap.get(PROCINCE_VALUE[i]).getOutTypeStr(this.outType[k]);
                 }
@@ -524,22 +536,6 @@ class ListLogCommand implements Command {
 }
 
 /**
- * list -out
- */
-class ListOutCommand implements Command {
-    private MyList list;
-
-    public ListOutCommand(MyList list) {
-        this.list = list;
-    }
-
-    @Override
-    public void execute() {
-        list.out();
-    }
-}
-
-/**
  * list -date
  */
 class ListDateCommand implements Command {
@@ -550,8 +546,24 @@ class ListDateCommand implements Command {
     }
 
     @Override
-    public void execute() {
+    public void execute() throws FileNotFoundException {
         list.date();
+    }
+}
+
+/**
+ * list -province
+ */
+class ListProvinceCommand implements Command {
+    private MyList list;
+
+    public ListProvinceCommand(MyList list) {
+        this.list = list;
+    }
+
+    @Override
+    public void execute() {
+        list.province();
     }
 }
 
@@ -573,18 +585,18 @@ class ListTypeCommand implements Command {
 }
 
 /**
- * list -province
+ * list -out
  */
-class ListProvinceCommand implements Command {
+class ListOutCommand implements Command {
     private MyList list;
 
-    public ListProvinceCommand(MyList list) {
+    public ListOutCommand(MyList list) {
         this.list = list;
     }
 
     @Override
     public void execute() {
-        list.province();
+        list.out();
     }
 }
 
@@ -592,6 +604,9 @@ class ListProvinceCommand implements Command {
  * 命令控制
  */
 class ControlCommand {
+    /**
+     * list 总共有5种参数,分别是：-log -date -type -province -out
+     */
     private static final int CONTROL_SIZE = 5;
 
     private Command[] commands;
@@ -625,91 +640,6 @@ class ControlCommand {
 }
 
 //------------------------------命令模式实现list命令------------------↑-------------------
-
-/**
- * FileOperate
- * <p>
- * 实现对文件的操作
- *
- * @author 221701414 黎家泽
- * @version xxx
- * @since 2020年2月8日10:41:51
- */
-class FileOperate {
-
-    /**
-     * 根据提供的文件地址，读取文件内容
-     *
-     * @param path 文件地址
-     * @return 每行内容用 # 分隔的String
-     */
-    public static String readFile(String path) {
-        File file = new File(path);
-        if (file != null) {
-            try {
-                FileInputStream fileInputStream = new FileInputStream(file);
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-                StringBuffer sb = new StringBuffer();
-                String line = null;
-                while ((line = bufferedReader.readLine()) != null) {
-                    //每一行的数据通过 # 分隔
-                    sb.append(line + "#");
-                }
-                return sb.toString();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 进行写文件
-     *
-     * @param path    文件地址
-     * @param content 需要写入的文件内容
-     * @return void
-     */
-    public static void writeTxt(String path, String content) {
-        FileOutputStream fileOutputStream = null;
-        File file = new File(path);
-        try {
-            if (file.exists()) {
-                //判断文件是否存在，如果不存在就新建一个txt
-                file.createNewFile();
-            }
-            fileOutputStream = new FileOutputStream(file);
-            fileOutputStream.write(content.getBytes());
-            fileOutputStream.flush();
-            fileOutputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 获取指定目录的所有文件
-     *
-     * @param dir 文件目录
-     * @return 文件目录下面的所有文件名
-     */
-    public static ArrayList<String> getAllFileName(String dir) {
-        ArrayList<String> fileList = new ArrayList<String>();
-        File file = new File(dir);
-        if (file != null) {
-            File[] tempList = file.listFiles();
-            for (int i = 0; i < tempList.length; i++) {
-                if (tempList[i].isFile()) {
-                    fileList.add(tempList[i].getName());
-                }
-            }
-            return fileList;
-        }
-        return null;
-    }
-}
 
 //----------------------------责任链模式匹配8种不同的日志行-------------↓------------------
 
@@ -768,14 +698,14 @@ class NewInfectorLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-        System.out.println(logLineStr);
+//        System.out.println(logLineStr);
         Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[0]);
         Matcher matcher = pattern.matcher(logLineStr);
         if (matcher.find()) {
             String province = matcher.group(1);
             int num = Integer.parseInt(matcher.group(2));
-            System.out.println(province);
-            System.out.println(num);
+//            System.out.println(province);
+//            System.out.println(num);
             if (!linkedHashMap.containsKey(province)) {
                 linkedHashMap.put(province, new ProvinceStatus(province));
             }
@@ -796,14 +726,14 @@ class NewSuspectLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-        System.out.println(logLineStr);
+//        System.out.println(logLineStr);
         Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[1]);
         Matcher matcher = pattern.matcher(logLineStr);
         if (matcher.find()) {
             String province = matcher.group(1);
             int num = Integer.parseInt(matcher.group(2));
-            System.out.println(province);
-            System.out.println(num);
+//            System.out.println(province);
+//            System.out.println(num);
             if (!linkedHashMap.containsKey(province)) {
                 linkedHashMap.put(province, new ProvinceStatus(province));
             }
@@ -824,16 +754,16 @@ class InInfectorLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-        System.out.println(logLineStr);
+//        System.out.println(logLineStr);
         Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[2]);
         Matcher matcher = pattern.matcher(logLineStr);
         if (matcher.find()) {
             String provinceA = matcher.group(1);
             String provinceB = matcher.group(2);
             int num = Integer.parseInt(matcher.group(3));
-            System.out.println(provinceA);
-            System.out.println(provinceB);
-            System.out.println(num);
+//            System.out.println(provinceA);
+//            System.out.println(provinceB);
+//            System.out.println(num);
             if (linkedHashMap.containsKey(provinceA)) {
                 if (linkedHashMap.containsKey(provinceB)) {
                     //
@@ -868,16 +798,16 @@ class InSuspectLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-        System.out.println(logLineStr);
+//        System.out.println(logLineStr);
         Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[3]);
         Matcher matcher = pattern.matcher(logLineStr);
         if (matcher.find()) {
             String provinceA = matcher.group(1);
             String provinceB = matcher.group(2);
             int num = Integer.parseInt(matcher.group(3));
-            System.out.println(provinceA);
-            System.out.println(provinceB);
-            System.out.println(num);
+//            System.out.println(provinceA);
+//            System.out.println(provinceB);
+//            System.out.println(num);
             if (linkedHashMap.containsKey(provinceA)) {
                 if (linkedHashMap.containsKey(provinceB)) {
                     //
@@ -912,14 +842,14 @@ class DeathLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-        System.out.println(logLineStr);
+//        System.out.println(logLineStr);
         Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[4]);
         Matcher matcher = pattern.matcher(logLineStr);
         if (matcher.find()) {
             String province = matcher.group(1);
             int num = Integer.parseInt(matcher.group(2));
-            System.out.println(province);
-            System.out.println(num);
+//            System.out.println(province);
+//            System.out.println(num);
             if (!linkedHashMap.containsKey(province)) {
                 linkedHashMap.put(province, new ProvinceStatus(province));
             }
@@ -941,14 +871,14 @@ class CureLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-        System.out.println(logLineStr);
+//        System.out.println(logLineStr);
         Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[5]);
         Matcher matcher = pattern.matcher(logLineStr);
         if (matcher.find()) {
             String province = matcher.group(1);
             int num = Integer.parseInt(matcher.group(2));
-            System.out.println(province);
-            System.out.println(num);
+//            System.out.println(province);
+//            System.out.println(num);
             if (!linkedHashMap.containsKey(province)) {
                 linkedHashMap.put(province, new ProvinceStatus(province));
             }
@@ -970,14 +900,14 @@ class DefiniteLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-        System.out.println(logLineStr);
+//        System.out.println(logLineStr);
         Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[6]);
         Matcher matcher = pattern.matcher(logLineStr);
         if (matcher.find()) {
             String province = matcher.group(1);
             int num = Integer.parseInt(matcher.group(2));
-            System.out.println(province);
-            System.out.println(num);
+//            System.out.println(province);
+//            System.out.println(num);
             if (!linkedHashMap.containsKey(province)) {
                 linkedHashMap.put(province, new ProvinceStatus(province));
             }
@@ -999,14 +929,14 @@ class ExcludeLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-        System.out.println(logLineStr);
+//        System.out.println(logLineStr);
         Pattern pattern = Pattern.compile(AbstractLogLineType.LOGLINE_TYPE[7]);
         Matcher matcher = pattern.matcher(logLineStr);
         if (matcher.find()) {
             String province = matcher.group(1);
             int num = Integer.parseInt(matcher.group(2));
-            System.out.println(province);
-            System.out.println(num);
+//            System.out.println(province);
+//            System.out.println(num);
             if (!linkedHashMap.containsKey(province)) {
                 linkedHashMap.put(province, new ProvinceStatus(province));
             }
@@ -1027,14 +957,14 @@ class MismatchingLogLine extends AbstractLogLineType {
 
     @Override
     protected void executeLogLine(String logLineStr, LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
-        System.out.println("不匹配:" + logLineStr);
+//        System.out.println("不匹配:" + logLineStr);
     }
 }
 
 //----------------------------责任链模式匹配8种不同的日志行----------------↑---------------
 
 /**
- * 省/全国类，
+ * 省/全国类
  */
 class ProvinceStatus {
     /**
@@ -1072,7 +1002,8 @@ class ProvinceStatus {
     }
 
     /**
-     *
+     * @param typeValue 命令行参数 -type 指定的一种输出类型
+     * @return 返回整理好的字符串
      */
     public String getOutTypeStr(String typeValue) {
         switch (typeValue) {
@@ -1143,6 +1074,91 @@ class ProvinceStatus {
                 ", cure=" + cure +
                 ", death=" + death +
                 '}';
+    }
+}
+
+/**
+ * FileOperate
+ * <p>
+ * 实现对文件的操作
+ *
+ * @author 221701414 黎家泽
+ * @version 1.0
+ * @since 2020年2月8日10:41:51
+ */
+class FileOperate {
+    /**
+     * 根据提供的文件地址，读取文件内容
+     *
+     * @param path 文件地址
+     * @return 每行内容用 # 分隔的String
+     */
+    public static String readFile(String path) {
+        File file = new File(path);
+        if (file != null) {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                StringBuffer sb = new StringBuffer();
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    //每一行的数据通过 # 分隔
+                    sb.append(line + "#");
+                }
+                return sb.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 进行写文件
+     *
+     * @param path    文件地址
+     * @param content 需要写入的文件内容
+     * @return void
+     */
+    public static void writeTxt(String path, String content) {
+        FileOutputStream fileOutputStream = null;
+        File file = new File(path);
+        try {
+            if (file.exists()) {
+                //判断文件是否存在，如果不存在就新建一个txt
+                file.createNewFile();
+            }
+            fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(content.getBytes());
+            fileOutputStream.flush();
+            fileOutputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 获取指定目录的所有文件
+     *
+     * @param dir 文件目录
+     * @return 文件目录下面的所有文件名
+     * @throws FileNotFoundException
+     */
+    public static ArrayList<String> getAllFileName(String dir) throws FileNotFoundException {
+        ArrayList<String> fileList = new ArrayList<String>();
+        File file = new File(dir);
+        if (file != null) {
+            File[] tempList = file.listFiles();
+            for (int i = 0; i < tempList.length; i++) {
+                if (tempList[i].isFile()) {
+                    fileList.add(tempList[i].getName());
+                }
+            }
+            return fileList;
+        }
+        throw new FileNotFoundException("文件路径错误");
     }
 }
 
