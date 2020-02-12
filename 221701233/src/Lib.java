@@ -1,10 +1,8 @@
-import sun.security.x509.AttributeNameEnumeration;
-
 import java.io.*;
-import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -369,7 +367,400 @@ class CommandReceiver {
      */
     public void list(ListCommandUtil util) {
         // TODO 根据命令参数统计疫情
+        LogParser.parse(util);
     }
 
     // 扩展命令...
+}
+
+/**
+ * 抽象动作类
+ */
+abstract class AbstractAction {
+
+    public static int ADD_IP = 0;
+
+    public static int FLOW_IN = 1;
+
+    public static int DEAD_OR_CURE = 2;
+
+    public static int DGS = 3;
+
+    public static int EXC = 4;
+
+    protected int typeNum;
+
+    //责任链中的下一个动作
+    protected AbstractAction nextAction;
+
+    public void passOn(int typeNum, String logLine) {
+        if (this.typeNum == typeNum) {
+            doAction(logLine);
+            return;
+        }
+        if (nextAction != null) {
+            nextAction.passOn(typeNum, logLine);
+        }
+    }
+
+    abstract protected void doAction(String logLine);
+}
+
+/**
+ * 人员增加
+ */
+class Add extends AbstractAction {
+
+    private String regex = "(\\S+) 新增 (\\S+) (\\d+)人";
+
+    Add(AbstractAction nextAction) {
+        this.typeNum = AbstractAction.ADD_IP;
+        this.nextAction = nextAction;
+    }
+
+    @Override
+    protected void doAction(String logLine) {
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher addMatcher = pattern.matcher(logLine);
+
+        if (addMatcher.find()) {
+            String regionName = addMatcher.group(1);
+            String peopleType = addMatcher.group(2);
+            int peopleNum = Integer.parseInt(addMatcher.group(3));
+            StatisticResult.get(regionName).increase(peopleNum, peopleType);
+        }
+
+    }
+}
+
+/**
+ * 人员流动
+ */
+class FlowIn extends AbstractAction {
+
+    private String regex = "(\\S+) (\\S+) 流入 (\\S+) (\\d+)人";
+
+    FlowIn(AbstractAction nextAction) {
+        this.typeNum = AbstractAction.FLOW_IN;
+        this.nextAction = nextAction;
+    }
+
+    @Override
+    protected void doAction(String logLine) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher flowMatcher = pattern.matcher(logLine);
+
+        if (flowMatcher.find()) {
+            String regionFrom = flowMatcher.group(1);
+            String peopleType = flowMatcher.group(2);
+            String regionTo = flowMatcher.group(3);
+            int peopleNum = Integer.parseInt(flowMatcher.group(4));
+
+
+            StatisticResult.get(regionFrom).flowOut(peopleNum, peopleType);
+            StatisticResult.get(regionTo).flowIn(peopleNum, peopleType);
+        }
+    }
+}
+
+/**
+ * 人员死亡或治愈
+ */
+class DeadOrCure extends AbstractAction {
+
+    private String regex = "(\\S+) (\\S+) (\\d+)人";
+
+    DeadOrCure(AbstractAction nextAction) {
+        this.typeNum = AbstractAction.DEAD_OR_CURE;
+        this.nextAction = nextAction;
+    }
+
+    @Override
+    protected void doAction(String logLine) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher DOCMatcher = pattern.matcher(logLine);
+
+        if (DOCMatcher.find()) {
+            String regionName = DOCMatcher.group(1);
+            String peopleType = DOCMatcher.group(2);
+            int peopleNum = Integer.parseInt(DOCMatcher.group(3));
+            StatisticResult.get(regionName).deadOrCure(peopleNum, peopleType);
+        }
+    }
+}
+
+/**
+ * 疑似患者确诊
+ */
+class Diagnosis extends AbstractAction {
+
+    String regex = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
+
+    Diagnosis(AbstractAction nextAction) {
+        this.typeNum = AbstractAction.DGS;
+        this.nextAction = nextAction;
+    }
+
+    @Override
+    protected void doAction(String logLine) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher DiaMatcher = pattern.matcher(logLine);
+
+        if (DiaMatcher.find()) {
+            String regionName = DiaMatcher.group(1);
+            int peopleNum = Integer.parseInt(DiaMatcher.group(2));
+            StatisticResult.get(regionName).diagnose(peopleNum);
+        }
+    }
+}
+
+/**
+ * 排除疑似患者
+ */
+class Exclusive extends AbstractAction {
+
+    String regex = "(\\S+) 排除 疑似患者 (\\d+)人";
+
+    Exclusive(AbstractAction nextAction) {
+        this.typeNum = AbstractAction.EXC;
+        this.nextAction = nextAction;
+    }
+
+    @Override
+    protected void doAction(String logLine) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher ExcMatcher = pattern.matcher(logLine);
+
+        if (ExcMatcher.find()) {
+            String regionName = ExcMatcher.group(1);
+            int peopleNum = Integer.parseInt(ExcMatcher.group(2));
+            StatisticResult.get(regionName).exclusive(peopleNum);
+        }
+    }
+}
+
+/**
+ * 正则工具类
+ */
+class RegexUtil {
+    static String[] REGEXS = {
+            "(\\S+) 新增 (\\S+) (\\d+)人",
+            "(\\S+) (\\S+) 流入 (\\S+) (\\d+)人",
+            "(\\S+) (\\S+) (\\d+)人",
+            "(\\S+) 疑似患者 确诊感染 (\\d+)人",
+            "(\\S+) 排除 疑似患者 (\\d+)人",
+    };
+
+
+    public static int logType(String logLine) {
+        for (int i = 0; i < REGEXS.length; i++) {
+            if (logLine.matches(REGEXS[i])) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}
+
+/**
+ * 地区实体类
+ * 一个实例代表一个地区的情况
+ */
+class Region {
+    private String name;
+    private int infected;
+    private int suspected;
+    private int cure;
+    private int dead;
+
+    Region(String name) {
+        this.infected = 0;
+        this.suspected = 0;
+        this.cure = 0;
+        this.dead = 0;
+        this.name = name;
+    }
+
+    public int getCure() {
+        return cure;
+    }
+
+    public int getDead() {
+        return dead;
+    }
+
+    public int getInfected() {
+        return infected;
+    }
+
+    public int getSuspected() {
+        return suspected;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * 增加人数
+     *
+     * @param num  人数
+     * @param type 类型
+     */
+    public void increase(int num, String type) {
+        if (type.equals("感染患者")) {
+            this.infected += num;
+        }
+        if (type.equals("疑似患者")) {
+            this.suspected += num;
+        }
+    }
+
+    /**
+     * 疑似患者确诊
+     *
+     * @param num 人数
+     */
+    public void diagnose(int num) {
+        this.suspected -= num;
+        this.infected += num;
+    }
+
+    /**
+     * 增加死亡人数或治愈人数
+     *
+     * @param num  人数
+     * @param type 类型
+     */
+    public void deadOrCure(int num, String type) {
+        this.infected -= num;
+        if (type.equals("死亡")) {
+            this.dead += num;
+        }
+        if (type.equals("治愈")) {
+            this.cure += num;
+        }
+    }
+
+    /**
+     * 排除疑似患者
+     *
+     * @param num 人数
+     */
+    public void exclusive(int num) {
+        this.suspected -= num;
+    }
+
+    /**
+     * 流入人员
+     *
+     * @param num  人数
+     * @param type 类型
+     */
+    public void flowIn(int num, String type) {
+        if (type.equals("感染患者")) {
+            this.infected += num;
+        }
+        if (type.equals("疑似患者")) {
+            this.suspected += num;
+        }
+    }
+
+    /**
+     * 流出人员
+     *
+     * @param num  人数
+     * @param type 类型
+     */
+    public void flowOut(int num, String type) {
+        if (type.equals("感染患者")) {
+            this.infected -= num;
+        }
+        if (type.equals("疑似患者")) {
+            this.suspected -= num;
+        }
+    }
+
+    /**
+     * 用名称判断是否相等
+     *
+     * @param obj
+     * @return
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        return this.getName().equals(((Region) obj).getName());
+    }
+}
+
+/**
+ * 统计结果集
+ */
+class StatisticResult {
+
+    static List<Region> regions = new ArrayList<>();
+
+    /**
+     * 按地区名查找地区
+     * 如果当前集合{@code regions}中不存在此地区，添加此地区的实例到{@code regions}
+     *
+     * @param name
+     * @return
+     */
+    public static Region get(String name) {
+        for (Region region : regions) {
+            if (region.getName().equals(name))
+                return region;
+        }
+
+        Region newRg = new Region(name);
+        regions.add(newRg);
+        return newRg;
+    }
+
+    public static void doStatistic(List<String> logLines) {
+        // 统计所有地区的疫情状况
+        Add add = new Add(null);
+        FlowIn flowIn = new FlowIn(add);
+        DeadOrCure deadOrCure = new DeadOrCure(flowIn);
+        Diagnosis diagnosis = new Diagnosis(deadOrCure);
+        Exclusive exclusive = new Exclusive(diagnosis);
+
+        for (String logLine : logLines) {
+            exclusive.passOn(RegexUtil.logType(logLine), logLine);
+        }
+    }
+}
+
+/**
+ * 日志解析
+ */
+class LogParser {
+
+    /**
+     * 读取日志并解析，返回
+     *
+     * @param util
+     * @return
+     */
+    public static List<String> parse(ListCommandUtil util) {
+
+        // TODO 按要求生成待输出的日志内容
+
+        // TODO 按照地区字典序排列
+
+        return null;
+    }
 }
