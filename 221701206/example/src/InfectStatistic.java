@@ -113,6 +113,7 @@ class FileHandleTool
 	public static void HandleFile()
 	{
 		List<String> FileNames = DateCompareTool.getFileName(InfectStatistic.DeadLine);
+		StatisticResult Result = new StatisticResult();
 		for(int i = 0 ; i < FileNames.size() ; i ++)
 		{
 			String FilePath = FileNames.get(i);
@@ -134,14 +135,7 @@ class FileHandleTool
 						{
 							DataGet Use = new DataGet();
 							Use.getData(line);
-							if(Use.Type == 1 || Use.Type == 2)
-								System.out.println(Use.Type + " " + Use.Province1 + " " + Use.Number);
-							if(Use.Type == 3 || Use.Type == 4)
-								System.out.println(Use.Type + " " + Use.Province1 + " " + Use.Province2 + " " + Use.Number);
-							if(Use.Type == 5 || Use.Type == 6)
-								System.out.println(Use.Type + " " + Use.Province1 + " " + Use.Number);
-							if(Use.Type == 7 || Use.Type == 8)
-								System.out.println(Use.Type + " " + Use.Province1 + " " + Use.Number);
+							Result.Statistic(Use);
 						}
 					}
 				}
@@ -156,6 +150,18 @@ class FileHandleTool
 				e.printStackTrace();
 				System.err.println("文件路径错误，找不到指定文件");
 			}
+		}
+		for(int i = 0 ; i < Result.StatisticLink.size(); i++)
+		{
+			if(Result.StatisticLink.get(i).Comfirmed != 0 || Result.StatisticLink.get(i).Suspected != 0 
+					|| Result.StatisticLink.get(i).Healed != 0 || Result.StatisticLink.get(i).Dead != 0)
+			{
+				System.out.println(Result.ProvinceIndex.get(i) + " 感染患者" + Result.StatisticLink.get(i).Comfirmed + "人"
+						            + " 疑似患者" + Result.StatisticLink.get(i).Suspected + "人"
+						            + " 治愈" + Result.StatisticLink.get(i).Healed + "人"
+						            + " 死亡" + Result.StatisticLink.get(i).Dead + "人");
+			}
+			
 		}
 	}
 }
@@ -274,6 +280,7 @@ class StatisticResult
      * 黑龙江12、湖北13、湖南14、吉林15、江苏16、江西17、辽宁18、内蒙古19、宁夏20、青海21、山东22、山西23
      * 陕西24、上海25、四川26、天津27、西藏28、新疆29、云南30、浙江31
 	 */
+	List<String> ProvinceIndex = new ArrayList<String>();
 	List<PeopleType> StatisticLink = new ArrayList<PeopleType>();
 	public StatisticResult()
 	{
@@ -282,10 +289,97 @@ class StatisticResult
 			PeopleType Temp = new PeopleType();
 			StatisticLink.add(Temp);
 		}
+		ProvinceIndex.add("全国");
+		ProvinceIndex.add("安徽");
+		ProvinceIndex.add("北京");
+		ProvinceIndex.add("重庆");
+		ProvinceIndex.add("福建");
+		ProvinceIndex.add("甘肃");
+		ProvinceIndex.add("广东");
+		ProvinceIndex.add("广西");
+		ProvinceIndex.add("贵州");
+		ProvinceIndex.add("海南");
+		ProvinceIndex.add("河北");
+		ProvinceIndex.add("河南");
+		ProvinceIndex.add("黑龙江");
+		ProvinceIndex.add("湖北");
+		ProvinceIndex.add("湖南");
+		ProvinceIndex.add("吉林");
+		ProvinceIndex.add("江苏");
+		ProvinceIndex.add("江西");
+		ProvinceIndex.add("辽宁");
+		ProvinceIndex.add("内蒙古");
+		ProvinceIndex.add("宁夏");
+		ProvinceIndex.add("青海");
+		ProvinceIndex.add("山东");
+		ProvinceIndex.add("山西");
+		ProvinceIndex.add("陕西");
+		ProvinceIndex.add("上海");
+		ProvinceIndex.add("四川");
+		ProvinceIndex.add("天津");
+		ProvinceIndex.add("西藏");
+		ProvinceIndex.add("新疆");
+		ProvinceIndex.add("云南");
+		ProvinceIndex.add("浙江");
 	}
-	public void Statistic()
+	public void Statistic(DataGet data)
 	{
-		//StatisticLink.get(0).Comfirmed += RegexTool.i;
+		if(data.Type == 1)
+		{
+			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
+			StatisticLink.get(ProvinceIndex_1).Comfirmed += data.Number;
+			StatisticLink.get(0).Comfirmed += data.Number;
+		}
+		if(data.Type == 2)
+		{
+			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
+			StatisticLink.get(ProvinceIndex_1).Suspected += data.Number;
+			StatisticLink.get(0).Suspected += data.Number;
+		}
+		if(data.Type == 3)
+		{
+			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
+			int ProvinceIndex_2 = ProvinceIndex.indexOf(data.Province2);
+			StatisticLink.get(ProvinceIndex_1).Comfirmed -= data.Number;
+			StatisticLink.get(ProvinceIndex_2).Comfirmed += data.Number;
+		}
+		if(data.Type == 4)
+		{
+			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
+			int ProvinceIndex_2 = ProvinceIndex.indexOf(data.Province2);
+			StatisticLink.get(ProvinceIndex_1).Suspected -= data.Number;
+			StatisticLink.get(ProvinceIndex_2).Suspected += data.Number;
+		}
+		if(data.Type == 5)
+		{
+			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
+			StatisticLink.get(ProvinceIndex_1).Dead += data.Number;
+			StatisticLink.get(0).Dead += data.Number;
+			StatisticLink.get(ProvinceIndex_1).Comfirmed -= data.Number;
+			StatisticLink.get(0).Comfirmed -= data.Number;
+		}
+		if(data.Type == 6)
+		{
+			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
+			StatisticLink.get(ProvinceIndex_1).Healed += data.Number;
+			StatisticLink.get(0).Healed += data.Number;
+			StatisticLink.get(ProvinceIndex_1).Comfirmed -= data.Number;
+			StatisticLink.get(0).Comfirmed -= data.Number;
+		}
+		if(data.Type == 7)
+		{
+			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
+			StatisticLink.get(ProvinceIndex_1).Comfirmed += data.Number;
+			StatisticLink.get(0).Comfirmed += data.Number;
+			StatisticLink.get(ProvinceIndex_1).Suspected -= data.Number;
+			StatisticLink.get(0).Suspected -= data.Number;
+		}
+		if(data.Type == 8)
+		{
+			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
+			StatisticLink.get(ProvinceIndex_1).Suspected -= data.Number;
+			StatisticLink.get(0).Suspected -= data.Number;
+		}
 	}
 	
 	
