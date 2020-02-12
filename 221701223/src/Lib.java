@@ -1,5 +1,6 @@
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -398,12 +399,39 @@ class FileTools {
     public FileTools(String date, String logPath, String outPath) {
 
         this.logPath = logPath;
+        //补上一个"/"防止后续读取文件时出错
+        if (!this.logPath.endsWith("/")) {
+            this.logPath += "/";
+        }
         this.outPath = outPath;
         if ("null".equals(date)) {
             initFileList();
         } else {
             this.newestFileName = date + ".log.txt";
             initFileListWithDateLimit();
+        }
+    }
+
+    public void readFile() {
+        try {
+            for (String fileName : fileList) {
+                BufferedReader reader = Files.newBufferedReader(Paths.get(logPath + fileName));
+                System.out.println(fileName + ":");
+                String read = null;
+                while ((read = reader.readLine()) != null) {
+                    String[] line = read.split(" ");
+                    if ("//".equals(line[0])) {
+                        continue;
+                    }
+                    for (String o : line) {
+                        System.out.print(o + " ");
+                    }
+                    System.out.println();
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

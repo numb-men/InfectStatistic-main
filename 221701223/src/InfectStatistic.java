@@ -16,7 +16,7 @@ public class InfectStatistic {
         Command command = parser.makeCommand();
         command.show();
         FileTools fileTools = parser.makeFileTools();
-        fileTools.show();
+        fileTools.readFile();
 //        String filename = "2020-02-05.log.txt";
 //        String path = "/Users/ybn/IdeaProjects/InfectStatistic-main/221701223/log";
 //        Path p = Paths.get(path);
