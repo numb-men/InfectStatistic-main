@@ -27,6 +27,8 @@ public class InfectStatistic {
     static line[] proresult=new line[34];//筛选省份后的排序后结果
     static String topath=new String();//输出文档路径
     static String frompath=new String();//log文件路径
+    static int index=0;//控制是否输入日期比日志最早一天还早，若是则值为-2
+    static int isWrong=0;//输入日期是否出错（输入日期比最新的日志还晚）
     	
     public static void main(String[] args) throws IOException {
 	    for(int j=0;j<34;j++) {
@@ -44,7 +46,7 @@ public class InfectStatistic {
     	getFrompath(args,hasLog);
     	if(hasDate!=-1) {//有指定日期
     		readLog(args[hasDate+1],true);  
-    		if(hasPro!=-1) {//有指定省份
+    		if(index!=-2&&isWrong==0&&hasPro!=-1) {//有指定省份
     			String[] province=selectPro(args,hasPro);    			
     			line[] a=selectMes(province);   			 			
     			line[] b=sortline1(a,selcount);
@@ -54,12 +56,12 @@ public class InfectStatistic {
         			printSelpart(proresult,type,selcount);
     			}
     		}
-    		else if(hasType!=-1) {//有指定类型未指定省份
+    		else if(index!=-2&&isWrong==0&&hasType!=-1) {//有指定类型未指定省份
     			String[] type=selectType(args,hasType);
     			printSelpart(result,type,count);
 			}    		
     	}
-    	else {
+    	else {//未指定日期
     		readLog(args[hasDate+1],false);   		
     		if(hasPro!=-1) {//有指定省份   			
     			String[] province=selectPro(args,hasPro);    			
@@ -203,8 +205,9 @@ public class InfectStatistic {
     static String getLastdate() {
     	String date="";
     	File file = new File(frompath);
-        String[] filename = file.list();//获取所有日志文件名      
-    	date=filename[filename.length-1].substring(0,10);    	
+        String[] filename = file.list();//获取所有日志文件名    
+    	date=filename[filename.length-1].substring(0,10);   
+    	//System.out.print(date);
     	return date;
     }
     
@@ -216,10 +219,13 @@ public class InfectStatistic {
     static int findPot(String date) {
     	File file = new File(frompath);
         String[] filename = file.list();//获取所有日志文件名      
+        if(isBefore(date,filename[0].substring(0,10))) {//输入日期比日志最新还早
+        	return -2;
+        }
     	for(int i=0;i<filename.length-1;i++) {
     		String datecut1=filename[i].substring(0,10);//只获取文件名前的日期
     		String datecut2=filename[i+1].substring(0,10);//前后两个日期
-    		if(date.equals(datecut1)) {   			
+    		if(date.equals(datecut1)) {   	   			
     			return i;    			
     		}
     		else if(date.equals(datecut2)) {
@@ -243,28 +249,38 @@ public class InfectStatistic {
     		if(isCorrectdate(getLastdate(),date)) {//检验输入日期正确性
     			int i=0;//控制日志读取索引
     			File file = new File(frompath);
-    			String[] filename = file.list();//获取所有日志文件名     				    
-    			while(i<=findPot(date)) { 
-    				//System.out.print(findPot(date));			
-					FileInputStream fs=new FileInputStream(frompath+filename[i]);
-				    InputStreamReader is=new InputStreamReader(fs,"UTF-8");
-				    BufferedReader br=new BufferedReader(is);
-				    String s="";				    
-				    while((s=br.readLine())!=null){//一行一行读
-				    	if(s.charAt(0)=='/'&&s.charAt(1)=='/') {//排除注释掉的内容
-				    		continue;
-				    	}
-				    	else {
-				    		String[] sp =s.split(" ");//分隔开的字符串
-				    		statistics(sp,all);
-				    	}
-				    	//System.out.print(s+"\n");
-		    	    }
-				    br.close();
-				    i++;
-		    	}
+    			String[] filename = file.list();//获取所有日志文件名     	
+    			index=findPot(date);
+    			if(index==-2) {//比最新的日期还早
+    				File f = new File(topath);
+    		        BufferedWriter output = new BufferedWriter(new FileWriter(f,false));
+    		        output.write("无");  
+    		        output.close();
+    			}
+    			else {
+	    			while(i<=index) { 
+	    				//System.out.print(findPot(date));			
+						FileInputStream fs=new FileInputStream(frompath+filename[i]);
+					    InputStreamReader is=new InputStreamReader(fs,"UTF-8");
+					    BufferedReader br=new BufferedReader(is);
+					    String s="";				    
+					    while((s=br.readLine())!=null){//一行一行读
+					    	if(s.charAt(0)=='/'&&s.charAt(1)=='/') {//排除注释掉的内容
+					    		continue;
+					    	}
+					    	else {
+					    		String[] sp =s.split(" ");//分隔开的字符串
+					    		statistics(sp,all);
+					    	}
+					    	//System.out.print(s+"\n");
+			    	    }
+					    br.close();
+					    i++;
+			    	}
+    			}
     		}
     		else {//日期不正确
+    			isWrong=1;
     			System.out.print("输入的日期超出范围，请重新命令！");
     		}
     	}
@@ -290,7 +306,9 @@ public class InfectStatistic {
 			    i++;
 	    	}   		
     	}
-    	printtxt(sortline(all,count));
+    	if(index!=-2&&isWrong!=1) {
+    		printtxt(sortline(all,count));
+    	}
     }
        
      /*
@@ -560,7 +578,7 @@ public class InfectStatistic {
     static String[] selectType(String[] args,int pos) {
     	String[] type=new String[4];   
     	int i=pos+1;    	
-		while(args[i].charAt(0)!='-'&&i<args.length) {//不是命令
+		while(i<args.length&&args[i].charAt(0)!='-') {//不是命令
 			type[seltypecount]=args[i];
 			seltypecount++;
 			i++;
