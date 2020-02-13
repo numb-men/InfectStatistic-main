@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,6 +25,13 @@ class province_info{
 public class Lib {
     //初始化数据数组
     ArrayList<province_info> infos = new ArrayList<province_info>();
+    String log=new String();//指定日志目录的位置
+    String out=new String();//指定输出文件路径和文件名
+    String date=new String();//指定日期
+
+    ArrayList<String> type = new ArrayList<String>();//指定显示类型
+
+    ArrayList<String> province = new ArrayList<String>();//指定显示地区
 
     public Lib(String[] arg) throws IOException {
         //for(String a:args) System.out.println(a);
@@ -33,16 +41,30 @@ public class Lib {
         String in = sc.nextLine();
         String[] args=in.split(" ");
 
-        String log=new String();//指定日志目录的位置
-        String out=new String();//指定输出文件路径和文件名
-        String date=new String();//指定日期
+
+
         for (int i=0;i<args.length;i++){
             if(args[i].startsWith("-")){
                 if(args[i].equals("-log")) log=args[i+1];
                 else if(args[i].equals("-out")) out=args[i+1];
                 else if(args[i].equals("-date")) date=args[i+1];
+                else if(args[i].equals("-type")){
+                    for (int j=i+1;!args[j].startsWith("-");j++){
+                        type.add(args[j]);//获取要显示的类型
+                    }
+                }
+                else if(args[i].equals("-province")){
+                    for (int j=i+1;j<args.length&&!args[j].startsWith("-");j++){
+                        System.out.println(args[j]);
+                        province.add(args[j]);//获取要显示的地区
+                    }
+                }
             }
         }
+
+
+
+
 
         //读取排序好的文件对象并进行处理
         File[] sort= sort_file(log);//获得排序好的文件对象
@@ -194,13 +216,13 @@ public class Lib {
 
     //对现有的对象数组进行整理
     private void Arrangement(){
-        for (int i=0;i<infos.size();i++){
+      /*  for (int i=0;i<infos.size();i++){
             System.out.print(infos.get(i).name);
             System.out.print("感染患者"+infos.get(i).infected+"人 ");
             System.out.print("疑似患者"+infos.get(i).suspected+"人 ");
             System.out.print("治愈"+infos.get(i).cure+"人 ");
             System.out.print("死亡"+infos.get(i).dead+"人 \n");
-        }
+        }*/
     }
 
     //统计全国的情况
@@ -228,13 +250,46 @@ public class Lib {
         File f2=new File(f1,filename);//第一个参数为一个目录文件，第二个参数为要在当前f1目录下要创建的文件
 
         PrintWriter printWriter =new PrintWriter(new FileWriter(f2,true),true);//第二个参数为true，从文件末尾写入 为false则从开头写入
+        if(province.size()==0){
+            for (int i=0;i<infos.size();i++){
+                printWriter.print(infos.get(i).name+" ");
+                printWriter.print("感染患者"+infos.get(i).infected+"人 ");
+                printWriter.print("疑似患者"+infos.get(i).suspected+"人 ");
+                printWriter.print("治愈"+infos.get(i).cure+"人 ");
+                printWriter.print("死亡"+infos.get(i).dead+"人 \n");
+            }
+        }
+        else {
+            //记录需要输出的地区的数据项
+            ArrayList<Integer> t = new ArrayList<Integer>();
+            for (int i = 0; i < province.size(); i++) {
+                for (int j = 0; j < infos.size(); j++) {
+                    if (province.get(i).equals(infos.get(j).name)) {
+                        province.set(i,"none");
+                        t.add(j);
+                        break;
+                    }
+                }
+            }
+            //如果想要显示的地区信息不存在 创建一个空数据项
+            if(t.size()<province.size()){
+                for (int i=0;i<province.size();i++){
 
-        for (int i=0;i<infos.size();i++){
-            printWriter.print(infos.get(i).name+" ");
-            printWriter.print("感染患者"+infos.get(i).infected+"人 ");
-            printWriter.print("疑似患者"+infos.get(i).suspected+"人 ");
-            printWriter.print("治愈"+infos.get(i).cure+"人 ");
-            printWriter.print("死亡"+infos.get(i).dead+"人 \n");
+                    if(!province.get(i).equals("none")){
+                        province_info tenp=new province_info(province.get(i));
+                        infos.add(tenp);
+                        t.add(infos.size()-1);
+                    }
+                }
+            }
+            //输出需要输出的地区情况
+            for (int i = 0; i < province.size(); i++) {
+                printWriter.print(infos.get(t.get(i)).name + " ");
+                printWriter.print("感染患者" + infos.get(t.get(i)).infected + "人 ");
+                printWriter.print("疑似患者" + infos.get(t.get(i)).suspected + "人 ");
+                printWriter.print("治愈" + infos.get(t.get(i)).cure + "人 ");
+                printWriter.print("死亡" + infos.get(t.get(i)).dead + "人 \n");
+            }
         }
         printWriter.close();//记得关闭输入流
     }
