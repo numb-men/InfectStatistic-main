@@ -51,7 +51,7 @@ public class InfectStatistic {
             , "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏"
             , "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
     static private List<String> result = new ArrayList<>();
-
+    static private List<String> files = new ArrayList<>();
     static {
         commands.add("list");
         for (int i = 0; i < 32; i++) {
@@ -64,6 +64,30 @@ public class InfectStatistic {
             map.put("flag", -1);
         }
         province.get("全国").put("flag", 0);
+    }
+    public static void getFiles(String path)
+    {
+        File file = new File(path);
+        File[] fileList = file.listFiles();
+        for(File tempFile:fileList)
+        {
+            if(tempFile.isFile())
+            {
+                files.add(tempFile.getAbsolutePath());
+            }
+        }
+        files.sort((ch1,ch2)->ch1.compareTo(ch2));
+    }
+
+    public static List<String> getLoadFiles(String fileName){
+        List<String> list = new ArrayList<>();
+        for(String ch:files)
+        {
+            if(fileName.compareTo(ch) >= 0){
+                list.add(ch);
+            }
+        }
+        return list;
     }
 
     public static String getTheLatestDate() {
@@ -111,9 +135,8 @@ public class InfectStatistic {
 
     public void fileRead(String[] commands) throws IOException {
         String input = listCommand.listMap.get("-log").get(0);
-        String output = listCommand.listMap.get("-out").get(0);
+        //String output = listCommand.listMap.get("-out").get(0);
         String tempString = "";
-        String command = "";
         if (listCommand.listMap.containsKey("-date")) {
             String date = listCommand.listMap.get("-date").get(0);
             input += "\\" + date + ".log.txt";
@@ -121,14 +144,14 @@ public class InfectStatistic {
         } else {
             input += "\\" + getTheLatestDate() + ".log.txt";
         }
-        System.out.println(input);
-        for (String ch : commands) {
-            command += ch + " ";
-        }
-        System.out.println(command);
-        BufferedReader reader = new BufferedReader(new FileReader(input));
-        while ((tempString = reader.readLine()) != null) {
-            stringProcessing(tempString);
+        getFiles(listCommand.listMap.get("-log").get(0));
+        List<String> loadFiles = getLoadFiles(input);
+        for(String fileName:loadFiles){
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            while ((tempString = reader.readLine()) != null) {
+                stringProcessing(tempString);
+            }
+            reader.close();
         }
         updateCountry();
         if (!listCommand.listMap.containsKey("-type") && !listCommand.listMap.containsKey("-province")) {
@@ -150,8 +173,6 @@ public class InfectStatistic {
         }
         logOutput();
         reset();
-        reader.close();
-
     }
 
 
@@ -352,34 +373,25 @@ public class InfectStatistic {
             map.put("flag", -1);
         }
         province.get("全国").put("flag", 0);
+        result = new ArrayList<>();
+        files = new ArrayList<>();
     }
 
     @Test
-    public void unitTest() {
-        List<String> list = new ArrayList<>();
-        //list.add("list -date 2020-01-22 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:\\java\\InfectStatistic-main\\221701227\\result\\output.txt");
-        //list.add("list -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:\\java\\InfectStatistic-main\\221701227\\result\\output2.txt -date 2020-01-23 -type cure dead ip");
-        list.add("list -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:\\java\\InfectStatistic-main\\221701227\\result\\output2.txt -date 2020-01-22 -type cure dead ip -province 福建 河北");
-        //list.add("list -date 2020-01-22 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:/output.txt");
-        //list.add("list -type sp cure -province 福建 -log D:/log/ -out D:/output.txt");
-        //list.add("change -date 2020-01-22 -log D:/log/ -out D:/output.txt");
-        //list.add("list -typesp cure -log D:/log/ -out D:/output.txt");
-        //list.add("list -type sp cure -province -log D:/log/ -out D:/output.txt");
-        for (String command : list) {
-            String[] commands = command.split(" ");
-//            for (String ch : commands) {
-//                System.out.println(ch);
-//            }
-//            System.out.println("-------------------------------");
+    public void infectStatisticMainTest() {
+        List<String> command = new ArrayList<>();
+        command.add("list -log D:\\java\\InfectStatistic-main\\221701227\\log " +
+                "-out D:\\java\\InfectStatistic-main\\221701227\\result\\ListOut4.txt -date 2020-01-22");
+        command.add( "list -log D:\\java\\InfectStatistic-main\\221701227\\log " +
+                "-out D:\\java\\InfectStatistic-main\\221701227\\result\\ListOut5.txt -date 2020-01-22 -province 福建 河北");
+        command.add("list -log D:\\java\\InfectStatistic-main\\221701227\\log " +
+                "-out D:\\java\\InfectStatistic-main\\221701227\\result\\ListOut6.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建");
+        command.add("list -log D:\\java\\InfectStatistic-main\\221701227\\log " +
+                "-out D:\\java\\InfectStatistic-main\\221701227\\result\\ListOut7.txt -date 2020-01-27 -type cure dead ip -province 全国 浙江 福建 湖北");
+        for(String ch:command) {
+            String[] commands = ch.split(" ");
             try {
                 commandAnalyze(commands);
-//                for (String key : listCommand.listMap.keySet()) {
-//                    System.out.print(key + ":");
-//                    for (String ch : listCommand.listMap.get(key)) {
-//                        System.out.print(ch + " ");
-//                    }
-//                    System.out.println("");
-//                }
                 System.out.println("-------------------------------");
                 fileRead(commands);
             } catch (CommandErrorException e) {
@@ -390,7 +402,6 @@ public class InfectStatistic {
             }
         }
     }
-
 
     public static void main(String[] args) {
 
