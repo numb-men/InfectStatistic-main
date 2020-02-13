@@ -6,6 +6,14 @@
  * @version 1.0
  * @since 2020-02-06
  */
+
+import java.io.File;
+import java.io.*;
+import java.util.List;
+import java.util.regex.*;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
 class InfectStatistic {
     public static void main(String[] args) {
     	if (args.length == 0) {  
@@ -35,21 +43,39 @@ class CmdArgs{
 
 	public String log_path; //日志文件位置
 	public String out_path; //输出文件位置
-	public String date; //指定日期
+	/*
+	 * 指定日期
+	 * 将指定日期默认设置为今天（即启动程序的该天日期）
+	 */
+	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+	Date d = new Date(System.currentTimeMillis());
+	public String date = formatter.format(d); //指定日期
 
 	/*
 	 * 指定类型(按顺序分别为ip,sp,cure,dead)
-	 * 当数值为1时表示需要列出，为0时无需列出
+	 * 当数值不为0时表示需要列出，为0时无需列出
+	 * 默认顺序为1,2,3,4，即全部列出并按照上述顺序
 	 */
-	public int[] type = {1,1,1,1};
+	public int[] type = {1,2,3,4};
 
 	/*
 	 * 指定省份(按省份名称排序（第一位为全国）)
+	 * 当数值为1时表示需要列出，为0时无需列出
+	 * 默认第一位为-1,其他全为0,代表未指定省份
 	 */
 	public int[] province = new int[35];
+	/*
+	 * 省份列表(按省份名称拼音排序（第一位为全国）)
+	 */
+	public String[] province_str = {"全国", "安徽", "澳门" ,"北京", "重庆", "福建","甘肃",
+			"广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
+			"江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海",
+			"四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
+
 
 	CmdArgs(String[] args_str){
 		args = args_str;
+		province[0] = -1; //将全国指定位置为-1
 	}
 
 	/*
@@ -86,8 +112,7 @@ class CmdArgs{
 	 * @return
 	 */
 	public int getLogPath(int i) {
-		if(i < args.length)
-		{
+		if(i < args.length) { //当下标未越界
 			log_path = args[i];
 		}
 		else
@@ -101,8 +126,7 @@ class CmdArgs{
 	 * @return
 	 */
 	public int getOutPath(int i) {
-		if(i < args.length)
-		{
+		if(i < args.length) { //当下标未越界
 			out_path = args[i];
 		}
 		else
@@ -116,8 +140,7 @@ class CmdArgs{
 	 * @return
 	 */
 	public int getDate(int i) {
-		if(i < args.length)
-		{
+		if(i < args.length) { //当下标未越界
 			date = args[i];
 		}
 		else
@@ -131,29 +154,29 @@ class CmdArgs{
 	 * @return int
 	 */
 	public int getType(int i) {
-		int j = i, m = i;
+		int j, m = i; 
 
-		if(i < args.length)
-		{
-			for(j = 0; j < 4; j++)
+		if(i < args.length) { //当下标未越界
+			for(j = 0; j < 4; j++) //将默认指定全置为0
 				type[j] = 0;
+			j = 1; //j用来指定类型的顺序输出
 			while(i<args.length) {
 				switch(args[i]) {
 					case "ip" :
-						type[0] = 1;
-						j = i++;
+						type[0] = j;
+						j++;
 						break;
 					case "sp":
-						type[1] = 1;
-						j = i++;
+						type[1] = j;
+						j++;
 						break;
 					case "cure":
-						type[2] = 1;
-						j = i++;
+						type[2] = j;
+						j++;
 						break;
 					case "dead":
-						type[3] = 1;
-						j = i++;
+						type[3] = j;
+						j++;
 						break;
 					default:
 						break;
@@ -162,7 +185,7 @@ class CmdArgs{
 		}
 		if(m == i) //说明-type后无正确参数
 			return -1;
-		return (j - 1); //接下来不为-type的参数，或越界
+		return (i - 1); //接下来不为-type的参数，或越界
 	}
 
 	/*
@@ -173,13 +196,21 @@ class CmdArgs{
 	public int getProvince(int i) {
 		int j, m = i;
 
-		if(i < args.length)
-		{
-			//指定省份
+		if(i < args.length){ //当下标未越界
+			province[0] = 0; //取消未指定状态标记
+			while(i<args.length) {
+				for(j = 0; j < province_str.length; j++) {
+					if(args[i].equals(province_str[j])) { //如果参数找到对应省份
+						province[j] = 1; //指定该省份需要输出
+						i++;
+						break;
+					}
+				}
+			}
 		}
 		if(m == i) //说明-province后无正确参数
 			return -1;
-		return i;
+		return (i - 1); //接下来不为province的参数，或越界
 	}
 }
 
@@ -193,13 +224,18 @@ class FileHandle{
 
 	/*
 	 * 指定类型(按顺序分别为ip,sp,cure,dead)
-	 * 当数值为1时表示需要列出，为0时无需列出
+	 * 当数值不为0时表示需要列出，为0时无需列出
+	 * 默认顺序为1,2,3,4，即全部列出并按照上述顺序
 	 */
-	public int[] type = {1,1,1,1};
-
+	public int[] type;
 	/*
-	 * 指定省份(按省份名称拼音排序（第一位为全国）)
+	 * 类型列表(按顺序分别为ip,sp,cure,dead)
+	 */
+	public String[] type_str = {"感染患者", "疑似患者", "治愈", "死亡"};
+	/*
+	 * 指定省份(按省份名称排序（第一位为全国）)
 	 * 当数值为1时表示需要列出，为0时无需列出
+	 * 默认第一位为-1,其他全为0,代表未指定省份
 	 */
 	public int[] province = new int[35];
 	public String[] fileName = new String[9]; //存储指定日期下的文件名
@@ -317,6 +353,8 @@ class FileHandle{
     		if(str_arr[0].equals(province_str[i])) { //第一个字符串为省份
     			people[0][0] += n; //全国感染患者人数增加
     			people[i][0] += n; //该省份感染患者人数增加
+    			if(province[0] == -1) //省份处于未指定状态
+    				province[i] = 1; //需要将该省份列出
     			break;
     		}
     	}
@@ -335,6 +373,8 @@ class FileHandle{
     		if(str_arr[0].equals(province_str[i])) { //第一个字符串为省份
     			people[0][1] += n; //全国疑似患者人数增加
     			people[i][1] += n; //该省份疑似患者人数增加
+    			if(province[0] == -1) //省份处于未指定状态
+    				province[i] = 1; //需要将该省份列出
     			break;
     		}
     	}
@@ -355,6 +395,8 @@ class FileHandle{
     			people[0][0] -= n; //全国感染患者人数减少
     			people[i][2] += n; //该省份治愈人数增加
     			people[i][0] -= n; //该省份感染患者人数减少
+    			if(province[0] == -1) //省份处于未指定状态
+    				province[i] = 1; //需要将该省份列出
     			break;
     		}
     	}
@@ -375,6 +417,8 @@ class FileHandle{
     			people[0][0] -= n; //全国感染患者人数减少
     			people[i][3] += n; //该省份死亡人数增加
     			people[i][0] -= n; //该省份感染患者人数减少
+    			if(province[0] == -1) //省份处于未指定状态
+    				province[i] = 1; //需要将该省份列出
     			break;
     		}
     	}
@@ -390,10 +434,16 @@ class FileHandle{
     	int n = Integer.valueOf(str_arr[4].replace("人", ""));//将人前的数字从字符串类型转化为int类型
 
     	for(i = 0; i < province_str.length; i++) {
-    		if(str_arr[0].equals(province_str[i])) //第一个字符串为流出省份
+    		if(str_arr[0].equals(province_str[i])) { //第一个字符串为流出省份
     			people[i][0] -= n; //该省份感染患者人数减少
-    		if(str_arr[3].equals(province_str[i])) //第四个字符串为流入省份
+    			if(province[0] == -1) //省份处于未指定状态
+    				province[i] = 1; //需要将该省份列出
+    		}
+    		if(str_arr[3].equals(province_str[i])) { //第四个字符串为流入省份
     			people[i][0] += n; //该省份感染患者人数增加
+    			if(province[0] == -1) //省份处于未指定状态
+    				province[i] = 1; //需要将该省份列出
+    		}
     	}
     }
 
@@ -407,12 +457,17 @@ class FileHandle{
     	int n = Integer.valueOf(str_arr[4].replace("人", ""));//将人前的数字从字符串类型转化为int类型
 
     	for(i = 0; i < province_str.length; i++) {
-    		if(str_arr[0].equals(province_str[i])) //第一个字符串为流出省份
+    		if(str_arr[0].equals(province_str[i])) { //第一个字符串为流出省份
     			people[i][1] -= n; //该省份疑似患者减少
-    		if(str_arr[3].equals(province_str[i])) //第四个字符串为流入省份
+    			if(province[0] != -1) //省份处于未指定状态
+    				province[i] = 1; //需要将该省份列出
+    		}
+    		if(str_arr[3].equals(province_str[i])) { //第四个字符串为流入省份
     			people[i][1] += n; //该省份疑似患者增加
+    			if(province[0] == -1) //省份处于未指定状态
+    				province[i] = 1; //需要将该省份列出
+    		}
     	}
-
     }
 
     /*
@@ -430,6 +485,8 @@ class FileHandle{
     			people[0][0] += n; //全国感染患者人数增加
     			people[i][1] -= n; //该省份疑似患者人数减少
     			people[i][0] += n; //该省份感染患者人数增加
+    			if(province[0] == -1) //省份处于未指定状态
+    				province[i] = 1; //需要将该省份列出
     			break;
     		}
     	}
@@ -448,6 +505,8 @@ class FileHandle{
     		if(str_arr[0].equals(province_str[i])) { //第一个字符串为省份
     			people[i][1] -= n; //该省份疑似患者人数减少
     			people[0][1] -= n; //全国疑似患者人数减少
+    			if(province[0] == -1) //省份处于未指定状态
+    				province[i] = 1; //需要将该省份列出
     			break;
     		}
     	}
@@ -458,10 +517,37 @@ class FileHandle{
 	 * 输出文件内容
 	 */
     public void writeTxt() {
+    	FileWriter fwriter = null;
+    	int i, j, k;
+    	
         try {
-
+        	fwriter = new FileWriter(out_path);
+        	if(province[0] == -1) //省份处于未指定状态
+				province[0] = 1; //将全国以及省份改为指定状态（即列出日志文件中出现的省份）
+        	for(i = 0; i < province_str.length; i++) { //遍历省份查找需要列出的省份
+        		if(province[i] == 1) { //该省份需要列出
+        			fwriter.write(province_str[i] + " ");
+        			for(j = 0; j < type.length; j++) {
+        				for(k = 0; k < type.length; k++) {
+        					if(type[k] == j+1) { //即该省份需要列出且按照参数顺序
+        						fwriter.write(type_str[k] + people[i][k] + "人 ");
+        						break;
+        					}
+        				}
+        			}
+        			fwriter.write("\n");
+        		}
+        	}
+        	fwriter.write("// 该文档并非真实数据，仅供测试使用");
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                fwriter.flush();
+                fwriter.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 } 
