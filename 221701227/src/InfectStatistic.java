@@ -32,7 +32,7 @@ class CommandErrorException extends Exception {
 
 public class InfectStatistic {
     static class ListCommand {
-        private Map<String, List<String>> listMap = new HashMap<>();
+        private Map<String, List<String>> listMap = new LinkedHashMap<>();
         static List<String> command = new ArrayList<>();
 
         static {
@@ -46,15 +46,16 @@ public class InfectStatistic {
 
     private ListCommand listCommand = new ListCommand();
     static private List<String> commands = new ArrayList<>();
-    static private Map<String, Map<String, Integer>> province = new HashMap<>(32);
+    static private Map<String, Map<String, Integer>> province = new LinkedHashMap<>(32);
     static private String[] provinces = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北"
             , "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏"
             , "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
+    static private List<String> result = new ArrayList<>();
 
     static {
         commands.add("list");
         for (int i = 0; i < 32; i++) {
-            province.put(provinces[i], new HashMap<>());
+            province.put(provinces[i], new LinkedHashMap<>());
             Map<String, Integer> map = province.get(provinces[i]);
             map.put("感染患者", 0);
             map.put("疑似患者", 0);
@@ -127,33 +128,34 @@ public class InfectStatistic {
         }
         System.out.println(command);
         BufferedReader reader = new BufferedReader(new FileReader(input));
-        if (!listCommand.listMap.containsKey("-type") && !listCommand.listMap.containsKey("-province")) {
-
-            while ((tempString = reader.readLine()) != null) {
-                stringProcessing(tempString);
-                //writer.write();
-                //writer.newLine();
-            }
-            updateCountry();
-            for (String key : province.keySet()) {
-                Map<String, Integer> map = province.get(key);
-                if (map.get("flag") == -1) {
-                    continue;
-                } else {
-                    System.out.print(key + " ");
-                    for (String ch : map.keySet()) {
-                        if (!ch.equals("flag")) {
-                            System.out.print(ch + ":");
-                            System.out.print(map.get(ch) + " ");
-                        }
-                    }
-                }
-                System.out.println();
-            }
-            //writer.flush();
-            reader.close();
-            //writer.close();
+        while ((tempString = reader.readLine()) != null) {
+            stringProcessing(tempString);
         }
+        updateCountry();
+        if (!listCommand.listMap.containsKey("-type") && !listCommand.listMap.containsKey("-province")) {
+            stringSynthesis(new ArrayList<>());
+        }else if(listCommand.listMap.containsKey("-type") && !listCommand.listMap.containsKey("-province"))
+        {
+
+            List<String> params = new ArrayList<>();
+            List<String> typeParams = listCommand.listMap.get("-type");
+            params.addAll(typeParams);
+            stringSynthesis(params);
+        }else if(!listCommand.listMap.containsKey("-type") && listCommand.listMap.containsKey("-province"))
+        {
+//            stringSynthesis(new ArrayList<>());
+        }
+        else {
+//            List<String> params = new ArrayList<>();
+//            List<String> typeParams = listCommand.listMap.get("-type");
+//            List<String> provinceParams = listCommand.listMap.get("-province");
+//            params.addAll(typeParams);
+//            params.addAll(provinceParams);
+//            stringSynthesis(params);
+        }
+        logOutput();
+        reset();
+        reader.close();
 
     }
 
@@ -222,6 +224,72 @@ public class InfectStatistic {
         }
     }
 
+    public void stringSynthesis(List<String> params)
+    {
+        if(params.isEmpty()) {
+            for (String key : province.keySet()) {
+                StringBuffer tempString = new StringBuffer();
+                Map<String, Integer> map = province.get(key);
+                if (map.get("flag") == -1) {
+                    continue;
+                } else {
+                    tempString.append(key + " ");
+                    for (String ch : map.keySet()) {
+                        if (!"flag".equals(ch)) {
+                            tempString.append(ch);
+                            tempString.append(map.get(ch) + "人 ");
+                        }
+                    }
+                    result.add(tempString.toString().trim());
+                    System.out.println(tempString.toString().trim());
+                }
+            }
+        }
+        else{
+            for (String key : province.keySet()) {
+                StringBuffer tempString = new StringBuffer();
+                Map<String, Integer> map = province.get(key);
+                if (map.get("flag") == -1) {
+                    continue;
+                } else {
+                    for (String ch : params) {
+                        if("".equals(ch)){
+
+                        }
+                    }
+                    tempString.append(key + " ");
+                    for (String ch : map.keySet()) {
+                        if (!"flag".equals(ch)) {
+                            tempString.append(ch);
+                            tempString.append(map.get(ch) + "人 ");
+                        }
+                    }
+                    result.add(tempString.toString().trim());
+                    System.out.println(tempString.toString().trim());
+                }
+            }
+        }
+        result.add("// 该文档并非真实数据，仅供测试使用");
+    }
+
+    public void logOutput()
+    {
+        String out = listCommand.listMap.get("-out").get(0);
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(out));
+            for(String ch:result)
+            {
+                writer.write(ch);
+                writer.write("\n");
+            }
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public String getPro(String ch, int index) {
         String pro = "";
         String[] temp = ch.split(" ");
@@ -255,23 +323,35 @@ public class InfectStatistic {
                 continue;
             }
             Map<String, Integer> map = province.get(key);
-            for(String str:map.keySet())
-            {
-                if("flag".equals(str))
-                {
+            for (String str : map.keySet()) {
+                if ("flag".equals(str)) {
                     continue;
                 }
                 temp = country.get(str) + map.get(str);
-                country.put(str,temp);
+                country.put(str, temp);
             }
-
         }
+    }
+    public void reset()
+    {
+        for (int i = 0; i < 32; i++) {
+            province.put(provinces[i], new LinkedHashMap<>());
+            Map<String, Integer> map = province.get(provinces[i]);
+            map.put("感染患者", 0);
+            map.put("疑似患者", 0);
+            map.put("治愈", 0);
+            map.put("死亡", 0);
+            map.put("flag", -1);
+        }
+        province.get("全国").put("flag", 0);
     }
 
     @Test
     public void unitTest() {
         List<String> list = new ArrayList<>();
-        list.add("list -date 2020-01-22 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:/output.txt");
+        list.add("list -date 2020-01-22 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:\\java\\InfectStatistic-main\\221701227\\result\\output.txt");
+        //list.add("list -date 2020-01-23 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:/output.txt");
+        //list.add("list -date 2020-01-27 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:/output.txt");
         //list.add("list -date 2020-01-22 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:/output.txt");
         //list.add("list -type sp cure -province 福建 -log D:/log/ -out D:/output.txt");
         //list.add("change -date 2020-01-22 -log D:/log/ -out D:/output.txt");
@@ -279,19 +359,19 @@ public class InfectStatistic {
         //list.add("list -type sp cure -province -log D:/log/ -out D:/output.txt");
         for (String command : list) {
             String[] commands = command.split(" ");
-            for (String ch : commands) {
-                System.out.println(ch);
-            }
-            System.out.println("-------------------------------");
+//            for (String ch : commands) {
+//                System.out.println(ch);
+//            }
+//            System.out.println("-------------------------------");
             try {
                 commandAnalyze(commands);
-                for (String key : listCommand.listMap.keySet()) {
-                    System.out.print(key + ":");
-                    for (String ch : listCommand.listMap.get(key)) {
-                        System.out.print(ch + " ");
-                    }
-                    System.out.println("");
-                }
+//                for (String key : listCommand.listMap.keySet()) {
+//                    System.out.print(key + ":");
+//                    for (String ch : listCommand.listMap.get(key)) {
+//                        System.out.print(ch + " ");
+//                    }
+//                    System.out.println("");
+//                }
                 System.out.println("-------------------------------");
                 fileRead(commands);
             } catch (CommandErrorException e) {
