@@ -35,22 +35,31 @@ public class Lib {
 
         String log=new String();//指定日志目录的位置
         String out=new String();//指定输出文件路径和文件名
+        String date=new String();//指定日期
         for (int i=0;i<args.length;i++){
             if(args[i].startsWith("-")){
                 if(args[i].equals("-log")) log=args[i+1];
                 else if(args[i].equals("-out")) out=args[i+1];
+                else if(args[i].equals("-date")) date=args[i+1];
             }
-
         }
 
         //读取排序好的文件对象并进行处理
-        for (File file_temp : sort_file(log)) {
-           System.out.println(file_temp.getName());
-           read_file(file_temp);//读取指定的文件
+        File[] sort= sort_file(log);//获得排序好的文件对象
+        if(date.compareTo(sort[sort.length-1].getName())>0) System.out.println("日期超出范围");
+        else {
+            System.out.println(sort[0].getName().split("[.]")[0]);
+            for (int i=0;i<sort.length;i++) {
+                String temp=(sort[i].getName().split("[.]"))[0];//获取文件对应的日期
+                if(temp.compareTo(date)<=0)//如果文件日期小于等于指定日期
+                    read_file(sort[i]);//读取指定的文件
+                else break;
+            }
+            summary();
+            Arrangement();
+            output(out);
         }
-        summary();
-        Arrangement();
-        output(out);
+
     }
     //对指定目录下的文件按照日期进行排序
     private File[] sort_file(String log) throws IOException {
@@ -209,11 +218,12 @@ public class Lib {
     //写入文件
     private void output(String out) throws IOException {
         String[] temp=out.split("\\\\");
-        String filename=temp[temp.length-1];
+        String filename=temp[temp.length-1];//获取地址中的文件名
 
-        System.out.println(filename);
+        //System.out.println(filename);
 
-        String path=out.split(filename)[0];
+        String path=out.split(filename)[0];//将地址中的文件名剔除
+
         File f1=new File(path);//传入文件/目录的路径
         File f2=new File(f1,filename);//第一个参数为一个目录文件，第二个参数为要在当前f1目录下要创建的文件
 
