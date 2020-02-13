@@ -10,6 +10,7 @@ import org.junit.runners.Suite.SuiteClasses;
         CommandFactoryTest.class,
         ListCheckerTest.class,
         CommandLineTest.class,
+        LogReaderTest.class,
 })
 public class SuiteTest {
 }
