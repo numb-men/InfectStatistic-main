@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -14,12 +16,16 @@ import java.util.regex.Pattern;
  */
 class InfectStatistic {
     public static void main(String[] args) {
+        System.out.println("done");
         CmdList cmd = new CmdList(args);
         Log log = new Log(cmd);
+        String[] filesName = log.getFiles();
+        for (String file : filesName) {
+            System.out.println(file);
+        }
         log.logToRegion(log.getLogs());
-        // ArrayList<String> logs = log.getLogs();
-        // System.out.println(logs.get(0).equals("福建 新增 感染患者 2人"));
-        for (Log.Region region : log.getRegions()) {
+        ArrayList<Log.Region> regions = log.getRegions();
+        for (Log.Region region : regions) {
             System.out.println(
                 region.getName()+" "+
                 region.getIp()+" "+
@@ -157,6 +163,9 @@ class CmdArgs {
 class CmdList extends CmdArgs {
     private String logPath = null;  //日志文件路径
     private String outPath = null;  //输出文件路径
+    private String date = null;
+    private ArrayList<String> type = null;
+    private ArrayList<String> province = null;
 
     /**
      * 传入list命令
@@ -166,8 +175,17 @@ class CmdList extends CmdArgs {
     CmdList(String[] args) {
         super(args);
         if(isLegal()) {
-            logPath = argVal("-log");
-            outPath = argVal("-out");
+            this.logPath = argVal("-log");
+            this.outPath = argVal("-out");
+            if(getCmd().contains("-date")) {
+                this.date = argVal("-date");
+            }
+            if(getCmd().contains("-type")) {
+                this.type = argVals("-type");
+            }
+            if(getCmd().contains("-province")) {
+                this.province = argVals("-province");
+            }
         }
     }
 
@@ -185,6 +203,18 @@ class CmdList extends CmdArgs {
      */
     String getOutPath() {
         return this.outPath;
+    }
+
+    String getDate() {
+        return this.date;
+    }
+
+    ArrayList<String> getType() {
+        return this.type;
+    }
+
+    ArrayList<String> getProvince() {
+        return this.province;
     }
 
     /**
@@ -222,7 +252,7 @@ class CmdList extends CmdArgs {
 class Log {
     private String logPath = null;  //日志文件路径
     private File logDir = null; //日志文件的文件夹
-    private String[] filesName = null;  //日志文件的文件名
+    private String[] files = null;  //日志文件的文件名
     private ArrayList<String> logs = new ArrayList<>(); //用于储存日志文件的动态数组
     private String ignore = "//.*"; //行忽略标志
     private ArrayList<Region> regions = new ArrayList<>();  //用于储存地区类的动态数组
@@ -235,7 +265,11 @@ class Log {
         logPath = cmdList.getLogPath();
         logDir = new File(logPath);
         if (logDir.isDirectory()) {
-            this.filesName = logDir.list();
+            this.files = logDir.list();
+            Arrays.sort(files);
+            if(cmdList.getCmd().contains("-date")) {
+                delAfter(cmdList.argVal("-date"));
+            }
             try {
                 readLog(logPath);
             } catch (IOException e) {
@@ -244,12 +278,26 @@ class Log {
         }
     }
 
+    String[] delAfter(String date) {
+        String[] result = null;
+        if(files.length > 0) {
+            List<String> fileList = new ArrayList<String>(Arrays.asList(files));
+            for (String file : fileList) {
+                if(date.compareTo(file) < 0) {
+                    fileList.remove(file);
+                }
+            }
+            fileList.toArray(result);
+        }
+        return result;
+    }
+
     /**
      * 获取日志文件的文件名
      * @return
      */
-    String[] getFilesName() {
-        return this.filesName;
+    String[] getFiles() {
+        return this.files;
     }
 
     /**
@@ -260,6 +308,10 @@ class Log {
         return this.logs;
     }
 
+    /**
+     * 获取地区数据
+     * @return
+     */
     ArrayList<Region> getRegions() {
         return this.regions;
     }
@@ -272,10 +324,11 @@ class Log {
     void readLog(String logPath) throws IOException {
         BufferedReader br = null;
         String line = null;
-        for (String name : filesName) {
+        for (String name : files) {
             FileInputStream fis = new FileInputStream(logPath + name);
             InputStreamReader isr = new InputStreamReader(fis, "utf-8");
             br = new BufferedReader(isr);
+            // br = new BufferedReader(new FileReader(logPath + name));
             while((line = br.readLine()) != null) {
                 if(!isIgnore(line)) {
                     logs.add(line);
@@ -305,46 +358,44 @@ class Log {
      */
     void logToRegion(ArrayList<String> logs) {
         for (String log : logs) {
-            String[] items = log.split(" ");
-            Region tmpRegion = new Region(items[0]);
-            if(!regions.contains(tmpRegion)) {
-                Region region = new Region(items[0]);
-                regions.add(region);
-            }
-            Region region = regions.get(regions.indexOf(tmpRegion));
-            // for (String item : items) {
-            //     System.out.print(item);
-            // }
-            // System.out.print(items[1]);
-            // System.out.println("新增".equals(items[1]));
-            // items[1] = "新增";
+            String[] items = log.split("[\\s]+");
+            int index = indexOfRegion(items[0]);
+            Region region = regions.get(index);
             switch (items[1]) {
                 case "新增": {
-                    items[3].replace("人", "");
-                    System.out.println(items[3]);
                     if(items[2].equals("感染患者")) {
-                        region.setIp(region.getIp() + Integer.valueOf(items[3]));
+                        region.ip += Integer.valueOf(items[3].replace("人", ""));
                     } else if(items[2].equals("疑似患者")) {
-                        region.setSp(region.getSp() + Integer.valueOf(items[3]));
+                        region.sp += Integer.valueOf(items[3].replace("人", ""));
                     }
                     break;
                 }
                 case "疑似患者": {
-                    items[4].replace("人","");
-                    region.setSp(region.getSp() - Integer.valueOf(items[4]));
+                    if(items[2].equals("确认感染")) {
+                        region.ip += Integer.valueOf(items[3].replace("人", ""));
+                    } else if(items[2].equals("流入")) {
+                        region.sp -= Integer.valueOf(items[4].replace("人", ""));
+                        Region another = regions.get(indexOfRegion(items[3]));
+                        another.sp += Integer.valueOf(items[4].replace("人", ""));
+                    }
                     break;
                 }
                 case "感染患者": {
-                    items[4].replace("人","");
+                    region.ip -= Integer.valueOf(items[4].replace("人", ""));
+                    Region another = regions.get(indexOfRegion(items[3]));
+                    another.ip += Integer.valueOf(items[4].replace("人", ""));
                     break;
                 }
                 case "治愈": {
+                    region.setCure(region.getCure() + Integer.valueOf(items[2].replace("人", "")));
                     break;
                 }
                 case "死亡": {
+                    region.setDead(region.getDead() + Integer.valueOf(items[2].replace("人", "")));
                     break;
                 }
                 case "排除": {
+                    region.setSp(region.getSp() - Integer.valueOf(items[3].replace("人", "")));
                     break;
                 }
                 default: {
@@ -355,12 +406,28 @@ class Log {
     }
 
     /**
+     * 获取指定地区在动态数组中的下表，如果数组中没有，则向动态数组中加入该地区
+     * @param name
+     * @return
+     */
+    int indexOfRegion(String name) {
+        int index = -1;
+        Region region = new Region(name);
+        if(!regions.contains(region)) {
+            region = new Region(name);
+            regions.add(region);
+        }
+        index = regions.indexOf(region);
+        return index;
+    }
+
+    /**
      * Region
      * 用于暂存日志文件内容的类对象
      */
-    public class Region {
-        private String name, another;   //地区名称，可能会出现的另一个地区的名称
-        private int ip, sp, cure, dead; //感染患者，疑似患者，治愈，死亡患者
+    class Region {
+        protected String name;   //地区名称
+        protected int ip, sp, cure, dead; //感染患者，疑似患者，治愈，死亡患者
 
         /**
          * 传入地区名称
@@ -368,7 +435,6 @@ class Log {
          */
         Region(String name) {
             this.name = name;
-            this.another = null;
             this.ip = 0;
             this.sp = 0;
             this.cure = 0;
@@ -395,22 +461,6 @@ class Log {
          */
         String getName() {
             return this.name;
-        }
-
-        /**
-         * 获取另一个地区的名称
-         * @return
-         */
-        String getAnother() {
-            return this.another;
-        }
-
-        /**
-         * 设置另一个地区的名称
-         * @param another
-         */
-        void setAnother(String another) {
-            this.another = another;
         }
 
         /**
