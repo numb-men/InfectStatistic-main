@@ -10,5 +10,6 @@ class InfectStatistic {
     public static void main(String[] args)
     {
 
+
     }
 }

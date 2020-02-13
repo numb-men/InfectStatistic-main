@@ -7,11 +7,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Read {
+    public String path;
+    Read(String path){
+        this.path=path;
+    }
     Date now = new Date(System.currentTimeMillis());//获取当前日期
     public SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");//规范日期格式
     public String Today = sdf.format(now);
 
-    public void getFiles(String Log_Path) {
+    public void getFiles() {
+        String Log_Path=path;
         File files = new File(Log_Path);
         File[] filelist = files.listFiles();//获取目录下的所有文件
         for (int i = 0; i < filelist.length; i++) {
