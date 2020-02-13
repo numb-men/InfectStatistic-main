@@ -1,4 +1,3 @@
-##　缩进
 
 * [强制]缩进使用4个空格,并设置tab键为4空格,IDEA设置tab为4个空格时，请勿勾选Use tab character；而在eclipse中，必须勾选insert spaces for tabs。
 * [强制]在前端页面例如jsp,html,css文件中设置缩进为2个空格
