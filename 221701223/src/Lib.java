@@ -88,54 +88,77 @@ public class Lib {
  * @author ybn
  */
 class Record {
-    int infected = 0;
-    int suspected = 0;
-    int cured = 0;
-    int dead = 0;
+    private int infected = 0;
+    private int suspected = 0;
+    private int cured = 0;
+    private int dead = 0;
 
-    public String getStringOfInfected() {
+    String getStringOfInfected() {
         return Lib.INFECTED + infected + "人";
     }
 
-    public String getStringOfSuspected() {
+    String getStringOfSuspected() {
         return Lib.SUSPECTED + suspected + "人";
     }
 
-    public String getStringOfCured() {
+    String getStringOfCured() {
         return Lib.CURED + cured + "人";
     }
 
-    public String getStringOfDead() {
+    String getStringOfDead() {
         return Lib.DEAD + dead + "人";
     }
 
-    public void updateInfected(int number) {
+    void updateInfected(int number) {
         infected += number;
     }
 
-    public void updateSuspected(int number) {
+    void updateSuspected(int number) {
         suspected += number;
     }
 
-    public void updateCured(int number) {
+    void updateCured(int number) {
         cured += number;
         //治愈数增加了，感染数就要同步减少
         updateInfected(-number);
     }
 
-    public void updateDead(int number) {
+    void updateDead(int number) {
         dead += number;
 
         //治愈数增加了，感染数就要同步减少
         updateInfected(-number);
     }
 
-    public boolean isEmpty() {
+    boolean isEmpty() {
         return (infected == 0 && suspected == 0 && cured == 0 && dead == 0);
     }
 
-    public void printAll() {
+    void printAll() {
         System.out.printf("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", infected, suspected, cured, dead);
+    }
+
+    void printWithPatientTypeFilter(ArrayList<String> filter) {
+        for (String type : filter) {
+            System.out.print(" ");
+            switch (type) {
+                case Lib.INFECTED:
+                    System.out.print(getStringOfInfected());
+                    break;
+                case Lib.SUSPECTED:
+                    System.out.print(getStringOfSuspected());
+                    break;
+                case Lib.CURED:
+                    System.out.print(getStringOfCured());
+                    break;
+                case Lib.DEAD:
+                    System.out.print(getStringOfDead());
+                    break;
+                default:
+                    break;
+            }
+        }
+        System.out.println();
     }
 }
 
@@ -243,7 +266,7 @@ class RecordContainer {
         }
     }
 
-    public void parseSingleLine(String line) {
+    void parseSingleLine(String line) {
         //将一行log用空格分隔成字符串数组
         String[] log = line.split(" ");
 
@@ -269,12 +292,7 @@ class RecordContainer {
     }
 
     private boolean exists(String province) {
-        for (Map.Entry<String, Record> entry : container.entrySet()) {
-            if (province.equals(entry.getKey())) {
-                return true;
-            }
-        }
-        return false;
+        return container.get(province) != null;
     }
 
     public void printRecords() {
@@ -283,6 +301,13 @@ class RecordContainer {
                 System.out.print(entry.getKey() + " ");
                 entry.getValue().printAll();
             }
+        }
+    }
+
+    public void printRecordsFilterByCommand(Command command) {
+        for (String province : command.provinces) {
+            System.out.print(province);
+            container.get(province).printWithPatientTypeFilter(command.patientTypes);
         }
     }
 }
@@ -452,11 +477,11 @@ class Command {
     /**
      * Type
      */
-    ArrayList<String> type;
+    ArrayList<String> patientTypes;
     /**
      * Province
      */
-    ArrayList<String> province;
+    ArrayList<String> provinces;
 
     /**
      * Command
@@ -471,8 +496,8 @@ class Command {
         this.date = date;
         this.logPath = logPath;
         this.outPath = outPath;
-        this.type = patientType;
-        this.province = provinceList;
+        this.patientTypes = patientType;
+        this.provinces = provinceList;
     }
 
     /**
@@ -490,10 +515,10 @@ class Command {
      */
     public void dump() {
         System.out.println(date);
-        for (String s : type) {
+        for (String s : patientTypes) {
             System.out.println(s);
         }
-        for (String s : province) {
+        for (String s : provinces) {
             System.out.println(s);
         }
     }
@@ -584,7 +609,7 @@ class FileTools {
                     container.parseSingleLine(read);
                 }
             }
-            container.printRecords();
+            //container.printRecords();
         } catch (IOException e) {
             e.printStackTrace();
         }

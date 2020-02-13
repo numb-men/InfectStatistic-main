@@ -12,10 +12,12 @@ public class InfectStatistic {
     public static void main(String[] args) {
         ArgumentParser parser = new ArgumentParser(args);
         Command command = parser.makeCommand();
-        command.dump();
-        FileTools fileTools = parser.makeFileTools();
-        fileTools.readFile(new RecordContainer() {{
+        RecordContainer recordContainer = new RecordContainer() {{
             init();
-        }});
+        }};
+        FileTools fileTools = parser.makeFileTools();
+        fileTools.readFile(recordContainer);
+
+        recordContainer.printRecordsFilterByCommand(command);
     }
 }
