@@ -8,10 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
+import java.util.*;
 
 /**
  * Lib
@@ -22,17 +19,17 @@ import java.util.HashSet;
  * @since xxx
  */
 
-
 /**
  * Lib
+ * 工具类
  *
  * @author ybn
  */
 public class Lib {
 
-    public static final String[] PROVINCE_LIST = {"全国", "安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州",
-        "哈尔滨", "海南", "河北", "河南", "湖北", "湖南", "吉林", "江苏", "江西", "内蒙古", "宁夏", "青海", "山东", "山西",
-        "山西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"
+    public static final String[] PROVINCE_LIST = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南",
+        "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西",
+        "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"
     };
 
     public final static String CHINESE_CHARACTER = "[\u4e00-\u9fa5]";
@@ -47,12 +44,12 @@ public class Lib {
 
     /**
      * Validate format of date string boolean
+     * 用来验证log文件名中对日期是否符合格式要求
      *
      * @param dateString date string
      * @return the boolean
      */
     public static boolean validateFormatOfDateString(String dateString) {
-
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         try {
             format.setLenient(false);
@@ -65,6 +62,7 @@ public class Lib {
 
     /**
      * Gets index from strings *
+     * 顺序查找目标字符串在字符串数组中的索引
      *
      * @param strings strings
      * @param target  target
@@ -86,21 +84,29 @@ public class Lib {
 
 /**
  * Record
+ *
+ * @author ybn
  */
 class Record {
-
     int infected = 0;
     int suspected = 0;
     int cured = 0;
     int dead = 0;
-    private String province = "";
 
-    public Record(String province) {
-        this.province = province;
+    public String getStringOfInfected() {
+        return Lib.INFECTED + infected + "人";
     }
 
-    public String getProvince() {
-        return this.province;
+    public String getStringOfSuspected() {
+        return Lib.SUSPECTED + suspected + "人";
+    }
+
+    public String getStringOfCured() {
+        return Lib.CURED + cured + "人";
+    }
+
+    public String getStringOfDead() {
+        return Lib.DEAD + dead + "人";
     }
 
     public void updateInfected(int number) {
@@ -113,7 +119,6 @@ class Record {
 
     public void updateCured(int number) {
         cured += number;
-
         //治愈数增加了，感染数就要同步减少
         updateInfected(-number);
     }
@@ -125,14 +130,13 @@ class Record {
         updateInfected(-number);
     }
 
-    public void print() {
-        System.out.printf("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", province, infected, suspected, cured, dead);
+    public boolean isEmpty() {
+        return (infected == 0 && suspected == 0 && cured == 0 && dead == 0);
     }
 
-
-//    String getRecordString(){
-//        return "感染患者"infected.toString()
-//    }
+    public void printAll() {
+        System.out.printf("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", infected, suspected, cured, dead);
+    }
 }
 
 /**
@@ -143,29 +147,33 @@ class RecordContainer {
     /**
      * Container
      */
-    ArrayList<Record> container;
+    LinkedHashMap<String, Record> container;
 
     public void init() {
-        container = new ArrayList<>() {{
+        container = new LinkedHashMap<>() {{
             for (String province : Lib.PROVINCE_LIST) {
-                add(new Record(province));
+                put(province, new Record());
             }
         }};
     }
 
+    public void init(Command command) {
+
+    }
+
     private void updateRecord(String province, String patientType, int number) {
-        for (Record record : container) {
-            if (province.trim().equals(record.getProvince())) {
+        for (Map.Entry<String, Record> entry : container.entrySet()) {
+            if (province.trim().equals(entry.getKey())) {
                 switch (patientType.trim()) {
                     case Lib.CURED:
-                        record.updateCured(number);
+                        entry.getValue().updateCured(number);
                         break;
                     case Lib.DEAD:
-                        record.updateDead(number);
+                        entry.getValue().updateDead(number);
                         break;
                     case Lib.CONFIRMED:
-                        record.updateInfected(number);
-                        record.updateSuspected(-number);
+                        entry.getValue().updateInfected(number);
+                        entry.getValue().updateSuspected(-number);
                         break;
                     default:
                         System.err.println("3参数log错误，可能含有非法字符。");
@@ -178,12 +186,12 @@ class RecordContainer {
     }
 
     private void updateRecord(String province, String operation, String patientType, int number) {
-        for (Record record : container) {
-            if (province.trim().equals(record.getProvince())) {
+        for (Map.Entry<String, Record> entry : container.entrySet()) {
+            if (province.trim().equals(entry.getKey())) {
                 switch (patientType.trim()) {
                     case Lib.INFECTED:
                         if (Lib.INCREASED.equals(operation.trim())) {
-                            record.updateInfected(number);
+                            entry.getValue().updateInfected(number);
                         } else {
                             System.err.println("更新感染患者出错。");
                             System.exit(-1);
@@ -192,10 +200,10 @@ class RecordContainer {
                     case Lib.SUSPECTED:
                         switch (operation.trim()) {
                             case Lib.INCREASED:
-                                record.updateSuspected(number);
+                                entry.getValue().updateSuspected(number);
                                 break;
                             case Lib.REMOVED:
-                                record.updateSuspected(-number);
+                                entry.getValue().updateSuspected(-number);
                                 break;
                             default:
                                 System.err.println("更新疑似患者出错。");
@@ -213,17 +221,17 @@ class RecordContainer {
     }
 
     private void updateRecord(String provinceOut, String patientType, int number, String provinceIn) {
-        for (Record recordOut : container) {
-            for (Record recordIn : container) {
-                if (provinceOut.trim().equals(recordOut.getProvince()) && provinceIn.equals(recordIn.getProvince())) {
+        for (Map.Entry<String, Record> entryOut : container.entrySet()) {
+            for (Map.Entry<String, Record> entryIn : container.entrySet()) {
+                if (provinceOut.trim().equals(entryOut.getKey()) && provinceIn.equals(entryIn.getKey())) {
                     switch (patientType) {
                         case Lib.INFECTED:
-                            recordOut.updateInfected(-number);
-                            recordIn.updateInfected(number);
+                            entryOut.getValue().updateInfected(-number);
+                            entryIn.getValue().updateInfected(number);
                             break;
                         case Lib.SUSPECTED:
-                            recordOut.updateSuspected(-number);
-                            recordIn.updateSuspected(number);
+                            entryOut.getValue().updateSuspected(-number);
+                            entryIn.getValue().updateSuspected(number);
                             break;
                         default:
                             System.err.println("5参数log出错");
@@ -261,8 +269,8 @@ class RecordContainer {
     }
 
     private boolean exists(String province) {
-        for (Record record : container) {
-            if (province.equals(record.getProvince())) {
+        for (Map.Entry<String, Record> entry : container.entrySet()) {
+            if (province.equals(entry.getKey())) {
                 return true;
             }
         }
@@ -270,8 +278,11 @@ class RecordContainer {
     }
 
     public void printRecords() {
-        for (Record record : container) {
-            record.print();
+        for (Map.Entry<String, Record> entry : container.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                System.out.print(entry.getKey() + " ");
+                entry.getValue().printAll();
+            }
         }
     }
 }
@@ -353,10 +364,13 @@ class ArgumentParser {
     private ArrayList<String> getPatientType() {
 
         int index = getIndexOfCommand("-type");
-        //index<0表明命令行参数中不含-type命令，就在type数组写一个"null"然后返回
+        //index<0表明命令行参数中不含-type命令，将所有类型都写入
         if (index < 0) {
-            return new ArrayList<>(1) {{
-                add("所有");
+            return new ArrayList<>(4) {{
+                add(Lib.INFECTED);
+                add(Lib.SUSPECTED);
+                add(Lib.CURED);
+                add(Lib.DEAD);
             }};
         }
         //如果args中-type的下一个元素也是一条命令选项，则表明-type命令没有参数，报错
@@ -366,10 +380,10 @@ class ArgumentParser {
         }
 
         HashMap<String, String> patientTypeMap = new HashMap<>(4) {{
-            put("ip", "感染患者");
-            put("sp", "疑似患者");
-            put("cure", "治愈");
-            put("dead", "死亡");
+            put("ip", Lib.INFECTED);
+            put("sp", Lib.SUSPECTED);
+            put("cure", Lib.CURED);
+            put("dead", Lib.DEAD);
         }};
         ArrayList<String> patientTypeList = new ArrayList<>();
 
@@ -562,33 +576,17 @@ class FileTools {
             //makeRecordContainer
             for (String fileName : fileList) {
                 BufferedReader reader = Files.newBufferedReader(Paths.get(logPath + fileName));
-                System.out.println(fileName + ":");
-                String read = null;
+                String read;
                 while ((read = reader.readLine()) != null) {
-                    //String[] line = read.split(" ");
                     if (read.startsWith("//")) {
                         continue;
                     }
                     container.parseSingleLine(read);
-
-//                    //System.out.println(" length=" + line.length);
-//                    for (String o : line) {
-//                        System.out.print(o + " ");
-//                        //System.out.print(o.replaceAll("[\u4e00-\u9fa5]+", "").trim() + 1 + " ");
-//                    }
-//                    System.out.println();
                 }
             }
             container.printRecords();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-
-    public void show() {
-        for (String s : fileList) {
-            System.out.println(s);
         }
     }
 }
