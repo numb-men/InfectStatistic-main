@@ -140,15 +140,13 @@ public class InfectStatistic {
             stringSynthesis(typeParams,new ArrayList<>());
         }else if(!listCommand.listMap.containsKey("-type") && listCommand.listMap.containsKey("-province"))
         {
-//            stringSynthesis(new ArrayList<>());
+            List<String> provinceParams = listCommand.listMap.get("-province");
+            stringSynthesis(new ArrayList<>(),provinceParams);
         }
         else {
-//            List<String> params = new ArrayList<>();
-//            List<String> typeParams = listCommand.listMap.get("-type");
-//            List<String> provinceParams = listCommand.listMap.get("-province");
-//            params.addAll(typeParams);
-//            params.addAll(provinceParams);
-//            stringSynthesis(params);
+            List<String> typeParams = listCommand.listMap.get("-type");
+            List<String> provinceParams = listCommand.listMap.get("-province");
+            stringSynthesis(typeParams,provinceParams);
         }
         logOutput();
         reset();
@@ -223,7 +221,16 @@ public class InfectStatistic {
 
     public void stringSynthesis(List<String> typeParams,List<String> countryParams)
     {
-        if(typeParams.isEmpty() && countryParams.isEmpty()) {
+        if(!countryParams.isEmpty())
+        {
+            for (int i = 0; i < 32; i++) {
+                province.get(provinces[i]).put("flag", -1);
+            }
+            for(String param:countryParams){
+                province.get(param).put("flag",0);
+            }
+        }
+        if(typeParams.isEmpty()) {
             for (String key : province.keySet()) {
                 StringBuffer tempString = new StringBuffer();
                 Map<String, Integer> map = province.get(key);
@@ -351,8 +358,8 @@ public class InfectStatistic {
     public void unitTest() {
         List<String> list = new ArrayList<>();
         //list.add("list -date 2020-01-22 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:\\java\\InfectStatistic-main\\221701227\\result\\output.txt");
-        list.add("list -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:\\java\\InfectStatistic-main\\221701227\\result\\output2.txt -date 2020-01-23 -type cure dead ip");
-        //list.add("list -date 2020-01-27 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:/output.txt");
+        //list.add("list -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:\\java\\InfectStatistic-main\\221701227\\result\\output2.txt -date 2020-01-23 -type cure dead ip");
+        list.add("list -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:\\java\\InfectStatistic-main\\221701227\\result\\output2.txt -date 2020-01-22 -type cure dead ip -province 福建 河北");
         //list.add("list -date 2020-01-22 -log D:\\java\\InfectStatistic-main\\221701227\\log -out D:/output.txt");
         //list.add("list -type sp cure -province 福建 -log D:/log/ -out D:/output.txt");
         //list.add("change -date 2020-01-22 -log D:/log/ -out D:/output.txt");
