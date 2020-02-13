@@ -1,5 +1,8 @@
 package reg;
 
+import argument.ArgParser;
+import com.sun.org.apache.xpath.internal.Arg;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,6 +16,7 @@ import java.util.regex.Pattern;
  */
 public class AllInformation {
     private Map<String,Integer[]> info;
+    private ArgParser argParser;
     String REGEX1 = "(\\S+) 新增 感染患者 (\\d+)人";
     String REGEX2 = "(\\S+) 新增 疑似患者 (\\d+)人";
     String REGEX3 = "(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
@@ -24,6 +28,7 @@ public class AllInformation {
 
     public AllInformation() {
         // 原来由于所有的键的引用都为同一个,所有修改一个会变为修改全部
+//        this.argParser = argParser;
 //        Integer[] num = {0,0,0,0};
         info = new LinkedHashMap<>();
         info.put("全国",new Integer[]{0,0,0,0});
