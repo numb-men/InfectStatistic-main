@@ -29,9 +29,6 @@ class InfectStatistic {
         return cmdArgs;
     }
 
-    public void setCmdArgs(CmdArgs cmdArgs) {
-        this.cmdArgs = cmdArgs;
-    }
 
     public Map<String, File> getLogFilesMap() {
         return logFilesMap;
@@ -45,9 +42,6 @@ class InfectStatistic {
         return container;
     }
 
-    public Record getCountry() {
-        return country;
-    }
     /** logical function **/
     public void addDeadNum(Record record, int num) {
         record.incDeadNum(num);
@@ -418,15 +412,17 @@ class CmdArgs {
     private String date;
     private Vector<String> types;
     private Vector<String> provinces;
+    private boolean showArgs;
     /** Constructor **/
     public CmdArgs() {
         this.types = new Vector<String>();
         this.provinces = new Vector<String>();
-        this.logFilePath = "/home/yyx/JavaWorkspace/InfectStatistic-main/221701232/log";
-        this.outFilePath = "/home/yyx/JavaWorkspace/InfectStatistic-main/221701232/result/";
+        this.logFilePath = null;
+        this.outFilePath = null;
         Date now = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         this.date = sdf.format(now);
+        this.showArgs = false;
     }
     /** Set and Get Method **/
     public String getLogFilePath() {
@@ -449,12 +445,13 @@ class CmdArgs {
         return date;
     }
 
-    public void setDate(String date) throws ParseException {
+    public boolean setDate(String date) throws ParseException {
         if (CommonUtil.stringToDate(date) == null) {
             // invalid date
-            return;
+            return false;
         }
         this.date = date;
+        return true;
     }
 
     public Vector<String> getTypes() {
@@ -467,11 +464,6 @@ class CmdArgs {
         this.types.add(type);
     }
 
-    public void addType(String[] types) {
-        for (String type : types) {
-            this.types.add(type);
-        }
-    }
 
     public Vector<String> getProvinces() {
         return provinces;
@@ -479,12 +471,6 @@ class CmdArgs {
 
     public void addProvince(String province) {
         this.provinces.add(province);
-    }
-
-    public void addProvince(String[] provinces) {
-        for (String province : provinces) {
-            addProvince(province);
-        }
     }
 
     public boolean hasProvince() { return provinces.size() > 0; }
@@ -513,14 +499,21 @@ class CmdArgs {
                 if (file.isDirectory()) {
                     this.setLogFilePath(args[i]);
                 } else {
-                    System.out.println("你必须指定日志文件夹的全路径");
+                    System.out.println("你必须指定日志文件夹的正确全路径");
                     return false;
                 }
             } else if ("-out".equals(args[i])) {
                 File file = new File(args[++i]);
-                this.setOutFilePath(args[i]);
+                if (file.isFile()) {
+                    this.setOutFilePath(args[i]);
+                } else {
+                    System.out.println("你必须指定输出文件的正确全路径");
+                    return false;
+                }
             } else if ("-date".equals(args[i])) {
-                this.setDate(args[++i]);
+                if (!this.setDate(args[++i])) {
+                    return false;
+                };
             } else if ("-type".equals(args[i])) {
                 while (i < args.length) {
                     if ((i + 1) >= args.length || args[i + 1].charAt(0) == '-') {
@@ -542,24 +535,28 @@ class CmdArgs {
                         }
                     }
                 }
+            } else if ("-show".equals(args[i])) {
+                this.showArgs = true;
             } else {
                 System.out.println("Unknow args " + args[i]);
             }
         }
-        if (this.logFilePath.length() == 0 || this.outFilePath.length() == 0) {
+        if (this.logFilePath == null || this.outFilePath == null) {
             showRule();
             return false;
         }
+        if (this.showArgs) { showArgs(); }
         return true;
     }
 
     public void showRule() {
         System.out.println("command line example : java InfectStatistic list");
-        System.out.println("                    -log (logFilePath, Must specify");
-        System.out.println("                    -out (logFilePath, Must specify)");
-        System.out.println("                    -date (logFilePath)");
-        System.out.println("                    -type (logFilePath)");
-        System.out.println("                    -province (logFilePath)");
+        System.out.println("                    -log (logFilePath, Must specify)");
+        System.out.println("                    -out (outFilePath, Must specify)");
+        System.out.println("                    -date (yyyy-MM-dd)");
+        System.out.println("                    -type (ip, sp, cure, dead)");
+        System.out.println("                    -province (武汉, 福建, 北京, ...)");
+        System.out.println("                    -show (print args)");
     }
 
     public void showArgs() {

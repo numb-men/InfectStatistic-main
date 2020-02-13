@@ -192,7 +192,7 @@ class CommonUtil {
                 }
             }
         }
-        // sorted for file by date
+        // sort file by date
         fileMap = fileMap.entrySet().stream()
                 .sorted(comparingByValue())
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue,
