@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+//System.out.println("在这里停止了");
 /*
  * 抽象命令接口，用于命令模式的设计
  */
@@ -28,17 +28,18 @@ interface Command
  */
 class ReceiveCommand
 {
-	public void listDate()
+	
+	public void listDate(ListCommand listCommand)
 	{
 		System.out.println("接受到listDate命令，正在执行中......");
 	}
 	
-	public void listType()
+	public void listType(ListCommand listCommand)
 	{
 		System.out.println("接受到listType命令，正在执行中......");
 	}
 	
-	public void listProvince()
+	public void listProvince(ListCommand listCommand)
 	{
 		System.out.println("接受到listProvince命令，正在执行中......");
 	}
@@ -82,34 +83,37 @@ class List implements Command
 	 ********************/
 	 public void execute(String[] command)
 	{		
-		String option = "";
-		String readPath = "";
-		String outPath = "";
-		option = command[1];//存放命令选项
 		
-		switch(option)
+		
+		ListCommand listCommand = new ListCommand(command);
+		
+		switch(listCommand.getOption())
 		{
 			case "-date":
-				readPath = command[4];
-				outPath = command[6];
-				if(!isRightPath.pathRight(readPath)||!isRightPath.outExist(outPath))
+				if(!listCommand.isPathRight()) 
 				{
-					System.out.println("路径错误");
-					break;
-				}
-				rc.listDate();
+					
+					return;
+				}		
+				
+				rc.listDate(listCommand);
 				break;
 				
 			case "-type":
-				rc.listType();
+				
+				rc.listType(listCommand);
 				break;
 				
 			case "-province":
-				rc.listProvince();
+				if(!listCommand.isPathRight()) 
+				{
+					return;
+				}
+				rc.listProvince(listCommand);
 				break;
 				
 			default:
-				System.out.println("没找到list的 " + option + "选项");
+				System.out.println("没找到list的 " + listCommand.getOption() + "选项");
 				break;
 		}
 		
@@ -117,9 +121,9 @@ class List implements Command
 }
 
 /*
- * 路径检测类
+ * 路径类
  */
-class isRightPath
+class Path
 {		
 	
 	/*检验文件路径是否存在*/
@@ -152,6 +156,153 @@ class isRightPath
 	
 	
 }
+
+/*
+ * list命令实体类，用于命令解析后存取命令实体
+ */
+class ListCommand{
+	private String option;
+	private ArrayList<String> parameter;
+	private String readPath;
+	private String outPath;
+	private String[] cmd;
+	
+	public ListCommand(String[] command) 
+	{
+		cmd = new String[command.length];
+		for(int i = 0;i < command.length;i++)
+		{
+			cmd[i] = command[i];		
+		}
+		
+		option = command[1];
+		switch(command[1])
+		{
+		case "-date":
+		{			
+			this.dateParameter();			
+			this.logParameter();
+			this.outParameter();
+			break;
+		}
+		
+		case "-type":
+		{
+			this.typeParameter();			
+			//this.logParameter();
+			//this.outParameter();
+			break;
+		}
+		
+		case "-province":
+		{
+			this.provinceParameter();			
+			this.logParameter();
+			this.outParameter();
+			break;
+		}
+		
+		default:
+			break;
+		}
+	}
+	
+	
+	
+	public String getOption() {
+		return option;
+	}
+	
+	public ArrayList<String> getParameter() {
+		return parameter;
+	}
+	
+	public String getReadPath() {
+		return readPath;
+	}
+	
+	public String getOutPath() {
+		return outPath;
+	}
+	
+	/*验证命令中路径是否正确*/
+	public boolean isPathRight() 
+	{
+		if(!Path.pathRight(readPath)||!Path.outExist(outPath))
+		{
+			return false;			
+		}
+		return true;
+	}
+	
+	public void logParameter()
+	{
+		String start = "-log";
+		int i = 0;
+		while(!start.equals(cmd[i]))
+		{
+			i++;
+		}
+		readPath = cmd[i+1];
+		
+	}
+	
+	public void outParameter()
+	{
+		String start = "-out";
+		int i = 0;
+		while(!start.equals(cmd[i]))
+		{
+			i++;
+		}
+		outPath = cmd[i+1];
+	}
+	
+	public void dateParameter()
+	{
+		int i = 2;
+		parameter = new ArrayList<String>();
+		String end = "-log";
+		
+		/*读取date参数，后可在此进行验证参数格式*/
+		while(!end.equals(cmd[i]) && i < cmd.length)
+		{					
+			parameter.add(cmd[i]);
+			i++;
+		}
+	}
+	
+	public void typeParameter()
+	{
+		int i = 2;
+		parameter = new ArrayList<String>();
+		String end = "-log";
+		
+		/*读取type参数，后可在此进行验证参数格式*/
+		while(!end.equals(cmd[i]) && i < cmd.length)
+		{					
+			parameter.add(cmd[i]);
+			i++;
+		}
+		
+	}
+	
+	public void provinceParameter()
+	{
+		int i = 2;
+		parameter = new ArrayList<String>();
+		String end = "-log";
+		
+		/*读取province参数，后可在此进行验证参数格式*/
+		while(!end.equals(cmd[i]) && i < cmd.length)
+		{					
+			parameter.add(cmd[i]);
+			i++;
+		}
+	}
+}
+
+
 /*
  * 命令行解析类（包含命令的格式验证，以及命令的执行）
  */
@@ -184,7 +335,7 @@ class CommandAnalyze
 	{
 		if(command.length == 0)
 		{
-			System.out.println("没有参数传入");
+			System.out.println("没有命令传入");
 			return;
 		}
 		
@@ -194,7 +345,10 @@ class CommandAnalyze
 		{
 			case "list":				
 				if(!re.isListDate()&&!re.isListType()&&!re.isListProvince())
+				{
+					System.out.println("此list命令格式不正确");
 					return;
+				}
 				sendCommandController.list(command);
 				break;
 				
@@ -225,7 +379,7 @@ class RegularExpression
 	/*判断list -date选项命令格式是否正确*/	 
 	public boolean isListDate()
 	{
-		String cmdCompile = "list\\s+-date\\s+[0-9]{4}-[0-9]{2}-[0-9]{2}\\s+-log\\s+\\S+\\s+-out\\s\\S+\\s*";
+		String cmdCompile = "list\\s+-date\\s+[0-9]{4}-[0-9]{2}-[0-9]{2}\\s+-log\\s+\\S+\\s+-out\\s+\\S+\\s*";
 		Pattern p = Pattern.compile(cmdCompile);
 		Matcher m = p.matcher(str);
 		boolean isValid = m.matches();
@@ -235,7 +389,7 @@ class RegularExpression
 	/*判断list -type选项格式命令是否正确*/	 
 	public boolean isListType()
 	{
-		String cmdCompile = "list\\s+-type\\s*";
+		String cmdCompile = "list\\s+-type\\s+.*-log\\s+\\S+\\s+-out\\s+\\S+\\s*";
 		Pattern p = Pattern.compile(cmdCompile);
 		Matcher m = p.matcher(str);
 		boolean isValid = m.matches();
@@ -245,7 +399,7 @@ class RegularExpression
 	/*判断list -province选项命令格式是否正确*/	 
 	public boolean isListProvince()
 	{
-		String cmdCompile = "list\\s+-province\\s*";
+		String cmdCompile = "list\\s+-province\\s+.*-log\\s+\\S+\\s+-out\\s+\\S+\\s*";
 		Pattern p = Pattern.compile(cmdCompile);
 		Matcher m = p.matcher(str);
 		boolean isValid = m.matches();
