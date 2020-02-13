@@ -25,20 +25,36 @@ public class Lib {
     //初始化数据数组
     ArrayList<province_info> infos = new ArrayList<province_info>();
 
-    public Lib() throws IOException {
+    public Lib(String[] arg) throws IOException {
+        //for(String a:args) System.out.println(a);
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("输入");
+        String in = sc.nextLine();
+        String[] args=in.split(" ");
+
+        String log=new String();//指定日志目录的位置
+        String out=new String();//指定输出文件路径和文件名
+        for (int i=0;i<args.length;i++){
+            if(args[i].startsWith("-")){
+                if(args[i].equals("-log")) log=args[i+1];
+                else if(args[i].equals("-out")) out=args[i+1];
+            }
+
+        }
 
         //读取排序好的文件对象并进行处理
-        for (File file_temp : sort_file()) {
+        for (File file_temp : sort_file(log)) {
            System.out.println(file_temp.getName());
-            read_file(file_temp);//读取指定的文件
+           read_file(file_temp);//读取指定的文件
         }
         summary();
         Arrangement();
-        out();
+        output(out);
     }
     //对指定目录下的文件按照日期进行排序
-    private File[] sort_file() throws IOException {
-        File file=new File("C:\\Users\\58215\\Desktop\\log");//创建指定目录的File对象
+    private File[] sort_file(String log) throws IOException {
+        File file=new File(log);//创建指定目录的File对象
         File[] files = file.listFiles();
         List fileList = Arrays.asList(files);
 
@@ -191,9 +207,15 @@ public class Lib {
     }
 
     //写入文件
-    private void out() throws IOException {
-        File f1=new File("C:\\Users\\58215\\Desktop\\result");//传入文件/目录的路径
-        File f2=new File(f1,"test.txt");//第一个参数为一个目录文件，第二个参数为要在当前f1目录下要创建的文件
+    private void output(String out) throws IOException {
+        String[] temp=out.split("\\\\");
+        String filename=temp[temp.length-1];
+
+        System.out.println(filename);
+
+        String path=out.split(filename)[0];
+        File f1=new File(path);//传入文件/目录的路径
+        File f2=new File(f1,filename);//第一个参数为一个目录文件，第二个参数为要在当前f1目录下要创建的文件
 
         PrintWriter printWriter =new PrintWriter(new FileWriter(f2,true),true);//第二个参数为true，从文件末尾写入 为false则从开头写入
 
