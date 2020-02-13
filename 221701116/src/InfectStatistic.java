@@ -37,7 +37,6 @@ class InfectStatistic {
  * 解析命令行参数
  */
 class CmdArgs{
-	//int i; //将args的下表位置定义为全局变量，便于传递
 	String[] args; //保存传入的命令行
 
 	public String log_path; //日志文件位置
@@ -189,7 +188,7 @@ class CmdArgs{
             //设置lenient为false. 否则SimpleDateFormat会比较宽松地验证日期
         	//比如2018-02-29会被接受，并转换成2018-03-01 
             format.setLenient(false);
-            Date date = format.parse(strDate);
+            format.parse(strDate);
 
             //判断传入的yyyy年-MM月-dd日 字符串是否为数字
             String[] sArray = strDate.split("-");
