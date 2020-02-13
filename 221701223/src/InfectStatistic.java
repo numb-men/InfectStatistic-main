@@ -5,6 +5,25 @@
  * @version xxx
  * @since xxx
  */
+class Te {
+    int value = 0;
+
+    public Te(int i) {
+        value = i;
+    }
+
+    public void upd(int u) {
+        value += u;
+    }
+
+    public int getValue() {
+        return value;
+    }
+}
+
+/**
+ * @author ybn
+ */
 public class InfectStatistic {
     /**
      * Main
@@ -14,9 +33,11 @@ public class InfectStatistic {
     public static void main(String[] args) {
         ArgumentParser parser = new ArgumentParser(args);
         Command command = parser.makeCommand();
-        command.show();
+        command.dump();
         FileTools fileTools = parser.makeFileTools();
-        fileTools.readFile();
+        fileTools.readFile(new RecordContainer() {{
+            init();
+        }});
 
 //        String filename = "2020-02-05.log.txt";
 //        String path = "/Users/ybn/IdeaProjects/InfectStatistic-main/221701223/log";
@@ -31,8 +52,5 @@ public class InfectStatistic {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-//        System.out.println(filename.matches("(19|20)[0-9][0-9]-(0[1-9]|1[0-2])-" +
-//            "(0[1-9]|[12][0-9]|3[01]).log.txt"));
-
     }
 }

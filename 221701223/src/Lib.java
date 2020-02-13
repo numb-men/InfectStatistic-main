@@ -35,6 +35,16 @@ public class Lib {
         "山西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"
     };
 
+    public final static String CHINESE_CHARACTER = "[\u4e00-\u9fa5]";
+
+    public final static String INFECTED = "感染患者";
+    public final static String SUSPECTED = "疑似患者";
+    public final static String CURED = "治愈";
+    public final static String DEAD = "死亡";
+    public final static String CONFIRMED = "确诊感染";
+    public final static String INCREASED = "新增";
+    public final static String REMOVED = "排除";
+
     /**
      * Validate format of date string boolean
      *
@@ -68,11 +78,10 @@ public class Lib {
         }
         return -1;
     }
-}
 
-class RecordElement {
-    int intValue = 0;
-    String stringValue = "";
+    public static int extractNumberFromString(String string) {
+        return Integer.parseInt(string.replaceAll(CHINESE_CHARACTER, "").trim());
+    }
 }
 
 /**
@@ -80,10 +89,10 @@ class RecordElement {
  */
 class Record {
 
-    RecordElement infected;
-    RecordElement suspected;
-    RecordElement cured;
-    RecordElement dead;
+    int infected = 0;
+    int suspected = 0;
+    int cured = 0;
+    int dead = 0;
     private String province = "";
 
     public Record(String province) {
@@ -95,34 +104,30 @@ class Record {
     }
 
     public void updateInfected(int number) {
-        infected.intValue += number;
-        infected.stringValue += number;
+        infected += number;
     }
 
     public void updateSuspected(int number) {
-        suspected.intValue += number;
-        suspected.stringValue += number;
+        suspected += number;
     }
 
     public void updateCured(int number) {
-        cured.intValue += number;
-        cured.stringValue += number;
+        cured += number;
 
         //治愈数增加了，感染数就要同步减少
         updateInfected(-number);
     }
 
     public void updateDead(int number) {
-        dead.intValue += number;
-        dead.stringValue += number;
+        dead += number;
 
         //治愈数增加了，感染数就要同步减少
         updateInfected(-number);
     }
 
-    //    public static String getRecordString(Record record) {
-//
-//    }
+    public void print() {
+        System.out.printf("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", province, infected, suspected, cured, dead);
+    }
 
 
 //    String getRecordString(){
@@ -149,45 +154,108 @@ class RecordContainer {
     }
 
     private void updateRecord(String province, String patientType, int number) {
-        for (int i = 0; i < container.size(); i++) {
-            if (province.trim().equals(container.get(i).getProvince())) {
+        for (Record record : container) {
+            if (province.trim().equals(record.getProvince())) {
                 switch (patientType.trim()) {
-                    case "治愈":
-                        container.get(i).updateCured(number);
+                    case Lib.CURED:
+                        record.updateCured(number);
                         break;
-                    case "死亡":
-
+                    case Lib.DEAD:
+                        record.updateDead(number);
+                        break;
+                    case Lib.CONFIRMED:
+                        record.updateInfected(number);
+                        record.updateSuspected(-number);
                         break;
                     default:
-                        System.err.println("读取log错误，可能含有非法字符。");
+                        System.err.println("3参数log错误，可能含有非法字符。");
                         System.exit(-2);
                         break;
                 }
+                break;
             }
         }
     }
 
-    private void updateRecord(String province, int operation, String patientType, int number) {
-
+    private void updateRecord(String province, String operation, String patientType, int number) {
+        for (Record record : container) {
+            if (province.trim().equals(record.getProvince())) {
+                switch (patientType.trim()) {
+                    case Lib.INFECTED:
+                        if (Lib.INCREASED.equals(operation.trim())) {
+                            record.updateInfected(number);
+                        } else {
+                            System.err.println("更新感染患者出错。");
+                            System.exit(-1);
+                        }
+                        break;
+                    case Lib.SUSPECTED:
+                        switch (operation.trim()) {
+                            case Lib.INCREASED:
+                                record.updateSuspected(number);
+                                break;
+                            case Lib.REMOVED:
+                                record.updateSuspected(-number);
+                                break;
+                            default:
+                                System.err.println("更新疑似患者出错。");
+                                System.exit(-1);
+                                break;
+                        }
+                        break;
+                    default:
+                        System.err.println("四参数log出错");
+                        break;
+                }
+                break;
+            }
+        }
     }
 
-    private void updateRecord(String province1, String patientType, String province2, int number) {
-
+    private void updateRecord(String provinceOut, String patientType, int number, String provinceIn) {
+        for (Record recordOut : container) {
+            for (Record recordIn : container) {
+                if (provinceOut.trim().equals(recordOut.getProvince()) && provinceIn.equals(recordIn.getProvince())) {
+                    switch (patientType) {
+                        case Lib.INFECTED:
+                            recordOut.updateInfected(-number);
+                            recordIn.updateInfected(number);
+                            break;
+                        case Lib.SUSPECTED:
+                            recordOut.updateSuspected(-number);
+                            recordIn.updateSuspected(number);
+                            break;
+                        default:
+                            System.err.println("5参数log出错");
+                            break;
+                    }
+                }
+                break;
+            }
+        }
     }
 
     public void parseSingleLine(String line) {
         //将一行log用空格分隔成字符串数组
-        String[] splited = line.split(" ");
+        String[] log = line.split(" ");
 
-        switch (splited.length) {
+        switch (log.length) {
             case 3:
-
+                updateRecord(log[0], log[1], Lib.extractNumberFromString(log[2]));
                 break;
             case 4:
+                //确诊感染
+                if (Lib.CONFIRMED.equals(log[2].trim())) {
+                    updateRecord(log[0], log[2].trim(), Lib.extractNumberFromString(log[3]));
+                } else {
+                    updateRecord(log[0], log[1], log[2], Lib.extractNumberFromString(log[3]));
+                }
                 break;
             case 5:
+                updateRecord(log[0], log[1], Lib.extractNumberFromString(log[4]), log[3]);
                 break;
             default:
+                System.err.println("日志格式可能有错。");
                 break;
         }
     }
@@ -201,13 +269,10 @@ class RecordContainer {
         return false;
     }
 
-    /**
-     * Gets record by province *
-     *
-     * @param province province
-     */
-    void getRecordByProvince(String[] province) {
-
+    public void printRecords() {
+        for (Record record : container) {
+            record.print();
+        }
     }
 }
 
@@ -409,7 +474,7 @@ class Command {
     /**
      * Show
      */
-    public void show() {
+    public void dump() {
         System.out.println(date);
         for (String s : type) {
             System.out.println(s);
@@ -431,7 +496,6 @@ class FileTools {
      */
     public final static String FILE_NAME_FILTER = "(19|20)[0-9][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]).log.txt";
 
-    public final static String LOG_FILTER_LENGTH_3 = "[\u4e00-\u9fa5]";
     /**
      * Date
      */
@@ -493,7 +557,7 @@ class FileTools {
         }
     }
 
-    public void readFile() {
+    public void readFile(RecordContainer container) {
         try {
             //makeRecordContainer
             for (String fileName : fileList) {
@@ -501,21 +565,21 @@ class FileTools {
                 System.out.println(fileName + ":");
                 String read = null;
                 while ((read = reader.readLine()) != null) {
-                    String[] line = read.split(" ");
-                    /*
-                    recordContainer.parse(line)
-                    */
-                    if ("//".equals(line[0])) {
+                    //String[] line = read.split(" ");
+                    if (read.startsWith("//")) {
                         continue;
                     }
-                    //System.out.println(" length=" + line.length);
-                    for (String o : line) {
-                        System.out.print(o + " ");
-                        //System.out.print(o.replaceAll("[\u4e00-\u9fa5]+", "").trim() + 1 + " ");
-                    }
-                    System.out.println();
+                    container.parseSingleLine(read);
+
+//                    //System.out.println(" length=" + line.length);
+//                    for (String o : line) {
+//                        System.out.print(o + " ");
+//                        //System.out.print(o.replaceAll("[\u4e00-\u9fa5]+", "").trim() + 1 + " ");
+//                    }
+//                    System.out.println();
                 }
             }
+            container.printRecords();
         } catch (IOException e) {
             e.printStackTrace();
         }
