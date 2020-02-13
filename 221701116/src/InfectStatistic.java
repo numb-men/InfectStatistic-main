@@ -161,26 +161,24 @@ class CmdArgs{
 				type[j] = 0;
 			j = 1; //j用来指定类型的顺序输出
 			while(i<args.length) {
-				switch(args[i]) {
-					case "ip" :
-						type[0] = j;
-						j++;
-						break;
-					case "sp":
-						type[1] = j;
-						j++;
-						break;
-					case "cure":
-						type[2] = j;
-						j++;
-						break;
-					case "dead":
-						type[3] = j;
-						j++;
-						break;
-					default:
-						break;
-				}
+				if(args[i].equals("ip")) {
+					type[0] = j;
+					i++;
+					j++;
+				} else if(args[i].equals("sp")) {
+					type[1] = j;
+					i++;
+					j++;
+				} else if(args[i].equals("cure")) {
+					type[2] = j;
+					i++;
+					j++;
+				} else if(args[i].equals("dead")) {
+					type[3] = j;
+					i++;
+					j++;
+				} else
+					break;
 			}
 		}
 		if(m == i) //说明-type后无正确参数
@@ -273,7 +271,7 @@ class FileHandle{
 		for (int i = 0; i < fileList.length; i++) {
 			fileName = fileList[i].getName();
 			if (fileName.compareTo(date) <= 0) {
-				readTxt(log_path + "\\" + fileName);
+				readTxt(log_path + fileName);
 			}
 		}
 	}
@@ -459,7 +457,7 @@ class FileHandle{
     	for(i = 0; i < province_str.length; i++) {
     		if(str_arr[0].equals(province_str[i])) { //第一个字符串为流出省份
     			people[i][1] -= n; //该省份疑似患者减少
-    			if(province[0] != -1) //省份处于未指定状态
+    			if(province[0] == -1) //省份处于未指定状态
     				province[i] = 1; //需要将该省份列出
     		}
     		if(str_arr[3].equals(province_str[i])) { //第四个字符串为流入省份
