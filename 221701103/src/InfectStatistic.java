@@ -15,7 +15,7 @@ import java.util.Arrays;
  * TODO
  *
  * @author 衡天宇
- * @version 5.0
+ * @version 6.0
  * 
  */
 public class InfectStatistic {
@@ -44,6 +44,9 @@ public class InfectStatistic {
     	int hasLog=cmd.hasParam("-log");//获取log路径索引
     	getTopath(args,hasPath);
     	getFrompath(args,hasLog);
+    	if(!isCorformpath(frompath)) {//输入日志所在文件夹有错
+    		return;
+    	}
     	if(hasDate!=-1) {//有指定日期
     		readLog(args[hasDate+1],true);  
     		if(index!=-2&&isWrong==0&&hasPro!=-1) {//有指定省份
@@ -145,6 +148,36 @@ public class InfectStatistic {
     }
     
     /*
+     * 功能：检验日志文件所在文档的路径的正确性
+     * 输入参数：String日志文件的路径
+     *返回值：boolean
+    */
+    static boolean isCorformpath(String path) {
+    	//System.out.println(path.matches("^[A-z]:\\\\(.+?\\\\)*$"));
+    	if(path.matches("^[A-z]:\\\\(.+?\\\\)*$")){//格式正确
+    		File file = new File(path);
+    		if(!file.exists()) {//输入文件夹不存在
+    			System.out.println("输入的日志文件路径不存在，请重新输入命令！");
+    			return false; 
+    		}
+    		else {
+    			String[] filename = file.list();//获取所有日志文件名     	
+    			if(filename.length==0) {//文件夹里没日志
+    				System.out.println("输入的日志文件夹内无内容，请重新输入命令！");
+    				return false;
+    			}
+    			else {
+    				return true;
+    			}
+    		}
+    	}
+    	else {
+    		System.out.println("输入的日志文件路径格式错误，请重新输入命令！");
+    		return false;
+    	}
+    }
+    
+    /*
      * 功能：获取输出文档位置
      * 输入参数：命令行String数组，-out命令所在索引
      *返回值：无
@@ -219,7 +252,7 @@ public class InfectStatistic {
     static int findPot(String date) {
     	File file = new File(frompath);
         String[] filename = file.list();//获取所有日志文件名      
-        if(isBefore(date,filename[0].substring(0,10))) {//输入日期比日志最新还早
+        if(isBefore(date,filename[0].substring(0,10))) {//输入日期比日志最早还早
         	return -2;
         }
     	for(int i=0;i<filename.length-1;i++) {
@@ -566,7 +599,10 @@ public class InfectStatistic {
 			province[selcount]=args[i];
 			selcount++;
 			i++;
-		}    	    	
+		}    	  
+		/*for(i=0;i<selcount;i++) {
+			System.out.print(province[i]+"\n");
+		}*/
     	return province;
     }
     
