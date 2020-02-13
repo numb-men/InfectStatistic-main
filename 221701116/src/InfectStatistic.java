@@ -45,7 +45,7 @@ class CmdArgs{
 	public String out_path; //输出文件位置
 	/*
 	 * 指定日期
-	 * 将指定日期默认设置为今天（即启动程序的该天日期）
+	 * 将指定日期默认设置为当前日期（即启动程序的该天日期）
 	 */
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 	Date d = new Date(System.currentTimeMillis());
@@ -80,7 +80,7 @@ class CmdArgs{
 
 	/*
 	 * 提取命令行中的参数
-	 * @return
+	 * @return boolean
 	 */
 	public boolean extractCmd() {
 		if(!args[0].equals("list")) //判断命令格式开头是否正确
@@ -109,27 +109,31 @@ class CmdArgs{
 	/*
 	 * 得到日志文件位置
 	 * @param i
-	 * @return
+	 * @return int
 	 */
 	public int getLogPath(int i) {
 		if(i < args.length) { //当下标未越界
-			log_path = args[i];
-		}
-		else
+			if(args[i].matches("^[A-z]:\\\\(.+?\\\\)*$")) //判断字符串是不是文件目录路径
+				log_path = args[i];
+			else
+				return -1;
+		} else
 			return -1;
 		return i;
 	}
 
 	/*
-	 * 得到日志文件位置
+	 * 得到输出文件位置
 	 * @param i
-	 * @return
+	 * @return int
 	 */
 	public int getOutPath(int i) {
 		if(i < args.length) { //当下标未越界
-			out_path = args[i];
-		}
-		else
+			if(args[i].matches("^[A-z]:\\\\(\\S+)+(\\.txt)$")) //判断字符串是不是txt文件路径
+				out_path = args[i];
+			else
+				return -1;
+		} else
 			return -1;
 		return i;
 	}
@@ -137,16 +141,47 @@ class CmdArgs{
 	/*
 	 * 得到指定日期
 	 * @param i
-	 * @return
+	 * @return int
 	 */
 	public int getDate(int i) {
 		if(i < args.length) { //当下标未越界
-			date = args[i];
-		}
-		else
+			if(isValidDate(args[i])) { //判断是否是合法日期格式：yyyy-MM-dd
+				if(date.compareTo(args[i]) >= 0) //判断日期是否超过当前日期
+					date = args[i];
+				else
+					return -1;
+			} else
+				return -1;
+		} else
 			return -1;
 		return i;
 	}
+	
+	/*
+	 * 判断是否是合法日期格式：yyyy-MM-dd
+	 * @param strDate
+	 */
+	public static boolean isValidDate(String strDate) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            //设置lenient为false. 否则SimpleDateFormat会比较宽松地验证日期
+        	//比如2018-02-29会被接受，并转换成2018-03-01 
+            format.setLenient(false);
+            Date date = format.parse(strDate);
+
+            //判断传入的yyyy年-MM月-dd日 字符串是否为数字
+            String[] sArray = strDate.split("-");
+            for (String s : sArray) {
+                boolean isNum = s.matches("[0-9]+");
+                if (!isNum) {
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
 
 	/*
 	 * 得到指定类型(type参数可能有多个)
