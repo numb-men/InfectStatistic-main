@@ -2,11 +2,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.file.*;
 
 /**
@@ -22,6 +26,8 @@ public class InfectStatistic
 	// LogLoction仅用于本机应用程序测试，命令行测试将注释赋值
 	public static String DeadLine = "2020-01-23";
 	// DeadLine仅用于本机应用程序测试，命令行测试将注释赋值
+	public static String OutputLocation = "D:\\Java\\InfectStatistic-main\\example\\Result\\" + DeadLine + "out.txt";
+	// OutputLocation仅用于本机应用程序测试，命令行测试将注释赋值
     public static void main(String[] args) 
     {
     	/*
@@ -35,12 +41,14 @@ public class InfectStatistic
         System.out.println("helloworld");
         */
     	//文件处理模块测试
-    	FileHandleTool.HandleFile();
+    	/*FileHandleTool.HandleFile();*/
     	
     	/*数据获取模块测试
     	DataGet a = new DataGet();
     	a.getData("湖北省 新增 感染患者 15人");
     	*/
+    	
+    	OutputControlTool.ProductInfectStatistic();
     }
 }
 
@@ -110,7 +118,16 @@ class DateCompareTool
  */
 class FileHandleTool
 {
-	public static void HandleFile()
+	public static List<String> OutResult = new ArrayList<String>();
+
+	/**
+	 * HandleFile
+	 * @description 用于读取文件内容，并调用数据处理和统计方法，按行处理文件
+	 * @author 221701206_是九啊
+	 * @version 1.0
+	 * @since 2020.2.12
+	 */
+	public static List<String> HandleFile()
 	{
 		List<String> FileNames = DateCompareTool.getFileName(InfectStatistic.DeadLine);
 		StatisticResult Result = new StatisticResult();
@@ -156,13 +173,14 @@ class FileHandleTool
 			if(Result.StatisticLink.get(i).Comfirmed != 0 || Result.StatisticLink.get(i).Suspected != 0 
 					|| Result.StatisticLink.get(i).Healed != 0 || Result.StatisticLink.get(i).Dead != 0)
 			{
-				System.out.println(Result.ProvinceIndex.get(i) + " 感染患者" + Result.StatisticLink.get(i).Comfirmed + "人"
+				OutResult.add(Result.ProvinceIndex.get(i) + " 感染患者" + Result.StatisticLink.get(i).Comfirmed + "人"
 						            + " 疑似患者" + Result.StatisticLink.get(i).Suspected + "人"
 						            + " 治愈" + Result.StatisticLink.get(i).Healed + "人"
 						            + " 死亡" + Result.StatisticLink.get(i).Dead + "人");
 			}
-			
 		}
+		OutResult.add("// 该文档并非真实数据，仅供测试使用");
+		return OutResult;
 	}
 }
 
@@ -266,7 +284,6 @@ class DataGet
 
 /**
  * StatisticResult
- * TODO
  * @description 统计数字实体类
  * @author 221701206_是九啊
  * @version 1.0
@@ -322,6 +339,14 @@ class StatisticResult
 		ProvinceIndex.add("云南");
 		ProvinceIndex.add("浙江");
 	}
+	
+	/**
+	 * Statistic
+	 * @description 统计，产生结果
+	 * @author 221701206_是九啊
+	 * @version 1.0
+	 * @since 2020.2.12
+	 */
 	public void Statistic(DataGet data)
 	{
 		if(data.Type == 1)
@@ -388,14 +413,56 @@ class StatisticResult
 /**
  * OutputControl
  * TODO
- * @description 输出控制类
+ * @description 输出控制工具类
  * @author 221701206_是九啊
  * @version 1.0
  * @since 2020.2.10
  */
-class OutputControl
+class OutputControlTool
 {
-	
+	/**
+	 * ProductInfectStatistic
+	 * @description 对结果进行文件输出重定向
+	 * @author 221701206_是九啊
+	 * @version 1.0
+	 * @since 2020.2.13
+	 */
+	public static void ProductInfectStatistic()
+	{
+		File TargetFile = new File(InfectStatistic.OutputLocation);
+		if(TargetFile.exists())
+		{
+			System.out.println("该日志文档已存在，请修改目标文件名");
+			return ;
+		}
+		else
+		{
+			try
+			{    
+				TargetFile.createNewFile();    
+			} 
+			catch (IOException e) 
+			{     
+				System.err.println("该目标文件无法新建，请重试");
+				e.printStackTrace();    
+			}       
+		}
+		List<String> Result = FileHandleTool.HandleFile();
+		try
+		{
+			OutputStream out = new FileOutputStream(TargetFile);
+            BufferedWriter rd = new BufferedWriter(new OutputStreamWriter(out,"utf-8"));
+            for(int i = 0; i < Result.size() ; i ++)
+    	         rd.write(Result.get(i) + "\n");
+	         rd.close();
+	         out.close();
+		}
+		catch(IOException e){
+			System.err.println("文件写入错误");
+            e.printStackTrace();
+        }
+		System.out.println(InfectStatistic.OutputLocation + "文件已生成");
+	}
 }
 
 /*
