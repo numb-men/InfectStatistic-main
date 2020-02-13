@@ -17,13 +17,12 @@ import java.text.SimpleDateFormat;
 class InfectStatistic {
     public static void main(String[] args) {
     	if (args.length == 0) {  
-            System.out.println("命令行格式有误");  
+    		System.out.println("命令行格式有误——未输入参数");  
             return;
         }
     	CmdArgs cmdargs = new CmdArgs(args);
     	boolean b = cmdargs.extractCmd();
     	if(b == false) {
-    		System.out.println("命令行格式有误");
     		return;
     	}
     	FileHandle filehandle = new FileHandle(cmdargs.log_path,
@@ -83,25 +82,48 @@ class CmdArgs{
 	 * @return boolean
 	 */
 	public boolean extractCmd() {
-		if(!args[0].equals("list")) //判断命令格式开头是否正确
+		if(!args[0].equals("list")) {//判断命令格式开头是否正确
+			System.out.println("命令行格式有误——开头非list错误");
 			return false;
+		}
 
 		int i;
 
 		for(i = 1; i < args.length; i++) {
-			if(args[i].equals("-log"))
+			if(args[i].equals("-log")) { //读取到-log参数
 				i = getLogPath(++i);
-			else if(args[i].equals("-out"))
+				if(i == -1) { //说明上述步骤中发现命令行出错
+					System.out.println("命令行格式有误——日志路径参数错误");
+					return false;
+				}
+			} else if(args[i].equals("-out")) { //读取到-out参数
 				i= getOutPath(++i);
-			else if(args[i].equals("-date")) 
+				if(i == -1) { //说明上述步骤中发现命令行出错
+					System.out.println("命令行格式有误——输出路径参数错误");
+					return false;
+				}
+			} else if(args[i].equals("-date")) { //读取到-date参数
 				i= getDate(++i);
-			else if(args[i].equals("-type"))
+				if(i == -1) { //说明上述步骤中发现命令行出错
+					System.out.println("命令行格式有误——日期参数错误");
+					return false;
+				}
+			} else if(args[i].equals("-type")) { //读取到-type参数
 				i = getType(++i); 
-			else if(args[i].equals("-province"))
+				if(i == -1) { //说明上述步骤中发现命令行出错
+					System.out.println("命令行格式有误——指定类型参数错误");
+					return false;
+				}
+			} else if(args[i].equals("-province")) { //读取到-province参数
 				i = getProvince(++i);
-
-			if(i == -1) //说明上述步骤中发现命令行出错
+				if(i == -1) { //说明上述步骤中发现命令行出错
+					System.out.println("命令行格式有误——指定省份参数错误");
+					return false;
+				}
+			} else { //未读取到以上参数
+				System.out.println("命令行格式有误——输入非以上参数错误");
 				return false;
+			}
 		}
 		return true;
 	}
