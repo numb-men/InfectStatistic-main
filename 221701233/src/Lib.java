@@ -602,6 +602,22 @@ class Region {
         return name;
     }
 
+    public void setInfected(int infected) {
+        this.infected = infected;
+    }
+
+    public void setSuspected(int suspected) {
+        this.suspected = suspected;
+    }
+
+    public void setDead(int dead) {
+        this.dead = dead;
+    }
+
+    public void setCure(int cure) {
+        this.cure = cure;
+    }
+
     /**
      * 增加人数
      *
@@ -703,6 +719,31 @@ class Region {
 
         return this.getName().equals(((Region) obj).getName());
     }
+
+    /**
+     * 统计指定类型的人员数量
+     *
+     * @param type 指定类型列表
+     * @return 包含指定类型人员统计结果的字符串，格式“[省] [人员类型]x人 [人员类型]y人..”
+     */
+    public String toStringWithCertainType(List<String> type) {
+        StringBuilder string = new StringBuilder(this.getName());
+        for (String tp : type) {
+            if (tp.equalsIgnoreCase("ip")) {
+                string.append(String.format(" 感染患者%d人", this.getInfected()));
+            }
+            if (tp.equalsIgnoreCase("sp")) {
+                string.append(String.format(" 疑似患者%d人", this.getSuspected()));
+            }
+            if (tp.equalsIgnoreCase("cure")) {
+                string.append(String.format(" 治愈%d人", this.getCure()));
+            }
+            if (tp.equalsIgnoreCase("dead")) {
+                string.append(String.format(" 死亡%d人", this.getDead()));
+            }
+        }
+        return "" + string;
+    }
 }
 
 /**
@@ -730,8 +771,12 @@ class StatisticResult {
         return newRg;
     }
 
+    /**
+     * 统计所有地区的疫情状况
+     *
+     * @param logLines 读取到的日志
+     */
     public static void doStatistic(List<String> logLines) {
-        // 统计所有地区的疫情状况
         Add add = new Add(null);
         FlowIn flowIn = new FlowIn(add);
         DeadOrCure deadOrCure = new DeadOrCure(flowIn);
@@ -741,6 +786,37 @@ class StatisticResult {
         for (String logLine : logLines) {
             exclusive.passOn(RegexUtil.logType(logLine), logLine);
         }
+    }
+
+    public static Region All() {
+        Region allRegions = new Region("全国");
+        for (Region rg : regions) {
+            allRegions.setInfected(rg.getInfected() + allRegions.getInfected());
+            allRegions.setSuspected(rg.getSuspected() + allRegions.getSuspected());
+            allRegions.setCure(rg.getCure() + allRegions.getCure());
+            allRegions.setDead(rg.getDead() + allRegions.getDead());
+        }
+        return allRegions;
+    }
+
+    public static List<String> filterTypeAndProvince(List<String> type, List<String> province) {
+        List<String> result = new ArrayList<>();
+
+        // -province 为空
+        if (province.size() == 0) {
+            // 添加全国统计
+            result.add(All().toStringWithCertainType(type));
+            // 添加各省统计
+            for (Region rg : regions) {
+                result.add(rg.toStringWithCertainType(type));
+            }
+        }
+
+        for (String prv : province) {
+            result.add(get(prv).toStringWithCertainType(type));
+        }
+
+        return result;
     }
 }
 
@@ -756,11 +832,12 @@ class LogParser {
      * @return
      */
     public static List<String> parse(ListCommandUtil util) {
-
-        // TODO 按要求生成待输出的日志内容
+        StatisticResult.doStatistic(util.log);
+        List<String> results = StatisticResult.filterTypeAndProvince(util.type, util.province);
 
         // TODO 按照地区字典序排列
 
-        return null;
+        return results;
     }
 }
+
