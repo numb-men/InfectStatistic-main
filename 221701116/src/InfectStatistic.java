@@ -8,53 +8,56 @@
  */
 class InfectStatistic {
     public static void main(String[] args) {
-        if (args.length == 0) {  
-            System.out.println("å‘½ä»¤è¡Œæ ¼å¼æœ‰è¯¯");  
+    	if (args.length == 0) {  
+            System.out.println("ÃüÁîĞĞ¸ñÊ½ÓĞÎó");  
             return;
         }
     	CmdArgs cmdargs = new CmdArgs(args);
     	boolean b = cmdargs.extractCmd();
     	if(b == false) {
-    		System.out.println("å‘½ä»¤è¡Œæ ¼å¼æœ‰è¯¯");
+    		System.out.println("ÃüÁîĞĞ¸ñÊ½ÓĞÎó");
     		return;
     	}
-
+    	FileHandle filehandle = new FileHandle(cmdargs.log_path,
+    			cmdargs.out_path,cmdargs.date,cmdargs.type,cmdargs.province);
+    	filehandle.getFileList();
+    	filehandle.writeTxt();
     }
 }
 
 
 /*
- * è§£æå‘½ä»¤è¡Œå‚æ•°
+ * ½âÎöÃüÁîĞĞ²ÎÊı
  */
 class CmdArgs{
-	//int i; //å°†argsçš„ä¸‹è¡¨ä½ç½®å®šä¹‰ä¸ºå…¨å±€å˜é‡ï¼Œä¾¿äºä¼ é€’
-	String[] args; //ä¿å­˜ä¼ å…¥çš„å‘½ä»¤è¡Œ
+	//int i; //½«argsµÄÏÂ±íÎ»ÖÃ¶¨ÒåÎªÈ«¾Ö±äÁ¿£¬±ãÓÚ´«µİ
+	String[] args; //±£´æ´«ÈëµÄÃüÁîĞĞ
 
-	String log_path; //æ—¥å¿—æ–‡ä»¶ä½ç½®
-	String out_path; //è¾“å‡ºæ–‡ä»¶ä½ç½®
-	String date; //æŒ‡å®šæ—¥æœŸ
-
-	/*
-	 * æŒ‡å®šç±»å‹(æŒ‰é¡ºåºåˆ†åˆ«ä¸ºip,sp,cure,dead)
-	 * å½“æ•°å€¼ä¸º1æ—¶è¡¨ç¤ºéœ€è¦åˆ—å‡ºï¼Œä¸º0æ—¶æ— éœ€åˆ—å‡º
-	 */
-	int[] type = {1,1,1,1};
+	public String log_path; //ÈÕÖ¾ÎÄ¼şÎ»ÖÃ
+	public String out_path; //Êä³öÎÄ¼şÎ»ÖÃ
+	public String date; //Ö¸¶¨ÈÕÆÚ
 
 	/*
-	 * æŒ‡å®šçœä»½(æŒ‰çœä»½åç§°æ’åºï¼ˆç¬¬ä¸€ä½ä¸ºå…¨å›½ï¼‰)
+	 * Ö¸¶¨ÀàĞÍ(°´Ë³Ğò·Ö±ğÎªip,sp,cure,dead)
+	 * µ±ÊıÖµÎª1Ê±±íÊ¾ĞèÒªÁĞ³ö£¬Îª0Ê±ÎŞĞèÁĞ³ö
 	 */
-	int province[] = new int[35];
+	public int[] type = {1,1,1,1};
+
+	/*
+	 * Ö¸¶¨Ê¡·İ(°´Ê¡·İÃû³ÆÅÅĞò£¨µÚÒ»Î»ÎªÈ«¹ú£©)
+	 */
+	public int[] province = new int[35];
 
 	CmdArgs(String[] args_str){
 		args = args_str;
 	}
 
 	/*
-	 * æå–å‘½ä»¤è¡Œä¸­çš„å‚æ•°
+	 * ÌáÈ¡ÃüÁîĞĞÖĞµÄ²ÎÊı
 	 * @return
 	 */
 	public boolean extractCmd() {
-		if(!args[0].equals("list")) //åˆ¤æ–­å‘½ä»¤æ ¼å¼å¼€å¤´æ˜¯å¦æ­£ç¡®
+		if(!args[0].equals("list")) //ÅĞ¶ÏÃüÁî¸ñÊ½¿ªÍ·ÊÇ·ñÕıÈ·
 			return false;
 
 		int i;
@@ -71,14 +74,14 @@ class CmdArgs{
 			else if(args[i].equals("-province"))
 				i = getProvince(++i);
 
-			if(i == -1) //è¯´æ˜ä¸Šè¿°æ­¥éª¤ä¸­å‘ç°å‘½ä»¤è¡Œå‡ºé”™
+			if(i == -1) //ËµÃ÷ÉÏÊö²½ÖèÖĞ·¢ÏÖÃüÁîĞĞ³ö´í
 				return false;
 		}
 		return true;
 	}
 
 	/*
-	 * å¾—åˆ°æ—¥å¿—æ–‡ä»¶ä½ç½®
+	 * µÃµ½ÈÕÖ¾ÎÄ¼şÎ»ÖÃ
 	 * @param i
 	 * @return
 	 */
@@ -93,7 +96,7 @@ class CmdArgs{
 	}
 
 	/*
-	 * å¾—åˆ°æ—¥å¿—æ–‡ä»¶ä½ç½®
+	 * µÃµ½ÈÕÖ¾ÎÄ¼şÎ»ÖÃ
 	 * @param i
 	 * @return
 	 */
@@ -108,7 +111,7 @@ class CmdArgs{
 	}
 
 	/*
-	 * å¾—åˆ°æŒ‡å®šæ—¥æœŸ
+	 * µÃµ½Ö¸¶¨ÈÕÆÚ
 	 * @param i
 	 * @return
 	 */
@@ -123,7 +126,7 @@ class CmdArgs{
 	}
 
 	/*
-	 * å¾—åˆ°æŒ‡å®šç±»å‹(typeå‚æ•°å¯èƒ½æœ‰å¤šä¸ª)
+	 * µÃµ½Ö¸¶¨ÀàĞÍ(type²ÎÊı¿ÉÄÜÓĞ¶à¸ö)
 	 * @param i
 	 * @return int
 	 */
@@ -157,13 +160,13 @@ class CmdArgs{
 				}
 			}
 		}
-		if(m == i) //è¯´æ˜-typeåæ— æ­£ç¡®å‚æ•°
+		if(m == i) //ËµÃ÷-typeºóÎŞÕıÈ·²ÎÊı
 			return -1;
-		return (j - 1); //æ¥ä¸‹æ¥ä¸ä¸º-typeçš„å‚æ•°ï¼Œæˆ–è¶Šç•Œ
+		return (j - 1); //½ÓÏÂÀ´²»Îª-typeµÄ²ÎÊı£¬»òÔ½½ç
 	}
 
 	/*
-	 * å¾—åˆ°æŒ‡å®šçœä»½(provinceå‚æ•°å¯èƒ½æœ‰å¤šä¸ª)
+	 * µÃµ½Ö¸¶¨Ê¡·İ(province²ÎÊı¿ÉÄÜÓĞ¶à¸ö)
 	 * @param i
 	 * @return int
 	 */
@@ -172,10 +175,293 @@ class CmdArgs{
 
 		if(i < args.length)
 		{
-			//æŒ‡å®šçœä»½
+			//Ö¸¶¨Ê¡·İ
 		}
-		if(m == i) //è¯´æ˜-provinceåæ— æ­£ç¡®å‚æ•°
+		if(m == i) //ËµÃ÷-provinceºóÎŞÕıÈ·²ÎÊı
 			return -1;
 		return i;
 	}
 }
+
+/*
+ * ´¦ÀíÎÄ¼ş£¨¶ÁÈ¡Ä¿Â¼ÏÂµÄÎÄ¼ş£¬´ò¿ªÎÄ¼ş£¬¶ÁÈ¡ÄÚÈİ£¬Êä³öÄÚÈİµ½ÎÄ¼ş£©
+ */
+class FileHandle{
+	public String log_path; //ÈÕÖ¾ÎÄ¼şÎ»ÖÃ
+	public String out_path; //Êä³öÎÄ¼şÎ»ÖÃ
+	public String date; //Ö¸¶¨ÈÕÆÚ
+
+	/*
+	 * Ö¸¶¨ÀàĞÍ(°´Ë³Ğò·Ö±ğÎªip,sp,cure,dead)
+	 * µ±ÊıÖµÎª1Ê±±íÊ¾ĞèÒªÁĞ³ö£¬Îª0Ê±ÎŞĞèÁĞ³ö
+	 */
+	public int[] type = {1,1,1,1};
+
+	/*
+	 * Ö¸¶¨Ê¡·İ(°´Ê¡·İÃû³ÆÆ´ÒôÅÅĞò£¨µÚÒ»Î»ÎªÈ«¹ú£©)
+	 * µ±ÊıÖµÎª1Ê±±íÊ¾ĞèÒªÁĞ³ö£¬Îª0Ê±ÎŞĞèÁĞ³ö
+	 */
+	public int[] province = new int[35];
+	public String[] fileName = new String[9]; //´æ´¢Ö¸¶¨ÈÕÆÚÏÂµÄÎÄ¼şÃû
+
+	/*
+	 * Ê¡·İÁĞ±í(°´Ê¡·İÃû³ÆÆ´ÒôÅÅĞò£¨µÚÒ»Î»ÎªÈ«¹ú£©)
+	 */
+	public String[] province_str = {"È«¹ú", "°²»Õ", "°ÄÃÅ" ,"±±¾©", "ÖØÇì", "¸£½¨","¸ÊËà",
+			"¹ã¶«", "¹ãÎ÷", "¹óÖİ", "º£ÄÏ", "ºÓ±±", "ºÓÄÏ", "ºÚÁú½­", "ºş±±", "ºşÄÏ", "¼ªÁÖ",
+			"½­ËÕ", "½­Î÷", "ÁÉÄş", "ÄÚÃÉ¹Å", "ÄşÏÄ", "Çàº£", "É½¶«", "É½Î÷", "ÉÂÎ÷", "ÉÏº£",
+			"ËÄ´¨", "Ì¨Íå", "Ìì½ò", "Î÷²Ø", "Ïã¸Û", "ĞÂ½®", "ÔÆÄÏ", "Õã½­"};
+	/*
+	 * ÈËÊıÍ³¼Æ(Ò»Î¬´ú±íÊ¡·İÅÅĞò£¬¶şÎ¬±íÊ¾ÀàĞÍÅÅĞò)
+	 * °´Ê¡·İÃû³ÆÆ´ÒôÅÅĞò£¨µÚÒ»Î»ÎªÈ«¹ú£©
+	 * ÀàĞÍ°´Ë³Ğò·Ö±ğÎªip,sp,cure,dead
+	 */
+	public int[][] people = new int[35][4]; 
+
+	FileHandle(String log, String out, String d, int[] t, int[] p) {
+		log_path = log;
+		out_path = out;
+		date = d + ".log.txt"; //ÈÕÖ¾ÎÄ¼şÃûºóÓĞ.log.txt£¬ÔÚ´Ë¼ÓÉÏ±ãÓÚ±È½Ï
+		type = t;
+		province = p;
+	}
+
+	/*
+	 * ¶ÁÈ¡Ö¸¶¨Â·¾¶ÏÂµÄÎÄ¼şÃûºÍÄ¿Â¼Ãû
+	 */
+	public void getFileList() {
+		File file = new File(log_path);
+		File[] fileList = file.listFiles();
+		String fileName;
+
+		for (int i = 0; i < fileList.length; i++) {
+			fileName = fileList[i].getName();
+			if (fileName.compareTo(date) <= 0) {
+				readTxt(log_path + "\\" + fileName);
+			}
+		}
+	}
+
+
+	/*
+	 * ¶ÁÈ¡ÎÄ¼şÄÚÈİ
+	 * @param filePath
+	 */
+    public void readTxt(String filePath) {
+        try {
+            BufferedReader bfr = new BufferedReader(new InputStreamReader(
+            		new FileInputStream(new File(filePath)), "UTF-8"));
+            String lineTxt = null;
+
+            while ((lineTxt = bfr.readLine()) != null) {
+            	if(!lineTxt.startsWith("//"))
+            		textProcessing(lineTxt);
+            }
+            bfr.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+     * ÎÄ±¾´¦Àí
+     * @param string
+     */
+    public void textProcessing(String string) {
+    	String pattern1 = "(\\S+) ĞÂÔö ¸ĞÈ¾»¼Õß (\\d+)ÈË";
+    	String pattern2 = "(\\S+) ĞÂÔö ÒÉËÆ»¼Õß (\\d+)ÈË";
+    	String pattern3 = "(\\S+) ÖÎÓú (\\d+)ÈË";
+    	String pattern4 = "(\\S+) ËÀÍö (\\d+)ÈË";
+    	String pattern5 = "(\\S+) ¸ĞÈ¾»¼Õß Á÷Èë (\\S+) (\\d+)ÈË";
+    	String pattern6 = "(\\S+) ÒÉËÆ»¼Õß Á÷Èë (\\S+) (\\d+)ÈË";
+    	String pattern7 = "(\\S+) ÒÉËÆ»¼Õß È·Õï¸ĞÈ¾ (\\d+)ÈË";
+    	String pattern8 = "(\\S+) ÅÅ³ı ÒÉËÆ»¼Õß (\\d+)ÈË";
+    	boolean isMatch1 = Pattern.matches(pattern1, string);
+    	boolean isMatch2 = Pattern.matches(pattern2, string);
+    	boolean isMatch3 = Pattern.matches(pattern3, string);
+    	boolean isMatch4 = Pattern.matches(pattern4, string);
+    	boolean isMatch5 = Pattern.matches(pattern5, string);
+    	boolean isMatch6 = Pattern.matches(pattern6, string);
+    	boolean isMatch7 = Pattern.matches(pattern7, string);
+    	boolean isMatch8 = Pattern.matches(pattern8, string);
+
+    	if(isMatch1) { //ĞÂÔö ¸ĞÈ¾»¼Õß´¦Àí
+    		addIP(string);
+    	} else if(isMatch2){ //ĞÂÔö ÒÉËÆ»¼Õß´¦Àí
+    		addSP(string);
+    	} else if(isMatch3){ //ĞÂÔö ÖÎÓú»¼Õß´¦Àí
+    		addCure(string);
+    	} else if(isMatch4){ //ĞÂÔö ËÀÍö»¼Õß´¦Àí
+    		addDead(string);
+    	} else if(isMatch5){ //¸ĞÈ¾»¼Õß Á÷Èë´¦Àí
+    		flowIP(string);
+    	} else if(isMatch6){ //ÒÉËÆ»¼Õß Á÷Èë´¦Àí
+    		flowSP(string);
+    	} else if(isMatch7){ //ÒÉËÆ»¼Õß È·Õï¸ĞÈ¾´¦Àí
+    		diagnosisSP(string);
+    	} else if(isMatch8){ //ÅÅ³ı ÒÉËÆ»¼Õß´¦Àí
+    		removeSP(string);
+    	}
+    }
+
+    /*
+     * ĞÂÔö ¸ĞÈ¾»¼Õß´¦Àí
+     * @param string
+     */
+    public void addIP(String string) {
+    	String[] str_arr = string.split(" "); //½«×Ö·û´®ÒÔ¿Õ¸ñ·Ö¸îÎª¶à¸ö×Ö·û´®
+    	int i;
+    	int n = Integer.valueOf(str_arr[3].replace("ÈË", ""));//½«ÈËÇ°µÄÊı×Ö´Ó×Ö·û´®ÀàĞÍ×ª»¯ÎªintÀàĞÍ
+
+    	for(i = 0; i < province_str.length; i++) {
+    		if(str_arr[0].equals(province_str[i])) { //µÚÒ»¸ö×Ö·û´®ÎªÊ¡·İ
+    			people[0][0] += n; //È«¹ú¸ĞÈ¾»¼ÕßÈËÊıÔö¼Ó
+    			people[i][0] += n; //¸ÃÊ¡·İ¸ĞÈ¾»¼ÕßÈËÊıÔö¼Ó
+    			break;
+    		}
+    	}
+    }
+
+    /*
+     * ĞÂÔö ÒÉËÆ»¼Õß´¦Àí
+     * @param string
+     */
+    public void addSP(String string) {
+    	String[] str_arr = string.split(" "); //½«×Ö·û´®ÒÔ¿Õ¸ñ·Ö¸îÎª¶à¸ö×Ö·û´®
+    	int i;
+    	int n = Integer.valueOf(str_arr[3].replace("ÈË", ""));//½«ÈËÇ°µÄÊı×Ö´Ó×Ö·û´®ÀàĞÍ×ª»¯ÎªintÀàĞÍ
+
+    	for(i = 0; i < province_str.length; i++) {
+    		if(str_arr[0].equals(province_str[i])) { //µÚÒ»¸ö×Ö·û´®ÎªÊ¡·İ
+    			people[0][1] += n; //È«¹úÒÉËÆ»¼ÕßÈËÊıÔö¼Ó
+    			people[i][1] += n; //¸ÃÊ¡·İÒÉËÆ»¼ÕßÈËÊıÔö¼Ó
+    			break;
+    		}
+    	}
+    }
+
+    /*
+     * ĞÂÔö ÖÎÓú»¼Õß´¦Àí
+     * @param string
+     */
+    public void addCure(String string) {
+    	String[] str_arr = string.split(" "); //½«×Ö·û´®ÒÔ¿Õ¸ñ·Ö¸îÎª¶à¸ö×Ö·û´®
+    	int i;
+    	int n = Integer.valueOf(str_arr[2].replace("ÈË", ""));//½«ÈËÇ°µÄÊı×Ö´Ó×Ö·û´®ÀàĞÍ×ª»¯ÎªintÀàĞÍ
+
+    	for(i = 0; i < province_str.length; i++) { 
+    		if(str_arr[0].equals(province_str[i])) { //µÚÒ»¸ö×Ö·û´®ÎªÊ¡·İ
+    			people[0][2] += n; //È«¹úÖÎÓúÈËÊıÔö¼Ó
+    			people[0][0] -= n; //È«¹ú¸ĞÈ¾»¼ÕßÈËÊı¼õÉÙ
+    			people[i][2] += n; //¸ÃÊ¡·İÖÎÓúÈËÊıÔö¼Ó
+    			people[i][0] -= n; //¸ÃÊ¡·İ¸ĞÈ¾»¼ÕßÈËÊı¼õÉÙ
+    			break;
+    		}
+    	}
+    }
+
+    /*
+     * ĞÂÔö ËÀÍö»¼Õß´¦Àí
+     * @param string
+     */
+    public void addDead(String string) {
+    	String[] str_arr = string.split(" "); //½«×Ö·û´®ÒÔ¿Õ¸ñ·Ö¸îÎª¶à¸ö×Ö·û´®
+    	int i;
+    	int n = Integer.valueOf(str_arr[2].replace("ÈË", ""));//½«ÈËÇ°µÄÊı×Ö´Ó×Ö·û´®ÀàĞÍ×ª»¯ÎªintÀàĞÍ
+
+    	for(i = 0; i < province_str.length; i++) {
+    		if(str_arr[0].equals(province_str[i])) { //µÚÒ»¸ö×Ö·û´®ÎªÊ¡·İ
+    			people[0][3] += n; //È«¹úËÀÍöÈËÊıÔö¼Ó
+    			people[0][0] -= n; //È«¹ú¸ĞÈ¾»¼ÕßÈËÊı¼õÉÙ
+    			people[i][3] += n; //¸ÃÊ¡·İËÀÍöÈËÊıÔö¼Ó
+    			people[i][0] -= n; //¸ÃÊ¡·İ¸ĞÈ¾»¼ÕßÈËÊı¼õÉÙ
+    			break;
+    		}
+    	}
+    }
+
+    /*
+     * ¸ĞÈ¾»¼Õß Á÷Èë´¦Àí
+     * @param string
+     */
+    public void flowIP(String string) {
+    	String[] str_arr = string.split(" "); //½«×Ö·û´®ÒÔ¿Õ¸ñ·Ö¸îÎª¶à¸ö×Ö·û´®
+    	int i;
+    	int n = Integer.valueOf(str_arr[4].replace("ÈË", ""));//½«ÈËÇ°µÄÊı×Ö´Ó×Ö·û´®ÀàĞÍ×ª»¯ÎªintÀàĞÍ
+
+    	for(i = 0; i < province_str.length; i++) {
+    		if(str_arr[0].equals(province_str[i])) //µÚÒ»¸ö×Ö·û´®ÎªÁ÷³öÊ¡·İ
+    			people[i][0] -= n; //¸ÃÊ¡·İ¸ĞÈ¾»¼ÕßÈËÊı¼õÉÙ
+    		if(str_arr[3].equals(province_str[i])) //µÚËÄ¸ö×Ö·û´®ÎªÁ÷ÈëÊ¡·İ
+    			people[i][0] += n; //¸ÃÊ¡·İ¸ĞÈ¾»¼ÕßÈËÊıÔö¼Ó
+    	}
+    }
+
+    /*
+     * ÒÉËÆ»¼Õß Á÷Èë´¦Àí
+     * @param string
+     */
+    public void flowSP(String string) {
+    	String[] str_arr = string.split(" "); //½«×Ö·û´®ÒÔ¿Õ¸ñ·Ö¸îÎª¶à¸ö×Ö·û´®
+    	int i;
+    	int n = Integer.valueOf(str_arr[4].replace("ÈË", ""));//½«ÈËÇ°µÄÊı×Ö´Ó×Ö·û´®ÀàĞÍ×ª»¯ÎªintÀàĞÍ
+
+    	for(i = 0; i < province_str.length; i++) {
+    		if(str_arr[0].equals(province_str[i])) //µÚÒ»¸ö×Ö·û´®ÎªÁ÷³öÊ¡·İ
+    			people[i][1] -= n; //¸ÃÊ¡·İÒÉËÆ»¼Õß¼õÉÙ
+    		if(str_arr[3].equals(province_str[i])) //µÚËÄ¸ö×Ö·û´®ÎªÁ÷ÈëÊ¡·İ
+    			people[i][1] += n; //¸ÃÊ¡·İÒÉËÆ»¼ÕßÔö¼Ó
+    	}
+
+    }
+
+    /*
+     * ÒÉËÆ»¼Õß È·Õï¸ĞÈ¾´¦Àí
+     * @param string
+     */
+    public void diagnosisSP(String string) {
+    	String[] str_arr = string.split(" "); //½«×Ö·û´®ÒÔ¿Õ¸ñ·Ö¸îÎª¶à¸ö×Ö·û´®
+    	int i;
+    	int n = Integer.valueOf(str_arr[3].replace("ÈË", ""));//½«ÈËÇ°µÄÊı×Ö´Ó×Ö·û´®ÀàĞÍ×ª»¯ÎªintÀàĞÍ
+
+    	for(i = 0; i < province_str.length; i++) {
+    		if(str_arr[0].equals(province_str[i])) { //µÚÒ»¸ö×Ö·û´®ÎªÊ¡·İ
+    			people[0][1] -= n; //È«¹úÒÉËÆ»¼ÕßÈËÊı¼õÉÙ
+    			people[0][0] += n; //È«¹ú¸ĞÈ¾»¼ÕßÈËÊıÔö¼Ó
+    			people[i][1] -= n; //¸ÃÊ¡·İÒÉËÆ»¼ÕßÈËÊı¼õÉÙ
+    			people[i][0] += n; //¸ÃÊ¡·İ¸ĞÈ¾»¼ÕßÈËÊıÔö¼Ó
+    			break;
+    		}
+    	}
+    }
+
+    /*
+     * ÅÅ³ı ÒÉËÆ»¼Õß´¦Àí
+     * @param string
+     */
+    public void removeSP(String string) {
+    	String[] str_arr = string.split(" "); //½«×Ö·û´®ÒÔ¿Õ¸ñ·Ö¸îÎª¶à¸ö×Ö·û´®
+    	int i;
+    	int n = Integer.valueOf(str_arr[3].replace("ÈË", ""));//½«ÈËÇ°µÄÊı×Ö´Ó×Ö·û´®ÀàĞÍ×ª»¯ÎªintÀàĞÍ
+
+    	for(i = 0; i < province_str.length; i++) {
+    		if(str_arr[0].equals(province_str[i])) { //µÚÒ»¸ö×Ö·û´®ÎªÊ¡·İ
+    			people[i][1] -= n; //¸ÃÊ¡·İÒÉËÆ»¼ÕßÈËÊı¼õÉÙ
+    			people[0][1] -= n; //È«¹úÒÉËÆ»¼ÕßÈËÊı¼õÉÙ
+    			break;
+    		}
+    	}
+    }
+
+
+    /*
+	 * Êä³öÎÄ¼şÄÚÈİ
+	 */
+    public void writeTxt() {
+        try {
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+} 
