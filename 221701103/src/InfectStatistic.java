@@ -15,7 +15,7 @@ import java.util.Arrays;
  * TODO
  *
  * @author 衡天宇
- * @version 6.0
+ * @version 7.0
  * 
  */
 public class InfectStatistic {
@@ -31,6 +31,14 @@ public class InfectStatistic {
     static int isWrong=0;//输入日期是否出错（输入日期比最新的日志还晚）
     	
     public static void main(String[] args) throws IOException {
+    	if(args.length==0) {
+    		System.out.println("输入命令行为空，请重新输入！");
+    		return;
+    	}
+    	if(!args[0].equals("list")) {//命令错误
+    		System.out.println("未输入命令‘list’，则不可以带参数，请重新输入！");
+    		return;
+    	}
 	    for(int j=0;j<34;j++) {
 	    	all[j]=new line();
 	    	result[j]=new line();
