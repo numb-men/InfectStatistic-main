@@ -1,4 +1,5 @@
 import java.io.*;
+import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -366,7 +367,6 @@ class CommandReceiver {
      * @param util
      */
     public void list(ListCommandUtil util) throws Exception {
-        // TODO 根据命令参数统计疫情
         List<String> results = LogParser.parse(util);
         LogWriter.write(util.out.getAbsolutePath(), results);
     }
@@ -841,14 +841,13 @@ class LogParser {
     /**
      * 读取日志并解析
      *
-     * @param util
+     * @param entity
      * @return
      */
-    public static List<String> parse(ListCommandUtil util) {
-        StatisticResult.doStatistic(util.log);
-        List<String> results = StatisticResult.filterTypeAndProvince(util.type, util.province);
-
-        // TODO 按照地区字典序排列
+    public static List<String> parse(ListCommandUtil entity) {
+        StatisticResult.doStatistic(entity.log);
+        List<String> results = StatisticResult.filterTypeAndProvince(entity.type, entity.province);
+        Sorter.sortByRegion(results);
 
         return results;
     }
@@ -871,5 +870,25 @@ class LogWriter {
                 bw.write(resultLine);
             }
         }
+    }
+}
+
+/**
+ * 排序器
+ */
+class Sorter {
+    public static void sortByRegion(List<String> results) {
+        Comparator<Object> CHINA_COMPARE = Collator.getInstance(java.util.Locale.CHINA);
+
+        results.sort((o1, o2) -> {
+            String rg1 = o1.substring(0, o1.indexOf(' ')).replace("重庆", "冲庆");
+            String rg2 = o2.substring(0, o2.indexOf(' ')).replace("重庆", "冲庆");
+
+            if (rg1.equals("全国") || rg2.equals("全国")) {
+                return (rg1.equals("全国")) ? -1 : 1;
+            }
+            return CHINA_COMPARE.compare(rg1, rg2);
+        });
+
     }
 }

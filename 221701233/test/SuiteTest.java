@@ -11,6 +11,7 @@ import org.junit.runners.Suite.SuiteClasses;
         ListCheckerTest.class,
         CommandLineTest.class,
         LogReaderTest.class,
+        SorterTest.class,
 })
 public class SuiteTest {
 }
