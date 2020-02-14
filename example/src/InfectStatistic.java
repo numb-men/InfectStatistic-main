@@ -32,7 +32,7 @@ class Province{
 
 class InfectStatistic{
 	private static final int PROVINCE_NUM = 31;
-	private static final String PROVINCE[] = {"安徽","北京","重庆","福建","甘肃","广东","广西","贵州",
+	private static final String PROVINCE[] ={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州",
 				"海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海",
 				"山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"
 	};
@@ -68,10 +68,8 @@ class InfectStatistic{
     						break;
     					case "-province":
     						while(args[i+1].equals(null) && !args[i+1].substring(0,1).equals("-")){
-    							System.out.println(temp);
     							prov[temp] = new String();
     							prov[temp] = args[i+1];
-    							System.out.println(prov[temp]);
     							temp++;
     							i++;
     						}
@@ -86,9 +84,9 @@ class InfectStatistic{
     		else{
     			initProvince(province);
     			List<File> files = searchFiles(new File(log),".log.txt");
-    			for (File file:files) {
+    			for(File file:files){
     				String[] file1 = file.getAbsolutePath().split("\\\\");
-    				if(date == null || timeCompare(date,file1[file1.length-1].substring(0,10)) > 0) {
+    				if(date == null || timeCompare(date,file1[file1.length-1].substring(0,10)) > 0){
     					update(file.getAbsolutePath(),province);
     				}
     				
@@ -109,15 +107,32 @@ class InfectStatistic{
     			+ "疑似患者" + province[PROVINCE_NUM].sp + "人" + " "
     			+ "治愈" + province[PROVINCE_NUM].cure + "人" + " "
     			+ "死亡" + province[PROVINCE_NUM].dead + "人" + "\n";//插入全国疫情情况
-  			for(int i = 0;i < PROVINCE_NUM;i++){
- 				if(province[i].ip != 0 || province[i].sp != 0 || province[i].cure != 0 || province[i].dead != 0){
- 					content = content + province[i].name + " "
-  		    			+ "感染患者" + province[i].ip + "人" + " "
-  		    			+ "疑似患者" + province[i].sp + "人" + " "
-  		    			+ "治愈" + province[i].cure + "人" + " "
-  		    			+ "死亡" + province[i].dead + "人" + "\n";
+  			
+  			if(!prov[0].equals(null)){
+  				for(int i = 0;i < 4 || !prov[i].equals(null);i++) {
+  					for(int j = 0;i < PROVINCE_NUM;i++) {
+  						if(province[j].name.equals(prov[i])) {
+  							content = content + province[i].name + " "
+  			  		    			+ "感染患者" + province[i].ip + "人" + " "
+  			  		    			+ "疑似患者" + province[i].sp + "人" + " "
+  			  		    			+ "治愈" + province[i].cure + "人" + " "
+  			  		    			+ "死亡" + province[i].dead + "人" + "\n";
+  						}
+  					}
   				}
-  			}//插入各省份疫情
+  			}
+  			else {
+  				for(int i = 0;i < PROVINCE_NUM;i++){
+  	 				if(province[i].ip != 0 || province[i].sp != 0 || province[i].cure != 0 || province[i].dead != 0){
+  	 					content = content + province[i].name + " "
+  	  		    			+ "感染患者" + province[i].ip + "人" + " "
+  	  		    			+ "疑似患者" + province[i].sp + "人" + " "
+  	  		    			+ "治愈" + province[i].cure + "人" + " "
+  	  		    			+ "死亡" + province[i].dead + "人" + "\n";
+  	  				}
+  	  			}//插入各省份疫情
+  			}
+  			
 
   			content = content + "// 该文档并非真实数据，仅供测试使用";
   			write(out,content);
@@ -221,7 +236,7 @@ class InfectStatistic{
 				fstream.flush();
 				fstream.close();
 			}
-			catch (Exception e){
+			catch(Exception e){
 				e.printStackTrace();
 			}
 	}
@@ -230,25 +245,25 @@ class InfectStatistic{
 	/*查找对应目录下的文件*/
 	public static List<File> searchFiles(File folder,String keyWord){
 		List<File> result = new ArrayList<File>();
-		if (folder.isFile()){
+		if(folder.isFile()){
 			result.add(folder);
 		}
 		
 		File[] subFolders = folder.listFiles(new FileFilter(){
-			public boolean accept(File file) {
-				if (file.isDirectory()) {
+			public boolean accept(File file){
+				if(file.isDirectory()){
 					return true;
 				}
-				if (file.getName().toLowerCase().endsWith(keyWord)) {
+				if(file.getName().toLowerCase().endsWith(keyWord)){
 					return true;
 				}
 				return false;
 			}
 		});
  
-        if (subFolders != null){
-        	for (File file : subFolders){
-        		if (file.isFile()){
+        if(subFolders != null){
+        	for(File file : subFolders){
+        		if(file.isFile()){
                     result.add(file);
                 } 
             }
@@ -263,11 +278,11 @@ class InfectStatistic{
 		Calendar c1=Calendar.getInstance();
 		Calendar c2=Calendar.getInstance();
 		
-		try {
+		try{
 			c1.setTime(formatter.parse(time1));
 			c2.setTime(formatter.parse(time2));
 		}
-		catch (ParseException e){
+		catch(ParseException e){
 			e.printStackTrace();
 		}
 		
