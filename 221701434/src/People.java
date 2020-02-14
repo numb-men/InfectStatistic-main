@@ -17,7 +17,8 @@ public class People {
             "陕西", "上海","四川", "天津",
             "西藏", "新疆", "云南", "浙江"
     };
-    Map<String,Integer> map=new HashMap<String,Integer>();//创建哈希表
+    Map<String,Integer> map1=new HashMap<String, Integer>();//创建哈希表
+    Map<Integer,String> map2=new HashMap<Integer, String>();
     People() {
         for (int i = 0; i < 36; i++) {
             province[i] = i;
@@ -27,7 +28,8 @@ public class People {
             province_infectpeople[i] = 0;
         }
         for(int i=0;i<36;i++){//将省份以及对应数字连接起来
-            map.put(province2[i],province[i]);
+            map1.put(province2[i],province[i]);// K V
+            map2.put(province[i],province2[i]);
         }
     }
 }
