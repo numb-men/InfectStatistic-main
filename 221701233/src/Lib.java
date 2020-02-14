@@ -365,9 +365,10 @@ class CommandReceiver {
      *
      * @param util
      */
-    public void list(ListCommandUtil util) {
+    public void list(ListCommandUtil util) throws Exception {
         // TODO 根据命令参数统计疫情
-        LogParser.parse(util);
+        List<String> results = LogParser.parse(util);
+        LogWriter.write(util.out.getAbsolutePath(), results);
     }
 
     // 扩展命令...
@@ -742,7 +743,7 @@ class Region {
                 string.append(String.format(" 死亡%d人", this.getDead()));
             }
         }
-        return "" + string;
+        return "" + string + "\n";
     }
 }
 
@@ -818,7 +819,7 @@ class StatisticResult {
         }
 
         for (String prv : province) {
-            if (!prv.equals("全国")){
+            if (!prv.equals("全国")) {
                 result.add(get(prv).toStringWithCertainType(type));
             }
         }
@@ -838,7 +839,7 @@ class StatisticResult {
 class LogParser {
 
     /**
-     * 读取日志并解析，返回
+     * 读取日志并解析
      *
      * @param util
      * @return
@@ -853,3 +854,22 @@ class LogParser {
     }
 }
 
+/**
+ * 统计结果导出到文件
+ */
+class LogWriter {
+    /**
+     * 将统计结果写入文件
+     *
+     * @param filePath
+     * @param results
+     */
+    static void write(String filePath, List<String> results) throws Exception {
+        try (FileWriter fw = new FileWriter(filePath);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+            for (String resultLine : results) {
+                bw.write(resultLine);
+            }
+        }
+    }
+}
