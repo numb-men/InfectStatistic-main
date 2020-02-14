@@ -12,6 +12,7 @@ import org.junit.runners.Suite.SuiteClasses;
         CommandLineTest.class,
         LogReaderTest.class,
         SorterTest.class,
+        InfectStatisticTest.class
 })
 public class SuiteTest {
 }

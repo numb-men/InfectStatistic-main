@@ -2,9 +2,9 @@
  * InfectStatistic
  * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author 张一凡
+ * @version 1.0
+ * @since 1.0
  */
 class InfectStatistic {
     public static void main(String[] args) {
@@ -15,7 +15,7 @@ class InfectStatistic {
 
             commandLine.execute();
         } catch (Exception e) {
-            System.out.println("error: " + e.getMessage());
+            System.out.print("error: " + e.getMessage());
         }
     }
 }

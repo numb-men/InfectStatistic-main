@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -61,6 +62,24 @@ public class LogReaderTest {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         format.setLenient(false);
         List<String> list = LogReader.readLog(format.parse("2020-01-27"), new File("D:\\log"));
+        for (String str : list) {
+            System.out.println(str);
+        }
+
+        Assert.assertEquals(list.size(), expected.size());
+        assertTrue(list.containsAll(expected));
+    }
+
+    @Test
+    public void readLogNow() throws ParseException {
+        List<String> expected = new ArrayList<>();
+        expected.addAll(fileContent("D:\\log\\2020-01-22.log.txt"));
+        expected.addAll(fileContent("D:\\log\\2020-01-23.log.txt"));
+        expected.addAll(fileContent("D:\\log\\2020-01-27.log.txt"));
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        format.setLenient(false);
+        List<String> list = LogReader.readLog(new Date(), new File("D:\\log"));
         for (String str : list) {
             System.out.println(str);
         }

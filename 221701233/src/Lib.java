@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  * Lib
  * TODO
  *
- * @author ZYF
+ * @author 张一凡
  * @version 1.0
  * @since 1.0
  */
@@ -104,8 +104,13 @@ class CommandFactory {
      * @throws Exception 不存在相应命令对象
      */
     public Command getCommand(String name, CommandReceiver receiver) throws Exception {
-        return (Command) this.getClass().getMethod(name.toLowerCase(), Class.forName("CommandReceiver"))
-                .invoke(this, receiver);
+        try {
+            return (Command) this.getClass().getMethod(name.toLowerCase(), Class.forName("CommandReceiver"))
+                    .invoke(this, receiver);
+        } catch (Exception e) {
+            throw new NoSuchMethodException("Unknown command \'" + name + "\'");
+        }
+
     }
 
     public Command list(CommandReceiver receiver) {
@@ -275,8 +280,7 @@ class ListCommandUtil {
         try {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             util.date = format.parse(line.getValue("-date"));
-        } catch (ParseException e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
 
         util.log = LogReader.readLog(util.date, new File(line.getValue("-log")));
@@ -369,6 +373,7 @@ class CommandReceiver {
     public void list(ListCommandUtil util) throws Exception {
         List<String> results = LogParser.parse(util);
         LogWriter.write(util.out.getAbsolutePath(), results);
+        StatisticResult.reset();
     }
 
     // 扩展命令...
@@ -831,6 +836,13 @@ class StatisticResult {
 
         return result;
     }
+
+    /**
+     * 重置数据
+     */
+    public static void reset() {
+        regions.clear();
+    }
 }
 
 /**
@@ -869,6 +881,7 @@ class LogWriter {
             for (String resultLine : results) {
                 bw.write(resultLine);
             }
+            bw.write("// 该文档并非真实数据，仅供测试使用\n");
         }
     }
 }
@@ -878,7 +891,7 @@ class LogWriter {
  */
 class Sorter {
     public static void sortByRegion(List<String> results) {
-        Comparator<Object> CHINA_COMPARE = Collator.getInstance(java.util.Locale.CHINA);
+        Comparator<Object> CHINA_COMPARE = Collator.getInstance(Locale.CHINA);
 
         results.sort((o1, o2) -> {
             String rg1 = o1.substring(0, o1.indexOf(' ')).replace("重庆", "冲庆");

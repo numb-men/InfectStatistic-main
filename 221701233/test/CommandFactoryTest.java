@@ -23,7 +23,7 @@ public class CommandFactoryTest {
         CommandReceiver receiver = new CommandReceiver();
 
         thrown.expect(NoSuchMethodException.class);
-        thrown.expectMessage("CommandFactory.help(CommandReceiver)");
+        thrown.expectMessage("Unknown command 'help'");
         factory.getCommand("help", receiver);
     }
 }
