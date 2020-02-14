@@ -8,8 +8,10 @@ import java.util.regex.Pattern;
 
 public class Read {
     public String path;
-    Read(String path){
+    public People num;
+    Read(String path,People a){
         this.path=path;
+        this.num=a;
     }
     Date now = new Date(System.currentTimeMillis());//获取当前日期
     public SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");//规范日期格式
@@ -40,6 +42,7 @@ public class Read {
     }
 
     public void Dealtxt(String a){
+        num.province[0]++;
         String addinfect = "(\\S+) 新增 感染患者 (\\d+)人";
         String adddoubt = "(\\S+) 新增 疑似患者 (\\d+)人";
         String addcure = "(\\S+) 治愈 (\\d+)人";
@@ -65,28 +68,52 @@ public class Read {
         Pattern r8=Pattern.compile(doubttoclear);
         Matcher m8=r8.matcher(a);
         if(m1.find()) {
-
+            num.province_infectpeople[num.map.get(m1.group(1))]+=Integer.valueOf(m1.group(2));//该省份
+            num.province_infectpeople[0]+=Integer.valueOf(m1.group(2));//全国
+            num.province[num.map.get(m1.group(1))]++;//此次出现的省份+1，表示日志中出现的省份
         }
         else if(m2.find()){
-
+            num.province_doubtpeople[num.map.get(m2.group(1))]+=Integer.valueOf(m2.group(2));
+            num.province_doubtpeople[0]+=Integer.valueOf(m2.group(2));
+            num.province[num.map.get(m2.group(1))]++;
         }
         else if(m3.find()){
+            num.province_curepeople[num.map.get(m3.group(1))]+=Integer.valueOf(m3.group(2));
+            num.province_curepeople[0]+=Integer.valueOf(m3.group(2));
+            num.province[num.map.get(m3.group(1))]++;
 
         }
         else if(m4.find()){
-
+            num.province_deadpeople[num.map.get(m4.group(1))]+=Integer.valueOf(m4.group(2));
+            num.province_deadpeople[0]+=Integer.valueOf(m4.group(2));
+            num.province[num.map.get(m4.group(1))]++;
         }
         else if(m5.find()){
+            num.province_infectpeople[num.map.get(m5.group(1))]-=Integer.valueOf(m5.group(3));
+            num.province_infectpeople[num.map.get(m5.group(2))]+=Integer.valueOf(m5.group(3));
+            num.province[num.map.get(m5.group(1))]++;
+            num.province[num.map.get(m5.group(2))]++;
 
         }
         else if(m6.find()){
+            num.province_doubtpeople[num.map.get(m6.group(1))]-=Integer.valueOf(m6.group(3));
+            num.province_doubtpeople[num.map.get(m5.group(2))]+=Integer.valueOf(m6.group(3));
+            num.province[num.map.get(m6.group(1))]++;
+            num.province[num.map.get(m6.group(2))]++;
 
         }
         else if(m7.find()){
+            num.province_doubtpeople[num.map.get(m7.group(1))]-=Integer.valueOf(m7.group(2));
+            num.province_infectpeople[num.map.get(m7.group(1))]+=Integer.valueOf(m7.group(2));
+            num.province_doubtpeople[0]-=Integer.valueOf(m7.group(2));
+            num.province_infectpeople[0]+=Integer.valueOf(m7.group(2));
+            num.province[num.map.get(m7.group(1))]++;
 
         }
         else if(m8.find()){
-
+            num.province_doubtpeople[num.map.get(m8.group(1))]-=Integer.valueOf(m8.group(2));
+            num.province_doubtpeople[0]-=Integer.valueOf(m8.group(2));
+            num.province[num.map.get(m8.group(1))]++;
         }
     }
 }

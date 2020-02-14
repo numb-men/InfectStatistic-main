@@ -1,3 +1,6 @@
+import java.util.HashMap;
+import java.util.Map;
+
 public class People {
     public int[] province=new int[36];
     public int[] province_deadpeople=new int[36];
@@ -14,13 +17,17 @@ public class People {
             "陕西", "上海","四川", "天津",
             "西藏", "新疆", "云南", "浙江"
     };
-    public void initial() {
+    Map<String,Integer> map=new HashMap<String,Integer>();//创建哈希表
+    People() {
         for (int i = 0; i < 36; i++) {
-            province[i] = 0;
+            province[i] = i;
             province_curepeople[i] = 0;
             province_deadpeople[i] = 0;
             province_doubtpeople[i] = 0;
             province_infectpeople[i] = 0;
+        }
+        for(int i=0;i<36;i++){//将省份以及对应数字连接起来
+            map.put(province2[i],province[i]);
         }
     }
 }

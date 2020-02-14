@@ -9,7 +9,7 @@
 class InfectStatistic {
     public static void main(String[] args)
     {
-
+        People a=new People();
 
     }
 }
