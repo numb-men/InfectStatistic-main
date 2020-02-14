@@ -93,13 +93,13 @@ class ListCommand {
     // 记录type的值，如果集合为空，默认列出全部情况
     private HashSet<String> type = new HashSet<String>();
     // 记录要列出的省
-    private HashSet<String> province = new HashSet<String>();
+    private HashSet<String> provinces = new HashSet<String>();
 
     private boolean dateIsExist = false;
     private boolean typeIsExist = false;
     private boolean provinceIsExist = false;
 
-    // 定义正则表达式
+    // 定义正则表达式，表达式内的空格不可随意修该，否则会影响读取处理
     String s1 = "\\s*\\S+ 新增 感染患者 \\d+人\\s*";
     String s2 = "\\s*\\S+ 新增 疑似患者 \\d+人\\s*";
     String s3 = "\\s*\\S+ 感染患者 流入 \\S+ \\d+人\\s*";
@@ -181,10 +181,10 @@ class ListCommand {
                 for (int j = i + 1; j < l; j++) {
                     if (args[j].charAt(0) == '-')
                         break;
-                    if (province.contains(args[j]))
+                    if (provinces.contains(args[j]))
                         throw new IllegalException("错误，参数-province出现重复参数值");
                     i = j;
-                    province.add(args[j]);
+                    provinces.add(args[j]);
                 }
                 provinceIsExist = true;
                 break;
@@ -254,9 +254,17 @@ class ListCommand {
 
                 // 取出感染人数
                 int sum = getAmount(strLine);
+//////////////////////////////////////////////////////////////////////////////
+                System.out.println("\n" + strLine);
+                System.out.println(province + "原感染人数：" + ipMap.get(province) + "  " + "新增感染患者 " + sum + "人");
+/////////////////////////////////////////////////////////////////////////////
                 // 修改人数
                 sum += ipMap.get(province);
                 ipMap.put(province, sum);
+
+//////////////////////////////////////////////////////////////////////////////
+                System.out.println(province + "最新感染患者 " + ipMap.get(province) + "人");
+/////////////////////////////////////////////////////////////////////////////
             } else if (strLine.matches(s2)) {
                 int index = strLine.indexOf(" 新增 疑似患者");
                 // 取出省份，省份前面可能有空格
@@ -266,10 +274,18 @@ class ListCommand {
 
                 // 取出疑似患者人数
                 int sum = getAmount(strLine);
+//////////////////////////////////////////////////////////////////////////////
+                System.out.println("\n" + strLine);
+                System.out.println(province + "原疑似人数：" + spMap.get(province) + "  " + "新增感染患者 " + sum + "人");
+/////////////////////////////////////////////////////////////////////////////                
+
                 // 修改人数
                 sum += spMap.get(province);
                 spMap.put(province, sum);
 
+//////////////////////////////////////////////////////////////////////////////
+                System.out.println(province + "最新疑似患者 " + spMap.get(province) + "人");
+/////////////////////////////////////////////////////////////////////////////
             } else if (strLine.matches(s3)) {
                 // String s3 = "\\s*\\S+ 感染患者 流入 \\S+ \\d+人\\s*";
                 int index = strLine.indexOf(" 感染患者 流入");
@@ -281,12 +297,21 @@ class ListCommand {
                 // 取出流出人数
                 int sum = getAmount(strLine);
                 index = strLine.indexOf(Integer.toString(sum));
-                // 取出流出省份
-                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index);
+                // 取出流入省份
+                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index-1);
+////////////////////////////////////////////////////////////////////////////////////
+                System.out.println("\n" + strLine);
+                System.out.println("输出省" + outProvince + "原感染人数" + ipMap.get(outProvince) + "  输入省" + inProvince
+                        + "原感染人数：" + ipMap.get(inProvince) + " 流入人口" + sum);
+//////////////////////////////////////////////////////////////////////////////////////                
 
                 ipMap.put(outProvince, ipMap.get(outProvince) - sum);
                 ipMap.put(inProvince, ipMap.get(inProvince) + sum);
 
+////////////////////////////////////////////////////////////////////////////////////////
+                System.out.println("输出省" + outProvince + "现感染人数为：" + ipMap.get(outProvince) + "  输入省" + inProvince
+                        + "现感染人数：" + ipMap.get(inProvince));
+////////////////////////////////////////////////////////////               
             } else if (strLine.matches(s4)) {
                 // String s4 = "\\s*\\S+ 疑似患者 流入 \\S+ \\d+人\\s*";
                 int index = strLine.indexOf(" 疑似患者 流入");
@@ -299,10 +324,19 @@ class ListCommand {
                 int sum = getAmount(strLine);
                 index = strLine.indexOf(Integer.toString(sum));
                 // 取出流出省份
-                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index);
-
+                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index-1);
+////////////////////////////////////////////////////////////////////////////////////
+                System.out.println("\n" + strLine);
+                System.out.println("输出省" + outProvince + "原疑似人数" + spMap.get(outProvince) + "  输入省" + inProvince
+                        + "原疑似人数：" + spMap.get(inProvince) + "  流入人口" + sum);
+//////////////////////////////////////////////////////////////////////////////////////
                 spMap.put(outProvince, spMap.get(outProvince) - sum);
                 spMap.put(inProvince, spMap.get(inProvince) + sum);
+
+////////////////////////////////////////////////////////////////////////////////////////
+                System.out.println("输出省" + outProvince + "现疑似人数为：" + spMap.get(outProvince) + "  输入省" + inProvince
+                        + "疑似染人数：" + spMap.get(inProvince));
+////////////////////////////////////////////////////////////
 
             } else if (strLine.matches(s5)) {
                 int index = strLine.indexOf(" 死亡");
@@ -315,12 +349,18 @@ class ListCommand {
                 int deadSum = getAmount(strLine);
                 // 获得感染人数
                 int ipSum = ipMap.get(province);
+////////////////////////////////////////////////////////////////////////////////////
+System.out.println("\n" + strLine);
+System.out.println(province+"原感染人数："+ipMap.get(province)+"  原死亡人数："+deadMap.get(province)+"  现死亡："+deadSum);
+////////////////////////////////////////////////////////////
                 // 更新感染人数
                 ipMap.put(province, ipSum - deadSum);
 
                 deadSum += deadMap.get(province);
                 deadMap.put(province, deadSum);
-
+///////////////////////////////////////////////////////////
+                System.out.println(province+"现感染人数："+ipMap.get(province)+"  现死亡人数："+deadMap.get(province));
+////////////////////////////////////////////////////////////
             } else if (strLine.matches(s6)) {
                 // s6 = "\\s*\\S+ 治愈 \\d+人\\s*";
                 int index = strLine.indexOf(" 治愈");
@@ -333,10 +373,18 @@ class ListCommand {
                 int cureSum = getAmount(strLine);
                 // 获得感染人数
                 int ipSum = ipMap.get(province);
+                
+////////////////////////////////////////////////////////////////////////////////////
+System.out.println("\n" + strLine);
+System.out.println(province+"原感染人数："+ipMap.get(province)+"  原治愈人数："+cureMap.get(province)+"  现治愈："+cureSum);
+////////////////////////////////////////////////////////////
                 // 更新感染人数
                 ipMap.put(province, ipSum - cureSum);
                 cureSum += cureMap.get(province);
                 cureMap.put(province, cureSum);
+///////////////////////////////////////////////////////////
+System.out.println(province+"现感染人数："+ipMap.get(province)+"  现治愈人数："+cureMap.get(province));
+////////////////////////////////////////////////////////////
 
             } else if (strLine.matches(s7)) {
                 // String s7 = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
@@ -345,11 +393,16 @@ class ListCommand {
                 String province = strLine.substring(0, index);
                 // 去掉全部空格
                 province.replace(" ", "");
-
                 int ipSum = getAmount(strLine);
+////////////////////////////////////////////////////////////////////////////////////
+System.out.println("\n" + strLine);
+System.out.println(province+"原疑似患者人数："+spMap.get(province)+"  原感染人数："+ipMap.get(province)+" 现确诊："+ipSum);
+//////////////////////////////////////////////////////////////////////////////
                 spMap.put(province, spMap.get(province) - ipSum);
                 ipMap.put(province, ipMap.get(province) + ipSum);
-
+///////////////////////////////////////////////////////////////////////////////////
+                System.out.println(province+"现疑似人数："+spMap.get(province)+" 现感染人数："+ipMap.get(province));
+/////////////////////////////////////////////////////////////////////////////////////
             } else if (strLine.matches(s8)) {
                 // String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
                 int index = strLine.indexOf(" 排除 疑似患者");
@@ -359,8 +412,14 @@ class ListCommand {
                 province.replace(" ", "");
 
                 int excludeSum = getAmount(strLine);
+////////////////////////////////////////////////////////////////////////////////////
+System.out.println("\n" + strLine);
+System.out.println(province+"原疑似患者人数："+spMap.get(province)+" 现排除："+excludeSum);
+//////////////////////////////////////////////////////////////////////////////
                 spMap.put(province, spMap.get(province) - excludeSum);
-
+///////////////////////////////////////////////////////////////////////////////////
+System.out.println(province+"现疑似人数："+spMap.get(province));
+/////////////////////////////////////////////////////////////////////////////////////
             }
         }
     }
