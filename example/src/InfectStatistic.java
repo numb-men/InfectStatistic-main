@@ -39,9 +39,8 @@ class InfectStatistic{
 	
 	
     public static void main(String[] args) throws IOException{
-    	String log = null,data = null,type = null,strLine = null;
-		String content = null;
-    	
+    	String log = null,out = null,date = null,content = null;
+    	String[] type = null,prov = null;
     	Province[] province = new Province[PROVINCE_NUM+1];
     	initProvince(province);//初始化省份信息
     	
@@ -52,10 +51,11 @@ class InfectStatistic{
     					case "-log":
     						log = args[i+1];
     						break;
-    					case "-data":
-    						data = args[i+1];
+    					case "-out":
+    						out = args[i+1];
     						break;
     					case "-date":
+    						date = args[i+1];
     						break;
     					case "-type":
     						break;
@@ -67,14 +67,18 @@ class InfectStatistic{
 			/*
 			 * log = "D:\\log\\2020-01-22.log.txt";//测试数据，最后应删除
 			 */
-    		if(log == null || data == null){
-    			System.out.println("没有输入log或没有输入data，请重新输入");
+    		if(log == null || out == null){
+    			System.out.println("没有输入log或没有输入out，请重新输入");
     		}
     		else{
     			initProvince(province);
     			List<File> files = searchFiles(new File(log),".log.txt");
     			for (File file:files) {
-    				update(file.getAbsolutePath(),province);
+    				String[] file1 = file.getAbsolutePath().split("\\\\");
+    				if(date == null || timeCompare(date,file1[file1.length-1].substring(0,10)) > 0) {
+    					update(file.getAbsolutePath(),province);
+    				}
+    				
                 }
   			}
   			
@@ -101,9 +105,9 @@ class InfectStatistic{
   		    			+ "死亡" + province[i].dead + "人" + "\n";
   				}
   			}//插入各省份疫情
-  			  	
+
   			content = content + "// 该文档并非真实数据，仅供测试使用";
-  			write(data,content);
+  			write(out,content);
   			  	
     	}
     }
@@ -192,9 +196,9 @@ class InfectStatistic{
 	
 	
 	/*写TXT文件保存到指定位置*/
-	public static void write(String data,String content){    
+	public static void write(String out,String content){    
 		FileOutputStream fstream = null;
-		File file = new File(data);
+		File file = new File(out);
 			try{
 				if(file.exists()){
 					file.createNewFile();
