@@ -6,9 +6,11 @@
  * @version 1.0
  * @since 2020
  */
+import sun.rmi.log.LogHandler;
+
+import java.io.*;
 import java.util.*;
 import java.util.regex.*;
-import java.io.File;
 
 class InfectStatistic {
     public static void main(String[] args) {
@@ -43,14 +45,19 @@ class LogLine {
 
     private Pattern reg;
     private String logline;
-    private LogHandle handle;
-    LogLine(String arg,Pattern pattern)
+    LogLine(String arg)
     {
         logline=arg;
-        reg=pattern;
+        reg=Pattern.compile(arg);
     }
 
+    public Pattern getReg() {
+        return reg;
+    }
 
+    public String getLogline() {
+        return logline;
+    }
 }
 
 /**
@@ -164,10 +171,9 @@ class CommandInvoker{
  * */
 class list implements Command{
     final String cmdname="list";
-    private LogHandle listhandle;
     private String log=null;  //日志文件夹路径
     private String out=null;  //输出文件路径
-    private HashMap<String,ArrayList> provienceMap=new HashMap<>();  //省份和各项数据的对应
+    private HashMap<String,ArrayList> provincemap=new HashMap<>();  //省份和各项数据的对应
     List<Pattern> patternlist=new ArrayList<>();
     list()
     {
@@ -198,17 +204,44 @@ class list implements Command{
         {
             /*
             *
-            * 参数缺失错误
+            * 必要参数缺失错误
             *
             * */
         }
 
         File logFiles=new File(log);
+        if(!logFiles.exists())
+        {
+            /*
+            * 文件不存在错误
+            *
+            * */
+        }
         File[] files=logFiles.listFiles();
         //遍历提供的文件夹下的日志
-        for(File f:files)
+        for (File f:files)
         {
+            try
+            {
+                FileReader fr=new FileReader(f.getName());
+                BufferedReader br=new BufferedReader(fr);
+                while (br.readLine()!=null)
+                {
+                    LogLine line=new LogLine(br.readLine());
+                    LogHandle.logHandlerList(line,provincemap);
 
+                }
+                br.close();
+            }
+            catch (FileNotFoundException fe)
+            {
+                System.out.println("file not found");
+                System.exit(1);
+            }
+            catch (IOException ie)
+            {
+                System.out.println("null content");
+            }
         }
 
     }
@@ -224,7 +257,7 @@ class list implements Command{
  * */
 class LogHandle{
     //命令的处理
-    public void logHandler(LogLine line)
+    public static void logHandlerList(LogLine line,HashMap<String,ArrayList> hm)
     {
 
     }
@@ -241,14 +274,98 @@ interface MyPatterns
     String PatientsCure="([\\u4e00-\\u9fa5])+ 治愈 (\\d+)人";//<省> 治愈 n人
     String SuspectedDiagnosis="([\\u4e00-\\u9fa5])+ 疑似患者 确诊感染 (\\d+)人";//<省> 疑似患者 确诊感染 n人
     String SuspectedExclude="([\\u4e00-\\u9fa5])+ 排除 疑似患者 (\\d+)人";//<省> 排除 疑似患者 n人
-    void doCount();
+    void doCount(HashMap<String,ArrayList> hs);
 }
 
 class InfectedPatients implements MyPatterns{
         private Pattern patt=Pattern.compile(InfectedPatients);
 
     //根据
-    public void doCount()
+    public void doCount(HashMap<String,ArrayList> hs)
+    {
+
+
+
+    }
+}
+
+class SuspectedPatients implements MyPatterns{
+    private Pattern patt=Pattern.compile(SuspectedPatients);
+
+    //根据
+    public void doCount(HashMap<String,ArrayList> hs)
+    {
+
+
+
+    }
+}
+
+class InfectedGo implements MyPatterns{
+    private Pattern patt=Pattern.compile(InfectedGo);
+
+    //根据
+    public void doCount(HashMap<String,ArrayList> hs)
+    {
+
+
+
+    }
+}
+
+class SuspectedGo implements MyPatterns{
+    private Pattern patt=Pattern.compile(SuspectedGo);
+
+    //根据
+    public void doCount(HashMap<String,ArrayList> hs)
+    {
+
+
+
+    }
+}
+
+class PatientsDie implements MyPatterns{
+    private Pattern patt=Pattern.compile(PatientsDie);
+
+    //根据
+    public void doCount(HashMap<String,ArrayList> hs)
+    {
+
+
+
+    }
+}
+
+class PatientsCure implements MyPatterns{
+    private Pattern patt=Pattern.compile(PatientsCure);
+
+    //根据
+    public void doCount(HashMap<String,ArrayList> hs)
+    {
+
+
+
+    }
+}
+
+class SuspectedDiagnosis implements MyPatterns{
+    private Pattern patt=Pattern.compile(SuspectedDiagnosis);
+
+    //根据
+    public void doCount(HashMap<String,ArrayList> hs)
+    {
+
+
+
+    }
+}
+
+class SuspectedExclude implements MyPatterns{
+    private Pattern patt=Pattern.compile(SuspectedExclude);
+
+    //根据
+    public void doCount(HashMap<String,ArrayList> hs)
     {
 
 
