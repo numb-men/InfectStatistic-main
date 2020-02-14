@@ -4,30 +4,44 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//储存省份患者信息
-class province_info{
-    boolean empty;//是否为空
-    String name;//省份
-    int infected;//感染患者
-    int suspected;//疑似患者
-    int cure;//治愈
-    int dead;//死亡
-    public province_info(String temp){
-        name=temp;
-        empty=true;
-        infected=0;//感染患者
-        suspected=0;//疑似患者
-        cure=0;//治愈
-        dead=0;//死亡
+
+//链表节点
+class Node {
+    public int data;//记录在数组中的位置
+    public int heavy;//记录权重
+    public Node next;
+    public Node(){
+        data=-1;
+    }
+    public Node(int e){
+        this.data = e;
     }
 }
-
 public class Lib {
+    //储存省份患者信息
+    class province_info{
+        int heavy;//
+        String name;//省份
+        int infected;//感染患者
+        int suspected;//疑似患者
+        int cure;//治愈
+        int dead;//死亡
+        public province_info(String temp){
+            name=temp;
+            heavy=0;
+            infected=0;//感染患者
+            suspected=0;//疑似患者
+            cure=0;//治愈
+            dead=0;//死亡
+        }
+    }
+
     //初始化数据数组
     ArrayList<province_info> infos = new ArrayList<province_info>();
     String log=new String();//指定日志目录的位置
     String out=new String();//指定输出文件路径和文件名
     String date=new String();//指定日期
+    Node list=new Node();
 
     ArrayList<String> type = new ArrayList<String>();//指定显示类型
 
@@ -40,9 +54,6 @@ public class Lib {
         System.out.println("输入");
         String in = sc.nextLine();
         String[] args=in.split(" ");
-
-
-
         for (int i=0;i<args.length;i++){
             if(args[i].startsWith("-")){
                 if(args[i].equals("-log")) log=args[i+1];
@@ -61,9 +72,6 @@ public class Lib {
                 }
             }
         }
-
-
-
 
 
         //读取排序好的文件对象并进行处理
@@ -216,14 +224,63 @@ public class Lib {
 
     //对现有的对象数组进行整理
     private void Arrangement(){
-      /*  for (int i=0;i<infos.size();i++){
-            System.out.print(infos.get(i).name);
-            System.out.print("感染患者"+infos.get(i).infected+"人 ");
-            System.out.print("疑似患者"+infos.get(i).suspected+"人 ");
-            System.out.print("治愈"+infos.get(i).cure+"人 ");
-            System.out.print("死亡"+infos.get(i).dead+"人 \n");
-        }*/
+        set_heavy();
+        Comparator<province_info> comparator = new Comparator<province_info>(){
+            public int compare(province_info s1, province_info s2) {
+                    return s1.heavy-s2.heavy;
+            };
+        };
+        //对输出队列排序
+        Collections.sort(infos,comparator);
+
+
     }
+    //设置省份对应的权重
+    private void set_heavy(){
+        String names[]={
+                "全国",
+                "安徽",
+                "北京",
+                "重庆",
+                "福建",
+                "甘肃",
+                "广东",
+                "广西",
+                "贵州",
+                "海南",
+                "河北",
+                "河南",
+                "黑龙江",
+                "湖北",
+                "湖南",
+                "吉林",
+                "江苏",
+                "江西",
+                "辽宁",
+                "内蒙古",
+                "宁夏",
+                "青海",
+                "山东",
+                "山西",
+                "陕西",
+                "上海",
+                "四川",
+                "天津",
+                "西藏",
+                "新疆",
+                "云南",
+                "浙江",
+        };
+        for(int i=0;i<infos.size();i++){
+            for (int j=0;j<names.length;j++){
+                if(infos.get(i).name.equals(names[j])){
+                    infos.get(i).heavy=j;
+                    break;
+                }
+            }
+        }
+    }
+
 
     //统计全国的情况
     private void summary(){
@@ -234,6 +291,7 @@ public class Lib {
             all.infected+=infos.get(i).infected;
             all.cure+=infos.get(i).cure;
         }
+
         infos.add(all);
     }
 
@@ -241,22 +299,25 @@ public class Lib {
     private void output(String out) throws IOException {
         String[] temp=out.split("\\\\");
         String filename=temp[temp.length-1];//获取地址中的文件名
-
         //System.out.println(filename);
-
         String path=out.split(filename)[0];//将地址中的文件名剔除
-
         File f1=new File(path);//传入文件/目录的路径
         File f2=new File(f1,filename);//第一个参数为一个目录文件，第二个参数为要在当前f1目录下要创建的文件
-
         PrintWriter printWriter =new PrintWriter(new FileWriter(f2,true),true);//第二个参数为true，从文件末尾写入 为false则从开头写入
-        if(province.size()==0){
-            for (int i=0;i<infos.size();i++){
-                printWriter.print(infos.get(i).name+" ");
-                printWriter.print("感染患者"+infos.get(i).infected+"人 ");
-                printWriter.print("疑似患者"+infos.get(i).suspected+"人 ");
-                printWriter.print("治愈"+infos.get(i).cure+"人 ");
-                printWriter.print("死亡"+infos.get(i).dead+"人 \n");
+
+
+        if(province.size()==0){//不指定显示地区
+            if(type.size()==0){//不指定显示类别
+                for (int i=0;i<infos.size();i++){
+                    printWriter.print(infos.get(i).name+" ");
+                    printWriter.print("感染患者"+infos.get(i).infected+"人 ");
+                    printWriter.print("疑似患者"+infos.get(i).suspected+"人 ");
+                    printWriter.print("治愈"+infos.get(i).cure+"人 ");
+                    printWriter.print("死亡"+infos.get(i).dead+"人 \n");
+                }
+            }
+            else{
+
             }
         }
         else {
@@ -291,6 +352,8 @@ public class Lib {
                 printWriter.print("死亡" + infos.get(t.get(i)).dead + "人 \n");
             }
         }
+
+
         printWriter.close();//记得关闭输入流
     }
 }
