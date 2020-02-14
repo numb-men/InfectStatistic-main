@@ -121,7 +121,7 @@ function print(){
    article += `// 该文档并非真实数据，仅供测试使用\n// 命令：node InfectStatistic ${cmd}`
    fs.writeFileSync(CmdParam.out[0], article, 'utf-8')  //最后写入文件
 }
-(function main() {
+(module.exports = function main() {  //若要开始单元测试。。。改变arguments以及washCmdParam()
    var [y,m,d] = washCmdParam()
    for (var i = 1; i <= m; i++){ //不循环年份，因为老爷说了，19年没有叫这个名的病毒
       for (var j = 1; j <= (i != m ? MONTH[i] : d); j++) {
@@ -131,5 +131,5 @@ function print(){
    print()
 })()
 process.on('uncaughtException', (e) => {
-   console.error('错误：', e.message)
+   console.error('错误：', e.message)   //若要开始单元测试。。。改为article拼接
 })
