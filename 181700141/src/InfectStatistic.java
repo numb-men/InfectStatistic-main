@@ -1,10 +1,12 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,16 +75,15 @@ class IllegalException extends Exception {
  */
 
 class ListCommand {
-    // 存储各省感染患者人数
+    // 存储各省及全国感染患者人数
     private LinkedHashMap<String, Integer> ipMap = new LinkedHashMap<>();
-    // 存储各省疑似患者人数
+    // 存储各省及全国疑似患者人数
     private LinkedHashMap<String, Integer> spMap = new LinkedHashMap<>();
-    // 存储各省治愈患者人数
+    // 存储各省及全国治愈患者人数
     private LinkedHashMap<String, Integer> cureMap = new LinkedHashMap<>();
-    // 存储各省死亡人数
+    // 存储各省及全国死亡人数
     private LinkedHashMap<String, Integer> deadMap = new LinkedHashMap<>();
-    // 存储全国情况
-    private LinkedHashMap<String, Integer> countryMap = new LinkedHashMap<>();
+   
 
     // 记录日志目录路径
     private String inDirectory = null;
@@ -91,10 +92,11 @@ class ListCommand {
     // 记录日期：date的参数值
     private String date = null;
     // 记录type的值，如果集合为空，默认列出全部情况
-    private HashSet<String> type = new HashSet<String>();
+    private List<String> types = new ArrayList<String>();
     // 记录要列出的省
-    private HashSet<String> provinces = new HashSet<String>();
+    private List<String> provinces = new ArrayList<String>();
 
+    // 记录是否有输入相应的参数
     private boolean dateIsExist = false;
     private boolean typeIsExist = false;
     private boolean provinceIsExist = false;
@@ -109,32 +111,42 @@ class ListCommand {
     String s7 = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
     String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
 
-    public ListCommand() {
+    private String[] provincesArray = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北",
+            "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南",
+            "浙江" };
 
-        String[] provinces = { "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南",
-                "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江" };
-        for (int i = 0; i < provinces.length; i++) {
-            ipMap.put(provinces[i], 0);
-            spMap.put(provinces[i], 0);
-            cureMap.put(provinces[i], 0);
-            deadMap.put(provinces[i], 0);
-        }
-        countryMap.put("感染患者", 0);
-        countryMap.put("疑似患者", 0);
-        countryMap.put("治愈", 0);
-        countryMap.put("死亡", 0);
+    public ListCommand() {
+        // 有顺序插入
+        for (int i = 0; i < provincesArray.length; i++) {
+            ipMap.put(provincesArray[i], 0);
+            spMap.put(provincesArray[i], 0);
+            cureMap.put(provincesArray[i], 0);
+            deadMap.put(provincesArray[i], 0);
+        }      
     }
 
     /**
-     * 处理list命令的各参数，对各个参数初始化其处理类。
+     * 处理list命令的各参数 。
+     * 
+     * 要求-log和-out参数都必须存在且参数值有且仅有一个 。
+     * -date参数值可以没有但如果有提供需满足XXXX-XX-XX(X=0-9)格式，且仅有一个。
+     * -type参数值可以没有但如果提供则应为（ip,sp,cure,dead）中一个或多个但不能重复，如果没有提供最后会将成员变量types修改含全部即ip，sp，cure，dead
+     * -province参数如果提供则要求一定提供参数值，参数值要求合法即存在该省份（可以为全国），同样不允许重复输入相同参数值
      * 
      * @param 用户输入的命令，含list
      * @throws 如果初步解析list命令如：list命令未提供该参数的执行方法 同一参数出现多次，必须存在的参数不存在时将抛出IllegalException
      */
     public void dealParameter(String[] args) throws IllegalException {
         int l = args.length;
-        // 存储参数值
-        String[] parameterValues;
+        // 存储合法的省份，用于检测用户输入的省份是否合法
+        List<String> legalProvinces = Arrays.asList(provincesArray);
+        // 存储合法的type值
+        List<String> legalTypes = new ArrayList<String>();
+        legalTypes.add("ip");
+        legalTypes.add("sp");
+        legalTypes.add("cure");
+        legalTypes.add("dead");
+
         for (int i = 1; i < l; i++) {
             switch (args[i]) {
             case "-log":
@@ -168,10 +180,12 @@ class ListCommand {
                 for (int j = i + 1; j < l; j++) {
                     if (args[j].charAt(0) == '-')
                         break;
-                    if (type.contains(args[j]))
+                    if (types.contains(args[j]))
                         throw new IllegalException("错误，参数-type出现重复参数值");
+                    if (!legalTypes.contains(args[j]))
+                        throw new IllegalException("错误，参数-type的参数值非法，应为（ip,sp,cure,dead）");
                     i = j;
-                    type.add(args[j]);
+                    types.add(args[j]);
                 }
                 typeIsExist = true;
                 break;
@@ -183,6 +197,8 @@ class ListCommand {
                         break;
                     if (provinces.contains(args[j]))
                         throw new IllegalException("错误，参数-province出现重复参数值");
+                    if (!legalProvinces.contains(args[j]) )
+                        throw new IllegalException("错误，参数-province出现的参数值非法（省份非法）");
                     i = j;
                     provinces.add(args[j]);
                 }
@@ -196,17 +212,36 @@ class ListCommand {
         } // end of for
         if (outDirectory == null || inDirectory == null)
             throw new IllegalException("错误，参数-log及-out要求必须存在");
+        if (provinceIsExist && provinces.isEmpty())
+            throw new IllegalException("错误，未提供参数-province的参数值");
+        // 如果有输入province参数则排序
+        if (provinceIsExist)
+            provinces = sort();
+        // 如果有输入-type参数，但未输入参数值
+        if (types.isEmpty()) {
+            types.add("ip");
+            types.add("sp");
+            types.add("cure");
+            types.add("dead");
+        }
+    }
+
+    /**
+     * 对用户输入的省份进行排序，如果有全国则其在首位，其余根据拼音排序。要求要有输入省份本函数不进行相应检查
+     * 
+     * @return 排好序的list
+     */
+    private List<String> sort() {
+        List<String> list = new ArrayList<String>();
+        int size = provincesArray.length;
+        for (int i = 0; i < size; i++)
+            if (provinces.contains(provincesArray[i]))
+                list.add(provincesArray[i]);
+        return list;
     }
 
     // 执行各参数所要求的操作
     public void carryOutActions() throws Exception {
-
-        /*
-         * System.out.println("log:" + inDirectory + "\nout:" + outDirectory + "\ndate:"
-         * + date + "\ntype:"); for (String s : type) System.out.print("  " + s);
-         * System.out.println("\nprovince:\n"); for (String s : province)
-         * System.out.print("  " + s);
-         */
 
         File file = new File(inDirectory);
         if (!file.exists() || !file.isDirectory())
@@ -226,11 +261,84 @@ class ListCommand {
             date = logFiles[l - 1];
         else
             date = date + ".log.txt";
+        // 读取满足要求的日志文件并进行数据更新
         for (int i = 0; i < l; i++) {
             if (logFiles[i].matches("\\S+\\.log\\.txt") && date.compareTo(logFiles[i]) >= 0) {
                 handleFile(inDirectory + "/" + logFiles[i]);
             }
         }
+
+        // 统计全国数据
+        int ipAmount = 0;
+        int spAmount = 0;
+        int cureAmount = 0;
+        int deadAmount = 0;
+        for (Integer i : ipMap.values())
+            ipAmount += i;
+        ipMap.put("全国",ipAmount);
+        for (Integer i : spMap.values())
+            spAmount += i;
+        spMap.put("全国",spAmount);
+        for (Integer i : cureMap.values())
+            cureAmount += i;
+        cureMap.put("全国",cureAmount);
+        for (Integer i : deadMap.values())
+            deadAmount += i;
+        deadMap.put("全国",deadAmount);
+
+        File outFile = new File(outDirectory);
+        FileWriter writer = new FileWriter(outFile, false);
+        if (typeIsExist) {
+            if (!provinceIsExist) {
+                //未提供要输出的省份，则输出日志文件有提供的省份的数据，
+                List<String> list=new ArrayList<String>();
+                int size=provincesArray.length;
+                for(int i=0; i<size; i++) {
+                    //全是0则不输出其数据
+                    if(ipMap.get(provincesArray[i])==0&&spMap.get(provincesArray[i])==0&&cureMap.get(provincesArray[i])==0&&deadMap.get(provincesArray[i])==0)
+                        continue;
+                    else
+                        list.add(provincesArray[i]);
+                }
+                out(writer,list);
+            } else {
+                out(writer,provinces);
+            }
+        } else {
+            if (provinceIsExist) {
+                for (String province : provinces) {
+                    writer.write(province + " 感染患者" + ipMap.get(province) + "人 疑似患者" + spMap.get(province) + "人 治愈"
+                            + cureMap.get(province) + "人 死亡" + deadMap.get(province) + "人\n");
+                }
+
+            } else {
+                
+                // 将各省数据填入相应状态数组内，由于前面集合是有顺序插入所以下面的数据也是有顺序
+                Integer[] ipProvincesAmount = new Integer[ipMap.size()];
+                ipMap.values().toArray(ipProvincesAmount);
+                Integer[] spProvincesAmount = new Integer[spMap.size()];
+                spMap.values().toArray(spProvincesAmount);
+                Integer[] cureProvincesAmount = new Integer[cureMap.size()];
+                cureMap.values().toArray(cureProvincesAmount);
+                Integer[] deadProvincesAmount = new Integer[deadMap.size()];
+                deadMap.values().toArray(deadProvincesAmount);
+
+                // 将数据填入文件，全部为0将不输入
+                int size = provincesArray.length;
+                for (int i = 0; i < size; i++) {
+                    if (ipProvincesAmount[i] == 0 && spProvincesAmount[i] == 0 && cureProvincesAmount[i] == 0
+                            && deadProvincesAmount[i] == 0)
+                        continue;
+                    else
+                        writer.write(
+                                provincesArray[i] + " 感染患者" + ipProvincesAmount[i] + "人 疑似患者" + spProvincesAmount[i]
+                                        + "人 治愈" + cureProvincesAmount[i] + "人 死亡" + deadProvincesAmount[i] + "人\n");
+                }
+
+            }
+        }
+        writer.write("// 该文档并非真实数据，仅供测试使用");
+        writer.close();
 
     }
 
@@ -298,7 +406,7 @@ class ListCommand {
                 int sum = getAmount(strLine);
                 index = strLine.indexOf(Integer.toString(sum));
                 // 取出流入省份
-                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index-1);
+                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index - 1);
 ////////////////////////////////////////////////////////////////////////////////////
                 System.out.println("\n" + strLine);
                 System.out.println("输出省" + outProvince + "原感染人数" + ipMap.get(outProvince) + "  输入省" + inProvince
@@ -324,7 +432,7 @@ class ListCommand {
                 int sum = getAmount(strLine);
                 index = strLine.indexOf(Integer.toString(sum));
                 // 取出流出省份
-                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index-1);
+                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index - 1);
 ////////////////////////////////////////////////////////////////////////////////////
                 System.out.println("\n" + strLine);
                 System.out.println("输出省" + outProvince + "原疑似人数" + spMap.get(outProvince) + "  输入省" + inProvince
@@ -350,8 +458,9 @@ class ListCommand {
                 // 获得感染人数
                 int ipSum = ipMap.get(province);
 ////////////////////////////////////////////////////////////////////////////////////
-System.out.println("\n" + strLine);
-System.out.println(province+"原感染人数："+ipMap.get(province)+"  原死亡人数："+deadMap.get(province)+"  现死亡："+deadSum);
+                System.out.println("\n" + strLine);
+                System.out.println(province + "原感染人数：" + ipMap.get(province) + "  原死亡人数：" + deadMap.get(province)
+                        + "  现死亡：" + deadSum);
 ////////////////////////////////////////////////////////////
                 // 更新感染人数
                 ipMap.put(province, ipSum - deadSum);
@@ -359,7 +468,7 @@ System.out.println(province+"原感染人数："+ipMap.get(province)+"  原死�
                 deadSum += deadMap.get(province);
                 deadMap.put(province, deadSum);
 ///////////////////////////////////////////////////////////
-                System.out.println(province+"现感染人数："+ipMap.get(province)+"  现死亡人数："+deadMap.get(province));
+                System.out.println(province + "现感染人数：" + ipMap.get(province) + "  现死亡人数：" + deadMap.get(province));
 ////////////////////////////////////////////////////////////
             } else if (strLine.matches(s6)) {
                 // s6 = "\\s*\\S+ 治愈 \\d+人\\s*";
@@ -373,17 +482,18 @@ System.out.println(province+"原感染人数："+ipMap.get(province)+"  原死�
                 int cureSum = getAmount(strLine);
                 // 获得感染人数
                 int ipSum = ipMap.get(province);
-                
+
 ////////////////////////////////////////////////////////////////////////////////////
-System.out.println("\n" + strLine);
-System.out.println(province+"原感染人数："+ipMap.get(province)+"  原治愈人数："+cureMap.get(province)+"  现治愈："+cureSum);
+                System.out.println("\n" + strLine);
+                System.out.println(province + "原感染人数：" + ipMap.get(province) + "  原治愈人数：" + cureMap.get(province)
+                        + "  现治愈：" + cureSum);
 ////////////////////////////////////////////////////////////
                 // 更新感染人数
                 ipMap.put(province, ipSum - cureSum);
                 cureSum += cureMap.get(province);
                 cureMap.put(province, cureSum);
 ///////////////////////////////////////////////////////////
-System.out.println(province+"现感染人数："+ipMap.get(province)+"  现治愈人数："+cureMap.get(province));
+                System.out.println(province + "现感染人数：" + ipMap.get(province) + "  现治愈人数：" + cureMap.get(province));
 ////////////////////////////////////////////////////////////
 
             } else if (strLine.matches(s7)) {
@@ -395,13 +505,14 @@ System.out.println(province+"现感染人数："+ipMap.get(province)+"  现治�
                 province.replace(" ", "");
                 int ipSum = getAmount(strLine);
 ////////////////////////////////////////////////////////////////////////////////////
-System.out.println("\n" + strLine);
-System.out.println(province+"原疑似患者人数："+spMap.get(province)+"  原感染人数："+ipMap.get(province)+" 现确诊："+ipSum);
+                System.out.println("\n" + strLine);
+                System.out.println(province + "原疑似患者人数：" + spMap.get(province) + "  原感染人数：" + ipMap.get(province)
+                        + " 现确诊：" + ipSum);
 //////////////////////////////////////////////////////////////////////////////
                 spMap.put(province, spMap.get(province) - ipSum);
                 ipMap.put(province, ipMap.get(province) + ipSum);
 ///////////////////////////////////////////////////////////////////////////////////
-                System.out.println(province+"现疑似人数："+spMap.get(province)+" 现感染人数："+ipMap.get(province));
+                System.out.println(province + "现疑似人数：" + spMap.get(province) + " 现感染人数：" + ipMap.get(province));
 /////////////////////////////////////////////////////////////////////////////////////
             } else if (strLine.matches(s8)) {
                 // String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
@@ -413,15 +524,17 @@ System.out.println(province+"原疑似患者人数："+spMap.get(province)+"  �
 
                 int excludeSum = getAmount(strLine);
 ////////////////////////////////////////////////////////////////////////////////////
-System.out.println("\n" + strLine);
-System.out.println(province+"原疑似患者人数："+spMap.get(province)+" 现排除："+excludeSum);
+                System.out.println("\n" + strLine);
+                System.out.println(province + "原疑似患者人数：" + spMap.get(province) + " 现排除：" + excludeSum);
 //////////////////////////////////////////////////////////////////////////////
                 spMap.put(province, spMap.get(province) - excludeSum);
 ///////////////////////////////////////////////////////////////////////////////////
-System.out.println(province+"现疑似人数："+spMap.get(province));
+                System.out.println(province + "现疑似人数：" + spMap.get(province));
 /////////////////////////////////////////////////////////////////////////////////////
             }
-        }
+        } // end of while
+        br.close();
+        fstream.close();
     }
 
     /**
@@ -435,6 +548,42 @@ System.out.println(province+"现疑似人数："+spMap.get(province));
         Matcher m = p.matcher(s);
         m.find();
         return Integer.parseInt(s.substring(m.start(), m.end()));
+    }
+    
+    public void out(FileWriter writer,List<String> provinces)throws Exception {
+        for (String province : provinces) {
+            writer.write(province);
+            int size = types.size();
+            String[] needTypes = new String[size];
+            types.toArray(needTypes);
+            if (needTypes[0].equals("ip"))
+                writer.write(" 感染患者" + ipMap.get(province));
+            else if (needTypes[0].equals("sp"))
+                writer.write(" 疑似患者" + spMap.get(province));
+            else if (needTypes[0].equals("cure"))
+                writer.write(" 治愈" + cureMap.get(province));
+            else
+                writer.write(" 死亡" + deadMap.get(province));
+
+            for (int i = 1; i < size - 1; i++) {
+                if (needTypes[i].equals("ip"))
+                    writer.write("人 感染患者"+ipMap.get(province));
+                else if(needTypes[i].equals("sp"))
+                    writer.write("人 疑似患者"+spMap.get(province));
+                else if(needTypes[i].equals("cure"))
+                    writer.write("人 治愈"+cureMap.get(province));
+                else 
+                    writer.write("人 死亡"+deadMap.get(province));
+            }
+            if (needTypes[size-1].equals("ip"))
+                writer.write("人 感染患者" + ipMap.get(province)+"人\n");
+            else if (needTypes[size-1].equals("sp"))
+                writer.write("人 疑似患者" + spMap.get(province)+"人\n");
+            else if (needTypes[size-1].equals("cure"))
+                writer.write("人 治愈" + cureMap.get(province)+"人\n");
+            else
+                writer.write("人 死亡" + deadMap.get(province)+"人\n");
+        }
     }
 
 }
