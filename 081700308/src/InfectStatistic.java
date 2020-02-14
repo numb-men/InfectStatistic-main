@@ -1,3 +1,9 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -327,7 +333,39 @@ class InfectStatistic {
 			exist[d]=1;
 		}
 
+		public static void readFile()
+		{
+			String pathname="D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-22.log.txt";
+			try(FileReader reader = new FileReader(pathname);
+				BufferedReader br = new BufferedReader(reader)	
+			){
+				String line;
+				while((line=br.readLine())!=null)
+				{
+					
+				}
+			}catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
 		
+		public static void writeFile()
+		{
+			try {
+				File writeName=new File("output.txt");
+				writeName.createNewFile();
+				try(FileWriter writer = new FileWriter(writeName);
+					BufferedWriter out = new BufferedWriter(writer)
+					){
+					out.write("text");
+					out.write("text2\r\n");
+					out.flush();
+				}
+			}catch(IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
 		public static void main(String args[ ])
 		{
 			 
@@ -340,6 +378,7 @@ class InfectStatistic {
 			int t=Integer.parseInt(y);
 			t++;
 			System.out.print(x.matches(type8));
+			writeFile();
 		       //System.out.print(getIp(0));
 		      // System.out.println(AddIp(x));
 		}// 方法main结束
