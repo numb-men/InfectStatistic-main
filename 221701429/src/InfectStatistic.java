@@ -78,7 +78,7 @@ class InfectStatistic {
         return new province(null,0,0,0,0);
     }
     //建立HashMap，把命令参数和参数值分开
-    private static HashMap<String, String[]> parseArgs(String[] args) {
+    public static HashMap<String, String[]> parseArgs(String[] args) {
         HashMap<String, String[]> tmp = new HashMap<String, String[]>();
         ArrayList<String> arrValue = new ArrayList<>();
         String key = null;
@@ -116,7 +116,7 @@ class InfectStatistic {
        return tmp;
     }
     //命令对应的行为
-    private static void func(HashMap<String, String[]> parseArgs,String[] args) throws ParseException {
+    public static void func(HashMap<String, String[]> parseArgs,String[] args) throws ParseException {
         ArrayList<province> list = new ArrayList<>();//完整的省份列表
         ArrayList<province> list1 = new ArrayList<>();//经过-province筛选后的列表
         String temp = null;//用来存放-type后的语句段
@@ -235,7 +235,7 @@ class InfectStatistic {
         }
     }
     //将省份排序
-    private static ArrayList<province> sortProvince(ArrayList<province> list){
+    public static ArrayList<province> sortProvince(ArrayList<province> list){
         //Comparator<String> comparator = Collator.getInstance(Locale.CHINA);
         ArrayList<province> newList = new ArrayList<>();
         Comparator<Object> cmp = Collator.getInstance(java.util.Locale.CHINA);
@@ -260,7 +260,7 @@ class InfectStatistic {
         return newList;
     }
     //清空文件内容
-    private static void initFile(String filePath){
+    public static void initFile(String filePath){
         FileWriter writer;
         try {
             writer = new FileWriter(filePath);
@@ -272,7 +272,7 @@ class InfectStatistic {
         }
     }
     //将字符串写入文件
-    private static void writeStringToFile(String filePath, String str) {
+    public static void writeStringToFile(String filePath, String str) {
         try {
             FileWriter fw = new FileWriter(filePath, true);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -285,7 +285,7 @@ class InfectStatistic {
         }
     }
     //判断list中是否含有指定name属性的province
-    private static boolean isListName(ArrayList<province> list, String name){
+    public static boolean isListName(ArrayList<province> list, String name){
         for(int i = 0; i < list.size(); i++){
             if (list.get(i).getName().equals(name)){
                 return true;
@@ -294,7 +294,7 @@ class InfectStatistic {
         return false;
     }
     //对读取到的内容正则匹配
-    private static ArrayList<province> match(String[] allContent){
+    public static ArrayList<province> match(String[] allContent){
         ArrayList<province> list = new ArrayList<>();
         try{
             for(int i = 0; i<allContent.length; i++){
@@ -452,7 +452,7 @@ class InfectStatistic {
         return list;
     }
     //读取目录下的日志
-    private static String[] readFile(String path,String date) throws ParseException {
+    public static String[] readFile(String path,String date) throws ParseException {
         File all = new File(path);
         List allPath = getFile(all,date);
         String[] allContent = new String[allPath.size()];
@@ -464,7 +464,7 @@ class InfectStatistic {
         return allContent;
     }
     //txt转String
-    private static String txt2String(File file) {
+    public static String txt2String(File file) {
         StringBuilder result = new StringBuilder();
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));// 构造一个BufferedReader类来读取文件
@@ -479,7 +479,7 @@ class InfectStatistic {
         return result.toString();
     }
     // 读取文件夹下所有文件名
-    private static List getFile(File file, String date) throws ParseException {
+    public static List getFile(File file, String date) throws ParseException {
         List listLocal = new ArrayList<>();
         if (file != null) {
             File[] f = file.listFiles();
@@ -498,7 +498,7 @@ class InfectStatistic {
         return listLocal;
     }
     //判断字符串是否为日期格式
-    private static boolean isValidDate(String str) {
+    public static boolean isValidDate(String str) {
         boolean convertSuccess = true;
         // 指定日期格式为四位年/两位月份/两位日期，注意yyyy-MM-dd区分大小写；
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -511,16 +511,16 @@ class InfectStatistic {
         return convertSuccess;
     }
     //比较日期前后，time1日期比time2前则返回true，否则返回false
-    private static boolean isBefore(String time1, String time2) throws ParseException {
+    public static boolean isBefore(String time1, String time2) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd");
         Date date1 =  simpleDateFormat.parse(time1);
         Date date2 =  simpleDateFormat.parse(time2);
         return !date1.after(date2);
     }
     public static void main(String[] args) throws ParseException {
-        String cmdLine = "list -date 2020-01-27 -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log" +
-                " -out G:/output.txt";
-        args = cmdLine.split(" ");
+        //String cmdLine = "list -date 2020-01-27 -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log" +
+                //" -out G:/output.txt";
+        //args = cmdLine.split(" ");
         HashMap<String, String[]> parseArgs = parseArgs(args);
         func(parseArgs,args);
     }
