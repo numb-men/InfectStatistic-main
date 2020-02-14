@@ -1,6 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.*;
 
 /**
@@ -13,8 +12,8 @@ import java.util.regex.*;
  */
 class InfectStatistic {
     public static void main(String[] args) throws IOException {
-    	/*FileHandle l=new FileHandle();
-    	l.findFile("D:\\testlog","2020-01-22");*/
+    	FileHandle l=new FileHandle();
+    	l.findFile("D:\\testlog","2020-01-22");
     }
 }
 
@@ -34,8 +33,12 @@ class FileHandle {
         	   strTmp = strTmp.replace("\uFEFF","");
         	}//win10无法建立无BOM,用此去掉开头
         	//这里进行结果统计
-        	List<LogResult> list=dh.calResult(strTmp);
+        	dh.calResult(strTmp);
         }
+		List<LogResult> l=dh.calNationData();
+		for (LogResult a:l) {
+			System.out.printf("%s %d %d %d %d\n",a.getProvince(),a.getIp(),a.getSp(),a.getCure(),a.getDead());
+		}
         buffReader.close();
 	}
 	
@@ -72,57 +75,77 @@ class FileHandle {
 //日志结果类
 class LogResult {
 	private String province;//省份
-	private int ip;
-	private int sp;
-	private int cure;
-	private int dead;
+	private int ip;//感染
+	private int sp;//疑似
+	private int cure;//治愈
+	private int dead;//死亡
+	private String[] order={"全国","安徽","北京","重庆","福建","甘肃","广东","广西",
+			   "贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西",
+			   "辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津",
+			   "西藏","新疆","云南","浙江"};
 	
 	LogResult() {
 		ip=sp=cure=dead=0;
 		province="";
 	}
 	
-	void setProvince (String pro) {
+	void setProvince(String pro) {
 		province=pro;
 	}
 	
-	String getProvince () {
+	String getProvince() {
 		return province;
 	}
 	
-	void setIp (int i) {
+	void setIp(int i) {
 		ip=i;
 	}
 	
-	int getIp () {
+	int getIp() {
 		return ip;
 	}
 	
-	void setSp (int s) {
+	void setSp(int s) {
 		sp=s;
 	}
 	
-	int getSp () {
+	int getSp() {
 		return sp;
 	}
 	
-	void setCure (int c) {
+	void setCure(int c) {
 		cure=c;
 	}
 	
-	int getCure () {
+	int getCure() {
 		return cure;
 	}
 	
-	void setDead (int d) {
+	void setDead(int d) {
 		dead=d;
 	}
 	
-	int getDead () {
+	int getDead() {
 		return dead;
 	}
 	
+	void sum(int i,int s,int c,int d) {
+		ip+=i;
+		sp+=s;
+		cure+=c;
+		dead+=d;
+	}
 	
+	int getIndex (String str) {
+		for (int i=0;i<order.length;i++) {
+			if (str.equals(order[i])) return i;
+		}
+		return -1;
+	}
+
+	public String toString() {
+		return province+" "+ip+" "+sp+" "+cure+" "+dead;
+	}
 }
 
 class DataHandle {
@@ -142,12 +165,62 @@ class DataHandle {
 	}
 	
 	//将单行文本转换成LogResult并加入集合
-	public List<LogResult> calResult(String str) {
+	public void calResult(String str) {
 		Handler addIpHandler=new AddIp(addIp);
 		addIpHandler.getData(str);
-		return list;
 	}
 	
+	//计算全国数据
+	public List<LogResult> calNationData() {
+		LogResult all=new LogResult();
+		List<LogResult> res=new ArrayList<>();
+		all.setProvince("全国");
+		for (LogResult lr:list) {
+			all.sum(lr.getIp(),lr.getSp(),lr.getCure(),lr.getDead());
+		}
+		list.add(all);
+		res=mergeResult();
+		return res;
+	}
+	
+	//合并数据(参考)
+	public List<LogResult> mergeResult() {
+		HashMap<String,LogResult> tempMap=new HashMap<String,LogResult>();
+        for (LogResult lr:list) {
+            String tmpStr=lr.getProvince();
+            if (tempMap.containsKey(tmpStr)) {
+                LogResult temp=new LogResult();
+                temp.setProvince(lr.getProvince());
+                //合并
+                temp.setIp(tempMap.get(tmpStr).getIp()+lr.getIp());
+                temp.setSp(tempMap.get(tmpStr).getSp()+lr.getSp());
+                temp.setCure(tempMap.get(tmpStr).getCure()+lr.getCure());
+                temp.setDead(tempMap.get(tmpStr).getDead()+lr.getDead());
+                //HashMap不允许key重复，当有key重复时，前面key对应的value值会被覆盖
+                tempMap.put(tmpStr,temp);
+            } else {
+                tempMap.put(tmpStr,lr);
+            }
+            
+        }
+         //去重
+        List<LogResult> newList=new ArrayList<>();
+        for (String temp:tempMap.keySet()) {
+            newList.add(tempMap.get(temp));
+        }
+        List<LogResult> sortList=ListSort(newList); 
+        return sortList;
+	}
+	
+	//排序
+	public List<LogResult> ListSort (List<LogResult> list) {
+		Collections.sort(list,new Comparator<LogResult>() {
+			public int compare(LogResult r1,LogResult r2) {
+				return r1.getIndex(r1.getProvince())-r2.getIndex(r2.getProvince());
+			}
+		});
+		return list;
+	}
 	
 	//尝试使用责任链模式，抽象类下方有八个类分别代表八种模式及对应的处理方法
 	//因为没有查到减少类的方法，所以就这么按照网上的例子写了,不是很懂变通
@@ -251,9 +324,9 @@ class DataHandle {
 				LogResult lr2=new LogResult();
 				lr.setProvince(m.group(1));
 				int sp=Integer.parseInt(m.group(3));
-				lr.setIp(-sp);
+				lr.setSp(-sp);
 				lr2.setProvince(m.group(2));
-				lr2.setIp(sp);
+				lr2.setSp(sp);
 				list.add(lr);
 				list.add(lr2);
 				return lr;
@@ -373,7 +446,3 @@ class DataHandle {
 	}
 
 }
-
-
-
-
