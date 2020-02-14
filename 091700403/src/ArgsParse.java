@@ -41,9 +41,9 @@ public class ArgsParse {
 
     String sdata;
 
-    String[] stype;// 多个参数
+    String stype;// 多个参数
 
-    String[] sprovince;// 多个参数
+    String sprovince;// 多个参数
 
     CommandLine cli;
 
@@ -102,10 +102,10 @@ public class ArgsParse {
 
         }
         if (cli.hasOption("type")) {
-            stype = cli.getOptionValues("type");
+            stype = cli.getOptionValue("type");
         }
         if (cli.hasOption("province")) {
-            sprovince = cli.getOptionValues("province");
+            sprovince = cli.getOptionValue("province");
         }
 
     }

@@ -26,11 +26,11 @@ public class ArgsParseTest {
         String[] args = { "-log", "logname", "-out", "outname", "-type", "sp", "-province", "福建" };
         ArgsParse ap = new ArgsParse();
         ap.parse(args);
-        System.out.println(ap.sprovince);
+        // System.out.println(ap.sprovince);
         assertEquals("logname", ap.slog);
-        // assertEquals("福建", ap.sprovince);
+        assertEquals("福建", ap.sprovince);
         assertEquals("outname", ap.sout);
-        // assertEquals("sp", ap.stype);
+        assertEquals("sp", ap.stype);
 
     }
 
