@@ -788,6 +788,11 @@ class StatisticResult {
         }
     }
 
+    /**
+     * 生成全国的统计
+     *
+     * @return
+     */
     public static Region All() {
         Region allRegions = new Region("全国");
         for (Region rg : regions) {
@@ -804,16 +809,23 @@ class StatisticResult {
 
         // -province 为空
         if (province.size() == 0) {
-            // 添加全国统计
-            result.add(All().toStringWithCertainType(type));
             // 添加各省统计
             for (Region rg : regions) {
                 result.add(rg.toStringWithCertainType(type));
             }
+            // 添加全国统计
+            result.add(All().toStringWithCertainType(type));
         }
 
         for (String prv : province) {
-            result.add(get(prv).toStringWithCertainType(type));
+            if (!prv.equals("全国")){
+                result.add(get(prv).toStringWithCertainType(type));
+            }
+        }
+
+        if (province.contains("全国")) {
+            // 添加全国统计
+            result.add(All().toStringWithCertainType(type));
         }
 
         return result;
