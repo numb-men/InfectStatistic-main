@@ -57,7 +57,12 @@ class InfectStatistic {
 		int[] cure=new int[32];
 		int[] dead=new int[32];
 		int[] exist=new int[32];
-		
+		int[] required=new int[32];
+		InfectStatistic()
+		{
+			exist[0]=1;
+		}
+
 		public  int getIp(int n)
 		{
 			return ip[n];
@@ -233,6 +238,7 @@ class InfectStatistic {
 			//提取句末人数
 			int addip=Integer.parseInt(pattern1.split(pattern2.split(text)[3])[0]);
 			//对ip数组进行操作
+			ip[0]+=addip;
 			ip[proToInt(pro)]+=addip;
 			exist[proToInt(pro)]=1;
 		}
@@ -246,6 +252,7 @@ class InfectStatistic {
 			//提取句末人数
 			int addsp=Integer.parseInt(pattern1.split(pattern2.split(text)[3])[0]);
 			//对sp数组进行操作
+			sp[0]+=addsp;
 			sp[proToInt(pro)]+=addsp;
 			exist[proToInt(pro)]=1;
 		}
@@ -290,7 +297,9 @@ class InfectStatistic {
 			int newdead=Integer.parseInt(	pattern1.split(pattern2.split(text)[2])[0]);
 			//对ip dead数组操作
 			int d=proToInt(pro);
+			dead[0]+=newdead;
 			dead[d]+=newdead;
+			ip[0]-=newdead;
 			ip[d]-=newdead;
 			exist[d]=1;
 		}
@@ -303,7 +312,9 @@ class InfectStatistic {
 			int newcure= Integer.parseInt(	pattern1.split(pattern2.split(text)[2])[0]);
 			//对ip cure数组操作
 			int d=proToInt(pro);
+			cure[0]+=newcure;
 			cure[d]+=newcure;
+			ip[0]-=newcure;
 			ip[d]-=newcure;
 			exist[d]=1;
 		}
@@ -316,7 +327,9 @@ class InfectStatistic {
 			int newip= Integer.parseInt(	pattern1.split(pattern2.split(text)[3])[0]);
 			//对ip sp数组操作
 			int d=proToInt(pro);
+			ip[0]+=newip;
 			ip[d]+=newip;
+			sp[0]-=newip;
 			sp[d]-=newip;
 			exist[d]=1;
 		}
@@ -329,27 +342,47 @@ class InfectStatistic {
 			int decsp= Integer.parseInt( 	pattern1.split(pattern2.split(text)[3])[0]);
 			//对sp数组操作
 			int d=proToInt(pro);
+			sp[0]-=decsp;
 			sp[d]-=decsp;
 			exist[d]=1;
 		}
 
-		public static void readFile()
+		public  void readFile()
 		{
-			String pathname="D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-22.log.txt";
+			String pathname="D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-27.log.txt";
 			try(FileReader reader = new FileReader(pathname);
 				BufferedReader br = new BufferedReader(reader)	
 			){
 				String line;
 				while((line=br.readLine())!=null)
 				{
-					
+					if(line.matches(type1))
+						addIp(line);
+					else if(line.matches(type2))
+						addSp(line);
+					else if(line.matches(type3))
+						transIp(line);
+					else if(line.matches(type4))
+						transSp(line);
+					else if(line.matches(type5))
+						addDead(line);
+					else if(line.matches(type6))
+						addCure(line);
+					else if(line.matches(type7))
+						spToIp(line);
+					else if(line.matches(type8))
+						decSp(line);
+					else
+						break;
+						
+						
 				}
 			}catch(IOException e) {
 				e.printStackTrace();
 			}
 		}
 		
-		public static void writeFile()
+		public  void writeFile()
 		{
 			try {
 				File writeName=new File("output.txt");
@@ -357,9 +390,22 @@ class InfectStatistic {
 				try(FileWriter writer = new FileWriter(writeName);
 					BufferedWriter out = new BufferedWriter(writer)
 					){
-					out.write("text");
-					out.write("text2\r\n");
+					for(int i=0;i<32;i++)
+					{
+						if(1==exist[i])
+						{
+							out.write(provinces[i]+" ");
+							out.write("感染患者"+ip[i]+"人 ");
+							out.write("疑似患者"+sp[i]+"人 ");
+							out.write("治愈"+cure[i]+"人 ");
+							out.write("死亡"+dead[i]+"人 ");
+							out.write("\r\n");
+						    out.flush();
+						}
+					}
+					out.write("// 该文档并非真实数据，仅供测试使用\r\n");
 					out.flush();
+					
 				}
 			}catch(IOException e)
 			{
@@ -370,15 +416,12 @@ class InfectStatistic {
 		{
 			 
 			 String x="浙江 排除 疑似患者 7人";
-			// getAddIp(x);
-			 String y="123";
-			 Matcher m=pattern8.matcher(x);
-			 pattern8.pattern();
-			//boolean t = x.matches(type8);
-			int t=Integer.parseInt(y);
-			t++;
+			 InfectStatistic a;
+			 a=new InfectStatistic();
+			
 			System.out.print(x.matches(type8));
-			writeFile();
+			a.readFile();
+			a.writeFile();
 		       //System.out.print(getIp(0));
 		      // System.out.println(AddIp(x));
 		}// 方法main结束
