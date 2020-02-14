@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -79,7 +76,7 @@ class Parameter
                 if(args[i].equals(name))
                 {
                     is_exist = true;
-                    String param = args[i+1];
+                    param = args[i+1];
                     break;
                 }
             }
@@ -105,26 +102,33 @@ class Parameter
         }
     }
 
-    public static List<File> get_file_list(File Dir)
+    public static List<File> get_file_list(String dir) throws MyException
     {
-        String rule = "\\d{4}-\\{2}-\\d{2}.log.txt";
-        List<File> filelist = new ArrayList<>();
+        File Dir = new File(dir);
+        if(!Dir.exists())
+        {
+            throw new MyException("路径不存在!");
+        }
+        String rule = "\\d{4}-\\d{2}-\\d{2}.log.txt";
+        List<File> file_list = new ArrayList<>();
         for(File file : Dir.listFiles())
         {
             if(file.getName().matches(rule))
             {
-                filelist.add(file);
+                file_list.add(file);
             }
         }
-        return filelist;
+        return file_list;
     }
 }
 
 class Info
 {
     public Map<String,List<Integer>> info;
+    public List<String> out_province;//记录最后需要输出的省份
     Info()
     {
+        out_province = new ArrayList<>();
         info = new LinkedHashMap<>();
         List<Integer> new_data = new ArrayList<>();
         new_data.add(0); //记录感染人数
@@ -168,6 +172,135 @@ class Info
         info.put("浙江",new ArrayList<>(new_data));
     }
 
+    public void add_province(String province)
+    {
+        if(out_province.contains(province))
+            return;
+        out_province.add(province);
+    }
+
+    public void Infected(String province,int Count)
+    {
+        List<Integer> province_list = info.get(province);
+        List<Integer> Country_list = info.get("全国");
+        int province_count = province_list.get(0);
+        province_count = province_count + Count;
+
+        int country_count = Country_list.get(0);
+        country_count = country_count + Count;
+
+        province_list.set(0,province_count);
+        Country_list.set(0,country_count);
+    }
+
+    public void Suspected(String province,int Count)
+    {
+        List<Integer> province_list = info.get(province);
+        List<Integer> Country_list = info.get("全国");
+        int province_count = province_list.get(1);
+        province_count = province_count + Count;
+
+        int country_count = Country_list.get(1);
+        country_count = country_count + Count;
+
+        province_list.set(1,province_count);
+        Country_list.set(1,country_count);
+    }
+
+    public void Inflow(String out,String in,int Count,int flag)
+    {
+        List<Integer> out_list = info.get(out);
+        List<Integer> in_list = info.get(in);
+        int out_count = out_list.get(flag);
+        out_count = out_count - Count;
+        int in_count = in_list.get(flag);
+        in_count = in_count + Count;
+
+        out_list.set(flag,out_count);
+        in_list.set(flag,in_count);
+    }
+
+    public void Cured(String province,int Count)
+    {
+        List<Integer> province_list = info.get(province);
+        List<Integer> country_list = info.get("全国");
+        int cure_count = province_list.get(2);
+        int cure_country_count = country_list.get(2);
+        int infectd_count = province_list.get(0);
+        int infectd_country_count = country_list.get(0);
+
+        cure_count = cure_count + Count;
+        province_list.set(2,cure_count);
+        cure_country_count = cure_country_count + Count;
+        country_list.set(2,cure_country_count);
+        infectd_count = infectd_count - Count;
+        province_list.set(0,infectd_count);
+        infectd_country_count = infectd_country_count - Count;
+        country_list.set(0,infectd_country_count);
+    }
+
+    public void Dead(String province,int Count)
+    {
+        List<Integer> province_list = info.get(province);
+        List<Integer> country_list = info.get("全国");
+        int dead_count = province_list.get(3);
+        int dead_country_count = province_list.get(3);
+        int infected_count = province_list.get(0);
+        int infected_country_count = country_list.get(0);
+
+        dead_count = dead_count + Count;
+        province_list.set(3,dead_count);
+        dead_country_count = dead_country_count + Count;
+        country_list.set(3,dead_country_count);
+        infected_count = infected_count - Count;
+        province_list.set(0,infected_count);
+        infected_country_count = infected_country_count - Count;
+        country_list.set(0,infected_country_count);
+    }
+
+    public void Diagnosis(String province,int Count)
+    {
+        List<Integer> province_list = info.get(province);
+        List<Integer> country_list = info.get("全国");
+        int infected_count = province_list.get(0);
+        int infected_country_count = country_list.get(0);
+        int suspected_count = province_list.get(1);
+        int suspected_country_count = country_list.get(1);
+
+        infected_count = infected_count + Count;
+        province_list.set(0,infected_count);
+        infected_country_count = infected_country_count + Count;
+        country_list.set(0,infected_country_count);
+
+        suspected_count = suspected_count - Count;
+        province_list.set(1,suspected_count);
+        suspected_country_count = suspected_country_count - Count;
+        country_list.set(1,suspected_country_count);
+    }
+
+    public void Exclude(String province,int Count)
+    {
+        List<Integer> province_list = info.get(province);
+        List<Integer> country_list = info.get("全国");
+        int suspected_count = province_list.get(1);
+        int suspected_country_count = country_list.get(1);
+
+        suspected_count = suspected_count - Count;
+        province_list.set(1,suspected_count);
+        suspected_country_count = suspected_country_count - Count;
+        country_list.set(1,suspected_country_count);
+    }
+
+    public void doOut()
+    {
+        for(String province : info.keySet())
+        {
+            if(!out_province.contains(province))
+                continue;
+            List<Integer> data = info.get(province);
+        }
+    }
+
 }
 
 class Command
@@ -209,55 +342,104 @@ class Command
         }
         if(date.is_exist && date.param != "")//有date参数且date后参数不为空
         {
-            log_dir = new File(log.param);
-            if(!log_dir.exists())
-            {
-                throw new MyException("路径不存在!");
-            }
-//            execute_date(date.param,log_dir);
+            List<File> file_list = Parameter.get_file_list(log.param);
+            execute_date(date.param,file_list);
+            new_info.doOut();
         }
     }
 
-//    private void execute_date(String date,File log_dir) throws MyException
-//    {
-//        Date date_param;
-//        BufferedReader reader  = null;
-//        List<File> file_list = Parameter.get_file_list(log_dir);
-//        DateFormat date_format = new SimpleDateFormat("yyyy-MM-dd");
-//        try
-//        {
-//            List<Integer> all_data = new_info.info.get("全国");
-//            date_param = date_format.parse(date);
-//            for(File file : file_list)
-//            {
-//                String data_row;
-//                Date file_date = date_format.parse(file.getName().substring(0,file.getName().indexOf(',')));
-//                if(file_date.compareTo(date_param) > 0)
-//                    continue;
-//                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-//                while((data_row = reader.readLine()) != null)
-//                {
-//                    if(data_row.startsWith("//"))
-//                        continue;
-//                    String[] data = data_row.split(" ");
-//                    if(data_row.contains("新增"))
-//                    {
-//                        List<Integer> p_data = new_info.info.get(data[0]);//获取省份信息
-//
-//                    }
-//                }
-//
-//            }
-//
-//        }
-//        catch(Exception ex)
-//        {
-//            throw new MyException(ex.getMessage());
-//        }
-//        finally
-//        {
-//        }
-//    }
+    private void execute_date(String date,List<File> file_list) throws MyException
+    {
+        Date date_param;
+        BufferedReader reader  = null;
+        DateFormat date_format = new SimpleDateFormat("yyyy-MM-dd");
+        try
+        {
+            date_param = date_format.parse(date);
+            Date date_now = date_format.parse(date_format.format(new Date()).toString());
+            if(date_param.compareTo(date_now) > 0)
+                throw new MyException("输入时间大于系统当前时间");
+            for(File file : file_list)
+            {
+                String data_row;
+                Date file_date = date_format.parse(file.getName().substring(0,file.getName().indexOf('.')));
+                if(file_date.compareTo(date_param) > 0)
+                    continue;
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+                while((data_row = reader.readLine()) != null)
+                {
+                    if(data_row.startsWith("//"))
+                        continue;
+                    String[] data = data_row.split(" ");
+                    new_info.add_province(data[0]);
+                    if(data_row.contains("新增"))
+                    {
+                        int count = Integer.parseInt(data[3].substring(0,data[3].length() - 1));
+                        if(data[2].equals("感染患者"))
+                        {
+                            new_info.Infected(data[0],count);
+                        }
+                        if(data[2].equals("疑似患者"))
+                        {
+                            new_info.Suspected(data[0],count);
+                        }
+                    }
+                    if(data_row.contains("流入"))
+                    {
+                        int count = Integer.parseInt(data[4].substring(0,data[4].length() - 1));
+                        if(data[1].equals("感染患者"))
+                        {
+                            new_info.Inflow(data[0],data[3],count,0);
+                        }
+                        if(data[1].equals("疑似患者"))
+                        {
+                            new_info.Inflow(data[0],data[3],count,1);
+                        }
+                    }
+                    if(data_row.contains("治愈"))
+                    {
+                        int count = Integer.parseInt(data[2].substring(0,data[2].length() - 1));
+                        new_info.Cured(data[0],count);
+                    }
+                    if(data_row.contains("死亡"))
+                    {
+                        int count = Integer.parseInt(data[2].substring(0,data[2].length() - 1));
+                        new_info.Dead(data[0],count);
+                    }
+                    if (data_row.contains("确诊感染"))
+                    {
+                        int count = Integer.parseInt(data[3].substring(0,data[3].length() - 1));
+                        new_info.Diagnosis(data[0],count);
+                    }
+                    if (data_row.contains("排除"))
+                    {
+                        int count = Integer.parseInt(data[3].substring(0,data[3].length() - 1));
+                        new_info.Exclude(data[0],count);
+                    }
+                }
+
+            }
+
+        }
+        catch(Exception ex)
+        {
+            throw new MyException(ex.getMessage());
+        }
+        finally
+        {
+            try
+            {
+                if (reader != null)
+                {
+                    reader.close();
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+    }
 
 
 
