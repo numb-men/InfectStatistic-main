@@ -174,10 +174,11 @@ class list implements Command{
     private String log=null;  //日志文件夹路径
     private String out=null;  //输出文件路径
     private HashMap<String,ArrayList> provincemap=new HashMap<>();  //省份和各项数据的对应
+    private LogHandle handler;
     List<Pattern> patternlist=new ArrayList<>();
     list()
     {
-
+        handler=new LogHandle();
     }
 
     public void execute(String[] args)
@@ -228,7 +229,7 @@ class list implements Command{
                 while (br.readLine()!=null)
                 {
                     //把读出来的日志行交给下面处理
-                   // LogHandle.logHandlerList(br.readLine(),provincemap);
+                    handler.logHandlerList(br.readLine(),provincemap);
 
                 }
                 br.close();
@@ -261,7 +262,6 @@ class LogHandle{
     //命令的处理
     LogHandle()
     {
-
         pat.add(new InfectedPatients());
         pat.add(new SuspectedPatients());
         pat.add(new InfectedGo());
@@ -280,7 +280,7 @@ class LogHandle{
             //根据日志行跟哪个类的正则匹配选择类执行统计
             if(line.matches(mypattern.getReg()))
             {
-                mypattern.doCount(hm);
+                mypattern.doCount(line,hm);
                 break;
             }
         }
@@ -298,7 +298,7 @@ abstract class MyPatterns
     String PatientsCure="([\\u4e00-\\u9fa5])+ 治愈 (\\d+)人";//<省> 治愈 n人
     String SuspectedDiagnosis="([\\u4e00-\\u9fa5])+ 疑似患者 确诊感染 (\\d+)人";//<省> 疑似患者 确诊感染 n人
     String SuspectedExclude="([\\u4e00-\\u9fa5])+ 排除 疑似患者 (\\d+)人";//<省> 排除 疑似患者 n人
-    abstract void doCount(HashMap<String,ArrayList> hs);
+    abstract void doCount(String line,HashMap<String,ArrayList> hs);
     abstract String getReg();
 }
 
@@ -306,7 +306,7 @@ class InfectedPatients extends   MyPatterns{
        // private Pattern patt=Pattern.compile(InfectedPatients);
     public String reg="([\\u4e00-\\u9fa5])+ 新增 感染患者 (\\d+)人";//<省> 新增 感染患者 n人
     //根据
-    public void doCount(HashMap<String,ArrayList> hs)
+    public void doCount(String line,HashMap<String,ArrayList> hs)
     {
 
 
@@ -323,7 +323,7 @@ class SuspectedPatients extends MyPatterns{
     //private Pattern patt=Pattern.compile(SuspectedPatients);
     public String reg="([\\u4e00-\\u9fa5])+ 新增 疑似患者 (\\d+)人";//<省> 新增 疑似患者 n人
     //根据
-    public void doCount(HashMap<String,ArrayList> hs)
+    public void doCount(String line,HashMap<String,ArrayList> hs)
     {
 
 
@@ -340,7 +340,7 @@ class InfectedGo extends MyPatterns{
     //private Pattern patt=Pattern.compile(InfectedGo);
     public String reg="([\\u4e00-\\u9fa5])+ 感染患者 流入 ([\\u4e00-\\u9fa5])+ (\\d+)人";//<省1> 感染患者 流入 <省2> n人
     //根据
-    public void doCount(HashMap<String,ArrayList> hs)
+    public void doCount(String line,HashMap<String,ArrayList> hs)
     {
 
 
@@ -357,7 +357,7 @@ class SuspectedGo extends MyPatterns{
     //private Pattern patt=Pattern.compile(SuspectedGo);
     public String reg="([\\u4e00-\\u9fa5])+ 疑似患者 流入 ([\\u4e00-\\u9fa5])+ (\\d+)人";//<省1> 疑似患者 流入 <省2> n人
     //根据
-    public void doCount(HashMap<String,ArrayList> hs)
+    public void doCount(String line,HashMap<String,ArrayList> hs)
     {
 
 
@@ -374,7 +374,7 @@ class PatientsDie extends MyPatterns{
     //private Pattern patt=Pattern.compile(PatientsDie);
     public String reg="([\\u4e00-\\u9fa5])+ 死亡 (\\d+)人";//<省> 死亡 n人
     //根据
-    public void doCount(HashMap<String,ArrayList> hs)
+    public void doCount(String line,HashMap<String,ArrayList> hs)
     {
 
 
@@ -391,7 +391,7 @@ class PatientsCure extends MyPatterns{
     //private Pattern patt=Pattern.compile(PatientsCure);
     public String reg="([\\u4e00-\\u9fa5])+ 治愈 (\\d+)人";//<省> 治愈 n人
     //根据
-    public void doCount(HashMap<String,ArrayList> hs)
+    public void doCount(String line,HashMap<String,ArrayList> hs)
     {
 
 
@@ -408,7 +408,7 @@ class SuspectedDiagnosis extends MyPatterns{
     //private Pattern patt=Pattern.compile(SuspectedDiagnosis);
     public String reg="([\\u4e00-\\u9fa5])+ 疑似患者 确诊感染 (\\d+)人";//<省> 疑似患者 确诊感染 n人
     //根据
-    public void doCount(HashMap<String,ArrayList> hs)
+    public void doCount(String line,HashMap<String,ArrayList> hs)
     {
 
 
@@ -425,7 +425,7 @@ class SuspectedExclude extends MyPatterns{
    // private Pattern patt=Pattern.compile(SuspectedExclude);
    public String reg="([\\u4e00-\\u9fa5])+ 排除 疑似患者 (\\d+)人";//<省> 排除 疑似患者 n人
     //根据
-    public void doCount(HashMap<String,ArrayList> hs)
+    public void doCount(String line,HashMap<String,ArrayList> hs)
     {
 
 
