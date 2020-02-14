@@ -1,5 +1,4 @@
 
-
 import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -182,36 +181,6 @@ class CmdArgs {
         }
         return null;
     }
-
-    /**
-     * 判断该命令是否有对应的参数
-     *
-     * @param key
-     * @return
-     */
-    public boolean has(String key) {
-        return this.argMap.containsKey(key);
-    }
-
-    //---------------------------getter/setter-----------------↓-------------------
-
-    public HashMap<String, String[]> getArgMap() {
-        return argMap;
-    }
-
-    public void setArgMap(HashMap<String, String[]> argMap) {
-        this.argMap = argMap;
-    }
-
-    public String[] getArgs() {
-        return args;
-    }
-
-    public void setArgs(String[] args) {
-        this.args = args;
-    }
-
-    //---------------------------getter/setter----------------↑--------------------
 }
 
 //------------------------------命令模式实现list命令--------------↓-----------------------
@@ -314,7 +283,7 @@ class MyList {
         if (this.cmdArgs == null || this.dir == null) {
             return;
         }
-        getLogPath();
+        getLogPaths();
     }
 
     /**
@@ -402,7 +371,7 @@ class MyList {
      *
      * @throws FileNotFoundException
      */
-    private void getLogPath() throws FileNotFoundException {
+    private void getLogPaths() throws FileNotFoundException {
         logPath = FileOperate.getAllFileName(dir);
         //-date 参数日期
         String dateValue = this.cmdArgs.getArgVal(PARAMS[2]);
@@ -511,6 +480,66 @@ class MyList {
         outStr += REMIND;
         return outStr;
     }
+
+    //------------------------------------getter/setter-----------↓------------------------------
+
+    public String getDir() {
+        return dir;
+    }
+
+    public void setDir(String dir) {
+        this.dir = dir;
+    }
+
+    public ArrayList<String> getLogPath() {
+        return logPath;
+    }
+
+    public void setLogPath(ArrayList<String> logPath) {
+        this.logPath = logPath;
+    }
+
+    public String[] getProvinceValue() {
+        return provinceValue;
+    }
+
+    public void setProvinceValue(String[] provinceValue) {
+        this.provinceValue = provinceValue;
+    }
+
+    public String[] getOutType() {
+        return outType;
+    }
+
+    public void setOutType(String[] outType) {
+        this.outType = outType;
+    }
+
+    public String getOutPath() {
+        return outPath;
+    }
+
+    public void setOutPath(String outPath) {
+        this.outPath = outPath;
+    }
+
+    public CmdArgs getCmdArgs() {
+        return cmdArgs;
+    }
+
+    public void setCmdArgs(CmdArgs cmdArgs) {
+        this.cmdArgs = cmdArgs;
+    }
+
+    public LinkedHashMap<String, ProvinceStatus> getLinkedHashMap() {
+        return linkedHashMap;
+    }
+
+    public void setLinkedHashMap(LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+        this.linkedHashMap = linkedHashMap;
+    }
+
+    //------------------------------------getter/setter-----------↑------------------------------
 }
 
 /**
