@@ -1,10 +1,9 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 
 /**
@@ -15,7 +14,7 @@ import java.io.UnsupportedEncodingException;
  * @version xxx
  * @since xxx
  */
-//省份
+/*省份相关信息*/
 class Province{
 	String name;
 	public int ip,sp,cure,dead;
@@ -24,82 +23,158 @@ class Province{
 
 
 class InfectStatistic{
-    public static void main(String[] args) throws FileNotFoundException{
-    	String strLine;
-    	Province[] province = new Province[31];
-    	String result = "F:\\Users\\lenovo\\Documents\\GitHub\\InfectStatistic-main\\example\\log\\省份.txt";
-    	//省份名文件地址
-    	FileInputStream fstream = new FileInputStream(new File(result));
-		InputStreamReader isr = null;
-		
-		try{
-			isr = new InputStreamReader(fstream,"UTF-8");
-		}
-		catch(UnsupportedEncodingException e1){
-			// TODO 自动生成的 catch 块
-			e1.printStackTrace();
-		} //指定以UTF-8编码读入
-    	BufferedReader br = new BufferedReader(isr);//构造一个BufferedReader，里面存放在控制台输入的字节转换后成的字符。
-    	try{
-    		int i = 0; 
-			while((strLine = br.readLine()) != null){
-				province[i] = new Province();
-				province[i].name = strLine;
-				i++;
-			}
-		}
-    	catch(IOException e){
-			// TODO 自动生成的 catch 块
-			e.printStackTrace();
-		}
+	private static final int PROVINCE_NUM = 31;
+	private static final String PROVINCE[] = {"安徽","北京","重庆","福建","甘肃","广东","广西","贵州",
+				"海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海",
+				"山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"
+	};
+	
+	
+    public static void main(String[] args) throws IOException{
+    	String log = null,data = null,type = null,strLine = "";
+		String content = null;
     	
-    	result = "F:\\Users\\lenovo\\Documents\\GitHub\\InfectStatistic-main\\example\\log\\2020-01-22.log.txt";
-    	//log文件地址
-    	fstream = new FileInputStream(new File(result));
-		try{
-			isr = new InputStreamReader(fstream,"UTF-8");
-		}
-		catch(UnsupportedEncodingException e1){
-			// TODO 自动生成的 catch 块
-			e1.printStackTrace();
-		} //指定以UTF-8编码读入
-		br = new BufferedReader(isr);//构造一个BufferedReader，里面存放在控制台输入的字节转换后成的字符。
-    	try{
-			while((strLine = br.readLine()) != null){
-				String str[] = strLine.split(" ");//用空格分隔每一行中的记录
-				if(!str[0].substring(0,2).equals("//")){
-					Update(str,province,str.length);
-				}
-			}
-		}
-    	catch(IOException e){
-			// TODO 自动生成的 catch 块
-			e.printStackTrace();
-		}
     	
-    	for(int i = 0;i<31;i++){
-    		System.out.println(province[i].name + " "
-    				 + "感染患者" + province[i].ip + " "
-    				 + "疑似患者" + province[i].sp + " "
-    				 + "治愈" + province[i].cure + " "
-    				 + "死亡" + province[i].dead);
-    	}
-    }
+    			
+    	Province[] province = new Province[PROVINCE_NUM+1];
+    	initProvince(province);//初始化省份信息
+    	
+    	if(args[0].equals("list")){
+    		for(int i = 1;i < args.length;i++){
+    			if(args[i].substring(0,1).equals("-")){
+    				switch(args[i]){
+    					case "-log":
+    						log = args[i+1];
+    						break;
+    					case "-data":
+    						data = args[i+1];
+    						break;
+    					case "-date":
+    						break;
+    					case "-type":
+    						break;
+    					case "-province":
+    						break;
+    				}
+    			}
+    			
+    		}
+    		
+    		log = "D:\\log\\2020-01-22.log.txt";//测试数据，最后应删除
+    		
+    		if(log == null || data == null){
+    			System.out.println("没有输入log或没有输入data，请重新输入");
+    		}
+    		else{
+    			System.out.println(log);
+    			initProvince(province);
+    			FileInputStream fstream = new FileInputStream(new File(log));
+    			InputStreamReader isr = new InputStreamReader(fstream,"UTF-8");
+  			  	BufferedReader br = new BufferedReader(isr);//构造一个BufferedReader，里面存放在控制台输入的字节转换后成的字符。
+  			  	while((strLine = br.readLine()) != null){
+  			  		String str[] = strLine.split(" ");//用空格分隔每一行中的记录 
+  			  		if(!str[0].substring(0,2).equals("//")){
+  			  			update(str,province,str.length); 
+  			  		}
+  				}
+  			  	
+  			  	province[PROVINCE_NUM] = new Province();
+  			  	for(int i = 0;i < PROVINCE_NUM;i++){
+  			  		province[PROVINCE_NUM].ip += province[i].ip;
+  			  		province[PROVINCE_NUM].sp += province[i].sp;
+  			  		province[PROVINCE_NUM].cure += province[i].cure;
+  			  		province[PROVINCE_NUM].dead += province[i].dead;
+  			  	}//计算全国疫情情况
+  			  	
+  			  	content = "全国" + " "
+    				+ "感染患者" + province[PROVINCE_NUM].ip + "人" + " "
+    				+ "疑似患者" + province[PROVINCE_NUM].sp + "人" + " "
+    				+ "治愈" + province[PROVINCE_NUM].cure + "人" + " "
+    				+ "死亡" + province[PROVINCE_NUM].dead + "人" + "\n";//插入全国疫情情况
 
+  			  	for(int i = 0;i < PROVINCE_NUM;i++){
+  			  		if(province[i].ip != 0 || province[i].sp != 0 || province[i].cure != 0 || province[i].dead != 0){
+  			  			content = content + province[i].name + " "
+  		    				+ "感染患者" + province[i].ip + "人" + " "
+  		    				+ "疑似患者" + province[i].sp + "人" + " "
+  		    				+ "治愈" + province[i].cure + "人" + " "
+  		    				+ "死亡" + province[i].dead + "人" + "\n";
+  			  		}
+  			  	}//插入各省份疫情
+  			  	
+  			  	content = content + "// 该文档并非真实数据，仅供测试使用";
+  			  	write("D:\\out.txt",content);
+  			  	
+    		}
+    		
+    		
+    		
+			
+			/*
+			 * for(int i = 0;i < PROVINCE_NUM;i++){ System.out.println(province[i].name +
+			 * " " + "感染患者" + province[i].ip + " " + "疑似患者" + province[i].sp + " " + "治愈" +
+			 * province[i].cure + " " + "死亡" + province[i].dead); }
+			 */
+			 
+    		 
+    	} 
+    		
+    	
+    		
+			
+			 /* String strLine; Province[] province = new Province[PROVINCE_NUM]; String
+			  result =
+			  "F:\\Users\\lenovo\\Documents\\GitHub\\InfectStatistic-main\\example\\log\\省份.txt";
+			  //省份名文件地址 FileInputStream fstream = new FileInputStream(new File(result));
+			  InputStreamReader isr = new InputStreamReader(fstream,"UTF-8");
+			  BufferedReader br = new
+			  BufferedReader(isr);//构造一个BufferedReader，里面存放在控制台输入的字节转换后成的字符。
+			  
+			  for(int i=0;(strLine = br.readLine()) != null;i++) { province[i] = new
+			  Province(); province[i].name = strLine; }
+			  
+			  result =
+			  "F:\\Users\\lenovo\\Documents\\GitHub\\InfectStatistic-main\\example\\log\\2020-01-22.log.txt";
+			  //log文件地址 fstream = new FileInputStream(new File(result)); isr = new
+			  InputStreamReader(fstream,"UTF-8"); br = new
+			  BufferedReader(isr);//构造一个BufferedReader，里面存放在控制台输入的字节转换后成的字符。
+			  
+			  while((strLine = br.readLine()) != null){ String str[] =
+			  strLine.split(" ");//用空格分隔每一行中的记录 if(!str[0].substring(0,2).equals("//")){
+			  Update(str,province,str.length); } }
+			  
+			  for(int i = 0;i < PROVINCE_NUM;i++){ System.out.println(province[i].name +
+			  " " + "感染患者" + province[i].ip + " " + "疑似患者" + province[i].sp + " " + "治愈" +
+			  province[i].cure + " " + "死亡" + province[i].dead); }*/
+		 
+    }
     
-	private static void Update(String str[],Province province[],int length){//读取Log文件后更新省份信息变动
+    
+    
+    /*初始化省份信息*/
+    private static void initProvince(Province province[]){
+    	for(int i = 0;i < PROVINCE_NUM;i++) {
+    		province[i] = new Province();
+    		province[i].name = PROVINCE[i];
+    	}
+    	
+    }
+    
+    
+    /*读取Log文件后更新省份信息变动*/
+	private static void update(String str[],Province province[],int length){
 		int num = 0;//记录变动人数
 		int i = 0;//记录变动省份
 		str[length - 1] = str[length - 1].trim();
-		if(str[length - 1] != null&&!"".equals(str[length - 1])){
-			for(int k = 0;k<str[length - 1].length();k++){
+		if(str[length - 1] != null && !"".equals(str[length - 1])){
+			for(int k = 0;k < str[length - 1].length();k++){
 				if(str[length - 1].charAt(k) >= 48 && str[length - 1].charAt(k) <= 57){
 					num = 10*num+str[length - 1].charAt(k) - 48;
 				}
 			}
 		}
 		
-		while(!str[0].equals(province[i].name)&&i<31){
+		while(!str[0].equals(province[i].name) && i < PROVINCE_NUM){
 			i++;
 		}
 		
@@ -132,7 +207,7 @@ class InfectStatistic{
 		}
 		else if(length == 5){
 			int j = 0;
-			while(!str[3].equals(province[j].name)&&j<31){
+			while(!str[3].equals(province[j].name) && j < PROVINCE_NUM){
 				j++;
 			}
 			if(str[1].equals("疑似患者")){//a省疑似患者流入b省
@@ -145,6 +220,28 @@ class InfectStatistic{
 			}
 		}
 	}
+	
+	
+	/*写TXT文件保存到指定位置*/
+	public static void write(String data,String content){    
+		FileOutputStream fstream = null;
+		File file = new File(data);
+			try {
+				if(file.exists()){
+					file.createNewFile();
+				}
+				fstream = new FileOutputStream(file);
+				fstream.write(content.getBytes());
+				fstream.flush();
+				fstream.close();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+	}
+	
+	
+	
 	
 
 }
