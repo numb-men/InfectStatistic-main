@@ -2,4 +2,12 @@ t.js
 package-lock.json
 package.json
 node_modules
+<<<<<<< Updated upstream
 add*.js
+=======
+add*
+add*
+061700150/src/node_modules
+061700150/src/package.json
+061700150/src/coverage
+>>>>>>> Stashed changes
