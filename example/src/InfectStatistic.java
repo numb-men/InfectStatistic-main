@@ -7,7 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -100,16 +103,10 @@ class InfectStatistic{
   			}//插入各省份疫情
   			  	
   			content = content + "// 该文档并非真实数据，仅供测试使用";
-  			write("D:\\out.txt",content);
+  			write(data,content);
   			  	
     	}
     }
-    		
-			/*
-			 * for(int i = 0;i < PROVINCE_NUM;i++){ System.out.println(province[i].name +
-			 * " " + "感染患者" + province[i].ip + " " + "疑似患者" + province[i].sp + " " + "治愈" +
-			 * province[i].cure + " " + "死亡" + province[i].dead); }
-			 */
 
     
     /*初始化省份信息*/
@@ -241,4 +238,23 @@ class InfectStatistic{
         }
         return result;
     }
+	
+	
+	/*比较两个时间前后*/
+	public static int timeCompare(String time1,String time2){
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		Calendar c1=Calendar.getInstance();
+		Calendar c2=Calendar.getInstance();
+		
+		try {
+			c1.setTime(formatter.parse(time1));
+			c2.setTime(formatter.parse(time2));
+		}
+		catch (ParseException e){
+			e.printStackTrace();
+		}
+		
+		int result=c1.compareTo(c2);
+		return result;
+	}
 }
