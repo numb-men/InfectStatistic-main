@@ -8,6 +8,16 @@ const Total = {  //存放统计数据
 const CmdParam = {  //存放命令参数
    log: [], out: [], date: [], type: [], province: [],
 }
+const REG = [
+   /(\S{2,3})\s新增 感染患者 (\d+)人/g,
+   /(\S{2,3})\s新增 疑似患者 (\d+)人/g,
+   /(\S{2,3})\s疑似患者 流入 (\S{2,3})\s(\d+)人/g,
+   /(\S{2,3})\s感染患者 流入 (\S{2,3})\s(\d+)人/g,
+   /(\S{2,3})\s死亡 (\d+)人/g,
+   /(\S{2,3})\s治愈 (\d+)人/g,
+   /(\S{2,3})\s疑似患者 确诊感染 (\d+)人/g,
+   /(\S{2,3})\s排除 疑似患者 (\d+)人/g,
+]
 var reading = '',
    article = '',
    argv = process.argv.slice(2),
@@ -35,35 +45,36 @@ function appendData(date) {
          }
          return res.slice(1, 4) //返回正则匹配的组内容
       }
-      if (res = match(/(\S{2,3}) 新增 感染患者 (\d+)人/g))  //正则
-         Total.ip[res[0]] += Number(res[1])
-      if (res = match(/(\S{2,3}) 新增 疑似患者 (\d+)人/g))
+      if (res = match(REG[0])) //正则
+         Total.ip[res[0]] += Number(res[1])  
+      else if (res = match(REG[1]))
          Total.sp[res[0]] += Number(res[1])
-      if (res = match(/(\S{2,3})\s疑似患者 流入 (\S{2,3})\s(\d+)人/g, true)) {
+      else if (res = match(REG[2], true)) {
          Total.sp[res[0]] -= Number(res[2])
          Total.sp[res[1]] += Number(res[2])
       }
-      if (res = match(/(\S{2,3})\s感染患者 流入 (\S{2,3})\s(\d+)人/g, true)) {
+      else if (res = match(REG[3], true)) {
          Total.ip[res[0]] -= Number(res[2])
          Total.ip[res[1]] += Number(res[2])
       }
-      if (res = match(/(\S{2,3})\s死亡 (\d+)人/g)) {
+      else if (res = match(REG[4])) {
          Total.ip[res[0]] -= Number(res[1])
          Total.dead[res[0]] += Number(res[1])
       }
-      if (res = match(/(\S{2,3})\s治愈 (\d+)人/g)) {
+      else if (res = match(REG[5])) {
          Total.cure[res[0]] += Number(res[1])
          Total.ip[res[0]] -= Number(res[1])
       }
-      if (res = match(/(\S{2,3})\s疑似患者 确诊感染 (\d+)人/g)) {
+      else if (res = match(REG[6])) {
          Total.ip[res[0]] += Number(res[1])
          Total.sp[res[0]] -= Number(res[1])
       }
-      if (res = match(/(\S{2,3})\s排除 疑似患者 (\d+)人/g))
+      else if (res = match(REG[7]))
          Total.sp[res[0]] -= Number(res[1])
    })
 }
 function washCmdParam(){
+   if(argv[0]!='list') throw new Error('仅能接受list命令！')
    argv.slice(1).forEach(v => {
       var checked = false  //checked为true，说明该参数是一个以-为前缀的key
       for (item of Object.keys(CmdParam))
@@ -74,6 +85,7 @@ function washCmdParam(){
          }
       !checked && CmdParam[reading].push(v) //统计键值对
    })
+   if(!fs.existsSync(CmdParam.log[0])) throw new Error('输入的日志目录不存在！')
    if (fs.readdirSync(CmdParam.log[0]).sort().reverse()[0].split('.')[0] < CmdParam.date[0])
       throw new Error('日期超出范围！（-date不会提供在日志最晚一天后的日期）');
    if (!CmdParam.date[0]) 
