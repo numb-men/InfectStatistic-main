@@ -40,12 +40,13 @@ class InfectStatistic{
 	
     public static void main(String[] args) throws IOException{
     	String log = null,out = null,date = null,content = null;
-    	String[] type = null,prov = null;
+    	String[] type = new String[4],prov = new String[PROVINCE_NUM+1];
     	Province[] province = new Province[PROVINCE_NUM+1];
     	initProvince(province);//初始化省份信息
     	
     	if(args[0].equals("list")){
     		for(int i = 1;i < args.length;i++){
+    			int temp = 0;
     			if(args[i].substring(0,1).equals("-")){
     				switch(args[i]){
     					case "-log":
@@ -58,15 +59,27 @@ class InfectStatistic{
     						date = args[i+1];
     						break;
     					case "-type":
+    						while(args[i+1].equals(null) && !args[i+1].substring(0,1).equals("-")){
+    							type[temp] = new String();
+    							type[temp] = args[i+1];
+    							temp++;
+    							i++;
+    						}
     						break;
     					case "-province":
+    						while(args[i+1].equals(null) && !args[i+1].substring(0,1).equals("-")){
+    							System.out.println(temp);
+    							prov[temp] = new String();
+    							prov[temp] = args[i+1];
+    							System.out.println(prov[temp]);
+    							temp++;
+    							i++;
+    						}
     						break;
     				}
     			}
     		}
-			/*
-			 * log = "D:\\log\\2020-01-22.log.txt";//测试数据，最后应删除
-			 */
+			
     		if(log == null || out == null){
     			System.out.println("没有输入log或没有输入out，请重新输入");
     		}
