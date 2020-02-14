@@ -8,8 +8,13 @@
  */
 
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Matcher;
@@ -28,10 +33,161 @@ interface Command
  */
 class ReceiveCommand
 {
+	private int[][] data;
+	private String[] provinceName;
+	
+	public ReceiveCommand() 
+	{
+		data = new int[4][32];
+		for(int i = 0;i < 4;i++) 
+		{
+			for(int j = 0;j < 32;j++)
+			{
+				data[i][j] = 0;
+			}
+		}
+		provinceName = new String[] {
+				"中国","安徽","北京","重庆","福建","甘肃","广东","广西",
+				"贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林",
+				"江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西",
+				"陕西","上海","四川","天津","西藏","新疆","云南","浙江"
+		};
+	}
+	
+	public int getProvinceId(String province)
+	{
+		for(int i = 0;i < 32;i++)
+		{
+			if(province.equals(this.provinceName[i]))
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	/*用于读取文件*/
+	public void readFile(String path) 
+	{
+		int num;
+		RegularExpression regularExpression = new RegularExpression("");
+		File file=new File(path);//创建文件对象
+        String encoding="UTF-8";//设置读取文件的编码格式
+        if(file.isFile()&&file.exists()){//判断文件是否存在
+            try {
+                FileInputStream fisr=new FileInputStream(file);            
+                InputStreamReader isr=new InputStreamReader(fisr,encoding);//封装文件输入流，并设置编码方式                
+                BufferedReader br=new BufferedReader(isr);               
+                String txt=null;
+                while((txt=br.readLine())!=null){//按行读取文件，每次读取一行               	
+                	String[] splited = txt.split("\\s+");
+                	String number;
+                	int number1;
+                	int number2;
+                	switch(regularExpression.fileMatch(txt))
+                	{
+                	case 1:                		
+                    	number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
+                    	num = Integer.parseInt(number);
+                    	number1 = this.getProvinceId(splited[0]);
+                    	data[0][number1] = data[0][number1] + num;
+                    	System.out.println("case 1's num:"+num);
+                		break;
+                		
+                	case 2:                		
+                    	number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
+                    	num = Integer.parseInt(number);
+                    	number1 = this.getProvinceId(splited[0]);
+                    	data[1][number1] = data[1][number1] + num;
+                    	System.out.println("case 2's num:"+num);
+                		break;
+                		
+                	case 3:
+                		number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
+                    	num = Integer.parseInt(number);
+                    	number1 = this.getProvinceId(splited[0]);
+                    	number2 = this.getProvinceId(splited[3]);
+                    	data[0][number1] = data[0][number1] - num;
+                    	data[0][number2] = data[0][number2] + num;
+                    	System.out.println("case 3's num:"+num);
+                		break;
+                		
+                	case 4:
+                		number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
+                    	num = Integer.parseInt(number);
+                    	number1 = this.getProvinceId(splited[0]);
+                    	number2 = this.getProvinceId(splited[3]);
+                    	data[1][number1] = data[1][number1] - num;
+                    	data[1][number2] = data[1][number2] + num;
+                    	System.out.println("case 4's num:"+num);
+                		break;
+                		
+                	case 5:
+                		number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
+                    	num = Integer.parseInt(number);
+                    	number1 = this.getProvinceId(splited[0]);
+                    	data[0][number1] = data[0][number1] - num;
+                    	data[3][number1] = data[3][number1] + num;
+                    	System.out.println("case 5's num:"+num);
+                		break;
+                		
+                	case 6:
+                		number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
+                    	num = Integer.parseInt(number);
+                    	number1 = this.getProvinceId(splited[0]);
+                    	data[0][number1] = data[0][number1] - num;
+                    	data[2][number1] = data[2][number1] + num;
+                    	System.out.println("case 6's num:"+num);
+                		break;
+                		
+                	case 7:
+                		number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
+                    	num = Integer.parseInt(number);
+                    	number1 = this.getProvinceId(splited[0]);
+                    	data[1][number1] = data[1][number1] - num;
+                    	data[0][number1] = data[0][number1] + num;
+                    	System.out.println("case 7's num:"+num);
+                		break;
+                		
+                	case 8:
+                		number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
+                    	num = Integer.parseInt(number);
+                    	number1 = this.getProvinceId(splited[0]);
+                    	data[1][number1] = data[1][number1] - num;    
+                    	System.out.println("case 8's num:"+num);
+                		break;
+                		
+                	default:
+                		break;
+                		
+                	}
+                }
+                fisr.close();
+                isr.close();
+                br.close();
+            } catch (FileNotFoundException e) {                
+                e.printStackTrace();
+            }catch (UnsupportedEncodingException e) {              
+                e.printStackTrace();
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+	}
+	
 	
 	public void listDate(ListCommand listCommand)
 	{
 		System.out.println("接受到listDate命令，正在执行中......");
+		this.readFile("E:\\Git\\GitLocal\\InfectStatistic-main\\example\\log\\2020-01-22.log.txt");
+		
+		for(int i = 1;i < 32;i++) {
+			System.out.print(provinceName[i]+" :");
+			for(int j = 0;j < 4;j++) {
+				System.out.print(data[j][i]+" ");
+			}
+			System.out.println("\n");
+		}
 	}
 	
 	public void listType(ListCommand listCommand)
@@ -44,6 +200,7 @@ class ReceiveCommand
 		System.out.println("接受到listProvince命令，正在执行中......");
 	}
 }
+
 
 /*
  * 命令发送者控制器类，用于封装命令
@@ -91,8 +248,7 @@ class List implements Command
 		{
 			case "-date":
 				if(!listCommand.isPathRight()) 
-				{
-					
+				{					
 					return;
 				}		
 				
@@ -100,7 +256,10 @@ class List implements Command
 				break;
 				
 			case "-type":
-				
+				if(!listCommand.isPathRight()) 
+				{					
+					return;
+				}	
 				rc.listType(listCommand);
 				break;
 				
@@ -158,9 +317,28 @@ class Path
 }
 
 /*
+ * 日期类
+ */
+class Time
+{
+	private String time;
+	
+	public Time(String time) 
+	{
+		this.time = time;
+	}
+	
+	/*日期比较函数*/
+	public static boolean timeCompare(String commandTime,String logTime) 
+	{
+		return true;
+	}
+}
+/*
  * list命令实体类，用于命令解析后存取命令实体
  */
-class ListCommand{
+class ListCommand
+{
 	private String option;
 	private ArrayList<String> parameter;
 	private String readPath;
@@ -369,11 +547,63 @@ class CommandAnalyze
 class RegularExpression
 {
 	private String str = "";
+	private String type1 = "\\W+ 新增 感染患者 [0-9]+人\\s*";
+	private String type2 = "\\W+ 新增 疑似患者 [0-9]+人\\s*";
+	private String type3 = "\\W+ 感染患者 流入 \\W+ [0-9]+人\\s*";
+	private String type4 = "\\W+ 疑似患者 流入 \\W+ [0-9]+人\\s*";
+	private String type5 = "\\W+ 死亡 [0-9]+人\\s*";
+	private String type6 = "\\W+ 治愈 [0-9]+人\\s*";
+	private String type7 = "\\W+ 疑似患者 确诊感染 [0-9]+人\\s*";
+	private String type8 = "\\W+ 排除 疑似患者 [0-9]+人\\s*";
+		
 	
 	public RegularExpression(String cmd) 
 	{
 		str = cmd;
 	}
+	
+	/*验证字符串是否匹配*/
+	public boolean isMatch(String compile,String str)
+	{		
+		Pattern p = Pattern.compile(compile);
+		Matcher m = p.matcher(str);
+		boolean isValid = m.matches();
+		return isValid;
+	}
+	
+	/*文件行匹配*/
+	public int fileMatch(String str)
+	{
+		if(this.isMatch(type1, str))
+			return 1;
+		else if(this.isMatch(type2, str))
+			return 2;
+		else if(this.isMatch(type3, str))
+			return 3;
+		else if(this.isMatch(type4, str))
+			return 4;
+		else if(this.isMatch(type5, str))
+			return 5;
+		else if(this.isMatch(type6, str))
+			return 6;
+		else if(this.isMatch(type7, str))
+			return 7;
+		else if(this.isMatch(type8, str))
+			return 8;
+		else 
+			return -1;
+	}
+	
+	/*用于截取人数变化数值*/
+	public String getSubUtilSimple(String soap){  
+		String rgex = "(.*?)人";
+        Pattern pattern = Pattern.compile(rgex);// 匹配的模式  
+        Matcher m = pattern.matcher(soap);  
+        while(m.find()){  
+            return m.group(1);  
+        }  
+        return "";  
+    }  
 	
 	/*正则匹配命令*/
 	/*判断list -date选项命令格式是否正确*/	 
