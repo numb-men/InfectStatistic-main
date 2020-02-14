@@ -1,9 +1,14 @@
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -31,11 +36,9 @@ class InfectStatistic{
 	
 	
     public static void main(String[] args) throws IOException{
-    	String log = null,data = null,type = null,strLine = "";
+    	String log = null,data = null,type = null,strLine = null;
 		String content = null;
     	
-    	
-    			
     	Province[] province = new Province[PROVINCE_NUM+1];
     	initProvince(province);//初始化省份信息
     	
@@ -57,28 +60,20 @@ class InfectStatistic{
     						break;
     				}
     			}
-    			
     		}
-    		
-    		log = "D:\\log\\2020-01-22.log.txt";//测试数据，最后应删除
-    		
+			/*
+			 * log = "D:\\log\\2020-01-22.log.txt";//测试数据，最后应删除
+			 */
     		if(log == null || data == null){
     			System.out.println("没有输入log或没有输入data，请重新输入");
     		}
     		else{
-    			System.out.println(log);
     			initProvince(province);
-    			FileInputStream fstream = new FileInputStream(new File(log));
-    			InputStreamReader isr = new InputStreamReader(fstream,"UTF-8");
-  			  	BufferedReader br = new BufferedReader(isr);//构造一个BufferedReader，里面存放在控制台输入的字节转换后成的字符。
-  			  	while((strLine = br.readLine()) != null){
-  			  		String str[] = strLine.split(" ");//用空格分隔每一行中的记录 
-  			  		if(!str[0].substring(0,2).equals("//")){
-  			  			update(str,province,str.length); 
-  			  		}
-  				}
+  			  	update(log,province);	
+  			}
   			  	
   			  	province[PROVINCE_NUM] = new Province();
+  			  	province[PROVINCE_NUM].name = "全国";
   			  	for(int i = 0;i < PROVINCE_NUM;i++){
   			  		province[PROVINCE_NUM].ip += province[i].ip;
   			  		province[PROVINCE_NUM].sp += province[i].sp;
@@ -147,13 +142,13 @@ class InfectStatistic{
 			  " " + "感染患者" + province[i].ip + " " + "疑似患者" + province[i].sp + " " + "治愈" +
 			  province[i].cure + " " + "死亡" + province[i].dead); }*/
 		 
-    }
+    
     
     
     
     /*初始化省份信息*/
     private static void initProvince(Province province[]){
-    	for(int i = 0;i < PROVINCE_NUM;i++) {
+    	for(int i = 0;i < PROVINCE_NUM;i++){
     		province[i] = new Province();
     		province[i].name = PROVINCE[i];
     	}
@@ -162,62 +157,73 @@ class InfectStatistic{
     
     
     /*读取Log文件后更新省份信息变动*/
-	private static void update(String str[],Province province[],int length){
-		int num = 0;//记录变动人数
-		int i = 0;//记录变动省份
-		str[length - 1] = str[length - 1].trim();
-		if(str[length - 1] != null && !"".equals(str[length - 1])){
-			for(int k = 0;k < str[length - 1].length();k++){
-				if(str[length - 1].charAt(k) >= 48 && str[length - 1].charAt(k) <= 57){
-					num = 10*num+str[length - 1].charAt(k) - 48;
-				}
-			}
-		}
+	private static void update(String log,Province province[]) throws IOException{
+		String strLine;
+		FileInputStream fstream = new FileInputStream(new File(log));
+		InputStreamReader isr = new InputStreamReader(fstream,"UTF-8");
+		BufferedReader br = new BufferedReader(isr);//构造一个BufferedReader，里面存放在控制台输入的字节转换后成的字符。
 		
-		while(!str[0].equals(province[i].name) && i < PROVINCE_NUM){
-			i++;
-		}
-		
-		if(length == 3){
-			if(str[1].equals("治愈")){//xx省份患者治愈
-				province[i].ip -= num;
-				province[i].cure += num;
-			}
-			else if(str[1].equals("死亡")){//xx省份患者死亡
-				province[i].ip -= num;
-				province[i].dead += num;
-			}	
-		}
-		else if(length == 4){
-			if(str[1].equals("新增")){
-				if(str[2].equals("感染患者")){//xx省份新增感染患者
-					province[i].ip += num;
+		while((strLine = br.readLine()) != null){
+			String str[] = strLine.split(" ");//用空格分隔每一行中的记录
+		  	if(!str[0].substring(0,2).equals("//")){//忽略以"//"开头的记录行
+				int num = 0;//记录变动人数
+				int i = 0;//记录变动省份
+				int length = str.length;
+				str[length - 1] = str[length - 1].trim();
+				if(str[length - 1] != null && !"".equals(str[length - 1])){
+					for(int k = 0;k < str[length - 1].length();k++){
+						if(str[length - 1].charAt(k) >= 48 && str[length - 1].charAt(k) <= 57){
+							num = 10*num+str[length - 1].charAt(k) - 48;
+						}
+					}
 				}
-				else if(str[2].equals("疑似患者")){//xx省份新增疑似患者
-					province[i].sp += num;
+				
+				while(!str[0].equals(province[i].name) && i < PROVINCE_NUM){
+					i++;
 				}
-			}
-			else if(str[1].equals("疑似患者")){////xx省份疑似患者确诊
-				province[i].sp -= num;
-				province[i].ip += num;
-			}
-			else if(str[1].equals("排除")){//xx省份疑似患者排除
-				province[i].sp -= num;
-			}
-		}
-		else if(length == 5){
-			int j = 0;
-			while(!str[3].equals(province[j].name) && j < PROVINCE_NUM){
-				j++;
-			}
-			if(str[1].equals("疑似患者")){//a省疑似患者流入b省
-				province[i].sp -= num;
-				province[j].sp += num;
-			}
-			else if(str[1].equals("感染患者")){//a省感染患者流入b省
-				province[i].ip -= num;
-				province[j].ip += num;
-			}
+				
+				if(length == 3){
+					if(str[1].equals("治愈")){//xx省份患者治愈
+						province[i].ip -= num;
+						province[i].cure += num;
+					}
+					else if(str[1].equals("死亡")){//xx省份患者死亡
+						province[i].ip -= num;
+						province[i].dead += num;
+					}	
+				}
+				else if(length == 4){
+					if(str[1].equals("新增")){
+						if(str[2].equals("感染患者")){//xx省份新增感染患者
+							province[i].ip += num;
+						}
+						else if(str[2].equals("疑似患者")){//xx省份新增疑似患者
+							province[i].sp += num;
+						}
+					}
+					else if(str[1].equals("疑似患者")){////xx省份疑似患者确诊
+						province[i].sp -= num;
+						province[i].ip += num;
+					}
+					else if(str[1].equals("排除")){//xx省份疑似患者排除
+						province[i].sp -= num;
+					}
+				}
+				else if(length == 5){
+					int j = 0;
+					while(!str[3].equals(province[j].name) && j < PROVINCE_NUM){
+						j++;
+					}
+					if(str[1].equals("疑似患者")){//a省疑似患者流入b省
+						province[i].sp -= num;
+						province[j].sp += num;
+					}
+					else if(str[1].equals("感染患者")){//a省感染患者流入b省
+						province[i].ip -= num;
+						province[j].ip += num;
+					}
+				}
+		  	}
 		}
 	}
 	
@@ -226,7 +232,7 @@ class InfectStatistic{
 	public static void write(String data,String content){    
 		FileOutputStream fstream = null;
 		File file = new File(data);
-			try {
+			try{
 				if(file.exists()){
 					file.createNewFile();
 				}
@@ -235,10 +241,40 @@ class InfectStatistic{
 				fstream.flush();
 				fstream.close();
 			}
-			catch (Exception e) {
+			catch (Exception e){
 				e.printStackTrace();
 			}
 	}
+	
+	
+	/*查找对应目录下的文件*/
+	public static List<File> searchFiles(File folder,String keyWord){
+		List<File> result = new ArrayList<File>();
+		if (folder.isFile()){
+			result.add(folder);
+		}
+		
+		File[] subFolders = folder.listFiles(new FileFilter(){
+			public boolean accept(File file) {
+				if (file.isDirectory()) {
+					return true;
+				}
+				if (file.getName().toLowerCase().endsWith(keyWord)) {
+					return true;
+				}
+				return false;
+			}
+		});
+ 
+        if (subFolders != null){
+        	for (File file : subFolders){
+        		if (file.isFile()){
+                    result.add(file);
+                } 
+            }
+        }
+        return result;
+    }
 	
 	
 	
