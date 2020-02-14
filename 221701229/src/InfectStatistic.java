@@ -227,8 +227,8 @@ class list implements Command{
                 BufferedReader br=new BufferedReader(fr);
                 while (br.readLine()!=null)
                 {
-                    LogLine line=new LogLine(br.readLine());
-                    LogHandle.logHandlerList(line,provincemap);
+                    //把读出来的日志行交给下面处理
+                   // LogHandle.logHandlerList(br.readLine(),provincemap);
 
                 }
                 br.close();
@@ -256,15 +256,39 @@ class list implements Command{
  对日志的处理
  * */
 class LogHandle{
+    private ArrayList<MyPatterns> pat=new ArrayList<>();
+    private MyPatterns mypattern;
     //命令的处理
-    public static void logHandlerList(LogLine line,HashMap<String,ArrayList> hm)
+    LogHandle()
     {
 
+        pat.add(new InfectedPatients());
+        pat.add(new SuspectedPatients());
+        pat.add(new InfectedGo());
+        pat.add(new SuspectedGo());
+        pat.add(new PatientsDie());
+        pat.add(new PatientsCure());
+        pat.add(new SuspectedDiagnosis());
+        pat.add(new SuspectedExclude());
+    }
+    public void logHandlerList(String line,HashMap<String,ArrayList> hm)
+    {
+        Iterator it=pat.iterator();
+        while(it.hasNext())
+        {
+            mypattern=(MyPatterns)it.next();
+            //根据日志行跟哪个类的正则匹配选择类执行统计
+            if(line.matches(mypattern.getReg()))
+            {
+                mypattern.doCount(hm);
+                break;
+            }
+        }
     }
 
 }
 
-interface MyPatterns
+abstract class MyPatterns
 {
     String InfectedPatients="([\\u4e00-\\u9fa5])+ 新增 感染患者 (\\d+)人";//<省> 新增 感染患者 n人
     String SuspectedPatients="([\\u4e00-\\u9fa5])+ 新增 疑似患者 (\\d+)人";//<省> 新增 疑似患者 n人
@@ -274,12 +298,13 @@ interface MyPatterns
     String PatientsCure="([\\u4e00-\\u9fa5])+ 治愈 (\\d+)人";//<省> 治愈 n人
     String SuspectedDiagnosis="([\\u4e00-\\u9fa5])+ 疑似患者 确诊感染 (\\d+)人";//<省> 疑似患者 确诊感染 n人
     String SuspectedExclude="([\\u4e00-\\u9fa5])+ 排除 疑似患者 (\\d+)人";//<省> 排除 疑似患者 n人
-    void doCount(HashMap<String,ArrayList> hs);
+    abstract void doCount(HashMap<String,ArrayList> hs);
+    abstract String getReg();
 }
 
-class InfectedPatients implements MyPatterns{
-        private Pattern patt=Pattern.compile(InfectedPatients);
-
+class InfectedPatients extends   MyPatterns{
+       // private Pattern patt=Pattern.compile(InfectedPatients);
+    public String reg="([\\u4e00-\\u9fa5])+ 新增 感染患者 (\\d+)人";//<省> 新增 感染患者 n人
     //根据
     public void doCount(HashMap<String,ArrayList> hs)
     {
@@ -287,11 +312,16 @@ class InfectedPatients implements MyPatterns{
 
 
     }
+
+    public String getReg()
+    {
+        return reg;
+    }
 }
 
-class SuspectedPatients implements MyPatterns{
-    private Pattern patt=Pattern.compile(SuspectedPatients);
-
+class SuspectedPatients extends MyPatterns{
+    //private Pattern patt=Pattern.compile(SuspectedPatients);
+    public String reg="([\\u4e00-\\u9fa5])+ 新增 疑似患者 (\\d+)人";//<省> 新增 疑似患者 n人
     //根据
     public void doCount(HashMap<String,ArrayList> hs)
     {
@@ -299,11 +329,16 @@ class SuspectedPatients implements MyPatterns{
 
 
     }
+
+    public String getReg()
+    {
+        return reg;
+    }
 }
 
-class InfectedGo implements MyPatterns{
-    private Pattern patt=Pattern.compile(InfectedGo);
-
+class InfectedGo extends MyPatterns{
+    //private Pattern patt=Pattern.compile(InfectedGo);
+    public String reg="([\\u4e00-\\u9fa5])+ 感染患者 流入 ([\\u4e00-\\u9fa5])+ (\\d+)人";//<省1> 感染患者 流入 <省2> n人
     //根据
     public void doCount(HashMap<String,ArrayList> hs)
     {
@@ -311,11 +346,16 @@ class InfectedGo implements MyPatterns{
 
 
     }
+
+    public String getReg()
+    {
+        return reg;
+    }
 }
 
-class SuspectedGo implements MyPatterns{
-    private Pattern patt=Pattern.compile(SuspectedGo);
-
+class SuspectedGo extends MyPatterns{
+    //private Pattern patt=Pattern.compile(SuspectedGo);
+    public String reg="([\\u4e00-\\u9fa5])+ 疑似患者 流入 ([\\u4e00-\\u9fa5])+ (\\d+)人";//<省1> 疑似患者 流入 <省2> n人
     //根据
     public void doCount(HashMap<String,ArrayList> hs)
     {
@@ -323,11 +363,16 @@ class SuspectedGo implements MyPatterns{
 
 
     }
+
+    public String getReg()
+    {
+        return reg;
+    }
 }
 
-class PatientsDie implements MyPatterns{
-    private Pattern patt=Pattern.compile(PatientsDie);
-
+class PatientsDie extends MyPatterns{
+    //private Pattern patt=Pattern.compile(PatientsDie);
+    public String reg="([\\u4e00-\\u9fa5])+ 死亡 (\\d+)人";//<省> 死亡 n人
     //根据
     public void doCount(HashMap<String,ArrayList> hs)
     {
@@ -335,11 +380,16 @@ class PatientsDie implements MyPatterns{
 
 
     }
+
+    public String getReg()
+    {
+        return reg;
+    }
 }
 
-class PatientsCure implements MyPatterns{
-    private Pattern patt=Pattern.compile(PatientsCure);
-
+class PatientsCure extends MyPatterns{
+    //private Pattern patt=Pattern.compile(PatientsCure);
+    public String reg="([\\u4e00-\\u9fa5])+ 治愈 (\\d+)人";//<省> 治愈 n人
     //根据
     public void doCount(HashMap<String,ArrayList> hs)
     {
@@ -347,11 +397,16 @@ class PatientsCure implements MyPatterns{
 
 
     }
+
+    public String getReg()
+    {
+        return reg;
+    }
 }
 
-class SuspectedDiagnosis implements MyPatterns{
-    private Pattern patt=Pattern.compile(SuspectedDiagnosis);
-
+class SuspectedDiagnosis extends MyPatterns{
+    //private Pattern patt=Pattern.compile(SuspectedDiagnosis);
+    public String reg="([\\u4e00-\\u9fa5])+ 疑似患者 确诊感染 (\\d+)人";//<省> 疑似患者 确诊感染 n人
     //根据
     public void doCount(HashMap<String,ArrayList> hs)
     {
@@ -359,16 +414,26 @@ class SuspectedDiagnosis implements MyPatterns{
 
 
     }
+
+    public String getReg()
+    {
+        return reg;
+    }
 }
 
-class SuspectedExclude implements MyPatterns{
-    private Pattern patt=Pattern.compile(SuspectedExclude);
-
+class SuspectedExclude extends MyPatterns{
+   // private Pattern patt=Pattern.compile(SuspectedExclude);
+   public String reg="([\\u4e00-\\u9fa5])+ 排除 疑似患者 (\\d+)人";//<省> 排除 疑似患者 n人
     //根据
     public void doCount(HashMap<String,ArrayList> hs)
     {
 
 
 
+    }
+
+    public String getReg()
+    {
+        return reg;
     }
 }
