@@ -18,7 +18,7 @@ public class Write {
             FileWriter fw = new FileWriter(Path);
             for(int i=0;i<36;i++){
                 if(num.province[i]!=0){
-                    fw.write(num.map2.get(i)+" ");
+                    fw.write(num.province2[i]+" ");
                     fw.write("感染患者"+num.province_infectpeople[i]+"人"+" ");
                     fw.write("疑似患者"+num.province_doubtpeople[i]+"人"+" ");
                     fw.write("治愈"+num.province_curepeople[i]+"人"+" ");

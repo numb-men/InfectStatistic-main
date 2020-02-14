@@ -79,13 +79,17 @@ public class Read {
         }
         else if(m3.find()){
             num.province_curepeople[num.map1.get(m3.group(1))]+=Integer.valueOf(m3.group(2));
+            num.province_infectpeople[num.map1.get(m3.group(1))]-=Integer.valueOf(m3.group(2));
             num.province_curepeople[0]+=Integer.valueOf(m3.group(2));
+            num.province_infectpeople[0]-=Integer.valueOf(m3.group(2));
             num.province[num.map1.get(m3.group(1))]++;
 
         }
         else if(m4.find()){
             num.province_deadpeople[num.map1.get(m4.group(1))]+=Integer.valueOf(m4.group(2));
             num.province_deadpeople[0]+=Integer.valueOf(m4.group(2));
+            num.province_infectpeople[num.map1.get(m4.group(1))]-=Integer.valueOf(m4.group(2));
+            num.province_infectpeople[0]-=Integer.valueOf(m4.group(2));
             num.province[num.map1.get(m4.group(1))]++;
         }
         else if(m5.find()){
@@ -97,7 +101,7 @@ public class Read {
         }
         else if(m6.find()){
             num.province_doubtpeople[num.map1.get(m6.group(1))]-=Integer.valueOf(m6.group(3));
-            num.province_doubtpeople[num.map1.get(m5.group(2))]+=Integer.valueOf(m6.group(3));
+            num.province_doubtpeople[num.map1.get(m6.group(2))]+=Integer.valueOf(m6.group(3));
             num.province[num.map1.get(m6.group(1))]++;
             num.province[num.map1.get(m6.group(2))]++;
 
