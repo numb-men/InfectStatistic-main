@@ -7,7 +7,7 @@
 通过命令行把相应程序进行编译，输入相关指令即可运行。
 
 ## 功能简介
-指令格式: java InfectStatistic list 后接相关参数
+指令格式: java InfectStatistic list 后接相关参数  
 list命令 支持以下命令行参数：
 * -log 指定日志目录的位置，该项必会附带
 * -out 指定输出文件路径和文件名，该项必会附带
