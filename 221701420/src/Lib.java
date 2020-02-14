@@ -26,6 +26,7 @@ public class Lib {
         int suspected;//疑似患者
         int cure;//治愈
         int dead;//死亡
+        boolean out;//是否输出
         public province_info(String temp){
             name=temp;
             heavy=0;
@@ -33,6 +34,7 @@ public class Lib {
             suspected=0;//疑似患者
             cure=0;//治愈
             dead=0;//死亡
+            out=false;
         }
     }
 
@@ -316,40 +318,111 @@ public class Lib {
                     printWriter.print("死亡"+infos.get(i).dead+"人 \n");
                 }
             }
-            else{
-
+            else{//指定显示类别
+                for(int i=0;i<infos.size();i++){
+                    printWriter.print(infos.get(i).name+" ");
+                    for (int j=0;j<type.size();j++){
+                        char od=type.get(j).charAt(0);
+                        switch (od){
+                            case 'i':{
+                                printWriter.print("感染患者"+infos.get(i).infected+"人 ");
+                                break;
+                            }
+                            case 's':{
+                                printWriter.print("疑似患者"+infos.get(i).suspected+"人 ");
+                                break;
+                            }
+                            case 'c':{
+                                printWriter.print("治愈"+infos.get(i).cure+"人 ");
+                                break;
+                            }
+                            case 'd':{
+                                printWriter.print("死亡"+infos.get(i).dead+"人 ");
+                                break;
+                            }
+                        }
+                    }
+                    printWriter.println();//行末换号
+                }
             }
         }
-        else {
+        else {//指定显示地区
+            for(int i=0;i<province.size();i++){
+                boolean get=false;
+                for (int j = 0; j < infos.size(); j++) {
+                    if (province.get(i).equals(infos.get(j).name)) {
+                            get=true;//该省份的信息存在
+                            break;
+                    }
+                }
+                if(get==false){//该省份的信息不存在
+                    province_info tenp = new province_info(province.get(i));
+                    infos.add(tenp);
+                }
+            }
+            Arrangement();//增加新的项目后重新排序
+
             //记录需要输出的地区的数据项
-            ArrayList<Integer> t = new ArrayList<Integer>();
             for (int i = 0; i < province.size(); i++) {
                 for (int j = 0; j < infos.size(); j++) {
                     if (province.get(i).equals(infos.get(j).name)) {
-                        province.set(i,"none");
-                        t.add(j);
+                        infos.get(j).out=true;
                         break;
                     }
                 }
             }
-            //如果想要显示的地区信息不存在 创建一个空数据项
-            if(t.size()<province.size()){
-                for (int i=0;i<province.size();i++){
-
-                    if(!province.get(i).equals("none")){
-                        province_info tenp=new province_info(province.get(i));
+          /*  //如果想要显示的地区信息不存在 创建一个空数据项
+            if (t.size() < province.size()) {
+                for (int i = 0; i < province.size(); i++) {
+                    if (!province.get(i).equals("none")) {
+                        province_info tenp = new province_info(province.get(i));
                         infos.add(tenp);
-                        t.add(infos.size()-1);
+                        t.add(infos.size() - 1);
                     }
                 }
+            }*/
+            if(type.size()==0) {//不指定显示类别
+                //输出需要输出的地区情况
+                for (int i = 0; i < infos.size(); i++) {
+                    if(infos.get(i).out==true){
+                        printWriter.print(infos.get(i).name + " ");
+                        printWriter.print("感染患者" + infos.get(i).infected + "人 ");
+                        printWriter.print("疑似患者" + infos.get(i).suspected + "人 ");
+                        printWriter.print("治愈" + infos.get(i).cure + "人 ");
+                        printWriter.print("死亡" + infos.get(i).dead + "人 \n");
+                    }
+
+                }
             }
-            //输出需要输出的地区情况
-            for (int i = 0; i < province.size(); i++) {
-                printWriter.print(infos.get(t.get(i)).name + " ");
-                printWriter.print("感染患者" + infos.get(t.get(i)).infected + "人 ");
-                printWriter.print("疑似患者" + infos.get(t.get(i)).suspected + "人 ");
-                printWriter.print("治愈" + infos.get(t.get(i)).cure + "人 ");
-                printWriter.print("死亡" + infos.get(t.get(i)).dead + "人 \n");
+            else{//指定显示类别
+                for(int i=0;i<infos.size();i++){
+                    if(infos.get(i).out==true){
+                        printWriter.print(infos.get(i).name + " ");
+                        for (int j=0;j<type.size();j++){
+
+                            char od=type.get(j).charAt(0);
+                            switch (od){
+                                case 'i':{
+                                    printWriter.print("感染患者" + infos.get(i).infected + "人 ");
+                                    break;
+                                }
+                                case 's':{
+                                    printWriter.print("疑似患者" + infos.get(i).suspected + "人 ");
+                                    break;
+                                }
+                                case 'c':{
+                                    printWriter.print("治愈" + infos.get(i).cure + "人 ");
+                                    break;
+                                }
+                                case 'd':{
+                                    printWriter.print("死亡" + infos.get(i).dead + "人 ");
+                                    break;
+                                }
+                            }
+                        }
+                        printWriter.println();//行末换号
+                    }
+                }
             }
         }
 
