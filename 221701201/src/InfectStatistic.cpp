@@ -153,7 +153,7 @@ class Initialize
         {"浙江",0}
     };
 
-}
+};
 
 
 
