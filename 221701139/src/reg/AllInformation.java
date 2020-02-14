@@ -4,10 +4,7 @@ import argument.ArgParser;
 import com.sun.org.apache.xpath.internal.Arg;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 /**
@@ -16,7 +13,7 @@ import java.util.regex.Pattern;
  */
 public class AllInformation {
     private Map<String,Integer[]> info;
-    private ArgParser argParser;
+//    private ArgParser argParser;
     String REGEX1 = "(\\S+) 新增 感染患者 (\\d+)人";
     String REGEX2 = "(\\S+) 新增 疑似患者 (\\d+)人";
     String REGEX3 = "(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
@@ -148,8 +145,11 @@ public class AllInformation {
 
     }
     // 写入日志文件
-    public void writeIntoLog(String logPath) {
+    public void writeIntoLog(String logPath,ArgParser argParser) {
         // 经过上面处理已经获得了全部的要写入日志的信息
+        argParser.printArg();
+        // 需要输出的省份名
+        List<String> outProvinces = argParser.getVals("-province");
         try {
             FileOutputStream fos = new FileOutputStream(logPath);
             // 键为省份信息,第一个为全国,其他为按照拼音顺序
@@ -157,6 +157,12 @@ public class AllInformation {
             for (String province:provinces) {
                 Integer[] populations = info.get(province);
                 String line;
+
+                // 如果要输出的省份中不包含就跳过
+                if (!outProvinces.contains(province))
+                {
+                    continue;
+                }
                 if (populations[0]!=0 || populations[1]!=0 || populations[2]!=0 || populations[3]!=0) {
                     line = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
                             province,populations[0],populations[1],populations[2],populations[3]);
