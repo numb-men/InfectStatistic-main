@@ -6,9 +6,9 @@
  * @since 2020.2.11
  */
 
-import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
-import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
-import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+
+
+
 import org.junit.Test;
 
 import java.io.*;
@@ -103,7 +103,6 @@ public class InfectStatistic {
             String command = "";
             List<String> params = new ArrayList<>();
             int i;
-            int count = 0;
             for (i = 1; i <= commands.length; i++) {
                 if (i == commands.length) {
                     if (params.isEmpty()) {
@@ -126,21 +125,17 @@ public class InfectStatistic {
                     command = commands[i];
                 } else {
                     params.add(commands[i]);
-                    count++;
                 }
-
             }
         }
     }
 
     public void fileRead(String[] commands) throws IOException {
         String input = listCommand.listMap.get("-log").get(0);
-        //String output = listCommand.listMap.get("-out").get(0);
         String tempString = "";
         if (listCommand.listMap.containsKey("-date")) {
             String date = listCommand.listMap.get("-date").get(0);
             input += "\\" + date + ".log.txt";
-
         } else {
             input += "\\" + getTheLatestDate() + ".log.txt";
         }
@@ -182,7 +177,12 @@ public class InfectStatistic {
         String state = "";
         int temp = 0;
         int num = 0;
-        if (ch.matches("(\\S+) 新增 (\\S\\S\\S\\S) (\\d+)人")) {
+        String regex = "(\\S+) 新增 (\\S\\S\\S\\S) (\\d+)人";
+        String regex2 = "(\\S+) (\\S+) 流入 (\\S+) (\\d+)人";
+        String regex3 = "(\\S+) (\\S+) (\\d+)人";
+        String regex4 = "(\\S+) (\\S+) 确诊感染 (\\d+)人";
+        String regex5 = "(\\S+) 排除 (\\S+) (\\d+)人";
+        if (ch.matches(regex)) {
             pro = getPro(ch, 0);
             num = getNum(ch);
             state = getState(ch, 2);
@@ -191,7 +191,7 @@ public class InfectStatistic {
             tempMap.put("flag", 0);
             temp = tempMap.get(state) + num;
             tempMap.put(state, temp);
-        } else if (ch.matches("(\\S+) (\\S+) 流入 (\\S+) (\\d+)人")) {
+        } else if (ch.matches(regex2)) {
             pro = getPro(ch, 0);
             pro1 = getPro(ch, 3);
             num = getNum(ch);
@@ -206,7 +206,7 @@ public class InfectStatistic {
             tempMap.put("flag", 0);
             temp = tempMap.get(state) + num;
             tempMap.put(state, temp);
-        } else if (ch.matches("(\\S+) (\\S+) (\\d+)人")) {
+        } else if (ch.matches(regex3)) {
             pro = getPro(ch, 0);
             state = getState(ch, 1);
             num = getNum(ch);
@@ -217,7 +217,7 @@ public class InfectStatistic {
             tempMap.put(state, temp);
             temp = tempMap.get("感染患者") - num;
             tempMap.put("感染患者", temp);
-        } else if (ch.matches("(\\S+) (\\S+) 确诊感染 (\\d+)人")) {
+        } else if (ch.matches(regex4)) {
             pro = getPro(ch, 0);
             state = getState(ch, 1);
             num = getNum(ch);
@@ -228,7 +228,7 @@ public class InfectStatistic {
             tempMap.put(state, temp);
             temp = tempMap.get("感染患者") + num;
             tempMap.put("感染患者", temp);
-        } else if (ch.matches("(\\S+) 排除 (\\S+) (\\d+)人")) {
+        } else if (ch.matches(regex5)) {
             pro = getPro(ch, 0);
             state = getState(ch, 2);
             num = getNum(ch);
@@ -389,6 +389,7 @@ public class InfectStatistic {
         command.add("list -log D:\\java\\InfectStatistic-main\\221701227\\log " +
                 "-out D:\\java\\InfectStatistic-main\\221701227\\result\\ListOut7.txt -date 2020-01-27 -type cure dead ip -province 全国 浙江 福建 湖北");
         for(String ch:command) {
+            System.out.println(ch);
             String[] commands = ch.split(" ");
             try {
                 commandAnalyze(commands);
@@ -404,6 +405,16 @@ public class InfectStatistic {
     }
 
     public static void main(String[] args) {
-
+        InfectStatistic infectStatistic = new InfectStatistic();
+        String[] commands = args;
+        try {
+            infectStatistic.commandAnalyze(commands);
+            infectStatistic.fileRead(commands);
+        } catch (CommandErrorException e) {
+            System.out.println("您输入的命令出现错误，请重新输入!");
+            exit(-1);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
