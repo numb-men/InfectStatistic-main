@@ -11,3 +11,11 @@ class InfectStatistic {
         System.out.println("helloworld");
     }
 }
+
+
+
+class Command {
+	
+	
+	
+}
