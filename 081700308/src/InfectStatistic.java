@@ -347,9 +347,9 @@ class InfectStatistic {
 			exist[d]=1;
 		}
 
-		public  void readFile()
+		public  void readFile(String x)
 		{
-			String pathname="D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-27.log.txt";
+			String pathname="D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\"+x;
 			try(FileReader reader = new FileReader(pathname);
 				BufferedReader br = new BufferedReader(reader)	
 			){
@@ -420,7 +420,9 @@ class InfectStatistic {
 			 a=new InfectStatistic();
 			
 			System.out.print(x.matches(type8));
-			a.readFile();
+			a.readFile("2020-01-22.log.txt");
+			a.readFile("2020-01-23.log.txt");
+			a.readFile("2020-01-27.log.txt");
 			a.writeFile();
 		       //System.out.print(getIp(0));
 		      // System.out.println(AddIp(x));
