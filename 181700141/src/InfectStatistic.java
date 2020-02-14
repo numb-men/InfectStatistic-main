@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * InfectStatistic TODO
@@ -96,6 +98,16 @@ class ListCommand {
     private boolean dateIsExist = false;
     private boolean typeIsExist = false;
     private boolean provinceIsExist = false;
+
+    // 定义正则表达式
+    String s1 = "\\s*\\S+ 新增 感染患者 \\d+人\\s*";
+    String s2 = "\\s*\\S+ 新增 疑似患者 \\d+人\\s*";
+    String s3 = "\\s*\\S+ 感染患者 流入 \\S+ \\d+人\\s*";
+    String s4 = "\\s*\\S+ 疑似患者 流入 \\S+ \\d+人\\s*";
+    String s5 = "\\s*\\S+ 死亡 \\d+人\\s*";
+    String s6 = "\\s*\\S+ 治愈 \\d+人\\s*";
+    String s7 = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
+    String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
 
     public ListCommand() {
 
@@ -212,68 +224,158 @@ class ListCommand {
             throw new IllegalException("错误，日期非法，超出日志最晚时间");
         if (date == null)
             date = logFiles[l - 1];
+        else
+            date = date + ".log.txt";
         for (int i = 0; i < l; i++) {
-            if (logFiles[i].matches("\\S+\\.log\\.txt")) {
+            if (logFiles[i].matches("\\S+\\.log\\.txt") && date.compareTo(logFiles[i]) >= 0) {
                 handleFile(inDirectory + "/" + logFiles[i]);
             }
         }
 
     }
 
+    /**
+     * 读取日志文件，更新相应人数
+     * 
+     * @param route 待读取日志文件路径
+     * @throws Exception
+     */
     public void handleFile(String route) throws Exception {
-
-        // 定义正则表达式
-        String s1 = "\\s*\\S+ 新增 感染患者 \\d+人\\s*";
-        String s2 = "\\s*\\S+ 新增 疑似患者 \\d+人\\s*";
-        String s3 = "\\s*\\S+ 感染患者 流入 \\S+ \\d+人\\s*";
-        String s4 = "\\s*\\S+ 疑似患者 流入 \\S+ \\d+人\\s*";
-        String s5 = "\\s*\\S+ 死亡 \\d+人\\s*";
-        String s6 = "\\s*\\S+ 治愈 \\d+人\\s*";
-        String s7 = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
-        String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
-
         FileInputStream fstream = new FileInputStream(new File(route));
         BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
         String strLine;
         while ((strLine = br.readLine()) != null) {
             if (strLine.matches(s1)) {
+                int index = strLine.indexOf(" 新增 感染患者");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
 
-                System.out.println(strLine);
-
-            } else if (strLine.matches(s1)) {
-
-                System.out.println(strLine);
-
+                // 取出感染人数
+                int sum = getAmount(strLine);
+                // 修改人数
+                sum += ipMap.get(province);
+                ipMap.put(province, sum);
             } else if (strLine.matches(s2)) {
+                int index = strLine.indexOf(" 新增 疑似患者");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
 
-                System.out.println(strLine);
+                // 取出疑似患者人数
+                int sum = getAmount(strLine);
+                // 修改人数
+                sum += spMap.get(province);
+                spMap.put(province, sum);
 
             } else if (strLine.matches(s3)) {
+                // String s3 = "\\s*\\S+ 感染患者 流入 \\S+ \\d+人\\s*";
+                int index = strLine.indexOf(" 感染患者 流入");
+                // 取出流出省份，省份前面可能有空格
+                String outProvince = strLine.substring(0, index);
+                // 去掉全部空格
+                outProvince.replace(" ", "");
 
-                System.out.println(strLine);
+                // 取出流出人数
+                int sum = getAmount(strLine);
+                index = strLine.indexOf(Integer.toString(sum));
+                // 取出流出省份
+                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index);
+
+                ipMap.put(outProvince, ipMap.get(outProvince) - sum);
+                ipMap.put(inProvince, ipMap.get(inProvince) + sum);
 
             } else if (strLine.matches(s4)) {
+                // String s4 = "\\s*\\S+ 疑似患者 流入 \\S+ \\d+人\\s*";
+                int index = strLine.indexOf(" 疑似患者 流入");
+                // 取出流出省份，省份前面可能有空格
+                String outProvince = strLine.substring(0, index);
+                // 去掉全部空格
+                outProvince.replace(" ", "");
 
-                System.out.println(strLine);
+                // 取出流出人数
+                int sum = getAmount(strLine);
+                index = strLine.indexOf(Integer.toString(sum));
+                // 取出流出省份
+                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index);
+
+                spMap.put(outProvince, spMap.get(outProvince) - sum);
+                spMap.put(inProvince, spMap.get(inProvince) + sum);
 
             } else if (strLine.matches(s5)) {
+                int index = strLine.indexOf(" 死亡");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
 
-                System.out.println(strLine);
+                // 取出死亡人数
+                int deadSum = getAmount(strLine);
+                // 获得感染人数
+                int ipSum = ipMap.get(province);
+                // 更新感染人数
+                ipMap.put(province, ipSum - deadSum);
+
+                deadSum += deadMap.get(province);
+                deadMap.put(province, deadSum);
 
             } else if (strLine.matches(s6)) {
+                // s6 = "\\s*\\S+ 治愈 \\d+人\\s*";
+                int index = strLine.indexOf(" 治愈");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
 
-                System.out.println(strLine);
+                // 取出治愈人数
+                int cureSum = getAmount(strLine);
+                // 获得感染人数
+                int ipSum = ipMap.get(province);
+                // 更新感染人数
+                ipMap.put(province, ipSum - cureSum);
+                cureSum += cureMap.get(province);
+                cureMap.put(province, cureSum);
 
             } else if (strLine.matches(s7)) {
+                // String s7 = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
+                int index = strLine.indexOf(" 疑似患者 确诊感染");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
 
-                System.out.println(strLine);
+                int ipSum = getAmount(strLine);
+                spMap.put(province, spMap.get(province) - ipSum);
+                ipMap.put(province, ipMap.get(province) + ipSum);
 
             } else if (strLine.matches(s8)) {
+                // String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
+                int index = strLine.indexOf(" 排除 疑似患者");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
 
-                System.out.println(strLine);
+                int excludeSum = getAmount(strLine);
+                spMap.put(province, spMap.get(province) - excludeSum);
 
             }
         }
+    }
+
+    /**
+     * 取出s里面的数字，s里面仅有一处地方有数字且是整数
+     * 
+     * @param s：满足handleFile函数中正则表达式s1-s8的字符串
+     * @return 返回s里面的整数
+     */
+    public int getAmount(String s) {
+        Pattern p = Pattern.compile("\\d+");
+        Matcher m = p.matcher(s);
+        m.find();
+        return Integer.parseInt(s.substring(m.start(), m.end()));
     }
 
 }
