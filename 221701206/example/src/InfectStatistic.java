@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.*;
 
 /**
@@ -24,7 +25,7 @@ public class InfectStatistic
 {
 	public static String LogLocation = "D:\\Java\\InfectStatistic-main\\example\\log";
 	// LogLoction仅用于本机应用程序测试，命令行测试将注释赋值
-	public static String DeadLine = "2020-01-23";
+	public static String DeadLine = "";
 	// DeadLine仅用于本机应用程序测试，命令行测试将注释赋值
 	public static String OutputLocation = "D:\\Java\\InfectStatistic-main\\example\\Result\\" + DeadLine + "out.txt";
 	// OutputLocation仅用于本机应用程序测试，命令行测试将注释赋值
@@ -40,16 +41,173 @@ public class InfectStatistic
     	System.out.println(use.StatisticLink.get(0).Comfirmed);
         System.out.println("helloworld");
         */
-    	//文件处理模块测试
+    	//文件处理测试
     	/*FileHandleTool.HandleFile();*/
     	
-    	/*数据获取模块测试
+    	/*数据获取测试
     	DataGet a = new DataGet();
     	a.getData("湖北省 新增 感染患者 15人");
     	*/
-    	
-    	OutputControlTool.ProductInfectStatistic();
+    	//输出测试
+    	//if(args[0].equals("list"))
+    	/*CommandGet Command = new CommandGet();
+    	Command.GetCommand(args);
+    	System.out.println(Command.IsDate);
+    	System.out.println(Command.Date);
+    	System.out.println(Command.IsProvince);
+    	for(int i = 0 ; i < Command.Province.length ; i ++)
+    		System.out.println(Command.Province[i]);
+    	System.out.println(Command.IsType);
+    	for(int i = 0 ; i < Command.Type.length ; i ++)
+    		System.out.println(Command.Type[i]);*/
+    	//OutputControlTool.ProductInfectStatistic();
+    	CommandGet Command_execute = new CommandGet();
+    	Command_execute.GetCommand(args);
+    	InfectSatisticCommandSet Execute = new InfectSatisticCommandSet();
+    	Execute.execute(Command_execute);
     }
+}
+
+/**
+ * InfectSatisticCommandSet
+ * @description 命令模式，用于扩展
+ * @author 221701206_是九啊
+ * @version 1.0
+ * @since 2020.2.15
+ */
+class InfectSatisticCommandSet
+{
+	Command[] Operations ;
+	public InfectSatisticCommandSet()
+	{
+		Operations = new Command[1]; //数组数量取决于共有几个命令功能
+		Operations[0] = new CommandList();
+	}
+	
+	public void execute(CommandGet Command_execute)
+	{
+		Operations[Command_execute.Command - 1].execute(Command_execute);
+	}
+}
+
+/**
+ * Command
+ * @description 命令接口
+ * @author 221701206_是九啊
+ * @version 1.0
+ * @since 2020.2.15
+ */
+interface Command
+{
+	public void execute(CommandGet Command_execute);
+}
+
+/**
+ * CommandList
+ * @description List命令
+ * @author 221701206_是九啊
+ * @version 1.0
+ * @since 2020.2.15
+ */
+class CommandList implements Command
+{
+	@Override
+	public void execute(CommandGet Command_execute) 
+	{
+		OutputControlTool.ProductInfectStatistic(Command_execute.Date,Command_execute.Log,Command_execute.Out
+				                                ,Command_execute.Province,Command_execute.Type);
+	}
+	
+}
+
+/**
+ * CommandGet
+ * @description 命令行命令类
+ * @author 221701206_是九啊
+ * @version 1.0
+ * @since 2020.2.15
+ */
+class CommandGet
+{
+	int Command ; // 用于存储执行的命令，1.list
+	boolean IsProvince;
+	boolean IsDate;
+	boolean IsType;
+	String Log;
+	String Out;
+	String Date;
+	String[] Province;
+	String[] Type;
+	public CommandGet()
+	{
+		this.Command = 0;
+		this.IsProvince = false;
+		this.IsDate = false;
+		this.IsType = false;
+		this.Log = "";
+		this.Out = "";
+		this.Date = "";
+		this.Province = new String[31];
+		this.Type = new String[4];
+		for(int i = 0; i < this.Province.length; i++)
+			Province[i] = "";
+		for(int i = 0; i < this.Type.length; i++)
+			Type[i] = "";
+	}
+	
+	public void GetCommand(String[] CommandSource)
+	{
+		int CommandLength = CommandSource.length;
+		if(CommandSource[0].equals("list"))
+			this.Command = 1;
+		else
+			System.out.println(CommandSource[0] + " 不能被解析为合法命令");
+		for(int i = 1 ; i < CommandLength ; i++)
+		{
+			if(CommandSource[i].equals("-log"))
+			{
+				this.Log = CommandSource[i+1];
+				i++;
+			}
+
+			else if(CommandSource[i].equals("-out"))
+			{
+				this.Out = CommandSource[i+1];
+				i++;
+			}
+
+			else if(CommandSource[i].equals("-date"))
+			{
+				this.IsDate = true;
+				this.Date = CommandSource[i+1];
+				i++;
+			}
+			else if(CommandSource[i].equals("-province"))
+			{
+				this.IsProvince = true;
+				int j = 0;
+				while(i+1<CommandSource.length&&!Pattern.matches("-.*", CommandSource[i+1]))
+				{
+					this.Province[j] = CommandSource[i+1];
+					i++;
+					j++;
+				}
+			}
+			else if(CommandSource[i].equals("-type"))
+			{
+				this.IsType = true;
+				int j = 0;
+				while(i+1<CommandSource.length && !Pattern.matches("-.*", CommandSource[i+1]))
+				{
+					this.Type[j] = CommandSource[i+1];
+					i++;
+					j++;
+				}
+			}
+			else 
+				System.out.println("命令中包含不合法参数" + CommandSource[i]);
+		}
+	}
 }
 
 
@@ -69,42 +227,52 @@ class DateCompareTool
      * @version 1.0
      * @since 2020.2.12
 	 */
-	public static List<String> getFileName(String Date)
+	public static List<String> getFileName(String Date,String LogLocation)
 	{
 		List<String> FileName = new ArrayList<String>();
-		boolean DateOutbound = false;
+		String[] FileList=new File(LogLocation).list();
 		int MaxMonth = 0;
 		int MaxDay = 0;
-		String[] FileList=new File(InfectStatistic.LogLocation).list();
-		String[] SplitDate = Date.split("-");
-		String MonthDate = SplitDate[1];
-		String DayDate = SplitDate[2];
-		int TargetMonth = Integer.valueOf(MonthDate);
-		int TargetDay = Integer.valueOf(DayDate);
-		for(int i = 0;i < FileList.length ;i++)
+		//下述判断用于解决是否带 -date参数问题
+		if(Date.equals(""))
 		{
-			String[] SplitFileName = FileList[i].split("-");
-			String Month = SplitFileName[1];
-			String Day = SplitFileName[2].split(".log")[0];
-			int FileMonth = Integer.valueOf(Month);
-			int FileDay = Integer.valueOf(Day);
-			if(FileMonth > MaxMonth)
-				MaxMonth = FileMonth;
-			if(FileDay > MaxDay)
-				MaxDay = FileDay;
-			if(FileMonth < TargetMonth)
-				FileName.add(InfectStatistic.LogLocation + "\\" + FileList[i]);
-			if(FileMonth == TargetMonth && FileDay <= TargetDay)
-				FileName.add(InfectStatistic.LogLocation + "\\" + FileList[i]);
+			for(int i = 0; i < FileList.length; i++)
+				FileName.add(LogLocation + "\\" + FileList[i]);
+			return FileName;
 		}
-		if(TargetMonth > MaxMonth || (TargetMonth == MaxMonth && TargetDay > MaxDay))
-			DateOutbound = true;
-		if(DateOutbound)
+		else
 		{
-			System.out.println("日期超过范围");
-			System.exit(1);
+			boolean DateOutbound = false;
+			String[] SplitDate = Date.split("-");
+			String MonthDate = SplitDate[1];
+			String DayDate = SplitDate[2];
+			int TargetMonth = Integer.valueOf(MonthDate);
+			int TargetDay = Integer.valueOf(DayDate);
+			for(int i = 0;i < FileList.length ;i++)
+			{
+				String[] SplitFileName = FileList[i].split("-");
+				String Month = SplitFileName[1];
+				String Day = SplitFileName[2].split(".log")[0];
+				int FileMonth = Integer.valueOf(Month);
+				int FileDay = Integer.valueOf(Day);
+				if(FileMonth > MaxMonth)
+					MaxMonth = FileMonth;
+				if(FileDay > MaxDay)
+					MaxDay = FileDay;
+				if(FileMonth < TargetMonth)
+					FileName.add(LogLocation + "\\" + FileList[i]);
+				if(FileMonth == TargetMonth && FileDay <= TargetDay)
+					FileName.add(LogLocation + "\\" + FileList[i]);
+			}
+			if(TargetMonth > MaxMonth || (TargetMonth == MaxMonth && TargetDay > MaxDay))
+				DateOutbound = true;
+			if(DateOutbound)
+			{
+				System.out.println("日期超过范围");
+				System.exit(1);
+			}
+			return FileName;
 		}
-		return FileName;
 	}
 }
 
@@ -127,9 +295,9 @@ class FileHandleTool
 	 * @version 1.0
 	 * @since 2020.2.12
 	 */
-	public static List<String> HandleFile()
+	public static List<String> HandleFile(String DeadLine,String LogLocation,String[] Province, String[] Type)
 	{
-		List<String> FileNames = DateCompareTool.getFileName(InfectStatistic.DeadLine);
+		List<String> FileNames = DateCompareTool.getFileName(DeadLine,LogLocation);
 		StatisticResult Result = new StatisticResult();
 		for(int i = 0 ; i < FileNames.size() ; i ++)
 		{
@@ -137,7 +305,7 @@ class FileHandleTool
 			try
 			{
 				FileInputStream Is = new FileInputStream(FilePath);
-				InputStreamReader Isr = new InputStreamReader(Is);
+				InputStreamReader Isr = new InputStreamReader(Is,"utf-8");
 				BufferedReader Br = new BufferedReader(Isr);
 				String line;
 				try
@@ -166,20 +334,107 @@ class FileHandleTool
 			{
 				e.printStackTrace();
 				System.err.println("文件路径错误，找不到指定文件");
+			} catch (UnsupportedEncodingException e1) {
+				// TODO 自动生成的 catch 块
+				e1.printStackTrace();
 			}
 		}
-		for(int i = 0 ; i < Result.StatisticLink.size(); i++)
+		if(Province[0].equals("")&&Type[0].equals(""))
 		{
-			if(Result.StatisticLink.get(i).Comfirmed != 0 || Result.StatisticLink.get(i).Suspected != 0 
-					|| Result.StatisticLink.get(i).Healed != 0 || Result.StatisticLink.get(i).Dead != 0)
+			for(int i = 0 ; i < Result.ProvinceOccur.length; i++)
 			{
-				OutResult.add(Result.ProvinceIndex.get(i) + " 感染患者" + Result.StatisticLink.get(i).Comfirmed + "人"
-						            + " 疑似患者" + Result.StatisticLink.get(i).Suspected + "人"
-						            + " 治愈" + Result.StatisticLink.get(i).Healed + "人"
-						            + " 死亡" + Result.StatisticLink.get(i).Dead + "人");
+				if(Result.ProvinceOccur[i])
+				{
+					OutResult.add(Result.ProvinceIndex.get(i) + " 感染患者" + Result.StatisticLink.get(i).Comfirmed + "人"
+							            + " 疑似患者" + Result.StatisticLink.get(i).Suspected + "人"
+							            + " 治愈" + Result.StatisticLink.get(i).Healed + "人"
+							            + " 死亡" + Result.StatisticLink.get(i).Dead + "人");
+				}
 			}
+			OutResult.add("// 该文档并非真实数据，仅供测试使用");
 		}
-		OutResult.add("// 该文档并非真实数据，仅供测试使用");
+		if(Province[0].equals("") && !Type[0].equals(""))
+		{
+			for(int i = 0 ; i < Result.ProvinceOccur.length; i++)
+			{
+				if(Result.ProvinceOccur[i])
+				{
+					String Data = Result.ProvinceIndex.get(i);
+					for(int j = 0 ; j < 4 ; j ++)
+					{
+						if(Type[j].equals(""))
+							break;
+						else if(Type[j].equals("ip"))
+							Data += " 感染患者" + Result.StatisticLink.get(i).Comfirmed + "人";
+						else if(Type[j].equals("sp"))
+							Data += " 疑似患者" + Result.StatisticLink.get(i).Suspected + "人";
+						else if(Type[j].equals("cure"))
+							Data += " 治愈" + Result.StatisticLink.get(i).Healed + "人";
+						else if(Type[j].equals("dead"))
+							Data += " 死亡" + Result.StatisticLink.get(i).Dead + "人";
+					}
+					OutResult.add(Data);
+				}
+			}
+			OutResult.add("// 该文档并非真实数据，仅供测试使用");
+		}
+		if(!Province[0].equals("") && Type[0].equals(""))
+		{
+			for(int i = 0 ; i < 32; i++)
+				Result.ProvinceOccur[i] = false;
+			for(int i = 0 ; i < 32; i++)
+			{
+				if(Province[i].equals(""))
+					break;
+				Result.ProvinceOccur[Result.ProvinceIndex.indexOf(Province[i])] = true;
+			}
+			for(int i = 0 ; i < Result.ProvinceOccur.length; i++)
+			{
+				if(Result.ProvinceOccur[i])
+				{
+					OutResult.add(Result.ProvinceIndex.get(i) + " 感染患者" + Result.StatisticLink.get(i).Comfirmed + "人"
+							            + " 疑似患者" + Result.StatisticLink.get(i).Suspected + "人"
+							            + " 治愈" + Result.StatisticLink.get(i).Healed + "人"
+							            + " 死亡" + Result.StatisticLink.get(i).Dead + "人");
+				}
+			}
+			OutResult.add("// 该文档并非真实数据，仅供测试使用");
+		}
+		
+		else
+		{
+			for(int i = 0 ; i < 32; i++)
+				Result.ProvinceOccur[i] = false;
+			for(int i = 0 ; i < 32; i++)
+			{
+				if(Province[i].equals(""))
+					break;
+				Result.ProvinceOccur[Result.ProvinceIndex.indexOf(Province[i])] = true;
+			}
+			
+			for(int i = 0 ; i < Result.ProvinceOccur.length; i++)
+			{
+				if(Result.ProvinceOccur[i])
+				{
+					String Data = Result.ProvinceIndex.get(i);
+					for(int j = 0 ; j < 4 ; j ++)
+					{
+						if(Type[j].equals(""))
+							break;
+						else if(Type[j].equals("ip"))
+							Data += " 感染患者" + Result.StatisticLink.get(i).Comfirmed + "人";
+						else if(Type[j].equals("sp"))
+							Data += " 疑似患者" + Result.StatisticLink.get(i).Suspected + "人";
+						else if(Type[j].equals("cure"))
+							Data += " 治愈" + Result.StatisticLink.get(i).Healed + "人";
+						else if(Type[j].equals("dead"))
+							Data += " 死亡" + Result.StatisticLink.get(i).Dead + "人";
+					}
+					OutResult.add(Data);
+				}
+			}
+			OutResult.add("// 该文档并非真实数据，仅供测试使用");
+		}
 		return OutResult;
 	}
 }
@@ -297,10 +552,15 @@ class StatisticResult
      * 黑龙江12、湖北13、湖南14、吉林15、江苏16、江西17、辽宁18、内蒙古19、宁夏20、青海21、山东22、山西23
      * 陕西24、上海25、四川26、天津27、西藏28、新疆29、云南30、浙江31
 	 */
+	
+	boolean[] ProvinceOccur = new boolean[32]; //用于判断省份是否出现过
 	List<String> ProvinceIndex = new ArrayList<String>();
 	List<PeopleType> StatisticLink = new ArrayList<PeopleType>();
 	public StatisticResult()
 	{
+		for(int i = 0; i < 32 ; i ++)
+			ProvinceOccur[i] = false;
+		ProvinceOccur[0] = true;
 		for(int i = 0; i < 32 ; i ++)
 		{
 			PeopleType Temp = new PeopleType();
@@ -354,12 +614,14 @@ class StatisticResult
 			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
 			StatisticLink.get(ProvinceIndex_1).Comfirmed += data.Number;
 			StatisticLink.get(0).Comfirmed += data.Number;
+			ProvinceOccur[ProvinceIndex_1] = true;
 		}
 		if(data.Type == 2)
 		{
 			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
 			StatisticLink.get(ProvinceIndex_1).Suspected += data.Number;
 			StatisticLink.get(0).Suspected += data.Number;
+			ProvinceOccur[ProvinceIndex_1] = true;
 		}
 		if(data.Type == 3)
 		{
@@ -367,6 +629,8 @@ class StatisticResult
 			int ProvinceIndex_2 = ProvinceIndex.indexOf(data.Province2);
 			StatisticLink.get(ProvinceIndex_1).Comfirmed -= data.Number;
 			StatisticLink.get(ProvinceIndex_2).Comfirmed += data.Number;
+			ProvinceOccur[ProvinceIndex_1] = true;
+			ProvinceOccur[ProvinceIndex_2] = true;
 		}
 		if(data.Type == 4)
 		{
@@ -374,6 +638,8 @@ class StatisticResult
 			int ProvinceIndex_2 = ProvinceIndex.indexOf(data.Province2);
 			StatisticLink.get(ProvinceIndex_1).Suspected -= data.Number;
 			StatisticLink.get(ProvinceIndex_2).Suspected += data.Number;
+			ProvinceOccur[ProvinceIndex_1] = true;
+			ProvinceOccur[ProvinceIndex_2] = true;
 		}
 		if(data.Type == 5)
 		{
@@ -382,6 +648,7 @@ class StatisticResult
 			StatisticLink.get(0).Dead += data.Number;
 			StatisticLink.get(ProvinceIndex_1).Comfirmed -= data.Number;
 			StatisticLink.get(0).Comfirmed -= data.Number;
+			ProvinceOccur[ProvinceIndex_1] = true;
 		}
 		if(data.Type == 6)
 		{
@@ -390,6 +657,7 @@ class StatisticResult
 			StatisticLink.get(0).Healed += data.Number;
 			StatisticLink.get(ProvinceIndex_1).Comfirmed -= data.Number;
 			StatisticLink.get(0).Comfirmed -= data.Number;
+			ProvinceOccur[ProvinceIndex_1] = true;
 		}
 		if(data.Type == 7)
 		{
@@ -398,12 +666,14 @@ class StatisticResult
 			StatisticLink.get(0).Comfirmed += data.Number;
 			StatisticLink.get(ProvinceIndex_1).Suspected -= data.Number;
 			StatisticLink.get(0).Suspected -= data.Number;
+			ProvinceOccur[ProvinceIndex_1] = true;
 		}
 		if(data.Type == 8)
 		{
 			int ProvinceIndex_1 = ProvinceIndex.indexOf(data.Province1);
 			StatisticLink.get(ProvinceIndex_1).Suspected -= data.Number;
 			StatisticLink.get(0).Suspected -= data.Number;
+			ProvinceOccur[ProvinceIndex_1] = true;
 		}
 	}
 	
@@ -427,9 +697,9 @@ class OutputControlTool
 	 * @version 1.0
 	 * @since 2020.2.13
 	 */
-	public static void ProductInfectStatistic()
+	public static void ProductInfectStatistic(String DeadLine, String LogLocation,String ResultLocation,String[] Province,String[] Type)
 	{
-		File TargetFile = new File(InfectStatistic.OutputLocation);
+		File TargetFile = new File(ResultLocation);
 		if(TargetFile.exists())
 		{
 			System.out.println("该日志文档已存在，请修改目标文件名");
@@ -447,7 +717,7 @@ class OutputControlTool
 				e.printStackTrace();    
 			}       
 		}
-		List<String> Result = FileHandleTool.HandleFile();
+		List<String> Result = FileHandleTool.HandleFile(DeadLine,LogLocation,Province,Type);
 		try
 		{
 			OutputStream out = new FileOutputStream(TargetFile);
@@ -461,7 +731,7 @@ class OutputControlTool
 			System.err.println("文件写入错误");
             e.printStackTrace();
         }
-		System.out.println(InfectStatistic.OutputLocation + "文件已生成");
+		System.out.println(ResultLocation + "文件已生成");
 	}
 }
 
