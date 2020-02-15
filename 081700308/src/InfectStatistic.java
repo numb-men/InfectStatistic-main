@@ -101,7 +101,6 @@ class InfectStatistic {
 								{
 								if(!args[i+1].matches("-.*"))
 								{
-									System.out.println(args[i+1]);
 									required[proToInt(args[i+1])]=1;
 								}else
 									break;
@@ -130,6 +129,9 @@ class InfectStatistic {
 						}
 					}
 				}
+			}else
+			{
+				System.out.print("没有list,请重新输入");
 			}
 		}
 		public  int getIp(int n)
@@ -212,79 +214,6 @@ class InfectStatistic {
 			return 0;
 		}
 		
-		//下标对应省份
-		public String intToPro(int n)
-		{
-			switch(n)
-			{
-			    case 0 :
-			    	return "全国";
-			    case 1 :
-			    	return "安徽";
-			    case 2 :
-			    	return "北京";
-			    case 3 :
-			    	return "重庆";
-			    case 4 :
-			    	return "福建";
-			    case 5 :
-			    	return "甘肃";
-			    case 6 :
-			    	return "广东";
-			    case 7 :
-			    	return "广西";
-			    case 8 :
-			    	return "贵州";
-			    case 9 :
-			    	return "海南";
-			    case 10 :
-			    	return "河北";
-			    case 11 :
-			    	return "河南";
-			    case 12 :
-			    	return "黑龙江";
-			    case 13 :
-			    	return "湖北";
-			    case 14 :
-			    	return "湖南";
-			    case 15 :
-			    	return "吉林";
-			    case 16 :
-			    	return "江苏";
-			    case 17 :
-			    	return "江西";
-			    case 18 :
-			    	return "辽宁";
-			    case 19 :
-			    	return "内蒙古";
-			    case 20 :
-			    	return "宁夏";
-			    case 21 :
-			    	return "青海";
-			    case 22 :
-			    	return "山东";
-			    case 23 :
-			    	return "山西";
-			    case 24 :
-			    	return "陕西";
-			    case 25 :
-			    	return "上海";
-			    case 26 :
-			    	return "四川";
-			    case 27 :
-			    	return "天津";
-			    case 28 :
-			    	return "西藏";
-			    case 29 :
-			    	return "新疆";
-			    case 30 :
-			    	return "云南";
-			    case 31 :
-			    	return "浙江";
-			}
-			return "全国";
-		}
-	
     	
 	static String type1=".*新增 感染患者.*";
 	static	String type2=".*新增 疑似患者.*";
@@ -465,7 +394,6 @@ class InfectStatistic {
 		public  void readFile()
 		{
 			//获取该后缀的所有文件
-			
 			List<File> files=searchFiles(new File(log),".log.txt");
 			for(File file:files)
 			{
@@ -573,7 +501,6 @@ class InfectStatistic {
 										case "":k=4;break;
 										
 										}
-										
 									}
 									out.write("\r\n");
 								    out.flush();
@@ -588,14 +515,9 @@ class InfectStatistic {
 									}
 								}
 							}
-							
-							
-							
-						
 					}
 					out.write("// 该文档并非真实数据，仅供测试使用\r\n");
-					out.flush();
-					
+					out.flush();		
 				}
 			}catch(IOException e)
 			{
@@ -604,38 +526,14 @@ class InfectStatistic {
 		}
 		public static void main(String args[ ])
 		{
-			 
-			 String x="浙江 排除 疑似患者 7人";
 			 InfectStatistic a;
 			 a=new InfectStatistic();
-			 args=new String[15];
-			 args[0]="list";
-			 args[1]="-date";
-			 args[2]="2020-01-28";
-			 args[3]="-log";
-			 args[4]="D:/log/";
-			 args[5]="-out";
-			 args[6]="D:/output.txt";
-			
-			 args[7]="-province";
-			 args[8]="江西";
-			 args[9]="江苏";
-			 args[10]="-type";
-			 args[11]="cure";
-			 args[12]="ip";
-			 args[13]="dead";
-			 args[14]="sp";
+		 
 			a.update(args);
-			System.out.println(x.matches(type8));
-			for(int i=0;i<args.length;i++)
-			System.out.println(args[i]);
 			a.readFile();
-			System.out.println(a.type[1]);
-			System.out.println(System.getProperty("file.encoding"));
+			
+			//System.out.println("中文测试22");
+			//System.out.println(System.getProperty("file.encoding"));
 			a.writeFile();
 		}// 方法main结束
-		
-		
-	
-
 }
