@@ -15,17 +15,21 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-//System.out.println("在这里停止了");
+
+
 /*
  * 抽象命令接口，用于命令模式的设计
  */
 interface Command
 {
-	public void execute(String[] command);
+	public void execute(ListCommand listCommand);
 }
 
 /*
@@ -33,12 +37,15 @@ interface Command
  */
 class ReceiveCommand
 {
-	private int[][] data;
-	private String[] provinceName;
+	private int[][] data;//存储各个省份疫情出具
+	private String[] provinceName;//存取省份
+	private String[] state;//存取type选项值
+	
 	
 	public ReceiveCommand() 
 	{
 		data = new int[4][32];
+		
 		for(int i = 0;i < 4;i++) 
 		{
 			for(int j = 0;j < 32;j++)
@@ -46,12 +53,15 @@ class ReceiveCommand
 				data[i][j] = 0;
 			}
 		}
+		
 		provinceName = new String[] {
-				"中国","安徽","北京","重庆","福建","甘肃","广东","广西",
+				"全国","安徽","北京","重庆","福建","甘肃","广东","广西",
 				"贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林",
 				"江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西",
 				"陕西","上海","四川","天津","西藏","新疆","云南","浙江"
 		};
+		
+		state = new String[] {"ip","sp","cure","dead"};
 	}
 	
 	public int getProvinceId(String province)
@@ -66,18 +76,53 @@ class ReceiveCommand
 		return -1;
 	}
 	
-	/*用于读取文件*/
+	public int[] getProvinceIds(ArrayList<String> provinceParameter)
+	{
+		int size = provinceParameter.size();
+		int[] ids= new int[size];
+		
+		for(int i = 0;i < size;i++)
+		{
+			ids[i] = this.getProvinceId(provinceParameter.get(i));
+		}
+		return ids;
+	}
+	
+	public int[] getState(ArrayList<String> typeParameter)
+	{
+		int size = typeParameter.size();
+		int[] type = new int[size];
+		
+		
+		for(int i = 0;i < size;i++)
+		{
+			for(int j = 0;j < 4;j++)
+			{				
+				if(this.state[j].equals(typeParameter.get(i)))
+				{
+					type[i] = j;
+					break;
+				}					
+			}
+			
+		}
+		
+		
+		return type;
+	}
+	
+	/*用于读取单个文件*/
 	public void readFile(String path) 
 	{
-		int num;
-		RegularExpression regularExpression = new RegularExpression("");
+		int num;//存取数据修改
+		RegularExpression regularExpression = new RegularExpression();
 		File file=new File(path);//创建文件对象
         String encoding="UTF-8";//设置读取文件的编码格式
         if(file.isFile()&&file.exists()){//判断文件是否存在
             try {
-                FileInputStream fisr=new FileInputStream(file);            
-                InputStreamReader isr=new InputStreamReader(fisr,encoding);//封装文件输入流，并设置编码方式                
-                BufferedReader br=new BufferedReader(isr);               
+                FileInputStream fisr=new FileInputStream(file);               
+                InputStreamReader isr=new InputStreamReader(fisr,encoding);//封装文件输入流，并设置编码方式               
+                BufferedReader br=new BufferedReader(isr);                
                 String txt=null;
                 while((txt=br.readLine())!=null){//按行读取文件，每次读取一行               	
                 	String[] splited = txt.split("\\s+");
@@ -90,16 +135,14 @@ class ReceiveCommand
                     	number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
                     	num = Integer.parseInt(number);
                     	number1 = this.getProvinceId(splited[0]);
-                    	data[0][number1] = data[0][number1] + num;
-                    	System.out.println("case 1's num:"+num);
+                    	data[0][number1] = data[0][number1] + num;                   	
                 		break;
                 		
                 	case 2:                		
                     	number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
                     	num = Integer.parseInt(number);
                     	number1 = this.getProvinceId(splited[0]);
-                    	data[1][number1] = data[1][number1] + num;
-                    	System.out.println("case 2's num:"+num);
+                    	data[1][number1] = data[1][number1] + num;                   	
                 		break;
                 		
                 	case 3:
@@ -108,8 +151,7 @@ class ReceiveCommand
                     	number1 = this.getProvinceId(splited[0]);
                     	number2 = this.getProvinceId(splited[3]);
                     	data[0][number1] = data[0][number1] - num;
-                    	data[0][number2] = data[0][number2] + num;
-                    	System.out.println("case 3's num:"+num);
+                    	data[0][number2] = data[0][number2] + num;                    	
                 		break;
                 		
                 	case 4:
@@ -118,8 +160,7 @@ class ReceiveCommand
                     	number1 = this.getProvinceId(splited[0]);
                     	number2 = this.getProvinceId(splited[3]);
                     	data[1][number1] = data[1][number1] - num;
-                    	data[1][number2] = data[1][number2] + num;
-                    	System.out.println("case 4's num:"+num);
+                    	data[1][number2] = data[1][number2] + num;                    	
                 		break;
                 		
                 	case 5:
@@ -127,8 +168,7 @@ class ReceiveCommand
                     	num = Integer.parseInt(number);
                     	number1 = this.getProvinceId(splited[0]);
                     	data[0][number1] = data[0][number1] - num;
-                    	data[3][number1] = data[3][number1] + num;
-                    	System.out.println("case 5's num:"+num);
+                    	data[3][number1] = data[3][number1] + num;                    	
                 		break;
                 		
                 	case 6:
@@ -137,7 +177,6 @@ class ReceiveCommand
                     	number1 = this.getProvinceId(splited[0]);
                     	data[0][number1] = data[0][number1] - num;
                     	data[2][number1] = data[2][number1] + num;
-                    	System.out.println("case 6's num:"+num);
                 		break;
                 		
                 	case 7:
@@ -146,7 +185,6 @@ class ReceiveCommand
                     	number1 = this.getProvinceId(splited[0]);
                     	data[1][number1] = data[1][number1] - num;
                     	data[0][number1] = data[0][number1] + num;
-                    	System.out.println("case 7's num:"+num);
                 		break;
                 		
                 	case 8:
@@ -154,7 +192,6 @@ class ReceiveCommand
                     	num = Integer.parseInt(number);
                     	number1 = this.getProvinceId(splited[0]);
                     	data[1][number1] = data[1][number1] - num;    
-                    	System.out.println("case 8's num:"+num);
                 		break;
                 		
                 	default:
@@ -175,32 +212,185 @@ class ReceiveCommand
         }
 	}
 	
-	
-	public void listDate(ListCommand listCommand)
+	/*读取路径下所有文件*/
+	public void readAllFile(String path)
 	{
-		System.out.println("接受到listDate命令，正在执行中......");
-		this.readFile("E:\\Git\\GitLocal\\InfectStatistic-main\\example\\log\\2020-01-22.log.txt");
-		
-		for(int i = 1;i < 32;i++) {
-			System.out.print(provinceName[i]+" :");
-			for(int j = 0;j < 4;j++) {
-				System.out.print(data[j][i]+" ");
-			}
-			System.out.println("\n");
+		ArrayList<File> files = FileOperate.getFiles(path);
+		for(int i = 0;i < files.size();i++)
+		{
+			this.readFile(files.get(i).toString());
 		}
 	}
 	
-	public void listType(ListCommand listCommand)
+	/*根据日期读取路径下文件*/
+	public void readSomeFile(ArrayList<String> parameter,String path)
 	{
-		System.out.println("接受到listType命令，正在执行中......");
+		ArrayList<File> files = FileOperate.getFiles(path);
+		String logTime = "";
+		for(int i = 0;i < files.size();i++)
+		{
+			logTime = RegularExpression.getFileName(files.get(i).getName());
+			if(Time.timeCompare(parameter.get(0), logTime))
+				this.readFile(files.get(i).getPath());
+		}
 	}
 	
-	public void listProvince(ListCommand listCommand)
+	/*统计全国数据*/
+	public void chinaDate()
 	{
-		System.out.println("接受到listProvince命令，正在执行中......");
+		for(int i = 0;i < 4;i++)
+		{
+			for(int j = 1;j < 32;j++)
+			{
+				this.data[i][0] = this.data[i][0] + this.data[i][j];
+			}
+		}
+	}
+	
+	public void outPutAll()
+	{
+		/*输出所有结果*/
+		for(int i = 0;i < 32;i++) {
+			System.out.print(provinceName[i]);
+			for(int j = 0;j < 4;j++) {
+				switch(j)
+				{
+				case 0:
+					System.out.print(" 感染患者");
+					break;
+				case 1:
+					System.out.print(" 疑似患者");
+					break;
+				case 2:
+					System.out.print(" 治愈");
+					break;
+				case 3:
+					System.out.print(" 死亡");
+					break;
+				default:
+					break;
+				}
+				System.out.print(data[j][i]+"人");
+				
+			}
+			System.out.print("\n");
+		}
+	}
+	
+	public void outPutType(ListCommand listCommand)
+	{
+		if(listCommand.getTypeParameter().size() == 0)
+		{
+			this.outPutAll();
+			return;
+		}
+		
+		int[] type = this.getState(listCommand.getTypeParameter());
+		
+		for(int i = 0;i < 32;i++) {
+			System.out.print(provinceName[i]);
+			for(int j = 0;j < type.length;j++) {
+				switch(type[j])
+				{
+				case 0:
+					System.out.print(" 感染患者");
+					break;
+				case 1:
+					System.out.print(" 疑似患者");
+					break;
+				case 2:
+					System.out.print(" 治愈");
+					break;
+				case 3:
+					System.out.print(" 死亡");
+					break;
+				default:
+					break;
+				}
+				System.out.print(data[j][i]+"人");
+				
+			}
+			System.out.print("\n");
+		}
+	}
+	
+	public void outPutProvince(ListCommand listCommand) 
+	{
+		if(listCommand.getProvinceParameter().size() == 0)
+		{
+			System.out.println("省份选项参数不能为空");
+			return;
+		}
+		int[] ids = this.getProvinceIds(listCommand.getProvinceParameter());
+		for(int i = 0;i < ids.length;i++) {
+			System.out.print(provinceName[ids[i]]);
+			for(int j = 0;j < 4;j++) {
+				switch(j)
+				{
+				case 0:
+					System.out.print(" 感染患者");
+					break;
+				case 1:
+					System.out.print(" 疑似患者");
+					break;
+				case 2:
+					System.out.print(" 治愈");
+					break;
+				case 3:
+					System.out.print(" 死亡");
+					break;
+				default:
+					break;
+				}
+				System.out.print(data[j][ids[i]]+"人");
+				
+			}
+			System.out.print("\n");
+		}
+	}
+	
+	public void outPutBoth()
+	{
+		
+	}
+	/*输出函数*/
+	public void outPut(ListCommand listCommand)
+	{
+		this.chinaDate();
+		if(listCommand.getOption()[1]&&!listCommand.getOption()[2])
+		{
+			this.outPutType(listCommand);
+			
+		}
+		else if(!listCommand.getOption()[1]&&listCommand.getOption()[2])
+		{
+			this.outPutProvince(listCommand);
+		}
+		else if(listCommand.getOption()[1]&&listCommand.getOption()[2])
+		{
+			
+		}
+		else//只有date命令输出
+		{
+			this.outPutAll();
+		}
+	}
+	
+	public void list(ListCommand listCommand)
+	{
+		if(listCommand.getOption()[0] && listCommand.getDateParameter().size() != 0) 
+		{
+			
+			this.readSomeFile(listCommand.getDateParameter(),listCommand.getReadPath());
+		}
+		else
+		{
+			this.readAllFile(listCommand.getReadPath());
+		}
+		
+		this.outPut(listCommand);
 	}
 }
-
 
 /*
  * 命令发送者控制器类，用于封装命令
@@ -214,12 +404,9 @@ class SendCommandController
 		this.list = list;
 	}
 	
-	/*
-	 * list命令执行方法，通过switch+正则选择不同选项的不同执行方法
-	 */
-	public void list(String[] command)
+	public void list(ListCommand listCommand)
 	{ 
-		list.execute(command);
+		list.execute(listCommand);
 	}
 }
 
@@ -235,164 +422,124 @@ class List implements Command
 		this.rc = new ReceiveCommand();
 	}
 	
-	/*********************
-	 * 执行不同选项的list命令，switch区分不同选项执行的函数
-	 ********************/
-	 public void execute(String[] command)
+	
+	 public void execute(ListCommand listCommand)
 	{		
-		
-		
-		ListCommand listCommand = new ListCommand(command);
-		
-		switch(listCommand.getOption())
-		{
-			case "-date":
-				if(!listCommand.isPathRight()) 
-				{					
-					return;
-				}		
-				
-				rc.listDate(listCommand);
-				break;
-				
-			case "-type":
-				if(!listCommand.isPathRight()) 
-				{					
-					return;
-				}	
-				rc.listType(listCommand);
-				break;
-				
-			case "-province":
-				if(!listCommand.isPathRight()) 
-				{
-					return;
-				}
-				rc.listProvince(listCommand);
-				break;
-				
-			default:
-				System.out.println("没找到list的 " + listCommand.getOption() + "选项");
-				break;
-		}
-		
+		rc.list(listCommand);
 	}
 }
 
 /*
- * 路径类
+ * 命令行解析类（包含命令的格式验证，以及命令的执行）
  */
-class Path
-{		
-	
-	/*检验文件路径是否存在*/
-	public static boolean pathRight(String path) 
-	{
-		File f = new File(path);
-		return f.exists();
-	}
-	
-	/*检验计算机输出文件是否存在不存在则创建*/
-	public static boolean outExist(String path) 
-	{
-		File file = new File(path);
-		if (!file.exists()) 
-		{		
-			try 
-			{
-			    file.createNewFile();
-			    
-			} 
-			catch (IOException e) 
-			{			        
-			    e.printStackTrace();
-			    System.out.println("输出文件路径错误");
-			    return false;
-			}
-		}
-		return true;
-	}
-	
-	
-}
-
-/*
- * 日期类
- */
-class Time
+class CommandAnalyze
 {
-	private String time;
-	
-	public Time(String time) 
+	public String[] cmd;
+	public String wholeCmd;
+	public CommandAnalyze(String[] args)
 	{
-		this.time = time;
+		wholeCmd = "";
+		cmd = new String[args.length];
+		
+		for(int i = 0;i < args.length;i++)
+		{
+			cmd[i] = args[i];
+			wholeCmd = wholeCmd + args;
+			if(i != args.length - 1)
+				wholeCmd = wholeCmd + " ";
+		}
 	}
 	
-	/*日期比较函数*/
-	public static boolean timeCompare(String commandTime,String logTime) 
+	public void commandAnalysis(SendCommandController sendCommandController)
 	{
-		return true;
+		switch(cmd[0])
+		{
+		case "list":
+		{
+			if(RegularExpression.isListRight(wholeCmd))
+			{
+				System.out.println("list命令格式错误");
+				return;
+			}
+			ListCommand listCommand = new ListCommand(cmd);
+			if(listCommand.getOption()[0])
+				listCommand.dateParameter();
+			if(listCommand.getOption()[1])
+				listCommand.typeParameter();
+			if(listCommand.getOption()[2])
+				listCommand.provinceParameter();
+			listCommand.logParameter();
+			listCommand.outParameter();
+			sendCommandController.list(listCommand);
+			break;
+		}
+		
+		default:
+			System.out.println("没找到 "+cmd[0]+" 命令");
+		}
 	}
 }
+
+
 /*
  * list命令实体类，用于命令解析后存取命令实体
  */
 class ListCommand
 {
-	private String option;
-	private ArrayList<String> parameter;
+	private boolean[] option;//存取三个选项<date,type,province>存在则置1
+	private String[] options;
+	private ArrayList<String> dateParameter;
+	private ArrayList<String> typeParameter;
+	private ArrayList<String> provinceParameter;
 	private String readPath;
 	private String outPath;
 	private String[] cmd;
 	
 	public ListCommand(String[] command) 
-	{
+	{	
+		
 		cmd = new String[command.length];
+		option = new boolean[] {false,false,false};
+		options = new String[] {"-date","-type","-province"};
+		dateParameter = new ArrayList<String>();
+		typeParameter = new ArrayList<String>();
+		provinceParameter = new ArrayList<String>();
+		
 		for(int i = 0;i < command.length;i++)
 		{
-			cmd[i] = command[i];		
-		}
+			cmd[i] = command[i];
+			if(command[i].equals("-date"))
+			{
+				option[0] = true;
+			}
+			if(command[i].equals("-type"))
+			{
+				option[1] = true;
+			}
+			if(command[i].equals("-province"))
+			{
+				option[2] = true;			
+			}
+		}		
 		
-		option = command[1];
-		switch(command[1])
-		{
-		case "-date":
-		{			
-			this.dateParameter();			
-			this.logParameter();
-			this.outParameter();
-			break;
-		}
-		
-		case "-type":
-		{
-			this.typeParameter();			
-			//this.logParameter();
-			//this.outParameter();
-			break;
-		}
-		
-		case "-province":
-		{
-			this.provinceParameter();			
-			this.logParameter();
-			this.outParameter();
-			break;
-		}
-		
-		default:
-			break;
-		}
 	}
 	
 	
 	
-	public String getOption() {
+	public boolean[] getOption() {
 		return option;
 	}
 	
-	public ArrayList<String> getParameter() {
-		return parameter;
+	public ArrayList<String> getDateParameter() {
+		return dateParameter;
+	}
+	
+	public ArrayList<String> getTypeParameter() {
+		return typeParameter;
+	}
+	
+	public ArrayList<String> getProvinceParameter() {
+		return provinceParameter;
 	}
 	
 	public String getReadPath() {
@@ -406,7 +553,7 @@ class ListCommand
 	/*验证命令中路径是否正确*/
 	public boolean isPathRight() 
 	{
-		if(!Path.pathRight(readPath)||!Path.outExist(outPath))
+		if(!FileOperate.pathRight(readPath)||!FileOperate.outExist(outPath))
 		{
 			return false;			
 		}
@@ -438,107 +585,142 @@ class ListCommand
 	
 	public void dateParameter()
 	{
-		int i = 2;
-		parameter = new ArrayList<String>();
-		String end = "-log";
+		int i = 0;
+		String start = "-date";
+		String compile = "-\\w+";
 		
 		/*读取date参数，后可在此进行验证参数格式*/
-		while(!end.equals(cmd[i]) && i < cmd.length)
+		while(!start.equals(cmd[i]) && i < cmd.length)
 		{					
-			parameter.add(cmd[i]);
+			i++;
+		}
+		i++;
+		while(!RegularExpression.isMatch(compile, cmd[i]) && i < cmd.length)
+		{
+			dateParameter.add(cmd[i]);
 			i++;
 		}
 	}
 	
 	public void typeParameter()
 	{
-		int i = 2;
-		parameter = new ArrayList<String>();
-		String end = "-log";
+		int i = 0;
+		String start = "-type";
+		String compile = "-\\w+";
 		
 		/*读取type参数，后可在此进行验证参数格式*/
-		while(!end.equals(cmd[i]) && i < cmd.length)
+		while(!start.equals(cmd[i]) && i < cmd.length)
 		{					
-			parameter.add(cmd[i]);
 			i++;
 		}
-		
+		i++;
+		while(!RegularExpression.isMatch(compile, cmd[i]) && i < cmd.length)
+		{
+			typeParameter.add(cmd[i]);
+			i++;
+		}
 	}
 	
 	public void provinceParameter()
 	{
-		int i = 2;
-		parameter = new ArrayList<String>();
-		String end = "-log";
+		int i = 0;
+		String start = "-province";
+		String compile = "-\\w+";
 		
 		/*读取province参数，后可在此进行验证参数格式*/
-		while(!end.equals(cmd[i]) && i < cmd.length)
+		while(!start.equals(cmd[i]) && i < cmd.length)
 		{					
-			parameter.add(cmd[i]);
+			i++;
+		}
+		i++;
+		while(!RegularExpression.isMatch(compile, cmd[i]) && i < cmd.length)
+		{
+			provinceParameter.add(cmd[i]);
 			i++;
 		}
 	}
+	
+	
+}
+/*
+ * 文件操作类
+ */
+class FileOperate
+{
+	/*检验文件路径是否存在*/
+	public static boolean pathRight(String path) 
+	{
+		File f = new File(path);
+		return f.exists();
+	}
+	
+	/*检验计算机输出文件是否存在不存在则创建*/
+	public static boolean outExist(String path) 
+	{
+		File file = new File(path);
+		if (!file.exists()) 
+		{		
+			try 
+			{
+			    file.createNewFile();
+			    
+			} 
+			catch (IOException e) 
+			{			        
+			    e.printStackTrace();
+			    System.out.println("输出文件路径错误");
+			    return false;
+			}
+		}
+		return true;
+	}
+	
+	/*获取指定路径下的所有文件（不包括文件夹）*/
+	public static ArrayList<File> getFiles(String path) {
+	 	ArrayList<File> files = new ArrayList<File>();
+        File file = new File(path);
+        File[] tempList = file.listFiles();
+        
+        for (int i = 0; i < tempList.length; i++) {
+            if (tempList[i].isFile()) {
+                files.add(tempList[i]);
+                //文件名，不包含路径
+                //String fileName = tempList[i].getName();
+            }
+            if (tempList[i].isDirectory()) {
+                continue;
+            }
+        }
+        return files;
+    }
+	
+	
 }
 
-
 /*
- * 命令行解析类（包含命令的格式验证，以及命令的执行）
+ * 日期类
  */
-class CommandAnalyze
-{
-	private String[] command;
-	private String wholeCommand;
-	private RegularExpression re;//用于命令解析中的正则格式匹配
-	
-	public CommandAnalyze(String[] args)
-	{		
-		command = new String[args.length];
-		wholeCommand = "";
-		
-		
-		for(int i = 0;i < args.length;i++)
-		{
-			command[i] = args[i];
-			wholeCommand = wholeCommand + args[i] +" ";
-		}
-		
-		
-		re = new RegularExpression(wholeCommand);
+class Time
+{	
+	/*日期比较函数*/
+	public static boolean timeCompare(String commandTime,String logTime) 
+	{			
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+            Date dt1 = df.parse(commandTime);
+            Date dt2 = df.parse(logTime);
+            if (dt1.getTime() > dt2.getTime()) {	                
+                return true;
+            } else if (dt1.getTime() < dt2.getTime()) {	                
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }		
+		return false;
 	}
-	
-	/*用于解析传入的命令，例如list等，通过switch选择
-	 * 
-	 */	 
-	public void commandAnalysis(SendCommandController sendCommandController) 
-	{
-		if(command.length == 0)
-		{
-			System.out.println("没有命令传入");
-			return;
-		}
-		
-		/*commandHead用来存取命令，即传入的第一个参数*/
-		String commandHead = command[0];
-		switch(commandHead)
-		{
-			case "list":				
-				if(!re.isListDate()&&!re.isListType()&&!re.isListProvince())
-				{
-					System.out.println("此list命令格式不正确");
-					return;
-				}
-				sendCommandController.list(command);
-				break;
-				
-			default:
-				System.out.println("找不到 "+commandHead+" 命令");
-				return;
-				
-		}
-	}
-	
-	
-	
 }
 
 /*
@@ -546,7 +728,6 @@ class CommandAnalyze
  */
 class RegularExpression
 {
-	private String str = "";
 	private String type1 = "\\W+ 新增 感染患者 [0-9]+人\\s*";
 	private String type2 = "\\W+ 新增 疑似患者 [0-9]+人\\s*";
 	private String type3 = "\\W+ 感染患者 流入 \\W+ [0-9]+人\\s*";
@@ -555,15 +736,19 @@ class RegularExpression
 	private String type6 = "\\W+ 治愈 [0-9]+人\\s*";
 	private String type7 = "\\W+ 疑似患者 确诊感染 [0-9]+人\\s*";
 	private String type8 = "\\W+ 排除 疑似患者 [0-9]+人\\s*";
-		
 	
-	public RegularExpression(String cmd) 
+	/*正则匹配验证list命令格式是否正确*/
+	public static boolean isListRight(String str) 
 	{
-		str = cmd;
+		String cmdCompile = "list(\\s+-\\w+)+\\s+-log\\s+\\S+\\s+-out\\s+\\S+\\s*";
+		Pattern p = Pattern.compile(cmdCompile);
+		Matcher m = p.matcher(str);
+		boolean isValid = m.matches();
+		return isValid;
 	}
 	
 	/*验证字符串是否匹配*/
-	public boolean isMatch(String compile,String str)
+	public static boolean isMatch(String compile,String str)
 	{		
 		Pattern p = Pattern.compile(compile);
 		Matcher m = p.matcher(str);
@@ -594,57 +779,40 @@ class RegularExpression
 			return -1;
 	}
 	
-	/*用于截取人数变化数值*/
-	public String getSubUtilSimple(String soap){  
+	/*正则匹配截取人数变化数值*/
+	public String getSubUtilSimple(String soap)
+	{  
 		String rgex = "(.*?)人";
         Pattern pattern = Pattern.compile(rgex);// 匹配的模式  
         Matcher m = pattern.matcher(soap);  
-        while(m.find()){  
+        while(m.find())
+        {  
             return m.group(1);  
         }  
         return "";  
     }  
 	
-	/*正则匹配命令*/
-	/*判断list -date选项命令格式是否正确*/	 
-	public boolean isListDate()
+	/*正则匹配获取文件名的日期*/ 	
+	public static String getFileName(String soap)	 
 	{
-		String cmdCompile = "list\\s+-date\\s+[0-9]{4}-[0-9]{2}-[0-9]{2}\\s+-log\\s+\\S+\\s+-out\\s+\\S+\\s*";
-		Pattern p = Pattern.compile(cmdCompile);
-		Matcher m = p.matcher(str);
-		boolean isValid = m.matches();
-		return isValid;
-	}
-	
-	/*判断list -type选项格式命令是否正确*/	 
-	public boolean isListType()
-	{
-		String cmdCompile = "list\\s+-type\\s+.*-log\\s+\\S+\\s+-out\\s+\\S+\\s*";
-		Pattern p = Pattern.compile(cmdCompile);
-		Matcher m = p.matcher(str);
-		boolean isValid = m.matches();
-		return isValid;
-	}
-	
-	/*判断list -province选项命令格式是否正确*/	 
-	public boolean isListProvince()
-	{
-		String cmdCompile = "list\\s+-province\\s+.*-log\\s+\\S+\\s+-out\\s+\\S+\\s*";
-		Pattern p = Pattern.compile(cmdCompile);
-		Matcher m = p.matcher(str);
-		boolean isValid = m.matches();
-		return isValid;
+		String rgex = "(.*?).log.txt";
+        Pattern pattern = Pattern.compile(rgex);// 匹配的模式  
+        Matcher m = pattern.matcher(soap);  
+        while(m.find())
+        {  
+            return m.group(1);  
+        }  
+        return "";  
 	}
 }
 
-public class InfectStatistic 
-{	
-	
-	public static void main(String[] args) 
-	{
+public class InfectStatistic {
+
+	public static void main(String[] args) {
 		
 		Command list;//创建命令
 		list = new List();//实例化
+		
 		CommandAnalyze commandAnalyze = new CommandAnalyze(args);//创建命令解析对象
 		
 		SendCommandController sendCommandController = new SendCommandController(list);//创建并初始化控制器
