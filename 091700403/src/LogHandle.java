@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -35,14 +39,33 @@ public class LogHandle {
 
     }
 
-    public void ShowHm() {
+    public StringBuilder ShowHm() {
+        StringBuilder sb = new StringBuilder();
         for (Entry<String, InflectInfo> entry : hm.entrySet()) {
 
             InflectInfo value = entry.getValue();
+
             System.out.println(entry.getKey() + " 感染患者" + value.getIp() + "人 疑似患者" + value.getSp() + "人 治愈"
                     + value.getCure() + "人 死亡" + value.getDead() + "人\n");
-        }
+            sb.append(entry.getKey() + " 感染患者" + value.getIp() + "人 疑似患者" + value.getSp() + "人 治愈" + value.getCure()
+                    + "人 死亡" + value.getDead() + "人\n");
 
+        }
+        return sb;
+
+    }
+
+    public void WriteToFile(String filePath) {
+        try {
+            File file = new File(filePath);
+            PrintStream ps = new PrintStream(new FileOutputStream(file));
+            ps.println(ShowHm());// 往文件里写入字符串
+
+            ps.close();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public void calculate(String rows) {
