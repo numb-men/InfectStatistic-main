@@ -502,13 +502,7 @@ class CmdArgs {
                     return false;
                 }
             } else if ("-out".equals(args[i])) {
-                File file = new File(args[++i]);
-                if (file.isFile()) {
-                    this.setOutFilePath(args[i]);
-                } else {
-                    System.out.println("你必须指定输出文件的正确全路径");
-                    return false;
-                }
+                    this.setOutFilePath(args[++i]);
             } else if ("-date".equals(args[i])) {
                 if (!this.setDate(args[++i])) {
                     return false;
