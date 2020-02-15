@@ -1,6 +1,6 @@
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.Collator;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -332,7 +332,6 @@ class LogReader {
 
                 // 过滤日期不规范的日志文件
                 try {
-
                     logDate = format.parse(getLogDate(file));
                 } catch (Exception e) {
                     continue;
@@ -346,8 +345,8 @@ class LogReader {
                         latestDate = logDate;
                     }
 
-                    try (FileReader fr = new FileReader(file.getAbsolutePath());
-                         BufferedReader bf = new BufferedReader(fr)) {
+                    try (InputStream fr = new FileInputStream(file.getAbsolutePath());
+                         BufferedReader bf = new BufferedReader(new InputStreamReader(fr, StandardCharsets.UTF_8))) {
                         String line;
                         // 按行读取
                         while ((line = bf.readLine()) != null) {
@@ -887,8 +886,8 @@ class LogWriter {
      * @param results
      */
     static void write(String filePath, List<String> results) throws Exception {
-        try (FileWriter fw = new FileWriter(filePath);
-             BufferedWriter bw = new BufferedWriter(fw)) {
+        try (FileOutputStream out = new FileOutputStream(filePath);
+             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
             for (String resultLine : results) {
                 bw.write(resultLine);
             }
