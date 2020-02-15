@@ -1,3 +1,7 @@
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+
 /**
  * InfectStatistic
  * TODO
@@ -25,6 +29,19 @@ class InfectStatistic {
         if(go==false)
             return;
         Read b=new Read(a.main_Path,a.here,a.date);
+        Arrays.sort(a.here.kinds, new Comparator<kind>() {
+            @Override
+            public int compare(kind o1, kind o2) {
+                return -(o1.quantify-o2.quantify);
+            }
+        });
+        Arrays.sort(a.here.provinces, new Comparator<province>() {
+            @Override
+            public int compare(province o1, province o2) {
+                return -(o1.quantify-o2.quantify);
+            }
+        });
+
 
 
     }

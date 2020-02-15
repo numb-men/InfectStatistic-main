@@ -1,5 +1,7 @@
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,10 +35,9 @@ public class Write {
             e.printStackTrace();
         }
     }
-    public void writedetail(int[] kind,int[] province,int _type,int _province){
+    public void writedetail(kind[] kind,province[] province,int _type,int _province){
         try {
             FileWriter fw=new FileWriter(Path);
-
         }
         catch (Exception e){
             e.printStackTrace();
