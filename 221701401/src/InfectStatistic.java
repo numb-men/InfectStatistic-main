@@ -103,7 +103,7 @@ class CmdList implements Cmd {
 			if (!isRight) throw new Exception("type参数值错误");
 		}
 		FileHandle l=new FileHandle();
-    	List<LogResult> res=new ArrayList<>();
+    	//List<LogResult> res=new ArrayList<>();
     	String[] require=null;
     	if (pm.isProvince()) {
     		require=pm.getProvinceValue();
@@ -221,7 +221,7 @@ class Param {
 
 //文件处理类
 class FileHandle {
-	private List<LogResult> all=new ArrayList();
+	private List<LogResult> all=new ArrayList<>();
 	
 	public void setList(List<LogResult> r) {
 		all=r;
@@ -271,12 +271,9 @@ class FileHandle {
 		}
 		DataHandle dh=new DataHandle();
 		//转化成要求的省份
-		/*if (!(require==null)) {
-			for (int i=0;i<require.length;i++) {
-				LogResult tmp=new LogResult(require[i]);
-				all.add(tmp);
-			}
-		}*/
+		if (!(require==null)) {
+			all=dh.toFormatPro(require);
+		}
 		List<LogResult> res=dh.mergeResult(all);
 		all=res;
 	}
@@ -290,7 +287,6 @@ class FileHandle {
 		OutputStreamWriter writer=new OutputStreamWriter(fout,"UTF-8");
 		//这里写入内容	
 		for (LogResult lr:all) {
-			//需修改
 			String tmp=lr.toString(type);
 			writer.write(tmp);
 		}
@@ -427,6 +423,25 @@ class DataHandle {
 		list.add(all);
 		res=mergeResult(list);
 		return res;
+	}
+	
+	//按要求省份
+	public List<LogResult> toFormatPro(String[] pro) {
+		HashMap<String,LogResult> target=new HashMap<>();
+		for (int i=0;i<pro.length;i++) {
+			LogResult lr=new LogResult(pro[i]);
+			target.put(pro[i],lr);
+		}
+		for (LogResult lr:list) {
+			if (target.containsKey(lr.getProvince())) {
+				target.get(lr.getProvince()).sum(lr.getIp(),lr.getSp(),lr.getCure(),lr.getDead());
+			}
+		}
+		List<LogResult> newList=new ArrayList<>();
+        for (String tmp:target.keySet()) {
+            newList.add(target.get(tmp));
+        }
+        return newList;
 	}
 	
 	//合并数据(参考)
