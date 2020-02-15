@@ -1,7 +1,7 @@
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.*;
-import java.util.stream.Collectors;
 
 /**
  * InfectStatistic
@@ -12,36 +12,231 @@ import java.util.stream.Collectors;
  * @since xxx
  */
 class InfectStatistic {
-    public static void main(String[] args) throws IOException {
-    	FileHandle l=new FileHandle();
-    	l.dealFile("D:/testlog","2020-01-27");
-    	l.writeFile("C:/Users/V556U/Desktop/a.txt");
+    public static void main(String[] args) throws Exception{
+    	CmdHandle cmdh=new CmdHandle();
+    	cmdh.setCmdArg(args);
+    	cmdh.isCmd();
     }
 }
 
 //命令行类
 class CmdHandle {
-	private String[] args;
+	private String[] args=new String[] {};
+	private Param p=new Param();
 	
 	void setCmdArg(String[] arg) {
 		args=arg;
 	}
+	
+	Param getParamRes() {
+		return p;
+	}
+	
+	public void isCmd() throws Exception {
+		switch (args[0]) {
+		case "list":
+			Param pm=CmdAnalyse();
+			CmdList c=new CmdList();
+			c.doCmd(pm);
+			break;
+		default:
+			throw new Exception("输入不合法命令");
+		}
+	}
+	
+	//参数分析
+	public Param CmdAnalyse() throws Exception {
+		int len=args.length;
+		for (int i=1;i<len;i++) {
+			switch (args[i]) {
+			case "-date":
+				p.setDate(true);
+				p.setDateValue(args[i+1]);
+				break;
+			case "-out":
+				p.setOutValue(args[i+1]);
+				break;
+			case "-log":
+				p.setLogValue(args[i+1]);
+				break;
+			case "-type":
+				p.setType(true);
+				int j,cntPm=0;
+				for (j=i+1;j<args.length;j++,cntPm++) {
+					if(args[j].substring(0,1).equals("-")) break;
+					p.setTypeValue(args[j]);
+				}
+				if (cntPm==0) p.setTypeValue("");			
+				break;
+			case "-province":
+				p.setProvince(true);
+				int begin=i+1,end=i+1;
+				for (;end<args.length;end++) {
+					if(args[end].substring(0,1).equals("-")) break;
+				}
+				String[] tmp=Arrays.copyOfRange(args,begin,end);
+				p.setProvinceValue(tmp);
+				break;
+			default:
+				break;
+			}
+		}
+		return p;
+	}
+}
+
+interface Cmd {
+	public abstract void doCmd(Param pm) throws IOException, Exception;//执行命令函数
+}
+
+class CmdList implements Cmd {
+	public void doCmd(Param pm) throws Exception {
+		if (pm.isType()) {
+			boolean isRight=false;
+			boolean[] res=pm.getTypeValue();
+			for (int i=0;i<res.length;i++) {
+				if (res[i]) {
+					isRight=true;
+					break;
+				}
+			}
+			if (!isRight) throw new Exception("type参数值错误");
+		}
+		FileHandle l=new FileHandle();
+    	List<LogResult> res=new ArrayList<>();
+    	String[] require=null;
+    	if (pm.isProvince()) {
+    		require=pm.getProvinceValue();
+    	}
+    	l.dealFile(pm.getLogValue(),pm.getDateValue(),require);
+    	l.writeFile(pm.getOutValue(),pm.getTypeValue());
+	}
+}
+
+class Param {
+	private boolean date;
+	private boolean type;
+	private boolean province;
+	private String logValue;
+	private String outValue;
+	private String dateValue;
+	private boolean[] typeValue;
+	private String[] provinceValue;
+	
+	Param() {
+		date=false;
+		type=false;
+		province=false;
+		typeValue= new boolean[]{false,false,false,false,true};
+		logValue=outValue=dateValue="";
+		provinceValue=new String[] {};
+	}
+	
+	String getOutValue() {
+		return outValue;
+	}
+	
+	void setOutValue(String o) {
+		outValue=o;
+	}
+	
+	String getLogValue() {
+		return logValue;
+	}
+	
+	void setLogValue(String g) {
+		logValue=g;
+	}
+	
+	void setDate(boolean d) {
+		date=d;
+	}
+	
+	String getDateValue() {
+		return dateValue;
+	}
+	
+	void setDateValue(String d) {
+		if (d==null) {
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			dateValue=df.format(new Date());
+	    }
+		else dateValue=d;
+	}
+	
+	void setProvince(boolean p) {
+		province=p;
+	}
+	
+	boolean isProvince() {
+		return province;
+	}
+	
+	String[] getProvinceValue() {
+		return provinceValue;
+	}
+	
+	void setProvinceValue(String[] p) {
+		provinceValue=p;
+	}
+	
+	void setType(boolean t) {
+		type=t;
+	}
+	
+	boolean isType() {
+		return type;
+	}
+	
+	boolean[] getTypeValue() {
+		return typeValue;
+	}
+	
+	void setTypeValue(String str) {
+		switch (str) {
+		case "ip":
+			typeValue[0]=true;
+			typeValue[4]=false;
+			break;
+		case "sp":
+			typeValue[1]=true;
+			typeValue[4]=false;
+			break;
+		case "cure":
+			typeValue[2]=true;
+			typeValue[4]=false;
+			break;
+		case "dead":
+			typeValue[3]=true;
+			typeValue[4]=false;
+			break;
+		case "":
+			break;
+		default:{
+			typeValue[4]=false;
+		}
+		}
+	}	
 }
 
 //文件处理类
 class FileHandle {
 	private List<LogResult> all=new ArrayList();
 	
+	public void setList(List<LogResult> r) {
+		all=r;
+	}
+
 	//读文件
 	public void readFile(String path) throws IOException {
-		FileInputStream fin = new FileInputStream(path);
-        InputStreamReader reader = new InputStreamReader(fin,"UTF-8");
-        BufferedReader buffReader = new BufferedReader(reader);
-        String strTmp = "";
+		FileInputStream fin=new FileInputStream(path);
+        InputStreamReader reader=new InputStreamReader(fin,"UTF-8");
+        BufferedReader buffReader=new BufferedReader(reader);
+        String strTmp="";
         DataHandle dh=new DataHandle();
-		while((strTmp = buffReader.readLine())!=null){
-        	if(strTmp.startsWith("\uFEFF")){
-        	   strTmp = strTmp.replace("\uFEFF","");
+		while ((strTmp=buffReader.readLine())!=null) {
+        	if (strTmp.startsWith("\uFEFF")) {
+        	   strTmp=strTmp.replace("\uFEFF","");
         	}//win10无法建立无BOM,用此去掉开头
         	//进行结果统计
         	dh.calResult(strTmp);
@@ -52,12 +247,12 @@ class FileHandle {
 	}		
 	
 	//找到日期对应文件进行处理
-	public void dealFile(String path,String date) throws IOException {
+	public void dealFile(String path,String date,String[] require) throws IOException {
 		String[] list=new File(path).list();
 		boolean isEnd=false;
 		//按日期排序
-		List<String> fileList = Arrays.asList(list);
-	    Collections.sort(fileList, new Comparator<String>() {
+		List<String> fileList=Arrays.asList(list);
+	    Collections.sort(fileList,new Comparator<String> () {
 	    	@Override
 	    	public int compare(String o1, String o2) {
 	    		return o1.compareTo(o2);
@@ -75,22 +270,31 @@ class FileHandle {
 			if (isEnd) break;
 		}
 		DataHandle dh=new DataHandle();
+		//转化成要求的省份
+		/*if (!(require==null)) {
+			for (int i=0;i<require.length;i++) {
+				LogResult tmp=new LogResult(require[i]);
+				all.add(tmp);
+			}
+		}*/
 		List<LogResult> res=dh.mergeResult(all);
 		all=res;
 	}
 	
-	//写文件(输入参数：路径)
-	public void writeFile(String path) throws IOException {
-		File file = new File(path);
-		if(!file.getParentFile().exists()) file.getParentFile().mkdirs();
-		if(!file.exists()) file.createNewFile();
+	//写文件(输入参数：路径，类型)
+	public void writeFile(String path,boolean[] type) throws IOException {
+		File file=new File(path);
+		if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+		if (!file.exists()) file.createNewFile();
 		FileOutputStream fout=new FileOutputStream(file,true);
 		OutputStreamWriter writer=new OutputStreamWriter(fout,"UTF-8");
-		//这里要写入内容	
+		//这里写入内容	
 		for (LogResult lr:all) {
-			String tmp=lr.toString();
+			//需修改
+			String tmp=lr.toString(type);
 			writer.write(tmp);
 		}
+		writer.write("//该文档并非真实数据，仅供测试使用\n");
         writer.flush();
         writer.close();
 	}
@@ -114,6 +318,11 @@ class LogResult {
 		province="";
 	}
 	
+	LogResult(String pro) {
+		ip=sp=cure=dead=0;
+		province=pro;
+	}
+	
 	void setProvince(String pro) {
 		province=pro;
 	}
@@ -121,7 +330,7 @@ class LogResult {
 	String getProvince() {
 		return province;
 	}
-	
+		
 	void setIp(int i) {
 		ip=i;
 	}
@@ -170,21 +379,28 @@ class LogResult {
 		return -1;
 	}
 
-	//toString（字符串形式输出）
-	public String toString() {
-		return province+" 感染患者"+ip+"人 疑似患者"+sp+"人 治愈"+cure+"人 死亡"+dead+"人\n";
+	//toString（默认字符串形式输出）
+	public String toString(boolean[] t) {
+		String res=province;
+		if (t[0]) res+=" 感染患者"+ip+"人";
+		if (t[1]) res+=" 疑似患者"+sp+"人";
+		if (t[2]) res+=" 治愈"+cure+"人";
+		if (t[3]) res+=" 死亡"+dead+"人";
+		if (t[4])res=province+" 感染患者"+ip+"人 "+" 疑似患者"+sp+"人 治愈"+cure+"人 死亡"+dead+"人";
+		res+="\n";
+		return res;
 	}
 }
 
 class DataHandle {
-	protected Pattern addIp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 新增 感染患者 (\\d+)人");
-	protected Pattern addSp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 新增 疑似患者 (\\d+)人");
-	protected Pattern addAndSubIp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 感染患者 流入 ([\\u4e00-\\u9fa5]{0,}+) (\\d+)人");
-	protected Pattern addAndSubSp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 疑似患者 流入 ([\\u4e00-\\u9fa5]{0,}+) (\\d+)人");
-	protected Pattern addDead=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 死亡 (\\d+)人");
-	protected Pattern addCure=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 治愈 (\\d+)人");
-	protected Pattern spToIp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 疑似患者 确诊感染 (\\d+)人");
-	protected Pattern subSp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 排除 疑似患者 (\\d+)人");
+	private Pattern addIp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 新增 感染患者 (\\d+)人");
+	private Pattern addSp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 新增 疑似患者 (\\d+)人");
+	private Pattern addAndSubIp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 感染患者 流入 ([\\u4e00-\\u9fa5]{0,}+) (\\d+)人");
+	private Pattern addAndSubSp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 疑似患者 流入 ([\\u4e00-\\u9fa5]{0,}+) (\\d+)人");
+	private Pattern addDead=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 死亡 (\\d+)人");
+	private Pattern addCure=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 治愈 (\\d+)人");
+	private Pattern spToIp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 疑似患者 确诊感染 (\\d+)人");
+	private Pattern subSp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 排除 疑似患者 (\\d+)人");
 	private List<LogResult> list;
 	
 	DataHandle () {
@@ -203,9 +419,8 @@ class DataHandle {
 	
 	//计算全国数据
 	public List<LogResult> calNationData() {
-		LogResult all=new LogResult();
+		LogResult all=new LogResult("全国");
 		List<LogResult> res=new ArrayList<>();
-		all.setProvince("全国");
 		for (LogResult lr:list) {
 			all.sum(lr.getIp(),lr.getSp(),lr.getCure(),lr.getDead());
 		}
@@ -231,8 +446,7 @@ class DataHandle {
                 tempMap.put(tmpStr,temp);
             } else {
                 tempMap.put(tmpStr,lr);
-            }
-            
+            }    
         }
         //去重
         List<LogResult> newList=new ArrayList<>();
@@ -485,3 +699,4 @@ class DataHandle {
 	}
 
 }
+
