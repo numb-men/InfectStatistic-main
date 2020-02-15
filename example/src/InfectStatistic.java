@@ -31,21 +31,23 @@ class Province{
 
 
 class InfectStatistic{
-	private static final int PROVINCE_NUM = 31;
-	private static final String PROVINCE[] ={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州",
+	private static final int PROVINCE_NUM = 32;
+	private static final String PROVINCE[] ={"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州",
 				"海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海",
 				"山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"
 	};
 	
 	
     public static void main(String[] args) throws IOException{
-    	String log = null,out = null,date = null,content = null;
-    	String[] type = new String[4],prov = new String[PROVINCE_NUM+1];
-    	Province[] province = new Province[PROVINCE_NUM+1];
+    	String log = null,out = null,date = null,content = "";
+    	boolean[] type = new boolean[5];//type[0]用于记录是否有-type命令行参数，1-4用于记录参数种类
+    	boolean [] prov = new boolean[PROVINCE_NUM+1];//boolean[PROVINCE_NUM]用于记录是否有输入-province参数，前面的部分记录参数种类
+    	
+    	Province[] province = new Province[PROVINCE_NUM];
     	initProvince(province);//初始化省份信息
     	
-    	if(args[0].equals("list")){
-    		for(int i = 1;i < args.length;i++){
+    	if(args.length > 0 && args[0].equals("list")){
+    		for(int i = 1;i+1 < args.length;i++){
     			int temp = 0;
     			if(args[i].substring(0,1).equals("-")){
     				switch(args[i]){
@@ -59,25 +61,44 @@ class InfectStatistic{
     						date = args[i+1];
     						break;
     					case "-type":
-    						while(args[i+1].equals(null) && !args[i+1].substring(0,1).equals("-")){
-    							type[temp] = new String();
-    							type[temp] = args[i+1];
-    							temp++;
+    						while(i+1 < args.length && !args[i+1].substring(0,1).equals("-")  && !args[i+1].equals(null)){
+    							switch(args[i+1]) {
+    								case "感染患者":
+    									type[0]=true;
+    									type[1] = true;
+    									break;
+    								case "疑似患者":
+    									type[0]=true;
+    									type[2] = true;
+    									break;
+    								case "治愈":
+    									type[0]=true;
+    									type[3] = true;
+    									break;
+    								case "死亡":
+    									type[0]=true;
+    									type[4] = true;
+    									break;
+    							}
     							i++;
     						}
     						break;
     					case "-province":
-    						while(args[i+1].equals(null) && !args[i+1].substring(0,1).equals("-")){
-    							prov[temp] = new String();
-    							prov[temp] = args[i+1];
-    							temp++;
+    						while(i+1 < args.length && !args[i+1].substring(0,1).equals("-")  && !args[i+1].equals(null)){
+    							for(int j = 0;j < PROVINCE_NUM;j++){
+    								if(args[i+1].equals(province[j].name)){
+    									prov[PROVINCE_NUM] = true;
+    									prov[j] = true;
+    									j = 32;
+    								}
+    							}
     							i++;
     						}
     						break;
     				}
     			}
     		}
-			
+    		
     		if(log == null || out == null){
     			System.out.println("没有输入log或没有输入out，请重新输入");
     		}
@@ -93,47 +114,61 @@ class InfectStatistic{
                 }
   			}
   			
-  			province[PROVINCE_NUM] = new Province();
-  			province[PROVINCE_NUM].name = "全国";
-  			for(int i = 0;i < PROVINCE_NUM;i++){
-  				province[PROVINCE_NUM].ip += province[i].ip;
-  				province[PROVINCE_NUM].sp += province[i].sp;
-  				province[PROVINCE_NUM].cure += province[i].cure;
-  				province[PROVINCE_NUM].dead += province[i].dead;
+    		if(!type[0]){//没有输入-type参数时所有类型人员都输出
+    			type[1] = true;
+				type[2] = true;
+				type[3] = true;
+				type[4] = true;
+    		}
+    		
+  			for(int i = 1;i < PROVINCE_NUM;i++){
+  				province[0].ip += province[i].ip;
+  				province[0].sp += province[i].sp;
+  				province[0].cure += province[i].cure;
+  				province[0].dead += province[i].dead;
   			}//计算全国疫情情况
   			
-  			content = "全国" + " "
-    			+ "感染患者" + province[PROVINCE_NUM].ip + "人" + " "
-    			+ "疑似患者" + province[PROVINCE_NUM].sp + "人" + " "
-    			+ "治愈" + province[PROVINCE_NUM].cure + "人" + " "
-    			+ "死亡" + province[PROVINCE_NUM].dead + "人" + "\n";//插入全国疫情情况
-  			
-  			if(!prov[0].equals(null)){
-  				for(int i = 0;i < 4 || !prov[i].equals(null);i++) {
-  					for(int j = 0;i < PROVINCE_NUM;i++) {
-  						if(province[j].name.equals(prov[i])) {
-  							content = content + province[i].name + " "
-  			  		    			+ "感染患者" + province[i].ip + "人" + " "
-  			  		    			+ "疑似患者" + province[i].sp + "人" + " "
-  			  		    			+ "治愈" + province[i].cure + "人" + " "
-  			  		    			+ "死亡" + province[i].dead + "人" + "\n";
-  						}
-  					}
-  				}
-  			}
-  			else {
+  			if(!prov[PROVINCE_NUM]){
   				for(int i = 0;i < PROVINCE_NUM;i++){
   	 				if(province[i].ip != 0 || province[i].sp != 0 || province[i].cure != 0 || province[i].dead != 0){
-  	 					content = content + province[i].name + " "
-  	  		    			+ "感染患者" + province[i].ip + "人" + " "
-  	  		    			+ "疑似患者" + province[i].sp + "人" + " "
-  	  		    			+ "治愈" + province[i].cure + "人" + " "
-  	  		    			+ "死亡" + province[i].dead + "人" + "\n";
+  	 					content = content + province[i].name + " ";
+  	 					if(type[1]) {
+  	 						content = content + "感染患者" + province[i].ip + "人" + " ";
+  	 					}
+  	 					if(type[2]) {
+  	 						content = content + "疑似患者" + province[i].sp + "人" + " ";
+  	 					}
+  	 					if(type[3]) {
+  	 						content = content + "治愈" + province[i].cure + "人" + " ";
+  	 					}
+  	 					if(type[4]) {
+  	 						content = content + "死亡" + province[i].dead + "人";
+  	 					}  	  		    			
+  	  		    		content = content + "\n";
   	  				}
   	  			}//插入各省份疫情
   			}
-  			
-
+  			else {
+  				for(int i = 0;i < PROVINCE_NUM;i++){
+  	 				if(prov[i]){
+  	 					content = content + province[i].name + " ";
+  	 					if(type[1]) {
+  	 						content = content + "感染患者" + province[i].ip + "人" + " ";
+  	 					}
+  	 					if(type[2]) {
+  	 						content = content + "疑似患者" + province[i].sp + "人" + " ";
+  	 					}
+  	 					if(type[3]) {
+  	 						content = content + "治愈" + province[i].cure + "人" + " ";
+  	 					}
+  	 					if(type[4]) {
+  	 						content = content + "死亡" + province[i].dead + "人";
+  	 					}  	  		    			
+  	  		    		content = content + "\n";
+  	  				}
+  	  			}//插入各省份疫情
+  			}
+  				
   			content = content + "// 该文档并非真实数据，仅供测试使用";
   			write(out,content);
   			  	
@@ -162,7 +197,7 @@ class InfectStatistic{
 			String str[] = strLine.split(" ");//用空格分隔每一行中的记录
 		  	if(!str[0].substring(0,2).equals("//")){//忽略以"//"开头的记录行
 				int num = 0;//记录变动人数
-				int i = 0;//记录变动省份
+				int i = 1;//记录变动省份
 				int length = str.length;
 				str[length - 1] = str[length - 1].trim();
 				if(str[length - 1] != null && !"".equals(str[length - 1])){
@@ -205,7 +240,7 @@ class InfectStatistic{
 					}
 				}
 				else if(length == 5){
-					int j = 0;
+					int j = 1;
 					while(!str[3].equals(province[j].name) && j < PROVINCE_NUM){
 						j++;
 					}
