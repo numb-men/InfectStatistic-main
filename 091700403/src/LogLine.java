@@ -32,9 +32,9 @@ public class LogLine {
 
     String s6 = "([\\u4e00-\\u9fa5]+) 治愈 (\\d+)人";
 
-    String s7 = "([\\u4e00-\\u9fa5]+) 疑似患者 确认感染 (\\d+)人";
+    String s7 = "([\\u4e00-\\u9fa5]+) 疑似患者 确诊感染 (\\d+)人";
 
-    String s8 = "([\\u4e00-\\u9fa5]+) 排除疑似患者 (\\d+)人";
+    String s8 = "([\\u4e00-\\u9fa5]+) 排除 疑似患者 (\\d+)人";
 
     public String getS1() {
         return s1;

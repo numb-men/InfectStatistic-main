@@ -45,8 +45,9 @@ public class LogHandle {
 
             InflectInfo value = entry.getValue();
 
-            System.out.println(entry.getKey() + " 感染患者" + value.getIp() + "人 疑似患者" + value.getSp() + "人 治愈"
-                    + value.getCure() + "人 死亡" + value.getDead() + "人\n");
+            // System.out.println(entry.getKey() + " 感染患者" + value.getIp() + "人
+            // 疑似患者" + value.getSp() + "人 治愈"
+            // + value.getCure() + "人 死亡" + value.getDead() + "人\n");
             sb.append(entry.getKey() + " 感染患者" + value.getIp() + "人 疑似患者" + value.getSp() + "人 治愈" + value.getCure()
                     + "人 死亡" + value.getDead() + "人\n");
 
