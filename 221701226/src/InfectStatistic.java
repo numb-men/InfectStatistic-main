@@ -239,6 +239,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 		
 		
 		public  void  handleReadLine(String readLine){  //处理文本内容的信息
+			
 			//总共有以下八种可能出现的文本信息，运用正则表达式来表示,并且用正则表达式判断是哪种出现的情况
 			String readLine1 = "(\\S+) 新增 感染患者 (\\d+)人";
 		    String readLine2 = "(\\S+) 新增 疑似患者 (\\d+)人";
@@ -281,42 +282,132 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 		//以下为每种情况的处理方法
 		
 		public void addToIP(String readLine){  //添加全国和各省的感染患者
-			
+			 String[] str = readLine.split(" ");  //将字符串以空格分割为多个字符串(运用了新学的split方法),下同
+			 int number = Integer.valueOf(str[3].replace("人", ""));  //将人前的数字从字符串类型转化为整数类型，下同       
+			    for(int i = 0; i < 35; i++) {
+			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为省份，下同
+			            peopleNumber[0][0] += number;  //全国感染患者人数增加
+			            peopleNumber[i][0] += number;  //该省份感染患者人数增加
+			            provinceExist[i] = true;
+			            break;
+			        }
+			    }
 			
 		}
 		
 		public void addToSP(String readLine){  //添加全国和各省的疑似患者
-			
+			 String[] str = readLine.split(" "); 
+			 int number = Integer.valueOf(str[3].replace("人", ""));        
+			    for(int i = 0; i < 35; i++) {
+			        if(str[0].equals(provinceStr[i])) {  
+			            peopleNumber[0][1] += number;  //全国疑似患者人数增加
+			            peopleNumber[i][1] += number;  //该省份疑似患者人数增加
+			            provinceExist[i] = true;
+			            break;
+			        }
+			    }
 		}
 		
 		public void addToCure(String readLine){  //添加全国和各省的治愈患者
-			
+			 String[] str = readLine.split(" ");  
+			 int number = Integer.valueOf(str[2].replace("人", ""));     
+			    for(int i = 0; i < 35; i++) {
+			        if(str[0].equals(provinceStr[i])) {  
+			            peopleNumber[0][0] -= number;  //全国感染患者人数减少
+			            peopleNumber[i][0] -= number;  //该省份感染患者人数减少
+			            peopleNumber[0][2] += number;  //全国治愈患者人数增加
+			            peopleNumber[i][2] += number;  //该省份治愈患者人数增加
+			            provinceExist[i] = true;
+			            break;
+			        }
+			    }
 		}
 		
 		public void addToDead(String readLine){  //添加全国和各省的死亡患者
-			
+			 String[] str = readLine.split(" ");  
+			 int number = Integer.valueOf(str[2].replace("人", ""));       
+			    for(int i = 0; i < 35; i++) {
+			        if(str[0].equals(provinceStr[i])) {  
+			        	peopleNumber[0][0] -= number;  //全国感染患者人数减少
+			            peopleNumber[i][0] += number;  //该省份感染患者人数减少
+			            peopleNumber[0][2] -= number;  //全国死亡患者人数增加
+			            peopleNumber[i][2] += number;  //该省份死亡患者人数增加
+			            provinceExist[i] = true;
+			            break;
+			        }
+			    }
 		}
 		
 		public void flowIntoIP(String readLine){  //流入感染患者的处理
-			
+			 String[] str = readLine.split(" ");  
+			 int number = Integer.valueOf(str[4].replace("人", ""));  //将人前的数字从字符串类型转化为整数类型，下同       
+			    for(int i = 0; i < 35; i++) {
+			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为省份
+			            peopleNumber[i][0] -= number;  //该省份感染患者人数减少
+			            provinceExist[i] = true;
+			            break;
+			        }
+			    }
+			    for(int i = 0; i < 35; i++) {
+			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为省份
+			            peopleNumber[i][0] += number;  //该省份感染患者人数增加
+			            provinceExist[i] = true;
+			            break;
+			        }
+			    }
 		}
 		
 		public void flowIntoSP(String readLine){  //流入疑似患者的处理
-			
+			 String[] str = readLine.split(" "); 
+			 int number = Integer.valueOf(str[3].replace("人", ""));       
+			    for(int i = 0; i < 35; i++) {
+			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为流出省份
+			            peopleNumber[i][1] -= number;  //该省份疑似患者人数增加
+			            provinceExist[i] = true;
+			            break;
+			        }
+			    }
+			    for(int i = 0; i < 35; i++) {
+			        if(str[3].equals(provinceStr[i])) {  //第四个字符串为流入省份
+			            peopleNumber[i][1] += number;  //该省份疑似患者人数增加
+			            provinceExist[i] = true;
+			            break;
+			        }
+			    }
 		}
 		
 		public void makeSPtoIP(String readLine){  //疑似患者确诊感染的处理
-			
+			 String[] str = readLine.split(" ");  
+			 int number = Integer.valueOf(str[3].replace("人", ""));     
+			    for(int i = 0; i < 35; i++) {
+			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为省份
+			            peopleNumber[0][0] += number;  //全国感染患者人数增加
+			            peopleNumber[i][0] += number;  //该省份感染患者人数增加
+			            peopleNumber[0][1] -= number;  //全国疑似患者人数减少
+			            peopleNumber[i][1] -= number;  //该省份疑似患者人数减少
+			            provinceExist[i] = true;
+			            break;
+			        }
+			    }
 		}
 		
 		public void excludeSP(String readLine){  //排除疑似患者的处理
-			
+			 String[] str = readLine.split(" ");  
+			 int number = Integer.valueOf(str[3].replace("人", ""));    
+			    for(int i = 0; i < 35; i++) {
+			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为省份
+			            peopleNumber[0][1] -= number;  //全国疑似患者人数增加
+			            peopleNumber[i][1] -= number;  //该省份疑似患者人数增加
+			            provinceExist[i] = true;
+			            break;
+			        }
+			    }
 		}
 		
 		
 		public void writeOutTxt() {  //输出文件内容
 			FileWriter fwriter = null;
-			int i, j, k;	
+			int i, j;	
 			try {
 				fwriter = new FileWriter(outPath);  
 				if(isProvinceExist == false){  //若-province未指定
