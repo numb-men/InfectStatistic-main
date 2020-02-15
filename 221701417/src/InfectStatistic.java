@@ -78,5 +78,93 @@ class InfectStatistic {
 	       }
 	    }
 	
-	
+	public static void main(String[] args) {
+
+		String list = "";
+		String log = "";
+		String out = "";
+		String date = "";
+		String type = "";
+		List<String> province = new ArrayList<String>();
+
+		String cmd = "//命令：list";
+		
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equals("list")) {
+				list = "ok";
+			} else if (args[i].equals("-log")) {
+				log = args[i + 1];
+				cmd += " -log "+log;
+			} else if (args[i].equals("-out")) {
+				out = args[i + 1];
+				cmd += " -out "+out;
+			} else if (args[i].equals("-date")) {
+				date = args[i + 1];
+				cmd += " -date "+date;
+			} else if (args[i].equals("-type")) {
+				type = args[i + 1];
+				cmd += " -type "+type;
+			} else if (args[i].equals("-province")) {
+				
+				for (int j = args.length - 1; j > i; j--) {
+					province.add(args[j]);
+				}
+				
+				String data = "";
+				cmd += " -province ";
+				for (int j = 0; j < province.size(); j++) {
+					data += province.get(j).toString()+" ";
+				}
+				cmd += data;
+			}
+		}
+
+		if (list.equals("") || log.equals("") || out.equals("")) {
+			System.out.println("Error,eg:java InfectStatistic list -log D:/log/ -out D:/output.txt");
+		} else {
+			ArrayList<String> fileName = getFiles(log);
+			List<String> allList = new ArrayList<String>();
+			for (int i = 0; i < fileName.size(); i++) {
+				try {
+					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+					String fileNamaDate = fileName.get(i).toString().split("\\\\")[2].split("\\.")[0];
+					if(date.equals("")) {
+						date = df.format(new Date());
+					}
+					long date1 = df.parse(date).getTime();
+					long date2 = df.parse(fileNamaDate).getTime();
+					if (date1 >= date2) {
+						ArrayList<String> inf = getText(new File("./log/"+fileNamaDate+".log.txt"));
+						for (int j = 0; j < inf.size(); j++) {
+							allList.add(inf.get(j));
+						}
+					}else {
+						continue;
+					}
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
+
+			List<String> siteList = new ArrayList<String>();
+			for (int i = 0; i < allList.size(); i++) {
+				boolean isExistSite = true;
+				if(siteList.size() == 0) {
+					siteList.add(allList.get(i).split(" ")[0]);
+				}else {
+					for (int j = 0; j < siteList.size(); j++) {
+						if(allList.get(i).split(" ")[0].toString().equals(siteList.get(j).toString())) {
+							isExistSite = true;
+							break;
+						}else {
+							isExistSite = false;
+						}
+					}
+				}
+				if (!isExistSite) {
+					siteList.add(allList.get(i).split(" ")[0]);
+				}
+			}
+			
+			
 }
