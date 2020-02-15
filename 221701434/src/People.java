@@ -22,7 +22,7 @@ public class People {
     //Map<Integer,String> map2=new HashMap<Integer, String>();
     People() {
         for (int i = 0; i < 35; i++) {
-            province[i] = i;
+            province[i] = 0;
             province_curepeople[i] = 0;
             province_deadpeople[i] = 0;
             province_doubtpeople[i] = 0;
