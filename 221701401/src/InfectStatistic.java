@@ -32,6 +32,7 @@ class CmdHandle {
 		return p;
 	}
 	
+	//是否命令
 	public void isCmd() throws Exception {
 		switch (args[0]) {
 		case "list":
@@ -61,12 +62,12 @@ class CmdHandle {
 				break;
 			case "-type":
 				p.setType(true);
-				int j,cntPm=0;
-				for (j=i+1;j<args.length;j++,cntPm++) {
+				List<String> typeList=new ArrayList<>();
+				for (int j=i+1;j<args.length;j++) {
 					if(args[j].substring(0,1).equals("-")) break;
-					p.setTypeValue(args[j]);
+					typeList.add(args[j]);
 				}
-				if (cntPm==0) p.setTypeValue("");			
+				p.setTypeValue(typeList);
 				break;
 			case "-province":
 				p.setProvince(true);
@@ -89,27 +90,132 @@ interface Cmd {
 	public abstract void doCmd(Param pm) throws IOException, Exception;//执行命令函数
 }
 
+//list命令类
 class CmdList implements Cmd {
 	public void doCmd(Param pm) throws Exception {
-		if (pm.isType()) {
-			boolean isRight=false;
-			boolean[] res=pm.getTypeValue();
-			for (int i=0;i<res.length;i++) {
-				if (res[i]) {
-					isRight=true;
-					break;
-				}
-			}
-			if (!isRight) throw new Exception("type参数值错误");
-		}
 		FileHandle l=new FileHandle();
     	//List<LogResult> res=new ArrayList<>();
     	String[] require=null;
+    	if (!pm.isType()) {
+    		pm.setTypeValue();
+    	}
     	if (pm.isProvince()) {
     		require=pm.getProvinceValue();
     	}
     	l.dealFile(pm.getLogValue(),pm.getDateValue(),require);
     	l.writeFile(pm.getOutValue(),pm.getTypeValue());
+	}
+}
+
+//-type参数值结构类
+class TypeStruct {
+	private int index;//顺序
+	private String name;//名称
+	private boolean isExist;//是否需要
+	
+	TypeStruct(int i,String n,boolean e) {
+		index=i;
+		name=n;
+		isExist=e;
+	}
+	
+	void setIndex(int i) {
+		index=i;
+	}
+	
+	void setExist(boolean b) {
+		isExist=b;
+	}
+	
+	int getIndex() {
+		return index;
+	}
+	
+	boolean getIsExist() {
+		return isExist;
+	}
+	
+	String getName() {
+		return name;
+	}
+}
+
+//-type参数值类
+class TypeValue {
+	private TypeStruct ip;
+	private TypeStruct sp;
+	private TypeStruct cure;
+	private TypeStruct dead;
+	private TypeStruct[] set;
+	int maxIndex;
+	
+	TypeValue() {
+		ip=new TypeStruct(1,"ip",false);
+		sp=new TypeStruct(2,"sp",false);
+		cure=new TypeStruct(3,"cure",false);
+		dead=new TypeStruct(4,"dead",false);
+		set= new TypeStruct[]{ip,sp,cure,dead};
+		maxIndex=4;
+	}
+	
+	TypeStruct[] getSet() {
+		return set;
+	}
+	
+	void setIp(int i,boolean b) {
+		ip.setIndex(i);
+		ip.setExist(b);
+	}
+	
+	void setSp(int i,boolean b) {
+		sp.setExist(b);
+		sp.setIndex(i);
+	}
+	
+	void setCure(int i,boolean b) {
+		cure.setExist(b);
+		cure.setIndex(i);
+	}
+	
+	void setDead(int i,boolean b) {
+		dead.setExist(b);
+		dead.setIndex(i);
+	}
+	
+	int getMaxIndex() {
+		return maxIndex;
+	}
+	
+	TypeStruct getIp() {
+		return ip;
+	}
+	
+	TypeStruct getSp() {
+		return sp;
+	}
+	
+	TypeStruct getCure() {
+		return cure;
+	}
+	
+	TypeStruct getDead() {
+		return dead;
+	}
+	
+	//给参数值排序
+	public void sortSet() {
+		List<TypeStruct> list=new ArrayList<>();
+		for (int i=0;i<maxIndex;i++) {
+			list.add(set[i]);
+		}
+		Collections.sort(list,new Comparator<TypeStruct>() {
+			public int compare(TypeStruct r1,TypeStruct r2) {
+				return r1.getIndex()-r2.getIndex();
+			}
+		});
+		for (int i=0;i<maxIndex;i++) {
+			set[i]=list.get(i);
+		}
 	}
 }
 
@@ -120,14 +226,14 @@ class Param {
 	private String logValue;
 	private String outValue;
 	private String dateValue;
-	private boolean[] typeValue;
+	private TypeValue typeValue;
 	private String[] provinceValue;
 	
 	Param() {
 		date=false;
 		type=false;
 		province=false;
-		typeValue= new boolean[]{false,false,false,false,true};
+		typeValue=new TypeValue();
 		logValue=outValue=dateValue="";
 		provinceValue=new String[] {};
 	}
@@ -188,34 +294,46 @@ class Param {
 		return type;
 	}
 	
-	boolean[] getTypeValue() {
+	TypeValue getTypeValue() {
 		return typeValue;
 	}
 	
-	void setTypeValue(String str) {
-		switch (str) {
-		case "ip":
-			typeValue[0]=true;
-			typeValue[4]=false;
-			break;
-		case "sp":
-			typeValue[1]=true;
-			typeValue[4]=false;
-			break;
-		case "cure":
-			typeValue[2]=true;
-			typeValue[4]=false;
-			break;
-		case "dead":
-			typeValue[3]=true;
-			typeValue[4]=false;
-			break;
-		case "":
-			break;
-		default:{
-			typeValue[4]=false;
+	void setTypeValue() {
+		typeValue.getIp().setExist(true);
+		typeValue.getSp().setExist(true);
+		typeValue.getCure().setExist(true);
+		typeValue.getDead().setExist(true);
+	}
+	
+	void setTypeValue(List<String> list) {
+		if (list.isEmpty()) {
+			setTypeValue();
 		}
+		else {
+			for (int i=0;i<list.size();i++) {
+				switch (list.get(i)) {
+				case "ip":
+					typeValue.getIp().setExist(true);
+					typeValue.getIp().setIndex(i+1);
+					break;
+				case "sp":
+					typeValue.getSp().setExist(true);
+					typeValue.getSp().setIndex(i+1);
+					break;
+				case "cure":
+					typeValue.getCure().setExist(true);
+					typeValue.getCure().setIndex(i+1);
+					break;
+				case "dead":
+					typeValue.getDead().setExist(true);
+					typeValue.getDead().setIndex(i+1);
+					break;
+				default:
+					//throw new 
+				}
+			}
 		}
+		typeValue.sortSet();
 	}	
 }
 
@@ -223,10 +341,6 @@ class Param {
 class FileHandle {
 	private List<LogResult> all=new ArrayList<>();
 	
-	public void setList(List<LogResult> r) {
-		all=r;
-	}
-
 	//读文件
 	public void readFile(String path) throws IOException {
 		FileInputStream fin=new FileInputStream(path);
@@ -271,15 +385,13 @@ class FileHandle {
 		}
 		DataHandle dh=new DataHandle();
 		//转化成要求的省份
-		if (!(require==null)) {
-			all=dh.toFormatPro(require);
-		}
+		if (!(require==null)) all=dh.toFormatPro(require,all);
 		List<LogResult> res=dh.mergeResult(all);
 		all=res;
 	}
 	
 	//写文件(输入参数：路径，类型)
-	public void writeFile(String path,boolean[] type) throws IOException {
+	public void writeFile(String path,TypeValue type) throws IOException {
 		File file=new File(path);
 		if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
 		if (!file.exists()) file.createNewFile();
@@ -376,13 +488,25 @@ class LogResult {
 	}
 
 	//toString（默认字符串形式输出）
-	public String toString(boolean[] t) {
+	public String toString(TypeValue type) {
 		String res=province;
-		if (t[0]) res+=" 感染患者"+ip+"人";
-		if (t[1]) res+=" 疑似患者"+sp+"人";
-		if (t[2]) res+=" 治愈"+cure+"人";
-		if (t[3]) res+=" 死亡"+dead+"人";
-		if (t[4])res=province+" 感染患者"+ip+"人 "+" 疑似患者"+sp+"人 治愈"+cure+"人 死亡"+dead+"人";
+		TypeStruct[] set=type.getSet();
+		for (int i=0;i<set.length;i++) {
+			switch (set[i].getName()) {
+			case "ip":
+				if (set[i].getIsExist()) res+=" 感染患者"+ip+"人";
+				break;
+			case "sp":
+				if (set[i].getIsExist()) res+=" 疑似患者"+sp+"人";
+				break;
+			case "cure":
+				if (set[i].getIsExist()) res+=" 治愈"+cure+"人";
+				break;
+			case "dead":
+				if (set[i].getIsExist()) res+=" 死亡"+dead+"人";
+				break;
+			}
+		}
 		res+="\n";
 		return res;
 	}
@@ -426,15 +550,22 @@ class DataHandle {
 	}
 	
 	//按要求省份
-	public List<LogResult> toFormatPro(String[] pro) {
+	public List<LogResult> toFormatPro(String[] pro, List<LogResult> all) {
 		HashMap<String,LogResult> target=new HashMap<>();
 		for (int i=0;i<pro.length;i++) {
 			LogResult lr=new LogResult(pro[i]);
 			target.put(pro[i],lr);
 		}
-		for (LogResult lr:list) {
-			if (target.containsKey(lr.getProvince())) {
-				target.get(lr.getProvince()).sum(lr.getIp(),lr.getSp(),lr.getCure(),lr.getDead());
+		for (LogResult lr:all) {
+			String tmp=lr.getProvince();
+			if (target.containsKey(tmp)) {
+				LogResult temp=new LogResult(tmp);
+                temp.setIp(target.get(tmp).getIp()+lr.getIp());
+                temp.setSp(target.get(tmp).getSp()+lr.getSp());
+                temp.setCure(target.get(tmp).getCure()+lr.getCure());
+                temp.setDead(target.get(tmp).getDead()+lr.getDead());
+                //HashMap不允许key重复，当有key重复时，前面key对应的value值会被覆盖
+                target.put(tmp,temp);
 			}
 		}
 		List<LogResult> newList=new ArrayList<>();
@@ -450,8 +581,7 @@ class DataHandle {
         for (LogResult lr:list) {
             String tmpStr=lr.getProvince();
             if (tempMap.containsKey(tmpStr)) {
-                LogResult temp=new LogResult();
-                temp.setProvince(lr.getProvince());
+                LogResult temp=new LogResult(tmpStr);
                 //合并
                 temp.setIp(tempMap.get(tmpStr).getIp()+lr.getIp());
                 temp.setSp(tempMap.get(tmpStr).getSp()+lr.getSp());
@@ -714,4 +844,3 @@ class DataHandle {
 	}
 
 }
-
