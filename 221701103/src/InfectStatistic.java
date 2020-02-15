@@ -15,7 +15,7 @@ import java.util.Arrays;
  * TODO
  *
  * @author 衡天宇
- * @version 7.1
+ * @version 7.2
  * 
  */
 public class InfectStatistic {
@@ -70,7 +70,8 @@ public class InfectStatistic {
     		}
     		else if(index!=-2&&isWrong==0&&hasType!=-1) {//有指定类型未指定省份
     			String[] type=selectType(args,hasType);
-    			printSelpart(result,type,count);
+    			addAll();
+    			printSelpart(result,type,count+1);
 			}    		
     	}
     	else {//未指定日期
@@ -87,10 +88,10 @@ public class InfectStatistic {
     		}
     		else if(hasType!=-1) {//有指定类型未指定省份
     			String[] type=selectType(args,hasType);
-    			printSelpart(result,type,count);
+    			addAll();
+    			printSelpart(result,type,count+1);
 			}
-    	}
-    	
+    	}    	
     }    
 
 	static class line{//统计之后的病例每条的结构
@@ -444,6 +445,20 @@ public class InfectStatistic {
     	return null;//不会用到
     }
     
+    /*
+     * 功能：将全国信息加在result总数组中
+     * 输入参数：无
+     *返回值：无
+    */
+    static void addAll() {
+    	line[] mid=new line[count+1];//暂存信息
+    	mid[0]=calAll(result,count);
+    	for(int i=1;i<count+1;i++) {
+    		mid[i]=result[i-1];
+    	}
+    	result=mid;
+    }
+    
      /*
      * 功能：把所有记录输出到txt文件
      * 输入参数：总的记录数组all
@@ -452,21 +467,10 @@ public class InfectStatistic {
     static void printtxt(line[] result) throws IOException {
     	File f = new File(topath);
         BufferedWriter output = new BufferedWriter(new FileWriter(f,false));
-        int sumg=0;//全国感染患者总数
-        int sumy=0;//全国疑似患者总数
-        int sumd=0;//全国死亡人数
-        int sumr=0;//全国治愈人数
-        for(int i=0;i<count;i++) {
-        	sumg+=result[i].grhz;
-        	sumy+=result[i].yshz;
-        	sumd+=result[i].dead;
-        	sumr+=result[i].recover;
-        }
-        //output.write("当日情况："+"\n");
-        output.write("全国 感染患者"+sumg+"人 疑似患者"+sumy+"人 治愈"+sumr+"人 死亡"+sumd+"人"+"\n");
+        output.write(calAll(result,count).printline()+"\n");
         for(int i=0;i<count;i++) {//写入统计数据
         	output.write(result[i].printline()+"\n");
-        }
+        }        
     	output.close();
     }
     
