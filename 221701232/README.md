@@ -28,6 +28,7 @@ PS : 每一行记录的输出顺序规则如下
 2.如果命令行指定了-province,则应该输出所有指定的项没有指定就不必输出,顺序同规则1
 ````
 **如何运行**
+```
 1.源文件在src/目录下可通过JAVA编译器编译,开发过程使用JDK1.8
 2.命令行参数格式 : java InfectStatistic list
                 -log (logFilePath, 必须指定)
@@ -36,6 +37,7 @@ PS : 每一行记录的输出顺序规则如下
 		-type (ip, sp, cure, dead, 可选)
 		-province (武汉, 福建, 北京, ..., 可选)
 		-show (print args, 可选)
+```
 **功能简介**
 ````
 命令行样例:java InfectStatistic list -date 2020-01-22 -log D:/log/ -out D:/output.txt
@@ -51,6 +53,7 @@ list命令 支持以下命令参数:
 ````
 作业链接
 [https://edu.cnblogs.com/campus/fzu/2020SpringW/homework/10281](https://edu.cnblogs.com/campus/fzu/2020SpringW/homework/10281) 
+
 博客链接
 [https://www.cnblogs.com/konananan/p/12310490.html](https://www.cnblogs.com/konananan/p/12310490.html) 
 
