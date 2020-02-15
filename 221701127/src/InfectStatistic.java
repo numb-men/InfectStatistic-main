@@ -21,8 +21,7 @@ import java.util.regex.Pattern;
  */
 class InfectStatistic {
     public static void main(String[] args) {
-        CmdList cmd = new CmdList(args);
-        cmd.action();
+        new CmdArgs(args).action();
     }
 }
 
@@ -41,6 +40,17 @@ class CmdArgs {
         this.args = args;
     }
 
+    void action() {
+        switch (args[0]) {
+            case "list": {
+                new CmdList(args).action();
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
     /**
      * 获取命令
      * 
