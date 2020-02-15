@@ -12,3 +12,5 @@ InfectStatistic-example.iml
 /bin/
 .settings/org.eclipse.core.resources.prefs
 *.class
+.classpath
+.project

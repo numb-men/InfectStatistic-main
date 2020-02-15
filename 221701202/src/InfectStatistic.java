@@ -9,9 +9,19 @@
 
 
 import java.util.Date;
+import java.awt.List;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+
 class InfectStatistic {
     //logPath:存放日志路径，outPath:存放输出文件路径
     public String logPath;
@@ -21,16 +31,19 @@ class InfectStatistic {
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
     String dateString = formatter.format(new Date());
     
-    //存放输入的日期参数
+    //用于转换文件
     public String date;
     
     //依次对应：ip：infection patients 感染患者，sp：suspected patients 疑似患者，cure：治愈 ，dead：死亡是否出现
     public int[] type = {0,0,0,0};
 
     //依次对应各个省份是否出现，最后一个为全国
-    public int[] province = new int[32];
+    int total=32;
+    public int[] province = new int[total];
     public String[] province_name = {"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏"		
-    	,"江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
+    	,"江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江","全国"};
+    //依次对应各个省份各个情况的人数，最后一个为全国
+    public int[][] numOfPeople = new int [total][4];
     
     /**
     * 解析命令行参数
@@ -227,17 +240,13 @@ class InfectStatistic {
          */
         public int GetProvince(int i) {
         	int province_num = 0;
-        	for(int k=0;k<32;k++)
+        	for(int k=0;k<total;k++)
         		province[k]=0;
             if(i<args.length) {
                 for(int j=0;j<args.length;j++) {
-                	for(int m=0;m<31;m++) {
+                	for(int m=0;m<total;m++) {
                 		if(args[j].equals(province_name[m])) {
                     		province[m]=1;
-                    		province_num++;
-                    	}
-                    	else if(args[j].equals("全国")) {
-                    		province[31]=1;
                     		province_num++;
                     	}
                 	}
@@ -248,15 +257,54 @@ class InfectStatistic {
             return province_num;
         }
     }
+    
+    class HandleFile {
+    	HandleFile(){}
+    	
+    	/**
+    	 *读取比date参数小的日期的所有文件
+    	 */
+    	public void LogFile() {
+    		File file = new File(logPath);
+    		File[] files = file.listFiles();
+    		for (int i = 0; i < files.length; i++) {
+    			File img = files[i];
+    			if(img.getName().compareTo(date) <= 0) {
+    				ReadFile(img.getName());
+    			}
+			}
+    	}
+    	
+    	/**
+    	 *逐行读取日志文件 
+    	 */
+    	public void ReadFile(String dateFile){
+    		for(int i=0;i<total;i++)
+        		for(int j=0;j<4;j++)
+        			numOfPeople[i][j]=0;
+    		InputStreamReader isr;
+    		try {
+    			isr = new InputStreamReader(new FileInputStream(logPath+dateFile),"utf-8");
+    			BufferedReader read = new BufferedReader(isr);	
+    			read.close();
+    			isr.close();
+    		}
+    		catch(Exception e) {
+        		e.printStackTrace();
+        	}
+    	}
+    }
 
     public static void main(String[] args) {
         InfectStatistic cmd = new InfectStatistic();
-        InfectStatistic.CmdArgs cmdargs= cmd.new CmdArgs(args);
+        InfectStatistic.CmdArgs cmdargs = cmd.new CmdArgs(args);
         boolean check = cmdargs.CmdArgCheck();     
         if(args.length==0)
             System.out.println("命令行参数为空");
         if(check==false)
             return;
+        InfectStatistic.HandleFile hf = cmd.new HandleFile();
+        hf.LogFile();
             
     }
 }
