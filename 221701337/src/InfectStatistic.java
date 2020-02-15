@@ -306,14 +306,59 @@ class Info
         country_list.set(1,suspected_country_count);
     }
 
-    public void doOut()
+    public void execute_out_file(String file_path) throws MyException
     {
-        for(String province : info.keySet())
+        File info_file = new File(file_path);
+        FileWriter file_writer = null;
+        try
         {
-            if(!out_province.contains(province))
-                continue;
-            List<Integer> data = info.get(province);
+            for(String province : info.keySet())
+            {
+                if(!out_province.contains(province))
+                    continue;
+                if(out_type.size() == 0)
+                {
+                    file_writer.write(province + "" + "感染患者" + info.get(province).get(0) + "人 ");
+                    file_writer.write("疑似患者"+info.get(province).get(1) + "人 ");
+                    file_writer.write("治愈"+info.get(province).get(2) + "人 ");
+                    file_writer.write("死亡"+info.get(province).get(3) + "人");
+                    file_writer.write("\n");
+                }
+                else
+                {
+                    file_writer.write(province + "");
+                    for(String type : out_type)
+                    {
+                        if(type.equals("ip"))
+                            file_writer.write("感染患者" + info.get(province).get(0) + "人 ");
+                        if(type.equals("sp"))
+                            file_writer.write("疑似患者" + info.get(province).get(0) + "人 ");
+                        if(type.equals("cure"))
+                            file_writer.write("治愈" + info.get(province).get(0) + "人 ");
+                        if(type.equals("dead"))
+                            file_writer.write("死亡" + info.get(province).get(0) + "人 ");
+                    }
+                    file_writer.write("\n");
+                }
+            }
         }
+        catch (Exception ex)
+        {
+            throw new MyException(ex.getMessage());
+        }
+        finally
+        {
+            try
+            {
+                if(file_writer != null)
+                    file_writer.close();
+            }
+            catch (Exception ex)
+            {
+                throw new MyException(ex.getMessage());
+            }
+        }
+
     }
 
 }
@@ -359,7 +404,6 @@ class Command
         {
             List<File> file_list = Parameter.get_file_list(log.param);
             execute_date(date.param,file_list,date.is_exist);
-            new_info.doOut();
         }
         if(!date.is_exist)
         {
