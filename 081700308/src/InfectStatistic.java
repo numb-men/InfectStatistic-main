@@ -1,11 +1,18 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
 
 
 /**
@@ -57,7 +64,8 @@ class InfectStatistic {
 		int[] cure=new int[32];
 		int[] dead=new int[32];
 		int[] exist=new int[32];
-		int[] required=new int[32];
+		boolean[] required=new boolean[32];
+		boolean[] type=new boolean[32];
 		InfectStatistic()
 		{
 			exist[0]=1;
@@ -347,8 +355,60 @@ class InfectStatistic {
 			exist[d]=1;
 		}
 
+		public static int dateCompare(String date1,String date2)
+		{
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+			Calendar t1=Calendar.getInstance();
+			Calendar t2=Calendar.getInstance();
+			
+			try {
+				t1.setTime(format.parse(date1));
+				t2.setTime(format.parse(date2));
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+			int r=t1.compareTo(t2);
+			return r;
+		}
+		
+		//查找目录下指定后缀文件
+		public static List<File> searchFiles(File folder,String keyWord){
+			List<File> result = new ArrayList<File>();
+			if(folder.isFile()){
+				result.add(folder);
+			}
+			
+			File[] subFolders = folder.listFiles(new FileFilter(){
+				public boolean accept(File file){
+					if(file.isDirectory()){
+						return true;
+					}
+					if(file.getName().toLowerCase().endsWith(keyWord)){
+						return true;
+					}
+					return false;
+				}
+			});
+	 
+	        if(subFolders != null){
+	        	for(File file :subFolders){
+	        		if(file.isFile()){
+	                    result.add(file);
+	                } 
+	            }
+	        }
+	        return result;
+	    }
+
 		public  void readFile(String x)
 		{
+			List<File> files=searchFiles(new File(x),".log.txt");
+			for(File file:files)
+			{
+				String[] filename = file.getAbsolutePath().split("\\\\");
+				String filedate=filename[filename.length-1].substring(0,10);
+			}
 			String pathname=x;
 			try(FileReader reader = new FileReader(pathname);
 				BufferedReader br = new BufferedReader(reader)	
@@ -420,9 +480,11 @@ class InfectStatistic {
 			 a=new InfectStatistic();
 			
 			System.out.print(x.matches(type8));
-			a.readFile("D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-22.log.txt");
-			a.readFile("D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-23.log.txt");
 			a.readFile("D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-27.log.txt");
+			a.readFile("D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-23.log.txt");
+			a.readFile("D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-22.log.txt");
+			
+			
 			a.writeFile();
 		       //System.out.print(getIp(0));
 		      // System.out.println(AddIp(x));
