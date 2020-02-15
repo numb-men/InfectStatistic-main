@@ -215,9 +215,9 @@ class ListChecker {
             return;
         }
 
-        Tools.DATE_FORMAT.setLenient(false);
+        Helper.DATE_FORMAT.setLenient(false);
         try {
-            Tools.DATE_FORMAT.parse(dateStr);
+            Helper.DATE_FORMAT.parse(dateStr);
         } catch (Exception e) {
             throw new Exception("日期非法或格式错误");
         }
@@ -275,7 +275,7 @@ class ListCommandUtil {
         util.out = new File(line.getValue("-out"));
 
         try {
-            util.date = Tools.DATE_FORMAT.parse(line.getValue("-date"));
+            util.date = Helper.DATE_FORMAT.parse(line.getValue("-date"));
         } catch (Exception ignored) {
         }
 
@@ -320,8 +320,8 @@ class LogReader {
         File[] fileList = logDir.listFiles();
         List<String> logLines = new ArrayList<>();
 
-        Tools.DATE_FORMAT.setLenient(false);
-        Date latestDate = Tools.DATE_FORMAT.parse("2000-01-01");
+        Helper.DATE_FORMAT.setLenient(false);
+        Date latestDate = Helper.DATE_FORMAT.parse("2000-01-01");
 
         for (File file : fileList) {
             if (file.isFile()) {
@@ -329,7 +329,7 @@ class LogReader {
 
                 // 过滤日期不规范的日志文件
                 try {
-                    logDate = Tools.DATE_FORMAT.parse(getLogDate(file));
+                    logDate = Helper.DATE_FORMAT.parse(getLogDate(file));
                 } catch (Exception e) {
                     continue;
                 }
@@ -379,7 +379,6 @@ class CommandReceiver {
      */
     public void list(ListCommandUtil util) throws Exception {
         List<String> results = LogParser.parse(util);
-        Sorter.sortByRegion(results);
         LogWriter.write(util.out.getAbsolutePath(), results);
         StatisticResult.reset();
     }
@@ -581,12 +580,16 @@ class RegexUtil {
  * 地区实体类
  * 一个实例代表一个地区的情况
  */
-class Region {
+class Region implements Comparable<Region> {
+
+    static final Comparator<Object> CHINA_COMPARE = Collator.getInstance(Locale.CHINA);
+
     private String name;
     private int infected;
     private int suspected;
     private int cure;
     private int dead;
+    private boolean isChecked;
 
     Region(String name) {
         this.infected = 0;
@@ -594,6 +597,7 @@ class Region {
         this.cure = 0;
         this.dead = 0;
         this.name = name;
+        this.isChecked = false;
     }
 
     public int getCure() {
@@ -630,6 +634,14 @@ class Region {
 
     public void setCure(int cure) {
         this.cure = cure;
+    }
+
+    public boolean isChecked() {
+        return isChecked;
+    }
+
+    public void setChecked(boolean checked) {
+        isChecked = checked;
     }
 
     /**
@@ -758,6 +770,26 @@ class Region {
         }
         return "" + string + "\n";
     }
+
+    /**
+     * 实现地区比较
+     * <p>
+     * 基于CHINA_COMPARE，”全国“优先，并解决”重庆“多音字的问题
+     *
+     * @param o
+     * @return
+     */
+    @Override
+    public int compareTo(Region o) {
+        String rg1 = this.getName().replace("重庆", "冲庆");
+        String rg2 = o.getName().replace("重庆", "冲庆");
+
+        if (rg1.equals("全国") || rg2.equals("全国")) {
+            return (rg1.equals("全国")) ? -1 : 1;
+        }
+
+        return CHINA_COMPARE.compare(rg1, rg2);
+    }
 }
 
 /**
@@ -765,24 +797,53 @@ class Region {
  */
 class StatisticResult {
 
+    // 地区的有序列表
+    private static final String[] REGIONS_LIST = new String[]{
+            "全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北",
+            "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津",
+            "西藏", "新疆", "云南", "浙江"
+    };
+
     static List<Region> regions = new ArrayList<>();
 
+    static {
+        for (String rg : REGIONS_LIST) {
+            regions.add(new Region(rg));
+        }
+    }
+
+    public static void setChecked(String name) {
+        get(name).setChecked(true);
+    }
+
     /**
-     * 按地区名查找地区
-     * 如果当前集合{@code regions}中不存在此地区，添加此地区的实例到{@code regions}
+     * 按地区名二分查找地区
+     * 如果当前集合{@code regions}中不存在此地区返回null
      *
      * @param name
      * @return
      */
     public static Region get(String name) {
-        for (Region region : regions) {
-            if (region.getName().equals(name))
-                return region;
+        int begin = 0, end = regions.size() - 1;
+        int mid;
+
+        Region temp = new Region(name);
+
+        while (begin <= end) {
+            mid = (begin + end) >> 1;
+            Region cur = regions.get(mid);
+            if (name.equals(cur.getName())) {
+                return regions.get(mid);
+            }
+            if (cur.compareTo(temp) < 0) {
+                begin = mid;
+            }
+            if (cur.compareTo(temp) > 0) {
+                end = mid;
+            }
         }
 
-        Region newRg = new Region(name);
-        regions.add(newRg);
-        return newRg;
+        return null;
     }
 
     /**
@@ -798,6 +859,7 @@ class StatisticResult {
         Exclusive exclusive = new Exclusive(diagnosis);
 
         for (String logLine : logLines) {
+            setChecked(logLine.substring(0, logLine.indexOf(" ")));
             exclusive.passOn(RegexUtil.logType(logLine), logLine);
         }
     }
@@ -807,8 +869,8 @@ class StatisticResult {
      *
      * @return
      */
-    public static Region All() {
-        Region allRegions = new Region("全国");
+    public static Region statisticAll() {
+        Region allRegions = get("全国");
         for (Region rg : regions) {
             allRegions.setInfected(rg.getInfected() + allRegions.getInfected());
             allRegions.setSuspected(rg.getSuspected() + allRegions.getSuspected());
@@ -821,25 +883,23 @@ class StatisticResult {
     public static List<String> filterTypeAndProvince(List<String> type, List<String> province) {
         List<String> result = new ArrayList<>();
 
-        // -province 为空
-        if (province.size() == 0) {
-            // 添加各省统计
-            for (Region rg : regions) {
-                result.add(rg.toStringWithCertainType(type));
-            }
-            // 添加全国统计
-            result.add(All().toStringWithCertainType(type));
-        }
-
         for (String prv : province) {
             if (!prv.equals("全国")) {
-                result.add(get(prv).toStringWithCertainType(type));
+                result.add(Objects.requireNonNull(get(prv)).toStringWithCertainType(type));
             }
         }
 
-        if (province.contains("全国")) {
+        if (province.contains("全国") || province.size() == 0) {
             // 添加全国统计
-            result.add(All().toStringWithCertainType(type));
+            result.add(Objects.requireNonNull(statisticAll()).toStringWithCertainType(type));
+        }
+
+        if (province.size() == 0) {
+            for (Region rg : regions) {
+                if (rg.isChecked()) {
+                    result.add(rg.toStringWithCertainType(type));
+                }
+            }
         }
 
         return result;
@@ -892,32 +952,12 @@ class LogWriter {
     }
 }
 
-/**
- * 排序器
- */
-class Sorter {
-    public static void sortByRegion(List<String> results) {
-
-        results.sort((o1, o2) -> {
-            String rg1 = o1.substring(0, o1.indexOf(' ')).replace("重庆", "冲庆");
-            String rg2 = o2.substring(0, o2.indexOf(' ')).replace("重庆", "冲庆");
-
-            if (rg1.equals("全国") || rg2.equals("全国")) {
-                return (rg1.equals("全国")) ? -1 : 1;
-            }
-            return Tools.CHINA_COMPARE.compare(rg1, rg2);
-        });
-
-    }
-}
 
 /**
- * 工具类
+ * 帮助类
  */
-class Tools {
+class Helper {
     static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-
-    static final Comparator<Object> CHINA_COMPARE = Collator.getInstance(Locale.CHINA);
 
     static {
         DATE_FORMAT.setLenient(false);

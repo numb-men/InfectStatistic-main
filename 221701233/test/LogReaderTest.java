@@ -44,7 +44,7 @@ public class LogReaderTest {
         expected.addAll(fileContent("D:\\log\\2020-01-22.log.txt"));
         expected.addAll(fileContent("D:\\log\\2020-01-23.log.txt"));
 
-        List<String> list = LogReader.readLog(Tools.DATE_FORMAT.parse("2020-01-23"), new File("D:\\log"));
+        List<String> list = LogReader.readLog(Helper.DATE_FORMAT.parse("2020-01-23"), new File("D:\\log"));
         for (String str : list) {
             System.out.println(str);
         }
@@ -60,7 +60,7 @@ public class LogReaderTest {
         expected.addAll(fileContent("D:\\log\\2020-01-23.log.txt"));
         expected.addAll(fileContent("D:\\log\\2020-01-27.log.txt"));
 
-        List<String> list = LogReader.readLog(Tools.DATE_FORMAT.parse("2020-01-27"), new File("D:\\log"));
+        List<String> list = LogReader.readLog(Helper.DATE_FORMAT.parse("2020-01-27"), new File("D:\\log"));
         for (String str : list) {
             System.out.println(str);
         }
