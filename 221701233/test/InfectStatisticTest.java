@@ -1,13 +1,11 @@
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.Tag;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class InfectStatisticTest {
@@ -132,7 +130,7 @@ public class InfectStatisticTest {
         String data = "list"
                 + " -log 221701233\\test\\resources\\emptylog"
                 + " -out 221701233\\test\\resources\\result\\listOutput5.txt"
-                +" -province 全国 福建 湖北";
+                + " -province 全国 福建 湖北";
         String expected = "全国 感染患者0人 疑似患者0人 治愈0人 死亡0人\n"
                 + "福建 感染患者0人 疑似患者0人 治愈0人 死亡0人\n"
                 + "湖北 感染患者0人 疑似患者0人 治愈0人 死亡0人\n"
@@ -210,6 +208,26 @@ public class InfectStatisticTest {
         String[] arg = data.split(" ");
         assertDoesNotThrow(() -> InfectStatistic.main(arg));
         assertEquals("error: 日期超出范围", outContent.toString());
+    }
+
+    /**
+     * 错误地区
+     */
+    @Test
+    public void main10() {
+        // 更改输出流
+        System.setOut(new PrintStream(outContent));
+
+        String data = "list"
+                + " -log 221701233\\test\\resources\\log"
+                + " -out 221701233\\test\\resources\\result\\listOutput3.txt"
+                + " -date 2020-02-01"
+                + " -type cure dead ip"
+                + " -province 全国 纽约 福建";
+
+        String[] arg = data.split(" ");
+        assertDoesNotThrow(() -> InfectStatistic.main(arg));
+        assertEquals("error: 无效地区：纽约", outContent.toString());
     }
 
     /**

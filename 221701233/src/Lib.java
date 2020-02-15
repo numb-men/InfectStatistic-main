@@ -162,6 +162,7 @@ class ListChecker {
         checkOut(line.getValue("-out"));
         checkDate(line.getValue("-date"));
         checkType(line.getValues("-type"));
+        checkProvince(line.getValues("-province"));
     }
 
 
@@ -230,11 +231,7 @@ class ListChecker {
      * @throws Exception
      */
     public void checkType(List<String> argTypes) throws Exception {
-        List<String> defaultTypes = new ArrayList<>();
-        defaultTypes.add("ip");
-        defaultTypes.add("sp");
-        defaultTypes.add("cure");
-        defaultTypes.add("dead");
+        List<String> defaultTypes = new ArrayList<>(Arrays.asList("ip","sp","cure","dead"));
 
         if (argTypes.size() == 0) {
             return;
@@ -244,6 +241,19 @@ class ListChecker {
             if (!defaultTypes.contains(type)) {
                 throw new Exception("无效 type 参数值：" + type);
             }
+        }
+    }
+
+    /**
+     * 检查地区
+     *
+     * @param provinces
+     * @throws Exception
+     */
+    public void checkProvince(List<String> provinces) throws Exception {
+        for (String prov : provinces) {
+            if (!StatisticResult.contains(prov))
+                throw new Exception("无效地区：" + prov);
         }
     }
 }
@@ -814,6 +824,16 @@ class StatisticResult {
 
     public static void setChecked(String name) {
         get(name).setChecked(true);
+    }
+
+    /**
+     * 列表是否包含某地区
+     *
+     * @param name
+     * @return
+     */
+    static boolean contains(String name) {
+        return Arrays.asList(REGIONS_LIST).contains(name);
     }
 
     /**

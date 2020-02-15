@@ -2,8 +2,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -109,9 +109,32 @@ public class ListCheckerTest {
     }
 
     @Test
-    public void checkTypeNull() throws Exception {
+    public void checkTypeEmpty() {
         List<String> types = new ArrayList<>();
 
-        assertDoesNotThrow(()->checker.checkType(types));
+        assertDoesNotThrow(() -> checker.checkType(types));
+    }
+
+    @Test
+    public void checkProvince() {
+        List<String> provs = new ArrayList<>(Arrays.asList("福建", "浙江", "全国"));
+
+        assertDoesNotThrow(() -> checker.checkProvince(provs));
+    }
+
+    @Test
+    public void checkProvinceEmpty() {
+        List<String> provs = new ArrayList<>();
+
+        assertDoesNotThrow(() -> checker.checkProvince(provs));
+    }
+
+    @Test
+    public void checkProvinceError() throws Exception {
+        List<String> provs = new ArrayList<>(Arrays.asList("福建", "华盛顿", "北京"));
+
+        thrown.expect(Exception.class);
+        thrown.expectMessage("无效地区：华盛顿");
+        checker.checkProvince(provs);
     }
 }
