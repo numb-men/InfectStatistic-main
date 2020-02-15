@@ -64,13 +64,67 @@ class InfectStatistic {
 		int[] cure=new int[32];
 		int[] dead=new int[32];
 		int[] exist=new int[32];
-		boolean[] required=new boolean[32];
-		boolean[] type=new boolean[32];
+		int[] required=new int[32];
+		int[] type=new int[4];
+		boolean havetype=false;
+		boolean havepro=false;
+		String log=null;
+		String date=null;
+		String out=null;
 		InfectStatistic()
 		{
 			exist[0]=1;
 		}
 
+		public void update(String [] args)
+		{
+			if(args.length > 0 && args[0].matches("list"))
+			{
+				for(int i = 1;i+1<args.length;i++)
+				{
+					if(args[i].matches("-.*"))
+					{
+						switch(args[i])
+						{
+						case "-log":log = args[i+1];break;
+						case "-out":out = args[i+1];break;
+						case "-date":date = args[i+1];break;
+						case "-province":
+							havepro=true;
+							for(;;i++)
+							{
+								if(!args[i+1].matches("-.*") && i+1<args.length)
+								{
+									required[proToInt(args[i+1])]=1;
+								}else
+									break;
+							}
+							break;
+						case "-type":
+							havetype=true;
+							for(;;i++)
+							{
+								if(!args[i+1].matches("-.*") && i+1<args.length)
+								{
+									switch(args[i+1])
+									{
+									case "ip":type[0] = 1;break;
+									case "sp":type[1] = 1;break;
+									case "cure":type[2] = 1;break;
+									case "dead":type[3] = 1;break;
+									}
+								}else
+									break;
+							}
+							break;
+						default:
+							System.out.print("输入错误参数"+args[i]+"请重新输入");
+							System.exit(0);
+						}
+					}
+				}
+			}
+		}
 		public  int getIp(int n)
 		{
 			return ip[n];
@@ -403,16 +457,19 @@ class InfectStatistic {
 
 		public  void readFile(String x)
 		{
+			//获取该后缀的所有文件
 			List<File> files=searchFiles(new File(x),".log.txt");
 			for(File file:files)
 			{
-				String[] filename = file.getAbsolutePath().split("\\\\");
-				String filedate=filename[filename.length-1].substring(0,10);
-			}
-			String pathname=x;
-			try(FileReader reader = new FileReader(pathname);
+				String[] filedir = file.getAbsolutePath().split("\\\\");
+				String filename=filedir[filedir.length-1];
+				String filedate=filename.substring(0,10);
+				if(date == null || dateCompare(date,filedate)>0)
+				{
+					String pathname=x+filename;
+					try(FileReader reader = new FileReader(pathname);
 				BufferedReader br = new BufferedReader(reader)	
-			){
+			           ){
 				String line;
 				while((line=br.readLine())!=null)
 				{
@@ -440,28 +497,83 @@ class InfectStatistic {
 			}catch(IOException e) {
 				e.printStackTrace();
 			}
+				}
+
+			}
+			
+			
 		}
 		
 		public  void writeFile()
 		{
 			try {
-				File writeName=new File("output.txt");
+				File writeName=new File(out);
 				writeName.createNewFile();
 				try(FileWriter writer = new FileWriter(writeName);
 					BufferedWriter out = new BufferedWriter(writer)
 					){
 					for(int i=0;i<32;i++)
 					{
-						if(1==exist[i])
-						{
-							out.write(provinces[i]+" ");
-							out.write("感染患者"+ip[i]+"人 ");
-							out.write("疑似患者"+sp[i]+"人 ");
-							out.write("治愈"+cure[i]+"人 ");
-							out.write("死亡"+dead[i]+"人 ");
-							out.write("\r\n");
-						    out.flush();
-						}
+						
+						
+							if(havepro)
+							{	
+								if(1 == required[i])
+									{
+									out.write(provinces[i]+" ");
+									if(havetype)
+									{
+										if(1 == type[0])
+									out.write("感染患者"+ip[i]+"人 ");
+										if(1 == type[1])
+									out.write("疑似患者"+sp[i]+"人 ");
+										if(1 == type[2])
+									out.write("治愈"+cure[i]+"人 ");
+										if(1 == type[3])
+									out.write("死亡"+dead[i]+"人 ");
+										out.write("\r\n");
+									    out.flush();
+									}else
+										{
+										out.write("感染患者"+ip[i]+"人 ");
+										out.write("疑似患者"+sp[i]+"人 ");
+										out.write("治愈"+cure[i]+"人 ");
+										out.write("死亡"+dead[i]+"人 ");
+										out.write("\r\n");
+									    out.flush();
+										}
+									}
+							}else
+							{
+								if(1==exist[i])
+								{out.write(provinces[i]+" ");
+								if(havetype)
+								{
+									if(1 == type[0])
+								out.write("感染患者"+ip[i]+"人 ");
+									if(1 == type[1])
+								out.write("疑似患者"+sp[i]+"人 ");
+									if(1 == type[2])
+								out.write("治愈"+cure[i]+"人 ");
+									if(1 == type[3])
+								out.write("死亡"+dead[i]+"人 ");
+									out.write("\r\n");
+								    out.flush();
+								}else
+									{
+									out.write("感染患者"+ip[i]+"人 ");
+									out.write("疑似患者"+sp[i]+"人 ");
+									out.write("治愈"+cure[i]+"人 ");
+									out.write("死亡"+dead[i]+"人 ");
+									out.write("\r\n");
+								    out.flush();
+									}
+								}
+							}
+							
+							
+							
+						
 					}
 					out.write("// 该文档并非真实数据，仅供测试使用\r\n");
 					out.flush();
@@ -478,11 +590,12 @@ class InfectStatistic {
 			 String x="浙江 排除 疑似患者 7人";
 			 InfectStatistic a;
 			 a=new InfectStatistic();
-			
+			a.update(args);
 			System.out.print(x.matches(type8));
-			a.readFile("D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-27.log.txt");
-			a.readFile("D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-23.log.txt");
-			a.readFile("D:\\GitHub\\A\\InfectStatistic-main\\081700308\\log\\2020-01-22.log.txt");
+			//a.log="D:/log/";
+			//a.out="D:/output.txt";
+			a.readFile(a.log);
+			
 			
 			
 			a.writeFile();
