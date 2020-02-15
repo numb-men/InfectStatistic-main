@@ -1,12 +1,18 @@
+/**
+ * InfectStatistic
+ * TODO
+ *
+ * @author xxx
+ * @version xxx
+ * @since xxx
+ */
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,68 +28,49 @@ import java.util.List;
  * @version xxx
  * @since xxx
  */
-/*Ê¡·İÏà¹ØĞÅÏ¢*/
+/*çœä»½ç›¸å…³ä¿¡æ¯*/
 class Province{
 	String name;
 	public int ip,sp,cure,dead;
-	//¸ĞÈ¾»¼Õß£¬ÒÉËÆ»¼Õß£¬ÖÎÓú£¬ËÀÍö»¼Õß
+	//æ„ŸæŸ“æ‚£è€…ï¼Œç–‘ä¼¼æ‚£è€…ï¼Œæ²»æ„ˆï¼Œæ­»äº¡æ‚£è€…
 }
 
 
 class InfectStatistic{
 	private static final int PROVINCE_NUM = 32;
-	private static final String PROVINCE[] ={"È«¹ú","°²»Õ","±±¾©","ÖØÇì","¸£½¨","¸ÊËà","¹ã¶«","¹ãÎ÷","¹óÖİ",
-				"º£ÄÏ","ºÓ±±","ºÓÄÏ","ºÚÁú½­","ºş±±","ºşÄÏ","¼ªÁÖ","½­ËÕ","½­Î÷","ÁÉÄş","ÄÚÃÉ¹Å","ÄşÏÄ","Çàº£",
-				"É½¶«","É½Î÷","ÉÂÎ÷","ÉÏº£","ËÄ´¨","Ìì½ò","Î÷²Ø","ĞÂ½®","ÔÆÄÏ","Õã½­"
+	private static final String PROVINCE[] ={"å…¨å›½","å®‰å¾½","åŒ—äº¬","é‡åº†","ç¦å»º","ç”˜è‚ƒ","å¹¿ä¸œ","å¹¿è¥¿","è´µå·",
+				"æµ·å—","æ²³åŒ—","æ²³å—","é»‘é¾™æ±Ÿ","æ¹–åŒ—","æ¹–å—","å‰æ—","æ±Ÿè‹","æ±Ÿè¥¿","è¾½å®","å†…è’™å¤","å®å¤","é’æµ·",
+				"å±±ä¸œ","å±±è¥¿","é™•è¥¿","ä¸Šæµ·","å››å·","å¤©æ´¥","è¥¿è—","æ–°ç–†","äº‘å—","æµ™æ±Ÿ"
 	};
 	
 	
     public static void main(String[] args) throws IOException{
     	String log = null,out = null,date = null,content = "";
-    	boolean[] type = new boolean[5];//type[0]ÓÃÓÚ¼ÇÂ¼ÊÇ·ñÓĞ-typeÃüÁîĞĞ²ÎÊı£¬1-4ÓÃÓÚ¼ÇÂ¼²ÎÊıÖÖÀà
-    	boolean [] prov = new boolean[PROVINCE_NUM+1];//boolean[PROVINCE_NUM]ÓÃÓÚ¼ÇÂ¼ÊÇ·ñÓĞÊäÈë-province²ÎÊı£¬Ç°ÃæµÄ²¿·Ö¼ÇÂ¼²ÎÊıÖÖÀà
+    	boolean[] type = new boolean[5];//type[0]ç”¨äºè®°å½•æ˜¯å¦æœ‰-typeå‘½ä»¤è¡Œå‚æ•°ï¼Œ1-4ç”¨äºè®°å½•å‚æ•°ç§ç±»
+    	boolean [] prov = new boolean[PROVINCE_NUM+1];//boolean[PROVINCE_NUM]ç”¨äºè®°å½•æ˜¯å¦æœ‰è¾“å…¥-provinceå‚æ•°ï¼Œå‰é¢çš„éƒ¨åˆ†è®°å½•å‚æ•°ç§ç±»
     	
     	Province[] province = new Province[PROVINCE_NUM];
-    	initProvince(province);//³õÊ¼»¯Ê¡·İĞÅÏ¢
+    	initProvince(province);//åˆå§‹åŒ–çœä»½ä¿¡æ¯
     	
     	if(args.length > 0 && args[0].equals("list")){
     		for(int i = 1;i+1 < args.length;i++){
-    			int temp = 0;
     			if(args[i].substring(0,1).equals("-")){
     				switch(args[i]){
-    					case "-log":
-    						log = args[i+1];
-    						break;
-    					case "-out":
-    						out = args[i+1];
-    						break;
-    					case "-date":
-    						date = args[i+1];
-    						break;
-    					case "-type":
+    					case "-log" :log = args[i+1];break;
+    					case "-out" :out = args[i+1];break;
+    					case "-date" :date = args[i+1];break;
+    					case "-type" :
     						while(i+1 < args.length && !args[i+1].substring(0,1).equals("-")  && !args[i+1].equals(null)){
     							switch(args[i+1]) {
-    								case "¸ĞÈ¾»¼Õß":
-    									type[0]=true;
-    									type[1] = true;
-    									break;
-    								case "ÒÉËÆ»¼Õß":
-    									type[0]=true;
-    									type[2] = true;
-    									break;
-    								case "ÖÎÓú":
-    									type[0]=true;
-    									type[3] = true;
-    									break;
-    								case "ËÀÍö":
-    									type[0]=true;
-    									type[4] = true;
-    									break;
+    								case "æ„ŸæŸ“æ‚£è€…" :type[0]=true;type[1] = true;break;
+    								case "ç–‘ä¼¼æ‚£è€…" :type[0]=true;type[2] = true;break;
+    								case "æ²»æ„ˆ" :type[0]=true;type[3] = true;break;
+    								case "æ­»äº¡" :type[0]=true;type[4] = true;break;
     							}
     							i++;
     						}
     						break;
-    					case "-province":
+    					case "-province" :
     						while(i+1 < args.length && !args[i+1].substring(0,1).equals("-")  && !args[i+1].equals(null)){
     							for(int j = 0;j < PROVINCE_NUM;j++){
     								if(args[i+1].equals(province[j].name)){
@@ -100,12 +87,12 @@ class InfectStatistic{
     		}
     		
     		if(log == null || out == null){
-    			System.out.println("Ã»ÓĞÊäÈëlog»òÃ»ÓĞÊäÈëout£¬ÇëÖØĞÂÊäÈë");
+    			System.out.println("æ²¡æœ‰è¾“å…¥logæˆ–æ²¡æœ‰è¾“å…¥outï¼Œè¯·é‡æ–°è¾“å…¥");
     		}
     		else{
     			initProvince(province);
     			List<File> files = searchFiles(new File(log),".log.txt");
-    			for(File file:files){
+    			for(File file :files){
     				String[] file1 = file.getAbsolutePath().split("\\\\");
     				if(date == null || timeCompare(date,file1[file1.length-1].substring(0,10)) > 0){
     					update(file.getAbsolutePath(),province);
@@ -114,7 +101,7 @@ class InfectStatistic{
                 }
   			}
   			
-    		if(!type[0]){//Ã»ÓĞÊäÈë-type²ÎÊıÊ±ËùÓĞÀàĞÍÈËÔ±¶¼Êä³ö
+    		if(!type[0]){//æ²¡æœ‰è¾“å…¥-typeå‚æ•°æ—¶æ‰€æœ‰ç±»å‹äººå‘˜éƒ½è¾“å‡º
     			type[1] = true;
 				type[2] = true;
 				type[3] = true;
@@ -126,57 +113,57 @@ class InfectStatistic{
   				province[0].sp += province[i].sp;
   				province[0].cure += province[i].cure;
   				province[0].dead += province[i].dead;
-  			}//¼ÆËãÈ«¹úÒßÇéÇé¿ö
+  			}//è®¡ç®—å…¨å›½ç–«æƒ…æƒ…å†µ
   			
   			if(!prov[PROVINCE_NUM]){
   				for(int i = 0;i < PROVINCE_NUM;i++){
   	 				if(province[i].ip != 0 || province[i].sp != 0 || province[i].cure != 0 || province[i].dead != 0){
   	 					content = content + province[i].name + " ";
   	 					if(type[1]) {
-  	 						content = content + "¸ĞÈ¾»¼Õß" + province[i].ip + "ÈË" + " ";
+  	 						content = content + "æ„ŸæŸ“æ‚£è€…" + province[i].ip + "äºº" + " ";
   	 					}
   	 					if(type[2]) {
-  	 						content = content + "ÒÉËÆ»¼Õß" + province[i].sp + "ÈË" + " ";
+  	 						content = content + "ç–‘ä¼¼æ‚£è€…" + province[i].sp + "äºº" + " ";
   	 					}
   	 					if(type[3]) {
-  	 						content = content + "ÖÎÓú" + province[i].cure + "ÈË" + " ";
+  	 						content = content + "æ²»æ„ˆ" + province[i].cure + "äºº" + " ";
   	 					}
   	 					if(type[4]) {
-  	 						content = content + "ËÀÍö" + province[i].dead + "ÈË";
+  	 						content = content + "æ­»äº¡" + province[i].dead + "äºº";
   	 					}  	  		    			
   	  		    		content = content + "\n";
   	  				}
-  	  			}//²åÈë¸÷Ê¡·İÒßÇé
+  	  			}//æ’å…¥å„çœä»½ç–«æƒ…
   			}
   			else {
   				for(int i = 0;i < PROVINCE_NUM;i++){
   	 				if(prov[i]){
   	 					content = content + province[i].name + " ";
   	 					if(type[1]) {
-  	 						content = content + "¸ĞÈ¾»¼Õß" + province[i].ip + "ÈË" + " ";
+  	 						content = content + "æ„ŸæŸ“æ‚£è€…" + province[i].ip + "äºº" + " ";
   	 					}
   	 					if(type[2]) {
-  	 						content = content + "ÒÉËÆ»¼Õß" + province[i].sp + "ÈË" + " ";
+  	 						content = content + "ç–‘ä¼¼æ‚£è€…" + province[i].sp + "äºº" + " ";
   	 					}
   	 					if(type[3]) {
-  	 						content = content + "ÖÎÓú" + province[i].cure + "ÈË" + " ";
+  	 						content = content + "æ²»æ„ˆ" + province[i].cure + "äºº" + " ";
   	 					}
   	 					if(type[4]) {
-  	 						content = content + "ËÀÍö" + province[i].dead + "ÈË";
+  	 						content = content + "æ­»äº¡" + province[i].dead + "äºº";
   	 					}  	  		    			
   	  		    		content = content + "\n";
   	  				}
-  	  			}//²åÈë¸÷Ê¡·İÒßÇé
+  	  			}//æ’å…¥å„çœä»½ç–«æƒ…
   			}
   				
-  			content = content + "// ¸ÃÎÄµµ²¢·ÇÕæÊµÊı¾İ£¬½ö¹©²âÊÔÊ¹ÓÃ";
+  			content = content + "// è¯¥æ–‡æ¡£å¹¶éçœŸå®æ•°æ®ï¼Œä»…ä¾›æµ‹è¯•ä½¿ç”¨";
   			write(out,content);
   			  	
     	}
     }
 
     
-    /*³õÊ¼»¯Ê¡·İĞÅÏ¢*/
+    /*åˆå§‹åŒ–çœä»½ä¿¡æ¯*/
     private static void initProvince(Province province[]){
     	for(int i = 0;i < PROVINCE_NUM;i++){
     		province[i] = new Province();
@@ -186,18 +173,18 @@ class InfectStatistic{
     }
     
     
-    /*¶ÁÈ¡LogÎÄ¼şºó¸üĞÂÊ¡·İĞÅÏ¢±ä¶¯*/
+    /*è¯»å–Logæ–‡ä»¶åæ›´æ–°çœä»½ä¿¡æ¯å˜åŠ¨*/
 	private static void update(String log,Province province[]) throws IOException{
 		String strLine;
 		FileInputStream fstream = new FileInputStream(new File(log));
 		InputStreamReader isr = new InputStreamReader(fstream,"UTF-8");
-		BufferedReader br = new BufferedReader(isr);//¹¹ÔìÒ»¸öBufferedReader£¬ÀïÃæ´æ·ÅÔÚ¿ØÖÆÌ¨ÊäÈëµÄ×Ö½Ú×ª»»ºó³ÉµÄ×Ö·û¡£
+		BufferedReader br = new BufferedReader(isr);//æ„é€ ä¸€ä¸ªBufferedReaderï¼Œé‡Œé¢å­˜æ”¾åœ¨æ§åˆ¶å°è¾“å…¥çš„å­—èŠ‚è½¬æ¢åæˆçš„å­—ç¬¦ã€‚
 		
 		while((strLine = br.readLine()) != null){
-			String str[] = strLine.split(" ");//ÓÃ¿Õ¸ñ·Ö¸ôÃ¿Ò»ĞĞÖĞµÄ¼ÇÂ¼
-		  	if(!str[0].substring(0,2).equals("//")){//ºöÂÔÒÔ"//"¿ªÍ·µÄ¼ÇÂ¼ĞĞ
-				int num = 0;//¼ÇÂ¼±ä¶¯ÈËÊı
-				int i = 1;//¼ÇÂ¼±ä¶¯Ê¡·İ
+			String str[] = strLine.split(" ");//ç”¨ç©ºæ ¼åˆ†éš”æ¯ä¸€è¡Œä¸­çš„è®°å½•
+		  	if(!str[0].substring(0,2).equals("//")){//å¿½ç•¥ä»¥"//"å¼€å¤´çš„è®°å½•è¡Œ
+				int num = 0;//è®°å½•å˜åŠ¨äººæ•°
+				int i = 1;//è®°å½•å˜åŠ¨çœä»½
 				int length = str.length;
 				str[length - 1] = str[length - 1].trim();
 				if(str[length - 1] != null && !"".equals(str[length - 1])){
@@ -213,29 +200,29 @@ class InfectStatistic{
 				}
 				
 				if(length == 3){
-					if(str[1].equals("ÖÎÓú")){//xxÊ¡·İ»¼ÕßÖÎÓú
+					if(str[1].equals("æ²»æ„ˆ")){//xxçœä»½æ‚£è€…æ²»æ„ˆ
 						province[i].ip -= num;
 						province[i].cure += num;
 					}
-					else if(str[1].equals("ËÀÍö")){//xxÊ¡·İ»¼ÕßËÀÍö
+					else if(str[1].equals("æ­»äº¡")){//xxçœä»½æ‚£è€…æ­»äº¡
 						province[i].ip -= num;
 						province[i].dead += num;
 					}	
 				}
 				else if(length == 4){
-					if(str[1].equals("ĞÂÔö")){
-						if(str[2].equals("¸ĞÈ¾»¼Õß")){//xxÊ¡·İĞÂÔö¸ĞÈ¾»¼Õß
+					if(str[1].equals("æ–°å¢")){
+						if(str[2].equals("æ„ŸæŸ“æ‚£è€…")){//xxçœä»½æ–°å¢æ„ŸæŸ“æ‚£è€…
 							province[i].ip += num;
 						}
-						else if(str[2].equals("ÒÉËÆ»¼Õß")){//xxÊ¡·İĞÂÔöÒÉËÆ»¼Õß
+						else if(str[2].equals("ç–‘ä¼¼æ‚£è€…")){//xxçœä»½æ–°å¢ç–‘ä¼¼æ‚£è€…
 							province[i].sp += num;
 						}
 					}
-					else if(str[1].equals("ÒÉËÆ»¼Õß")){////xxÊ¡·İÒÉËÆ»¼ÕßÈ·Õï
+					else if(str[1].equals("ç–‘ä¼¼æ‚£è€…")){////xxçœä»½ç–‘ä¼¼æ‚£è€…ç¡®è¯Š
 						province[i].sp -= num;
 						province[i].ip += num;
 					}
-					else if(str[1].equals("ÅÅ³ı")){//xxÊ¡·İÒÉËÆ»¼ÕßÅÅ³ı
+					else if(str[1].equals("æ’é™¤")){//xxçœä»½ç–‘ä¼¼æ‚£è€…æ’é™¤
 						province[i].sp -= num;
 					}
 				}
@@ -244,11 +231,11 @@ class InfectStatistic{
 					while(!str[3].equals(province[j].name) && j < PROVINCE_NUM){
 						j++;
 					}
-					if(str[1].equals("ÒÉËÆ»¼Õß")){//aÊ¡ÒÉËÆ»¼ÕßÁ÷ÈëbÊ¡
+					if(str[1].equals("ç–‘ä¼¼æ‚£è€…")){//açœç–‘ä¼¼æ‚£è€…æµå…¥bçœ
 						province[i].sp -= num;
 						province[j].sp += num;
 					}
-					else if(str[1].equals("¸ĞÈ¾»¼Õß")){//aÊ¡¸ĞÈ¾»¼ÕßÁ÷ÈëbÊ¡
+					else if(str[1].equals("æ„ŸæŸ“æ‚£è€…")){//açœæ„ŸæŸ“æ‚£è€…æµå…¥bçœ
 						province[i].ip -= num;
 						province[j].ip += num;
 					}
@@ -258,7 +245,7 @@ class InfectStatistic{
 	}
 	
 	
-	/*Ğ´TXTÎÄ¼ş±£´æµ½Ö¸¶¨Î»ÖÃ*/
+	/*å†™TXTæ–‡ä»¶ä¿å­˜åˆ°æŒ‡å®šä½ç½®*/
 	public static void write(String out,String content){    
 		FileOutputStream fstream = null;
 		File file = new File(out);
@@ -277,7 +264,7 @@ class InfectStatistic{
 	}
 	
 	
-	/*²éÕÒ¶ÔÓ¦Ä¿Â¼ÏÂµÄÎÄ¼ş*/
+	/*æŸ¥æ‰¾å¯¹åº”ç›®å½•ä¸‹çš„æ–‡ä»¶*/
 	public static List<File> searchFiles(File folder,String keyWord){
 		List<File> result = new ArrayList<File>();
 		if(folder.isFile()){
@@ -297,7 +284,7 @@ class InfectStatistic{
 		});
  
         if(subFolders != null){
-        	for(File file : subFolders){
+        	for(File file :subFolders){
         		if(file.isFile()){
                     result.add(file);
                 } 
@@ -307,7 +294,7 @@ class InfectStatistic{
     }
 	
 	
-	/*±È½ÏÁ½¸öÊ±¼äÇ°ºó*/
+	/*æ¯”è¾ƒä¸¤ä¸ªæ—¶é—´å‰å*/
 	public static int timeCompare(String time1,String time2){
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		Calendar c1=Calendar.getInstance();
