@@ -1,3 +1,4 @@
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,6 +30,10 @@ class InfectStatistic {
         if(go==false)
             return;
         Read b=new Read(a.main_Path,a.here,a.date);
+        // SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");//规范日期格式
+       //  String Today = sdf.format(a.date);
+       // System.out.println(Today);
+        b.getFiles();
         Arrays.sort(a.here.kinds, new Comparator<kind>() {
             @Override
             public int compare(kind o1, kind o2) {
@@ -41,6 +46,8 @@ class InfectStatistic {
                 return -(o1.quantify-o2.quantify);
             }
         });
-
+        Write c=new Write(a.out_Path,a.here);
+        c.writedetail(a.here.kinds,a.here.provinces);
+        System.out.println("成功");
     }
 }

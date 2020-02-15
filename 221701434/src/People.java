@@ -32,10 +32,12 @@ public class People {
             province_deadpeople[i] = 0;
             province_doubtpeople[i] = 0;
             province_infectpeople[i] = 0;
+            provinces[i]=new province();
             provinces[i].num=i;
             provinces[i].name=province2[i];
         }
         for(int i=0;i<4;i++){
+            kinds[i]=new kind();
             kinds[i].num=i;
             kinds[i].name=kindss[i];
         }

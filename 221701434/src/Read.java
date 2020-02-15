@@ -14,18 +14,19 @@ public class Read {
         this.path=path;
         this.num=a;
        this.now=date;
-
     }
    // Date now = new Date(System.currentTimeMillis());//获取当前日期
-    public SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");//规范日期格式
-    public String Today = sdf.format(now);
 
     public void getFiles() {
         String Log_Path=path;
         File files = new File(Log_Path);
         File[] filelist = files.listFiles();//获取目录下的所有文件
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");//规范日期格式
+        String today = sdf.format(now);
+        System.out.println(now);
+        System.out.println(today);
         for (int i = 0; i < filelist.length; i++) {
-            if (filelist[i].getName().compareTo(Today) <= 0)
+            if (filelist[i].getName().compareTo(today) <= 0)
                 ReadLog(Log_Path + filelist[i].getName());
         }
     }

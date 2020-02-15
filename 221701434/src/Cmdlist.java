@@ -1,3 +1,6 @@
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
+import sun.security.util.Length;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -5,7 +8,8 @@ public class Cmdlist {
     public String args[];
     public String main_Path;
     public String out_Path;
-    public Date date;
+    public Date date=new Date();
+    String date2;
     People here=new People();//记录指令指示的省份
     int typenum=0;//查看type后面跟随的指令个数
     int _date=0;
@@ -42,7 +46,7 @@ public class Cmdlist {
         for(int i=1;i<args.length;i++){
             if (args[i].equals("-out")) {
                 a++;
-                if (i + 1 > args.length) {
+                if (i + 1 >= args.length) {
                     System.out.println("必须输入路径");
                     return false;
                 }
@@ -56,13 +60,15 @@ public class Cmdlist {
         for(int i=1;i<args.length;i++){
             if (args[i].equals("-date")){
                 _date++;
-                if(i+1>args.length){
+                if(i+1==args.length){
+                    date=new Date(System.currentTimeMillis());
                     System.out.println("您没有输入日期，将按照今天日期进行处理");
-                    return false;
+                    return true;
                 }
                 bool_date=makedate(args[i+1]);
+              //  System.out.println(date);
                 if(bool_date==false){
-                    System.out.println("你输入的日期格式不符合yyyy-mm-dd，将按照今天的日期进行处理");
+                    System.out.println("你输入的日期格式不符合yyyy-mm-dd");
                     return false;
                 }
             }
@@ -103,9 +109,9 @@ public class Cmdlist {
                 return true;
             }
             else{
-                date=new Date(System.currentTimeMillis());
-                System.out.println("你的输入格式有误，或者没有输入日期，将按今日日期进行处理");
-                return false;
+                    date = new Date(System.currentTimeMillis());
+                    System.out.println("您没有输入具体日期或输入格式有误，将按照今天的日期计算");
+                    return true;
             }
 
         } catch (Exception e) {
