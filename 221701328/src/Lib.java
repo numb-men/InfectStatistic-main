@@ -90,13 +90,11 @@ public class Lib {
      * @param dataNumber 需要解析的数据
      * @return 解析结果
      */
-    public static int parseData(String dataNumber){
+    public static int parseData(String dataNumber) throws Exit {
         try{
             return Integer.parseInt(dataNumber.substring(0,dataNumber.length() - 1));
         }catch (Exception e){
-            System.out.println(e.getMessage());
-            System.exit(1);
-            return 0;
+            throw new Lib.Exit(e.getMessage());
         }
     }
 
@@ -116,7 +114,7 @@ public class Lib {
         return fileList;
     }
 
-    public static class Exit extends RuntimeException{
+    public static class Exit extends Exception{
 
         public Exit(){
             super();

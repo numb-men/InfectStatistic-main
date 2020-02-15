@@ -3,6 +3,8 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * InfectStatistic
@@ -21,7 +23,7 @@ class InfectStatistic {
         try {
             if(args.length == 0){
                 Lib.help();
-                throw new Lib.Exit();
+                throw new Lib.Exit("请按照提示输入命令");
             }
             infectStatistic.takeOrder(args[0]);
             infectStatistic.placeOrder(args);
@@ -59,7 +61,7 @@ class InfectStatistic {
  */
 interface Order {
 
-    void execute(String[] args);
+    void execute(String[] args) throws Lib.Exit;
 }
 
 /**
@@ -92,7 +94,7 @@ class ListOrder implements Order {
     private List<String> provinceParams;
 
     /*用于保存各省份疫情信息*/
-    private Map<String, List<Integer>> statistics;
+    private final Map<String, List<Integer>> statistics;
 
     /*日志目录*/
     private File logDirectory;
@@ -102,7 +104,7 @@ class ListOrder implements Order {
     private List<String> outProvince;
 
     /*构造方法*/
-    public ListOrder(){
+    public ListOrder() {
         hasLog = false;
         hasOut = false;
         hasDate = false;
@@ -129,7 +131,7 @@ class ListOrder implements Order {
     public void execute(String[] args) throws Lib.Exit {
         if(args.length == 1){
             Lib.helpList();    //显示提示信息
-            System.exit(0);
+            throw new Lib.Exit("请按照提示输入命令");
         }
         /*分离参数*/
         int i = 1;
@@ -175,21 +177,21 @@ class ListOrder implements Order {
             }
         }
         /*执行相应的方法*/
-        if(!hasLog){  //log必须有
+        if(!hasLog) {  //log必须有
             throw new Lib.Exit("缺少-log参数");
         }
-        if(!hasOut){  //out必须有
+        if(!hasOut) {  //out必须有
             throw new Lib.Exit("缺少-out参数");
         }
-        if(!hasDate){  //如果没有data参数
+        if(!hasDate) {  //如果没有data参数
             dateParam=new SimpleDateFormat("yyyy-MM-dd").format(new Date()); //当前日期
         }
         doLog(logParam);    //读取日志路径
         doDate(dateParam);   //读取日志路径下相应日期的日志
-        if(hasType){
+        if(hasType) {
             doType(typeParams);   //需要输出的信息类型
         }
-        if(hasProvince){
+        if(hasProvince) {
             doProvince(provinceParams);   //需要输出的省份疫情信息
         }
         doOut(outParam);  //输出到指定的路径
@@ -201,7 +203,7 @@ class ListOrder implements Order {
      */
     private void doLog(String logPath) throws Lib.Exit {
         logDirectory = new File(logPath);  //读取路径
-        if(!logDirectory.exists()){
+        if(!logDirectory.exists()) {
             throw new Lib.Exit("\"-log\" " + logDirectory + " 无法解析的路径");
         }
     }
@@ -211,30 +213,32 @@ class ListOrder implements Order {
      * @param outPath -out参数后面的输出路径
      */
     private void doOut(String outPath) throws Lib.Exit {
+        countNational(); //计算全国数据
         File outFile = new File(outPath);
         FileWriter writer = null;    //字符输出流
         try {
             writer = new FileWriter(outFile);
-            for(String province : statistics.keySet()){   //遍历统计数据
-                if(!outProvince.contains(province)){
+            for(String province : statistics.keySet()) {   //遍历统计数据
+                if(!outProvince.contains(province)) {
                     continue;
                 }
                 List<Integer> data = statistics.get(province);
                 writer.write(province + "    ");
-                for(String type : outType.keySet()){
+                for(String type : outType.keySet()) {
                     writer.write(type + data.get(outType.get(type)) + "人    ");
                 }
                 writer.write("\n");
             }
+            writer.write("//该文档并非真实数据，仅供测试使用\n");
             writer.flush();
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new Lib.Exit("\"out\" " + e.getMessage());
-        }finally {
+        } finally {
             try {
                 if (writer != null) {
                     writer.close();   //关闭流
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -248,69 +252,79 @@ class ListOrder implements Order {
         List<File> logList = Lib.getLogFiles(logDirectory);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date paramDate;
-        BufferedReader reader = null;
+        ExecutorService threadPool = Executors.newCachedThreadPool();
         try {
             paramDate = dateFormat.parse(date);
-            List<Integer> nationalData = statistics.get("全国"); //全国数据
             for (File log : logList) {
                 Date logDate = dateFormat.parse(log.getName().substring(0, log.getName().indexOf('.')));
                 if(logDate.compareTo(paramDate) > 0) {  //判断日志文件的日期是否小于等于给定日期
                     continue;
                 }
-                reader = new BufferedReader(new InputStreamReader(new FileInputStream(log), StandardCharsets.UTF_8));
-                String dataRow;
-                while((dataRow = reader.readLine()) != null){
-                    if(dataRow.startsWith("//")) { //忽略注释行
-                        continue;
-                    }
-                    String[] data = dataRow.split(" ");  //分割数据行
-                    if(!outProvince.contains(data[0])){
-                        outProvince.add(data[0]);
-                    }
-                    List<Integer> provinceData = statistics.get(data[0]);   //当前行的省份数据
-                    List<Integer> destProvince;   //用于处理流入
-                    switch (data[1]) {
-                        case INCREMENT:  //处理新增
-                            if (data[2].equals(INFECTION_PATIENT)) {  //新增感染
-                                increaseInf(nationalData, provinceData, Lib.parseData(data[3]));
-                            } else {                                  //新增疑似
-                                increaseSus(nationalData, provinceData, Lib.parseData(data[3]));
+                threadPool.submit(() -> {
+                    BufferedReader reader = null;
+                    try {
+                        reader = new BufferedReader(new InputStreamReader(new FileInputStream(log), StandardCharsets.UTF_8));
+                        String dataRow;
+                        while ((dataRow = reader.readLine()) != null) {
+                            if (dataRow.startsWith("//")) { //忽略注释行
+                                continue;
                             }
-                            break;
-                        case EXCLUDE:  //处理排除疑似
-                            excludeSus(nationalData, provinceData, Lib.parseData(data[3]));
-                            break;
-                        case CURE:  //处理治愈
-                            cure(nationalData,provinceData,Lib.parseData(data[2]));
-                            break;
-                        case DEAD:  //处理死亡
-                            dead(nationalData,provinceData,Lib.parseData(data[2]));
-                            break;
-                        case INFECTION_PATIENT:  //处理感染患者流入
-                            destProvince = statistics.get(data[3]);
-                            infInflow(provinceData,destProvince,Lib.parseData(data[4]));
-                            break;
-                        case SUSPECTED_PATIENT:
-                            if(data[2].equals(INFLOW)){   //处理疑似患者流入
-                                destProvince = statistics.get(data[3]);
-                                susInflow(provinceData,destProvince,Lib.parseData(data[4]));
-                            } else if(data[2].equals(DIAGNOSE)) {  //处理确诊
-                                diagnose(nationalData,provinceData,Lib.parseData(data[3]));
+                            String[] data = dataRow.split(" ");  //分割数据行
+                            if (!outProvince.contains(data[0])) {
+                                outProvince.add(data[0]);
                             }
-                            break;
+                            synchronized (statistics) {   //给数据加上锁
+                                List<Integer> provinceData = statistics.get(data[0]);   //当前行的省份数据
+                                List<Integer> destProvince;   //用于处理流入
+                                switch (data[1]) {
+                                    case INCREMENT:  //处理新增
+                                        if (data[2].equals(INFECTION_PATIENT)) {  //新增感染
+                                            increaseInf(provinceData, Lib.parseData(data[3]));
+                                        } else {                                  //新增疑似
+                                            increaseSus(provinceData, Lib.parseData(data[3]));
+                                        }
+                                        break;
+                                    case EXCLUDE:  //处理排除疑似
+                                        excludeSus(provinceData, Lib.parseData(data[3]));
+                                        break;
+                                    case CURE:  //处理治愈
+                                        cure(provinceData, Lib.parseData(data[2]));
+                                        break;
+                                    case DEAD:  //处理死亡
+                                        dead(provinceData, Lib.parseData(data[2]));
+                                        break;
+                                    case INFECTION_PATIENT:  //处理感染患者流入
+                                        destProvince = statistics.get(data[3]);
+                                        infInflow(provinceData, destProvince, Lib.parseData(data[4]));
+                                        break;
+                                    case SUSPECTED_PATIENT:
+                                        if (data[2].equals(INFLOW)) {   //处理疑似患者流入
+                                            destProvince = statistics.get(data[3]);
+                                            susInflow(provinceData, destProvince, Lib.parseData(data[4]));
+                                        } else if (data[2].equals(DIAGNOSE)) {  //处理确诊
+                                            diagnose(provinceData, Lib.parseData(data[3]));
+                                        }
+                                        break;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if(reader != null) {
+                            try {
+                                reader.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
-                }
+                });
             }
-        }catch (Exception e){
+            threadPool.shutdown();
+            while (!threadPool.isTerminated());   //等待所有线程执行完
+        } catch (Exception e) {
             throw new Lib.Exit(e.getMessage());
-        }finally {
-            try{
-                if (reader != null) {
-                    reader.close();
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
         }
     }
 
@@ -320,12 +334,12 @@ class ListOrder implements Order {
      */
     private void doType(List<String> types) throws Lib.Exit {
         Map<String,Integer> newOutType = new LinkedHashMap<>();
-        for (String key : statistics.keySet()){
+        for (String key : statistics.keySet()) {
             List<Integer> oldData = statistics.get(key);
             List<Integer> newData = new ArrayList<>();
             int index = 0;
-            for(String type : types){
-                switch (type){
+            for(String type : types) {
+                switch (type) {
                     case "ip":
                         newData.add(oldData.get(0));
                         newOutType.put(INFECTION_PATIENT,index++);
@@ -355,95 +369,55 @@ class ListOrder implements Order {
      *执行-province命令参数
      * @param provinces -province命令参数后面的具体参数值数组
      */
-    private void doProvince(List<String> provinces){
+    private void doProvince(List<String> provinces) {
         outProvince = provinces;
     }
 
     /**
      *新增确诊患者的计算
-     * @param nationalData 全国疫情
      * @param provinceData 当前省份疫情
      * @param count 新增数量
      */
-    private void increaseInf(List<Integer> nationalData,List<Integer> provinceData,int count){
-        int provinceInf = provinceData.get(0);
-        int nationalInf = nationalData.get(0);
-        provinceInf += count;
-        nationalInf += count;
-        provinceData.set(0,provinceInf);
-        nationalData.set(0,nationalInf);
+    private void increaseInf(List<Integer> provinceData,int count) {
+        provinceData.set(0,provinceData.get(0) + count);
     }
 
     /**
      *新增疑似患者的计算
-     * @param nationalData 全国疫情
      * @param provinceData 当前省份疫情
      * @param count 新增人数
      */
-    private void increaseSus(List<Integer> nationalData,List<Integer> provinceData,int count){
-        int provinceSus = provinceData.get(1);
-        int nationalSus = nationalData.get(1);
-        provinceSus += count;
-        nationalSus += count;
-        provinceData.set(1,provinceSus);
-        nationalData.set(1,nationalSus);
+    private void increaseSus(List<Integer> provinceData,int count) {
+        provinceData.set(1,provinceData.get(1) + count);
     }
 
     /**
      *排除疑似患者的计算
-     * @param nationalData 全国疫情
      * @param provinceData 当前省份疫情
      * @param count 排除人数
      */
-    private void excludeSus(List<Integer> nationalData,List<Integer> provinceData,int count){
-        int provinceSus = provinceData.get(1);
-        int nationalSus = nationalData.get(1);
-        provinceSus -= count;
-        nationalSus -= count;
-        provinceData.set(1,provinceSus);
-        nationalData.set(1,nationalSus);
+    private void excludeSus(List<Integer> provinceData,int count) {
+        provinceData.set(1,provinceData.get(1) - count);
     }
 
     /**
      *新增治愈病例的计算
-     * @param nationalData 全国疫情
      * @param provinceData 当前省份疫情
      * @param count 治愈人数
      */
-    private void cure(List<Integer> nationalData,List<Integer> provinceData,int count){
-        int provinceCure = provinceData.get(2);
-        int nationalCure = nationalData.get(2);
-        int provinceInf = provinceData.get(0);
-        int nationalInf = nationalData.get(0);
-        provinceCure += count;
-        nationalCure += count;
-        provinceInf -= count;
-        nationalInf -= count;
-        provinceData.set(2,provinceCure);
-        nationalData.set(2,nationalCure);
-        provinceData.set(0,provinceInf);
-        nationalData.set(0,nationalInf);
+    private void cure(List<Integer> provinceData,int count) {
+        provinceData.set(2,provinceData.get(2) + count);
+        provinceData.set(0,provinceData.get(0) - count);
     }
 
     /**
      *新增死亡病例的计算
-     * @param nationalData 全国疫情
      * @param provinceData 当前省份疫情
      * @param count 死亡人数
      */
-    private void dead(List<Integer> nationalData,List<Integer> provinceData,int count){
-        int provinceDead = provinceData.get(3);
-        int nationalDead = nationalData.get(3);
-        int provinceInf = provinceData.get(0);
-        int nationalInf = nationalData.get(0);
-        provinceDead += count;
-        nationalDead += count;
-        provinceInf -= count;
-        nationalInf -= count;
-        provinceData.set(3,provinceDead);
-        nationalData.set(3,nationalDead);
-        provinceData.set(0,provinceInf);
-        nationalData.set(0,nationalInf);
+    private void dead(List<Integer> provinceData,int count) {
+        provinceData.set(3,provinceData.get(3) + count);
+        provinceData.set(0,provinceData.get(0) - count);
     }
 
     /**
@@ -452,13 +426,9 @@ class ListOrder implements Order {
      * @param destProvince 感染者流入哪个省（市、自治区）
      * @param count 人数
      */
-    private void infInflow(List<Integer> sourceProvince,List<Integer> destProvince,int count){
-        int sourceInf = sourceProvince.get(0);
-        int destInf = destProvince.get(0);
-        sourceInf -= count;
-        destInf += count;
-        sourceProvince.set(0,sourceInf);
-        destProvince.set(0,destInf);
+    private void infInflow(List<Integer> sourceProvince,List<Integer> destProvince,int count) {
+        sourceProvince.set(0,sourceProvince.get(0) - count);
+        destProvince.set(0,destProvince.get(0) + count);
     }
 
     /**
@@ -467,33 +437,30 @@ class ListOrder implements Order {
      * @param destProvince 感染者流入哪个省（市、自治区）
      * @param count 人数
      */
-    private void susInflow(List<Integer> sourceProvince,List<Integer> destProvince,int count){
-        int sourceSus = sourceProvince.get(1);
-        int destSus = destProvince.get(1);
-        sourceSus -= count;
-        destSus += count;
-        sourceProvince.set(1,sourceSus);
-        destProvince.set(1,destSus);
+    private void susInflow(List<Integer> sourceProvince,List<Integer> destProvince,int count) {
+        sourceProvince.set(1,sourceProvince.get(1) - count);
+        destProvince.set(1,destProvince.get(1) + count);
     }
 
     /**
      *确诊病例的计算
-     * @param nationalData 全国疫情
      * @param provinceData 当前省份疫情
      * @param count 确诊人数
      */
-    private void diagnose(List<Integer> nationalData,List<Integer> provinceData,int count){
-        int provinceInf = provinceData.get(0);
-        int provinceSus = provinceData.get(1);
-        int nationalInf = nationalData.get(0);
-        int nationalSus = nationalData.get(1);
-        provinceInf += count;
-        provinceSus -= count;
-        nationalInf += count;
-        nationalSus -= count;
-        provinceData.set(0,provinceInf);
-        provinceData.set(1,provinceSus);
-        nationalData.set(0,nationalInf);
-        nationalData.set(1,nationalSus);
+    private void diagnose(List<Integer> provinceData,int count) {
+        provinceData.set(0,provinceData.get(0) + count);
+        provinceData.set(1,provinceData.get(1) -count);
+    }
+
+    /**
+     * 计算全国数据
+     */
+    private void countNational() {
+        List<Integer> national = statistics.get("全国");
+        for (List<Integer> data : statistics.values()) {
+            for (int i = 0 ; i < national.size() ; i ++){
+                national.set(i,national.get(i) + data.get(i));
+            }
+        }
     }
 }
