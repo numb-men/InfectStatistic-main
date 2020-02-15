@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import java.util.List;
 /**
  * InfectStatistic
- * TODO
  *
  * @author hmx1
  * @version 1.0.0
@@ -18,15 +17,105 @@ import java.util.List;
 class InfectStatistic {
     /**
      * TODO
-     * 建立Hashmap解析命令行，将命令行的参数与参数值分开
+     * 建立Hashmap，将命令行的参数与参数值分开
      * @author hmx1
      * @version 1.0.0
-     * @since 2020.2.10
      */
     public static HashMap<String, String[]> ParsingCommandLine(String[] args) {
-        HashMap<String, String[]> Arguments = new HashMap<String, String[]>();
+        HashMap<String, String[]> arguments = new HashMap<String, String[]>();
         ArrayList<String> ParsingValue = new ArrayList<>();
+        String str = null;
+        //如果命令不是list，那么报错
+        if ((args.length == 0) || (!args[0].equals("list"))) {
+            System.out.println("请输入正确的命令list！");
+            return arguments;
+        }
         for (int i = 1; i<args.length; i++) {
+            String arg = args[i];
+            if (arg.startsWith("-")){
+                if (str != null){
+                    String[] arr = new String[ParsingValue.size()];
+                    ParsingValue.toArray(arr);
+                    arguments.put(key,arr);
+                    ParsingValue.clear();
+                }
+                str = arg;
+            }
+            else {
+                arrValue.add(arg);
+            }
+        }
+        if(str != null){
+            String[] argsValue = new String[ParsingValue.size()];
+            ParsingValue.toArray(argsValue);
+            arguments.put(key,argsValue);
+            ParsingValue.clear();
+        }
+        return arguments;
+    }
+    /**
+     * TODO
+     * 日志中每一行statement的拆分,infestorName,ip,sp,cure,dead
+     * @author hmx1
+     * @version 1.0.0
+     */
+    static class statement{
+        private String infestorName;
+        private int ip;//感染
+        private int sp;//疑似
+        private int cure;//治愈
+        private int dead;//死亡
+        statement(String infestorName, int ip, int sp, int cure, int dead){
+            this.infestorName = infestorName;
+            this.ip = ip;
+            this.sp = sp;
+            this.cure = cure;
+            this.dead = dead;
+        }
+        public String getInfestorName(){
+            return infestorName;
+        }
+        public void setInfestorName(String infestorName) {
+            this.infestorName = infestorName;
+        }
+        public int getIp(){
+            return ip;
+        }
+        public void setIp(int ip) {
+            this.ip = ip;
+        }
+        public int getSp(){
+            return sp;
+        }
+        public void setSp(int sp) {
+            this.sp = sp;
+        }
+        public int getCure(){
+            return cure;
+        }
+        public void setCure(int cure) {
+            this.cure = cure;
+        }
+        public int getDead() {
+            return dead;
+        }
+        public void setDead(int dead) {
+            this.dead = dead;
+        }
+        public String printStatement(){
+            return infestorName+" 感染患者" + ip + "人" + " 疑似患者" + sp + "人" + " 治愈" + cure + "人" + " 死亡" + dead + "人";
+        }
+        public String printIp() {
+            return " 感染患者" + ip + "人";
+        }
+        public String printSp() {
+            return " 疑似患者" + sp + "人";
+        }
+        public String printCure(){
+            return " 治愈" + cure + "人";
+        }
+        public String printDead(){
+            return " 死亡" + dead + "人";
         }
     }
     /**
@@ -34,7 +123,6 @@ class InfectStatistic {
      * 清空文件内容
      * @author hmx1
      * @version 1.0.0
-     * @since 2020.2.10
      */
     public static void clearInfoForFile(String fileName) {
         File file =new File(fileName);
