@@ -1,12 +1,13 @@
+package src;
+
 /**
- * InfectStatistic
- * TODO
- *
- * @author xxx
- * @version xxx
- * @since xxx
+ * 
+ * 
+ * @author ZhangYuhui
+ * @version 1.0
  */
 class InfectStatistic {
+
     public static void main(String[] args) {
         System.out.println("helloworld");
     }
@@ -14,8 +15,5 @@ class InfectStatistic {
 
 
 
-class Command {
-	
-	
-	
-}
+
+
