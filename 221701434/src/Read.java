@@ -23,10 +23,12 @@ public class Read {
         File[] filelist = files.listFiles();//获取目录下的所有文件
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");//规范日期格式
         String today = sdf.format(now);
-        System.out.println(now);
-        System.out.println(today);
+        //System.out.println(now);
+        //System.out.println(today);
         for (int i = 0; i < filelist.length; i++) {
-            if (filelist[i].getName().compareTo(today) <= 0)
+           // System.out.println(filelist[i].getName());
+            //System.out.println(today+".log");
+            if (filelist[i].getName().compareTo(today+".log.txt") <= 0)
                 ReadLog(Log_Path + filelist[i].getName());
         }
     }

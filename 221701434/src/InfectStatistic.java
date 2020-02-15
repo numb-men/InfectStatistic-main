@@ -46,6 +46,11 @@ class InfectStatistic {
                 return -(o1.quantify-o2.quantify);
             }
         });
+        for(int i=0;i<a.here.kinds.length;i++){
+            System.out.println(a.here.kinds[i].name);
+            System.out.println(a.here.kinds[i].quantify);
+            System.out.println(a.here.kinds[i].num);
+        }
         Write c=new Write(a.out_Path,a.here);
         c.writedetail(a.here.kinds,a.here.provinces);
         System.out.println("成功");

@@ -150,25 +150,30 @@ public class Cmdlist {
     }
     public boolean dealtype(int i){
         int num=0;
+        int k=10;
         if (!args[i+1].equals("ip")&&!args[i+1].equals("sp")&&!args[i+1].equals("cure")&&!args[i+1].equals("dead")){
             System.out.println("-type指令只能跟随 ip sp cure dead");
             return false;
         }
         for(int j=i+1;j<args.length;j++){
             if(args[j].equals("ip")){
-                here.kinds[0].quantify-=j;//根据J来判断输出的优先顺序
+                here.kinds[0].quantify+=k;//根据J来判断输出的优先顺序
+                k--;
                 num++;
             }
             else if(args[j].equals("sp")){
-                here.kinds[1].quantify-=j;
+                here.kinds[1].quantify+=k;
+                k--;
                 num++;
             }
             else if(args[j].equals("dead")){
-                here.kinds[2].quantify-=j;
+                here.kinds[3].quantify+=k;
+                k--;
                 num++;
             }
             else if(args[j].equals("cure")){
-                here.kinds[3].quantify-=j;
+                here.kinds[2].quantify+=k;
+                k--;
                 num++;
             }
         }
@@ -177,10 +182,12 @@ public class Cmdlist {
         return true;
     }
     public void dealprovince(int x){
+        int k=100;
         boolean rightprovince=true;
         for(int i=x;i<args.length;i++){
             if (here.map1.containsKey(args[i])==true)
-                here.provinces[here.map1.get(args[i])].quantify-=i;
+                here.provinces[here.map1.get(args[i])].quantify+=k;
+            k--;
         }
     }
 }
