@@ -312,31 +312,36 @@ class Info
         FileWriter file_writer = null;
         try
         {
+            file_writer = new FileWriter(info_file);
+            if(!info_file.exists())
+                info_file.createNewFile();
             for(String province : info.keySet())
             {
                 if(!out_province.contains(province))
                     continue;
-                if(out_type.size() == 0)
+                if(out_type == null || out_type.size() == 0)
                 {
-                    file_writer.write(province + "" + "感染患者" + info.get(province).get(0) + "人 ");
-                    file_writer.write("疑似患者"+info.get(province).get(1) + "人 ");
-                    file_writer.write("治愈"+info.get(province).get(2) + "人 ");
-                    file_writer.write("死亡"+info.get(province).get(3) + "人");
+                    file_writer.write(province + " " + "感染患者" + info.get(province).get(0).toString() + "人 ");
+                    file_writer.write("疑似患者"+info.get(province).get(1).toString() + "人 ");
+                    file_writer.write("治愈"+info.get(province).get(2).toString() + "人 ");
+                    file_writer.write("死亡"+info.get(province).get(3).toString() + "人");
                     file_writer.write("\n");
                 }
                 else
                 {
-                    file_writer.write(province + "");
+                    file_writer.write(province + " ");
                     for(String type : out_type)
                     {
                         if(type.equals("ip"))
-                            file_writer.write("感染患者" + info.get(province).get(0) + "人 ");
+                        {
+                            file_writer.write("感染患者" + info.get(province).get(0).toString() + "人 ");
+                        }
                         if(type.equals("sp"))
-                            file_writer.write("疑似患者" + info.get(province).get(0) + "人 ");
+                            file_writer.write("疑似患者" + info.get(province).get(1).toString() + "人 ");
                         if(type.equals("cure"))
-                            file_writer.write("治愈" + info.get(province).get(0) + "人 ");
+                            file_writer.write("治愈" + info.get(province).get(2).toString() + "人 ");
                         if(type.equals("dead"))
-                            file_writer.write("死亡" + info.get(province).get(0) + "人 ");
+                            file_writer.write("死亡" + info.get(province).get(3).toString() + "人 ");
                     }
                     file_writer.write("\n");
                 }
@@ -416,10 +421,11 @@ class Command
         }
         if(province.is_exist)
         {
-            if(province.param_list.size() == 0)
+            if(province.param_list ==null || province.param_list.size() == 0)
                 throw new MyException("-province必须含有省份名称");
             execute_province(province.param_list);
         }
+        new_info.execute_out_file(out.param);
     }
 
     private void execute_date(String date,List<File> file_list,boolean exist) throws MyException
@@ -519,7 +525,7 @@ class Command
 
     public void execute_type(List<String> type_param) throws MyException
     {
-        if(type_param.size() == 0)
+        if(type_param == null || type_param.size() == 0)
             return;
         for(String type : type_param)
         {
