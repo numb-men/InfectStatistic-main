@@ -16,7 +16,7 @@ class InfectStatistic
 {
     public static void main(String[] args)
     {
-        String[] x=new String [11];
+        String[] x=new String [13];
         x[0]="list";
         x[1]="-date";
         x[2]="2020-1-22";
@@ -28,6 +28,8 @@ class InfectStatistic
         x[8]="福建";
         x[9]="安徽";
         x[10]="-type";
+        x[11]="sp";
+        x[12]="ip";
         try
         {
             if (x.length == 0)
@@ -132,6 +134,7 @@ class Info
     Info()
     {
         out_province = new ArrayList<>();
+        out_type = new ArrayList<>();
         info = new LinkedHashMap<>();
         List<Integer> new_data = new ArrayList<>();
         new_data.add(0); //记录感染人数
@@ -189,8 +192,6 @@ class Info
 
     public void add_type(String type)
     {
-        if(out_type.contains(type))
-            return;
         out_type.add(type);
     }
 
