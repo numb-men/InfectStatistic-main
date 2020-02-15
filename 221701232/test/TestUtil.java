@@ -87,17 +87,15 @@ public class TestUtil {
             pre = temp;
         }
     }
-
     @Test
-    void testCompareDate() throws ParseException {
+    void testCompareDate() {
         String dateStr1 = "2020-02-08";// dateStr cannot exceed current time
         String dateStr2 = "2020-02-06";// dateStr cannot exceed current time
         // if dateStr1 > dateStr2 return int > 0
         assert(CommonUtil.compareDate(dateStr1, dateStr2) > 0);
     }
-
     @Test
-    void testStringToDate() throws ParseException {
+    void testStringToDate()  {
         // string example : yyyy-MM-dd
         String dateStr1 = "2020-23-05";// invalid str return null
         Date date = CommonUtil.stringToDate(dateStr1);
@@ -107,7 +105,6 @@ public class TestUtil {
         date = CommonUtil.stringToDate(dateStr2);
         assert(date == null);
     }
-
     @Test
     void testParserStringGetType() {
         // str example : type + number + 人
@@ -116,7 +113,6 @@ public class TestUtil {
         String type = CommonUtil.parserStringGetType(str);
         assert(type.equals("感染患者"));
     }
-
     @Test
     void testParserStringToInt() {
         String str = "感染患者25人";
@@ -183,7 +179,7 @@ public class TestUtil {
     /** InfectStatistic **/
     String outFilePath = "/home/yyx/JavaWorkspace/InfectStatistic-main/221701232/result/";
     @Test
-    void main() throws IOException, ParseException {
+    void testMain() throws IOException, ParseException {
         Vector<String[]> args = new Vector<>(4);
         args.add(TestArgs.args1);
         args.add(TestArgs.args2);

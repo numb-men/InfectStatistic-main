@@ -4,9 +4,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static java.util.Map.Entry.comparingByValue;
-import static java.util.stream.Collectors.toMap;
-
 /**
  * Lib
  * TODO
@@ -54,14 +51,14 @@ class CommonUtil {
         return bw;
     }
 
-    public static int compareDate(String d1, String d2) throws ParseException {
+    public static int compareDate(String d1, String d2) {
         Date date1 = stringToDate(d1);
         Date date2 = stringToDate(d2);
         return date1.compareTo(date2);
     }
 
     /** tranform "yyyy-MM-dd" to Date **/
-    public static Date stringToDate(String dateStr) throws ParseException {
+    public static Date stringToDate(String dateStr) {
         Date date = null;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -141,6 +138,16 @@ class CommonUtil {
         return str2;
     }
 
+    /**
+     * parser date from log file name
+     * log file name : XX/XX/XX/YYYY-MM-dd.log.txt
+     */
+    public static Date parserDateFromLogFileName(String fileName) {
+        String[] strs1 = fileName.split("/");
+        String[] strs2 = strs1[strs1.length - 1].split("\\.");
+        return stringToDate(strs2[0]);
+    }
+
     /** parser number from string **/
     public static int parserStringToInt(String string) {
         String str1 = string.trim();
@@ -193,19 +200,27 @@ class CommonUtil {
             }
         }
         // sort file by date
-        fileMap = fileMap.entrySet().stream()
-                .sorted(comparingByValue())
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue,
-                        (e1, e2) -> e2, LinkedHashMap::new));
+        FileComparator fileComparator = new FileComparator();
+        fileMap = CommonUtil.sortMapByKey(fileMap, fileComparator);
         return fileMap;
     }
 }
 
-class MapKeyComparator implements Comparator<String>{
+class ChinaComparator implements Comparator<String>{
     @Override
     public int compare(String str1, String str2) {
         Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);
         return cmp.compare(str1,str2);
     }
 }
+
+class FileComparator implements Comparator<String>{
+    @Override
+    public int compare(String str1, String str2) {
+        Date date1 = CommonUtil.parserDateFromLogFileName(str1);
+        Date date2 = CommonUtil.parserDateFromLogFileName(str2);
+        return date2.compareTo(date1);
+    }
+}
+
 

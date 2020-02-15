@@ -29,7 +29,6 @@ class InfectStatistic {
         return cmdArgs;
     }
 
-
     public Map<String, File> getLogFilesMap() {
         return logFilesMap;
     }
@@ -240,7 +239,7 @@ class Container {
                 recordMap.put(entry.getValue(), record);
             }
         }
-        MapKeyComparator mapKeyComparator = new MapKeyComparator();
+        ChinaComparator mapKeyComparator = new ChinaComparator();
         recordMap = CommonUtil.sortMapByKey(recordMap, mapKeyComparator);
     }
 
