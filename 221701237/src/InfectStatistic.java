@@ -1,4 +1,4 @@
-import java.io.BufferedReader;
+﻿import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -829,7 +829,7 @@ class Command{
 		}
 		if(out)
 		{
-			if(logContent==null)
+			if(outContent==null)
 			{
 				System.out.println("-out命令参数缺失！");
 				return false;//输入-out命令 却未输入参数
