@@ -59,15 +59,19 @@ class InfectStatistic{
     					case "-log" :log = args[i+1];break;
     					case "-out" :out = args[i+1];break;
     					case "-date" :date = args[i+1];break;
-    					case "-type" :praseType(args,i,type);break;
+    					case "-type" :type[0]=true;praseType(args,i,type);break;
     					case "-province" :
     						prov = true;//确认province参数输入
     						praseProvince(args,i,province);
     						break;
     					default :
-    						System.out.println("输入了错误的参数"+args[i]+"，请重新输入");
+    						System.out.println("输入了错误的命令"+args[i]+"，请重新输入");
 							System.exit(0);
     				}
+    			}
+    			if(args[args.length-1].substring(0,1).equals("-")){
+    				System.out.println("没有输入"+args[args.length-1]+"的参数，请重新输入");
+        			System.exit(0);
     			}
     		}
     		if(log == null || out == null){
@@ -75,10 +79,10 @@ class InfectStatistic{
     			System.exit(0);
     		}
     		else{
-    			List<File> files = searchFiles(new File(log),".log.txt");
+    			List<File> files = searchFiles(new File(log),".log.txt");//获取对应文件底下所有带有.log.txt后缀的文件列表
     			for(File file :files){
-    				String[] file1 = file.getAbsolutePath().split("\\\\");
-    				if(date == null || timeCompare(date,file1[file1.length-1].substring(0,10)) > 0){
+    				String[] file1 = file.getAbsolutePath().split("\\\\");//获取文件名
+    				if(date == null || timeCompare(date,file1[file1.length-1].substring(0,10)) > 0){//比较时间判断是否读取文件信息
     					update(file.getAbsolutePath(),province);
     				}
     				
@@ -129,10 +133,10 @@ class InfectStatistic{
     private static void praseType(String args[],int i,boolean type[]){
     	while(i+1 < args.length && !args[i+1].substring(0,1).equals("-")){
     		switch(args[i+1]){
-    			case "感染患者" :type[0]=true;type[1] = true;break;
-    			case "疑似患者" :type[0]=true;type[2] = true;break;
-    			case "治愈" :type[0]=true;type[3] = true;break;
-    			case "死亡" :type[0]=true;type[4] = true;break;
+    			case "ip" :type[1] = true;break;
+    			case "sp" :type[2] = true;break;
+    			case "cure" :type[3] = true;break;
+    			case "dead" :type[4] = true;break;
     			default :
     				System.out.println("输入了错误的-type参数，请重新输入");
     				System.exit(0);
