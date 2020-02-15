@@ -35,10 +35,59 @@ public class Write {
             e.printStackTrace();
         }
     }
-    public void writedetail(kind[] kind,province[] province,int _type,int _province){
+    public void writedetail(kind[] kind,province[] province){
         try {
-            FileWriter fw=new FileWriter(Path);
+            FileWriter fw = new FileWriter(Path);
+            if (num.kinds[0].quantify == 0) {
+                if (num.provinces[0].quantify == 0)
+                    Writealltxt();
+                else {
+                    for (int i = 0; i < num.provinces.length; i++) {
+                        if (num.provinces[i].quantify != 0) {
+                            fw.write(num.provinces[i].name + " ");
+                            fw.write("感染患者" + num.province_infectpeople[num.provinces[i].num] + "人" + " ");
+                            fw.write("疑似患者" + num.province_doubtpeople[num.provinces[i].num] + "人" + " ");
+                            fw.write("治愈" + num.province_curepeople[num.provinces[i].num] + "人" + " ");
+                            fw.write("死亡" + num.province_deadpeople[num.provinces[i].num] + "人");
+                            fw.write("\n");
+                        }
+                    }
+                }
+            } else {
+                if (num.provinces[0].quantify == 0) {
+                    for (int i = 0; i < 35; i++) {
+                        if (num.province[i] != 0) {
+                            fw.write(num.province2[i]+" ");
+                            for(int j=0;j<4;j++){
+                                if(num.kinds[j].quantify!=0)
+                                    fw.write(num.kinds[i].name+num.province_infectpeople[num.provinces[i].num]+"人"+" ");
+                                else{
+                                    fw.write("\n");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else{
+                    for(int i=0;i<num.provinces.length;i++){
+                        if (num.provinces[i].quantify != 0) {
+                            fw.write(num.provinces[i].name+" ");
+                            for(int j=0;j<4;j++){
+                                if(num.kinds[j].quantify!=0)
+                                    fw.write(num.kinds[i].name+num.province_infectpeople[num.provinces[i].num]+"人"+" ");
+                                else{
+                                    fw.write("\n");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
         }
+
         catch (Exception e){
             e.printStackTrace();
         }

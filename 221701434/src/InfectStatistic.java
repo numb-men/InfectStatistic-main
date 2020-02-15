@@ -18,7 +18,7 @@ class InfectStatistic {
         //b.getFiles();
         //c.Writealltxt();
        Cmdlist a=new Cmdlist(args);
-       boolean go=true;
+       boolean go=true;//程序运行判断
        go=a.isright();
        if(go==false)
            return;
@@ -41,8 +41,6 @@ class InfectStatistic {
                 return -(o1.quantify-o2.quantify);
             }
         });
-
-
 
     }
 }
