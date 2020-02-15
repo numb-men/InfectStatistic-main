@@ -49,13 +49,14 @@ public class Lib {
 
     ArrayList<String> province = new ArrayList<String>();//指定显示地区
 
-    public Lib(String[] arg) throws IOException {
+    public Lib(String[] args) throws IOException {
         //for(String a:args) System.out.println(a);
 
-        Scanner sc = new Scanner(System.in);
+       /* Scanner sc = new Scanner(System.in);
         System.out.println("输入");
         String in = sc.nextLine();
-        String[] args=in.split(" ");
+        String[] args=in.split(" ");*/
+
         for (int i=0;i<args.length;i++){
             if(args[i].startsWith("-")){
                 if(args[i].equals("-log")) log=args[i+1];
@@ -425,8 +426,7 @@ public class Lib {
                 }
             }
         }
-
-
+        printWriter.print(" // 该文档并非真实数据，仅供测试使用\n");
         printWriter.close();//记得关闭输入流
     }
 }
