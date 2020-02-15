@@ -211,18 +211,16 @@ class ListChecker {
      * @throws Exception
      */
     public void checkDate(String dateStr) throws Exception {
-
-        Date defaultDate = new Date();
         if (dateStr == null) {
             return;
         }
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         format.setLenient(false);
-        Date argDate = format.parse(dateStr);
-
-        if (argDate.after(defaultDate)) {
-            throw new Exception(format.format(argDate) + " is later than current time：" + format.format(defaultDate));
+        try {
+            format.parse(dateStr);
+        } catch (Exception e) {
+            throw new Exception("日期非法或格式错误");
         }
     }
 
@@ -260,7 +258,7 @@ class ListCommandUtil {
 
     public File out;
 
-    public Date date = new Date();
+    public Date date;
 
     public List<String> type = new ArrayList<>(Arrays.asList("ip", "sp", "cure", "dead"));
 
@@ -272,7 +270,7 @@ class ListCommandUtil {
      * @param line
      * @return
      */
-    public static ListCommandUtil Mapper(CommandLine line) {
+    public static ListCommandUtil Mapper(CommandLine line) throws Exception {
         ListCommandUtil util = new ListCommandUtil();
 
         util.out = new File(line.getValue("-out"));
@@ -319,10 +317,14 @@ class LogReader {
      * @param logDir       日志文件所在目录
      * @return 指定日期之前的所有log列表
      */
-    public static List<String> readLog(Date requiredDate, File logDir) {
+    public static List<String> readLog(Date requiredDate, File logDir) throws Exception {
 
         File[] fileList = logDir.listFiles();
         List<String> logLines = new ArrayList<>();
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        format.setLenient(false);
+        Date latestDate = format.parse("2000-01-01");
 
         for (File file : fileList) {
             if (file.isFile()) {
@@ -330,15 +332,20 @@ class LogReader {
 
                 // 过滤日期不规范的日志文件
                 try {
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                    format.setLenient(false);
+
                     logDate = format.parse(getLogDate(file));
                 } catch (Exception e) {
                     continue;
                 }
 
                 // 过滤指定日期之后的日志
-                if (!logDate.after(requiredDate)) {
+                if (requiredDate == null || !logDate.after(requiredDate)) {
+
+                    // 记录日志最新日期
+                    if (logDate.after(latestDate)) {
+                        latestDate = logDate;
+                    }
+
                     try (FileReader fr = new FileReader(file.getAbsolutePath());
                          BufferedReader bf = new BufferedReader(fr)) {
                         String line;
@@ -350,10 +357,14 @@ class LogReader {
                             }
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw new Exception("日志文件读取失败: '" + file.getAbsolutePath() + "'");
                     }
                 }
             }
+        }
+
+        if (requiredDate != null && requiredDate.after(latestDate)) {
+            throw new Exception("日期超出范围");
         }
 
         return logLines;

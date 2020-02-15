@@ -36,7 +36,7 @@ public class LogReaderTest {
     }
 
     @Test
-    public void readLog() throws ParseException {
+    public void readLog() throws Exception {
         List<String> expected = new ArrayList<>();
         expected.addAll(fileContent("D:\\log\\2020-01-22.log.txt"));
         expected.addAll(fileContent("D:\\log\\2020-01-23.log.txt"));
@@ -53,7 +53,7 @@ public class LogReaderTest {
     }
 
     @Test
-    public void readLogAll() throws ParseException {
+    public void readLogAll() throws Exception {
         List<String> expected = new ArrayList<>();
         expected.addAll(fileContent("D:\\log\\2020-01-22.log.txt"));
         expected.addAll(fileContent("D:\\log\\2020-01-23.log.txt"));
@@ -71,7 +71,7 @@ public class LogReaderTest {
     }
 
     @Test
-    public void readLogNow() throws ParseException {
+    public void readLogNow() throws Exception {
         List<String> expected = new ArrayList<>();
         expected.addAll(fileContent("D:\\log\\2020-01-22.log.txt"));
         expected.addAll(fileContent("D:\\log\\2020-01-23.log.txt"));

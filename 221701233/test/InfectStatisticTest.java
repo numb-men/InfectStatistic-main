@@ -181,6 +181,29 @@ public class InfectStatisticTest {
     }
 
     /**
+     * 错误日期
+     */
+    @Test
+    public void main10() {
+        // 更改输出流
+        System.setOut(new PrintStream(outContent));
+
+        String data = "list"
+                + " -log 221701233\\test\\resources\\log"
+                + " -out 221701233\\test\\resources\\result\\listOutput3.txt"
+                + " -date 2020-02-01"
+                + " -type cure dead ip"
+                + " -province 全国 浙江 福建";
+
+        String[] arg = data.split(" ");
+        assertDoesNotThrow(() -> InfectStatistic.main(arg));
+        assertEquals("error: 日期超出范围", outContent.toString());
+        // 重置输出流
+        outContent.reset();
+        System.setOut(System.out);
+    }
+
+    /**
      * 从导出文件提取数据
      *
      * @param outFile 导出文件的路径
