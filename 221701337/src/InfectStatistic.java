@@ -16,7 +16,7 @@ class InfectStatistic
 {
     public static void main(String[] args)
     {
-        String[] x=new String [10];
+        String[] x=new String [11];
         x[0]="list";
         x[1]="-date";
         x[2]="2020-1-22";
@@ -27,6 +27,7 @@ class InfectStatistic
         x[7]="-province";
         x[8]="福建";
         x[9]="安徽";
+        x[10]="-type";
         try
         {
             if (x.length == 0)
@@ -126,6 +127,8 @@ class Info
 {
     public Map<String,List<Integer>> info;
     public List<String> out_province;//记录最后需要输出的省份
+    public List<String> out_type;//记录最后需要输出的类型
+
     Info()
     {
         out_province = new ArrayList<>();
@@ -177,6 +180,13 @@ class Info
         if(out_province.contains(province))
             return;
         out_province.add(province);
+    }
+
+    public void add_type(String type)
+    {
+        if(out_type.contains(type))
+            return;
+        out_type.add(type);
     }
 
     public void Infected(String province,int Count)
@@ -346,6 +356,15 @@ class Command
             execute_date(date.param,file_list,date.is_exist);
             new_info.doOut();
         }
+        if(!date.is_exist)
+        {
+            List<File> file_list = Parameter.get_file_list(log.param);
+            execute_date(date.param,file_list,date.is_exist);
+        }
+        if(type.is_exist)
+        {
+            execute_type(type.param_list);
+        }
     }
 
     private void execute_date(String date,List<File> file_list,boolean exist) throws MyException
@@ -439,6 +458,42 @@ class Command
             catch (Exception ex)
             {
                 ex.printStackTrace();
+            }
+        }
+    }
+
+    public void execute_type(List<String> type_param) throws MyException
+    {
+        if(type_param.size() == 0)
+            return;
+        for(String type : type_param)
+        {
+            switch (type)
+            {
+                case "ip":
+                    new_info.add_type("ip");
+                    break;
+                case "sp":
+                    new_info.add_type("sp");
+                    break;
+                case "cure":
+                    new_info.add_type("cure");
+                    break;
+                case "dead":
+                    new_info.add_type("dead");
+                    break;
+                default:
+                    throw new MyException("-type请输入正确参数(ip,sp,cure,dead)");
+            }
+        }
+    }
+
+    public void execute_province(List<String> province_param) throws MyException
+    {
+        for(String province : province_param)
+        {
+            switch (province)
+            {
             }
         }
     }
