@@ -65,7 +65,7 @@ class InfectStatistic {
 		int[] dead=new int[32];
 		int[] exist=new int[32];
 		int[] required=new int[32];
-		int[] type=new int[4];
+		String[] type=new String[4];
 		boolean havetype=false;
 		boolean havepro=false;
 		String log=null;
@@ -74,6 +74,10 @@ class InfectStatistic {
 		InfectStatistic()
 		{
 			exist[0]=1;
+			type[0]="";
+			type[1]="";
+			type[2]="";
+			type[3]="";
 		}
 
 		public void update(String [] args)
@@ -93,26 +97,29 @@ class InfectStatistic {
 							havepro=true;
 							for(;;i++)
 							{
-								if(!args[i+1].matches("-.*") && i+1<args.length)
+								if(i+1<args.length)
 								{
+								if(!args[i+1].matches("-.*"))
+								{
+									System.out.println(args[i+1]);
 									required[proToInt(args[i+1])]=1;
+								}else
+									break;
 								}else
 									break;
 							}
 							break;
 						case "-type":
 							havetype=true;
-							for(;;i++)
+							for(int k=0;;i++,k++)
 							{
-								if(!args[i+1].matches("-.*") && i+1<args.length)
+								if(i+1<args.length)
 								{
-									switch(args[i+1])
-									{
-									case "ip":type[0] = 1;break;
-									case "sp":type[1] = 1;break;
-									case "cure":type[2] = 1;break;
-									case "dead":type[3] = 1;break;
-									}
+								if(!args[i+1].matches("-.*"))
+								{
+									type[k]=args[i+1];
+								}else
+									break;
 								}else
 									break;
 							}
@@ -455,10 +462,11 @@ class InfectStatistic {
 	        return result;
 	    }
 
-		public  void readFile(String x)
+		public  void readFile()
 		{
 			//获取该后缀的所有文件
-			List<File> files=searchFiles(new File(x),".log.txt");
+			
+			List<File> files=searchFiles(new File(log),".log.txt");
 			for(File file:files)
 			{
 				String[] filedir = file.getAbsolutePath().split("\\\\");
@@ -466,7 +474,7 @@ class InfectStatistic {
 				String filedate=filename.substring(0,10);
 				if(date == null || dateCompare(date,filedate)>0)
 				{
-					String pathname=x+filename;
+					String pathname=log+filename;
 					try(FileReader reader = new FileReader(pathname);
 				BufferedReader br = new BufferedReader(reader)	
 			           ){
@@ -523,14 +531,19 @@ class InfectStatistic {
 									out.write(provinces[i]+" ");
 									if(havetype)
 									{
-										if(1 == type[0])
-									out.write("感染患者"+ip[i]+"人 ");
-										if(1 == type[1])
-									out.write("疑似患者"+sp[i]+"人 ");
-										if(1 == type[2])
-									out.write("治愈"+cure[i]+"人 ");
-										if(1 == type[3])
-									out.write("死亡"+dead[i]+"人 ");
+										for(int k=0;k<4;k++)
+										{
+											switch(type[k])
+											{
+											case "ip":out.write("感染患者"+ip[i]+"人 ");break;
+											case "sp":out.write("疑似患者"+sp[i]+"人 ");break;
+											case "cure":out.write("治愈"+cure[i]+"人 ");break;
+											case "dead":out.write("死亡"+dead[i]+"人 ");break;
+											case "":k=4;break;
+											}
+										}
+								
+									
 										out.write("\r\n");
 									    out.flush();
 									}else
@@ -549,14 +562,19 @@ class InfectStatistic {
 								{out.write(provinces[i]+" ");
 								if(havetype)
 								{
-									if(1 == type[0])
-								out.write("感染患者"+ip[i]+"人 ");
-									if(1 == type[1])
-								out.write("疑似患者"+sp[i]+"人 ");
-									if(1 == type[2])
-								out.write("治愈"+cure[i]+"人 ");
-									if(1 == type[3])
-								out.write("死亡"+dead[i]+"人 ");
+									for(int k=0;k<4;k++)
+									{
+										switch(type[k])
+										{
+										case "ip":out.write("感染患者"+ip[i]+"人 ");break;
+										case "sp":out.write("疑似患者"+sp[i]+"人 ");break;
+										case "cure":out.write("治愈"+cure[i]+"人 ");break;
+										case "dead":out.write("死亡"+dead[i]+"人 ");break;
+										case "":k=4;break;
+										
+										}
+										
+									}
 									out.write("\r\n");
 								    out.flush();
 								}else
@@ -590,17 +608,31 @@ class InfectStatistic {
 			 String x="浙江 排除 疑似患者 7人";
 			 InfectStatistic a;
 			 a=new InfectStatistic();
+			 args=new String[15];
+			 args[0]="list";
+			 args[1]="-date";
+			 args[2]="2020-01-28";
+			 args[3]="-log";
+			 args[4]="D:/log/";
+			 args[5]="-out";
+			 args[6]="D:/output.txt";
+			
+			 args[7]="-province";
+			 args[8]="江西";
+			 args[9]="江苏";
+			 args[10]="-type";
+			 args[11]="cure";
+			 args[12]="ip";
+			 args[13]="dead";
+			 args[14]="sp";
 			a.update(args);
-			System.out.print(x.matches(type8));
-			//a.log="D:/log/";
-			//a.out="D:/output.txt";
-			a.readFile(a.log);
-			
-			
-			
+			System.out.println(x.matches(type8));
+			for(int i=0;i<args.length;i++)
+			System.out.println(args[i]);
+			a.readFile();
+			System.out.println(a.type[1]);
+			System.out.println(System.getProperty("file.encoding"));
 			a.writeFile();
-		       //System.out.print(getIp(0));
-		      // System.out.println(AddIp(x));
 		}// 方法main结束
 		
 		
