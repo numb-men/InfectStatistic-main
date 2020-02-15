@@ -382,6 +382,7 @@ class CommandReceiver {
      */
     public void list(ListCommandUtil util) throws Exception {
         List<String> results = LogParser.parse(util);
+        Sorter.sortByRegion(results);
         LogWriter.write(util.out.getAbsolutePath(), results);
         StatisticResult.reset();
     }
@@ -868,10 +869,8 @@ class LogParser {
      */
     public static List<String> parse(ListCommandUtil entity) {
         StatisticResult.doStatistic(entity.log);
-        List<String> results = StatisticResult.filterTypeAndProvince(entity.type, entity.province);
-        Sorter.sortByRegion(results);
 
-        return results;
+        return StatisticResult.filterTypeAndProvince(entity.type, entity.province);
     }
 }
 
