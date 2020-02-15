@@ -426,8 +426,15 @@ class PatientsDie extends MyPatterns{
     public void doCount(String line,HashMap<String,Integer> infected,HashMap<String,Integer> suspected,HashMap<String,Integer> cured,HashMap<String,Integer> died)
     {
         String[] str=line.split("\\s+");
-
-
+        int change=Integer.parseInt(str[2].substring(0,str[2].indexOf("人")));//死亡人数
+        if(died.containsKey(str[0]))
+        {
+            died.put(str[0],died.get(str[0])+change);
+        }
+        else
+        {
+            died.put(str[0],change);
+        }
 
 
     }
@@ -444,7 +451,16 @@ class PatientsCure extends MyPatterns{
     //根据
     public void doCount(String line,HashMap<String,Integer> infected,HashMap<String,Integer> suspected,HashMap<String,Integer> cured,HashMap<String,Integer> died)
     {
-
+        String[] str=line.split("\\s+");
+        int change=Integer.parseInt(str[2].substring(0,str[2].indexOf("人")));//治愈人数
+        if(cured.containsKey(str[0]))
+        {
+            cured.put(str[0],cured.get(str[0])+change);
+        }
+        else
+        {
+            cured.put(str[0],change);
+        }
 
 
     }
@@ -461,9 +477,17 @@ class SuspectedDiagnosis extends MyPatterns{
     //根据
     public void doCount(String line,HashMap<String,Integer> infected,HashMap<String,Integer> suspected,HashMap<String,Integer> cured,HashMap<String,Integer> died)
     {
-
-
-
+        String[] str=line.split("\\s+");
+        int change=Integer.parseInt(str[3].substring(0,str[3].indexOf("人")));
+        suspected.put(str[0],suspected.get(str[0])-change);
+        if(infected.containsKey(str[0]))
+        {
+            infected.put(str[0],infected.get(str[0])+change);
+        }
+        else
+        {
+            infected.put(str[0],change);
+        }
     }
 
     public String getReg()
@@ -478,9 +502,9 @@ class SuspectedExclude extends MyPatterns{
     //根据
     public void doCount(String line,HashMap<String,Integer> infected,HashMap<String,Integer> suspected,HashMap<String,Integer> cured,HashMap<String,Integer> died)
     {
-
-
-
+        String[] str=line.split("\\s+");
+        int change=Integer.parseInt(str[3].substring(0,str[3].indexOf("人")));
+        suspected.put(str[0],suspected.get(str[0])-change);
     }
 
     public String getReg()
