@@ -325,25 +325,59 @@ class ListCommand {
 	 * 写入文件
 	 */
 	private static void writeFile() {
-		//无-pro 无-type
-		if(!hasProvince && !hasType) {
-			getTotal();
-			FileWriter.Writer(out, provinceMap);
-		}
-		//有-pro 无-type
-		if(hasProvince && !hasType) {
-			sortProvince();
-			FileWriter.proWriter(out, province, provinceMap);
-		}
-		//有-pro 有-type
-		else if(hasProvince && hasType) {
-			sortProvince();
-			FileWriter.proTypeWriter(out, province, type, provinceMap);
-		}
-		//无-pro 有-type
-		else if(!hasProvince && hasType) {
-			getTotal();
-			FileWriter.typeWriter(out, type, provinceMap);
+		// 得到全国数据
+		getTotal();
+		try {
+			File file = new File(out);
+			if(file.exists()) {
+	            file.delete();   
+	        }
+	        file.createNewFile();
+	        OutputStreamWriter stream = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+	        BufferedWriter writer = new BufferedWriter(stream);
+	        if(hasProvince) {
+	    		sortProvince();
+        		for(String pro : province) {
+    				if(!provinceMap.containsKey(pro)) {
+    					provinceMap.put(pro, new Province(pro));
+    				}
+    				if(hasType) {
+    					writer.write(provinceMap.get(pro).getName());
+    					for(String t : type) {
+    						writer.write(provinceMap.get(pro).getType(t));
+    					}
+    					writer.write("\n");
+    				}
+    				else {
+    					writer.write(provinceMap.get(pro).toString());
+    					writer.write("\n");
+    				}
+        		}
+	        }
+	        else {
+	        	String pro = null;
+	        	for(EnumProvince e : EnumProvince.values()) {
+	            	pro = e.value();
+	            	if(provinceMap.containsKey(pro)) {
+	            		if(hasType) {
+	            			writer.write(provinceMap.get(pro).getName());
+	            			for(String t : type) {
+	            				writer.write(provinceMap.get(pro).getType(t));
+	            			}
+	            			writer.write("\n");
+	            		}
+	            		else {
+	            			writer.write(provinceMap.get(pro).toString());
+	                		writer.write("\n");
+	            		}
+	            	}
+	            }
+	        }
+			writer.write("// 该文档并非真实数据，仅供测试使用");
+	        writer.flush();
+	        writer.close();
+		} catch(IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -427,172 +461,6 @@ enum EnumProvince {
 }
 
 /**
- * FileWriter
- * 文件输出的处理类
- *
- * @author Lan
- * @version v 1.0
- */
-class FileWriter {
-	/**
-	 * 命令情况：无-province 无-type
-	 * @param out
-	 * @param provinceMap
-	 */
-	public static void Writer(String out, HashMap<String, Province> provinceMap) {
-		try {
-			File file = new File(out);
-			if(file.exists()) {
-	            file.delete();
-	        }
-	        file.createNewFile();
-	        OutputStreamWriter stream = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-	        BufferedWriter writer = new BufferedWriter(stream);
-	        String pro = null;
-	        for(EnumProvince e : EnumProvince.values()) {
-            	pro = e.value();
-            	if(provinceMap.containsKey(pro)) {
-            		writer.write(provinceMap.get(pro).toString());
-            		writer.write("\n");
-            	}
-            }
-	        writer.flush();
-	        writer.close();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * 命令情况：有-province 无-type
-	 * @param out
-	 * @param province
-	 * @param provinceMap
-	 */
-	public static void proWriter(String out, ArrayList<String> province, 
-			HashMap<String, Province> provinceMap) {
-		// 判断是否需要输出全国
-		for(String pro : province) {
-			if("全国".equals(pro)) {
-				ListCommand.getTotal();
-				break;
-			}
-		}
-		try {
-			File file = new File(out);
-			if(file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
-            OutputStreamWriter stream = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-            BufferedWriter writer = new BufferedWriter(stream);
-            for(String pro : province) {
-            	if(!provinceMap.containsKey(pro)) {
-            		provinceMap.put(pro, new Province(pro));
-            	}
-            	writer.write(provinceMap.get(pro).toString());
-            	writer.write("\n");
-            }
-            writer.write("// 该文档并非真实数据，仅供测试使用");
-            writer.flush();
-            writer.close();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * 命令情况：有-type 无-province
-	 * @param out
-	 * @param type
-	 * @param provinceMap
-	 */
-	public static void typeWriter(String out, ArrayList<String> type, 
-			HashMap<String, Province> provinceMap) {
-		try {
-			File file = new File(out);
-			if(file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
-            OutputStreamWriter stream = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-            BufferedWriter writer = new BufferedWriter(stream);
-            String pro = null;
-            for(EnumProvince e : EnumProvince.values()) {
-            	pro = e.value();
-            	if(provinceMap.containsKey(pro)) {
-            		writer.write(provinceMap.get(pro).getName());
-            		for(String t : type) {
-            			writer.write(provinceMap.get(pro).getType(t));
-            		}
-            		writer.write("\n");
-            	}
-            }
-            writer.flush();
-            writer.close();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * 命令情况：有-province 有-type
-	 * @param out
-	 * @param province
-	 * @param type
-	 * @param provinceMap
-	 */
-	public static void proTypeWriter(String out, ArrayList<String> province, 
-			ArrayList<String> type, HashMap<String, Province> provinceMap) {
-		// 判断是否需要输出全国
-		for(String pro : province) {
-			if("全国".equals(pro)) {
-				ListCommand.getTotal();
-				break;
-			}
-		}
-		try {
-			File file = new File(out);
-			if(file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
-            OutputStreamWriter stream = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-            BufferedWriter writer = new BufferedWriter(stream);
-            for(String pro : province) {
-            	if(!provinceMap.containsKey(pro)) {
-            		provinceMap.put(pro, new Province(pro));
-            	}
-            	writer.write(provinceMap.get(pro).getName());
-            	for(String t : type) {   		
-            		switch(t) {
-            			case "ip":
-            				writer.write(" 感染患者" + provinceMap.get(pro).ip + "人");
-            				break;
-            			case "sp":
-            				writer.write(" 疑似患者" + provinceMap.get(pro).sp + "人");
-            				break;
-            			case "cure":
-            				writer.write(" 治愈" + provinceMap.get(pro).cure + "人");
-            				break;
-            			case "dead":
-            				writer.write(" 死亡" + provinceMap.get(pro).dead + "人");
-            				break;
-            		}
-            	}
-            	writer.write("\n");
-            }
-            writer.write("// 该文档并非真实数据，仅供测试使用");
-            writer.flush();
-            writer.close();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-	}
-}
-
-
-/**
  * Province类 存储省份及疫情人数情况
  *
  * @author Lan
@@ -613,20 +481,8 @@ class Province {
 		dead = 0;
 	}
 	
-	public Province(String name, int ip, int sp, int cure, int dead) {
-		this.name = name;
-		this.ip = ip;
-		this.sp = sp;
-		this.cure = cure;
-		this.dead = dead;
-	}
-	
 	public String getName() {
 		return name;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
 	}
 	
 	public int getIp() {
