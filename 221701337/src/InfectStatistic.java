@@ -182,6 +182,11 @@ class Info
         out_province.add(province);
     }
 
+    public void add_province(List<String> province_list)
+    {
+        this.out_province = province_list;
+    }
+
     public void add_type(String type)
     {
         if(out_type.contains(type))
@@ -365,6 +370,12 @@ class Command
         {
             execute_type(type.param_list);
         }
+        if(province.is_exist)
+        {
+            if(province.param_list.size() == 0)
+                throw new MyException("-province必须含有省份名称");
+            execute_province(province.param_list);
+        }
     }
 
     private void execute_date(String date,List<File> file_list,boolean exist) throws MyException
@@ -490,12 +501,15 @@ class Command
 
     public void execute_province(List<String> province_param) throws MyException
     {
+        List<String> out_province = new ArrayList<>();
         for(String province : province_param)
         {
-            switch (province)
-            {
-            }
+            if(new_info.info.containsKey(province))
+                out_province.add(province);
+            else
+                throw new MyException("-province后请输入正确省份");
         }
+        new_info.add_province(out_province);
     }
 
 
