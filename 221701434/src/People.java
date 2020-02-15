@@ -2,11 +2,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class People {
-    public int[] province=new int[36];
-    public int[] province_deadpeople=new int[36];
-    public int[] province_curepeople=new int[36];
-    public int[] province_doubtpeople=new int[36];
-    public int[] province_infectpeople=new int[36];
+    public int[] province=new int[35];
+    public int[] province_deadpeople=new int[35];
+    public int[] province_curepeople=new int[35];
+    public int[] province_doubtpeople=new int[35];
+    public int[] province_infectpeople=new int[35];
+    kind[] kinds=new kind[4];
+    province[] provinces=new province[35];
     String[] province2={
             "全国", "安徽", "澳门" ,"北京",
             "重庆", "福建","甘肃","广东",
@@ -18,6 +20,9 @@ public class People {
             "台湾", "天津", "西藏", "香港",
             "新疆", "云南", "浙江"
     };
+    String[] kindss={
+            "感染患者","疑似患者","治愈","死亡"
+    };
     Map<String,Integer> map1=new HashMap<String, Integer>();//创建哈希表
     //Map<Integer,String> map2=new HashMap<Integer, String>();
     People() {
@@ -27,10 +32,17 @@ public class People {
             province_deadpeople[i] = 0;
             province_doubtpeople[i] = 0;
             province_infectpeople[i] = 0;
+            provinces[i].num=i;
+            provinces[i].name=province2[i];
+        }
+        for(int i=0;i<4;i++){
+            kinds[i].num=i;
+            kinds[i].name=kindss[i];
         }
         for(int i=0;i<35;i++){//将省份以及对应数字连接起来
             map1.put(province2[i],i);// K V
            // map2.put(province[i],province2[i]);
         }
+
     }
 }

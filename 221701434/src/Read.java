@@ -9,11 +9,14 @@ import java.util.regex.Pattern;
 public class Read {
     public String path;
     public People num;
-    Read(String path,People a){
+    Date now;
+    Read(String path,People a,Date date){
         this.path=path;
         this.num=a;
+       this.now=date;
+
     }
-    Date now = new Date(System.currentTimeMillis());//获取当前日期
+   // Date now = new Date(System.currentTimeMillis());//获取当前日期
     public SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");//规范日期格式
     public String Today = sdf.format(now);
 

@@ -16,7 +16,7 @@ public class Write {
     public void Writealltxt() {
         try {
             FileWriter fw = new FileWriter(Path);
-            for(int i=0;i<36;i++){
+            for(int i=0;i<35;i++){
                 if(num.province[i]!=0){
                     fw.write(num.province2[i]+" ");
                     fw.write("感染患者"+num.province_infectpeople[i]+"人"+" ");
@@ -30,6 +30,15 @@ public class Write {
             fw.close();
         }
         catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void writedetail(int[] kind,int[] province,int _type,int _province){
+        try {
+            FileWriter fw=new FileWriter(Path);
+
+        }
+        catch (Exception e){
             e.printStackTrace();
         }
     }
