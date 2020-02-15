@@ -51,8 +51,12 @@ class CmdHandle {
 		for (int i=1;i<len;i++) {
 			switch (args[i]) {
 			case "-date":
-				p.setDate(true);
-				p.setDateValue(args[i+1]);
+				String arg=args[i+1];
+				if (isCorrectDate(arg)) {
+					p.setDate(true);
+					p.setDateValue(arg);	
+				}
+				else throw new Exception("日期非法");
 				break;
 			case "-out":
 				p.setOutValue(args[i+1]);
@@ -84,8 +88,21 @@ class CmdHandle {
 		}
 		return p;
 	}
+	
+	public boolean isCorrectDate(String date) {
+		SimpleDateFormat sd=new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			sd.setLenient(false);
+			sd.parse(date);
+		}
+		catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
 }
 
+//命令接口
 interface Cmd {
 	public abstract void doCmd(Param pm) throws IOException, Exception;//执行命令函数
 }
@@ -360,21 +377,26 @@ class FileHandle {
 		buffReader.close();
 	}		
 	
-	//找到日期对应文件进行处理
-	public void dealFile(String path,String date,String[] require) throws IOException {
-		String[] list=new File(path).list();
+	//找到日期对应文件进行处理(待修改)
+	public void dealFile(String path,String date,String[] require) throws Exception {
+		File f=new File(path);
+		if(!f.exists()) throw new Exception("目录不存在");
+		String[] list=f.list();
 		boolean isEnd=false;
 		//按日期排序
 		List<String> fileList=Arrays.asList(list);
-	    Collections.sort(fileList,new Comparator<String> () {
+	    Collections.sort(fileList,new Comparator<String>() {
 	    	@Override
-	    	public int compare(String o1, String o2) {
+	    	public int compare(String o1,String o2) {
 	    		return o1.compareTo(o2);
 	    	}
 	    });
+	    String lastDate=fileList.get(fileList.size()-1);
 	    //找文件
 		StringBuffer dt=new StringBuffer(date);
 		dt.append(".log.txt");
+		String targetDate=dt.toString();
+		if (targetDate.compareTo(lastDate)>0) throw new Exception("日期超出范围");
 		for (String file:fileList) {
 			if (file.contentEquals(dt)) isEnd=true; 
 			StringBuffer ph=new StringBuffer(path);
@@ -549,7 +571,7 @@ class DataHandle {
 		return res;
 	}
 	
-	//按要求省份
+	//按要求省份输出
 	public List<LogResult> toFormatPro(String[] pro, List<LogResult> all) {
 		HashMap<String,LogResult> target=new HashMap<>();
 		for (int i=0;i<pro.length;i++) {
@@ -641,8 +663,7 @@ class DataHandle {
 				list.add(lr);
 				return lr;
 			}
-			else 
-				return nextHandler.getData(str);
+			else return nextHandler.getData(str);
 		}
 		
 	}
@@ -657,7 +678,6 @@ class DataHandle {
 
 		@Override
 		public LogResult getData(String str) {
-			// TODO 自动生成的方法存根
 			Matcher m=ptn.matcher(str);
 			boolean rs=m.find();
 			if (rs) {
@@ -667,8 +687,7 @@ class DataHandle {
 				list.add(lr);
 				return lr;
 			}
-			else 
-				return nextHandler.getData(str);
+			else return nextHandler.getData(str);
 		}
 	}
 	
@@ -681,7 +700,6 @@ class DataHandle {
 
 		@Override
 		public LogResult getData(String str) {
-			// TODO 自动生成的方法存根
 			Matcher m=ptn.matcher(str);
 			boolean rs=m.find();
 			if (rs) {
@@ -696,8 +714,7 @@ class DataHandle {
 				list.add(lr2);
 				return lr;
 			}
-			else 
-				return nextHandler.getData(str);
+			else return nextHandler.getData(str);
 		}
 	}
 		
@@ -725,8 +742,7 @@ class DataHandle {
 				list.add(lr2);
 				return lr;
 			}
-			else 
-				return nextHandler.getData(str);
+			else return nextHandler.getData(str);
 		}
 	}
 	
@@ -754,8 +770,7 @@ class DataHandle {
 				list.add(lr2);
 				return lr;
 			}
-			else 
-				return nextHandler.getData(str);
+			else return nextHandler.getData(str);
 		}	
 	}
 
@@ -812,8 +827,7 @@ class DataHandle {
 				list.add(lr2);
 				return lr;
 			}
-			else 
-				return nextHandler.getData(str);
+			else return nextHandler.getData(str);
 		}		
 	}
 
@@ -838,9 +852,9 @@ class DataHandle {
 				list.add(lr);
 				return lr;
 			}
-			else 
-				return null;
+			else return null;
 		}		
 	}
 
 }
+
