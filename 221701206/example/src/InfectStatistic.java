@@ -24,11 +24,11 @@ import java.nio.file.*;
 public class InfectStatistic 
 {
 	public static String LogLocation = "D:\\Java\\InfectStatistic-main\\example\\log";
-	// LogLoction仅用于本机应用程序测试，命令行测试将注释赋值
+	// LogLoction仅用于本机应用程序测试
 	public static String DeadLine = "";
-	// DeadLine仅用于本机应用程序测试，命令行测试将注释赋值
+	// DeadLine仅用于本机应用程序测试
 	public static String OutputLocation = "D:\\Java\\InfectStatistic-main\\example\\Result\\" + DeadLine + "out.txt";
-	// OutputLocation仅用于本机应用程序测试，命令行测试将注释赋值
+	// OutputLocation仅用于本机应用程序测试
     public static void main(String[] args) 
     {
     	/*
@@ -133,6 +133,8 @@ class CommandGet
 	boolean IsProvince;
 	boolean IsDate;
 	boolean IsType;
+	boolean IsLog;
+	boolean IsOut;
 	String Log;
 	String Out;
 	String Date;
@@ -144,6 +146,8 @@ class CommandGet
 		this.IsProvince = false;
 		this.IsDate = false;
 		this.IsType = false;
+		this.IsLog = false;
+		this.IsOut = false;
 		this.Log = "";
 		this.Out = "";
 		this.Date = "";
@@ -166,12 +170,14 @@ class CommandGet
 		{
 			if(CommandSource[i].equals("-log"))
 			{
+				this.IsLog = true;
 				this.Log = CommandSource[i+1];
 				i++;
 			}
 
 			else if(CommandSource[i].equals("-out"))
 			{
+				this.IsOut = true;
 				this.Out = CommandSource[i+1];
 				i++;
 			}
@@ -207,6 +213,20 @@ class CommandGet
 			else 
 				System.out.println("命令中包含不合法参数" + CommandSource[i]);
 		}
+		if(!this.IsLog) //处理参数缺少
+		{
+			System.out.println("缺少必要的log参数");
+			if(!this.IsOut)
+				System.out.println("缺少必要的out参数");
+			System.exit(1);
+		}
+		if(!this.IsOut) //处理参数缺少
+		{
+			System.out.println("缺少必要的out参数");
+			if(!this.IsLog)
+				System.out.println("缺少必要的log参数");
+			System.exit(1);
+		}
 	}
 }
 
@@ -231,6 +251,11 @@ class DateCompareTool
 	{
 		List<String> FileName = new ArrayList<String>();
 		String[] FileList=new File(LogLocation).list();
+		if(FileList.length == 0)
+		{
+			System.out.println("指定文件夹下不存在日志文件");
+			System.exit(2);
+		}
 		int MaxMonth = 0;
 		int MaxDay = 0;
 		//下述判断用于解决是否带 -date参数问题
@@ -269,7 +294,7 @@ class DateCompareTool
 			if(DateOutbound)
 			{
 				System.out.println("日期超过范围");
-				System.exit(1);
+				System.exit(3);
 			}
 			return FileName;
 		}
