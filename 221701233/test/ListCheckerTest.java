@@ -37,14 +37,14 @@ public class ListCheckerTest {
     @Test
     public void checkLogError() throws Exception {
         thrown.expect(Exception.class);
-        thrown.expectMessage("\"D:\\log.txt\" is not a directory.");
+        thrown.expectMessage("\"D:\\log.txt\" 不是有效的日志目录");
         checker.checkLog("D:\\log.txt");
     }
 
     @Test
     public void checkLogNull() throws Exception {
         thrown.expect(Exception.class);
-        thrown.expectMessage("value of arg \"-log\" is required.");
+        thrown.expectMessage("\"-log\" 不能为空");
         checker.checkLog(null);
     }
 
@@ -56,14 +56,14 @@ public class ListCheckerTest {
     @Test
     public void checkOutError() throws Exception {
         thrown.expect(Exception.class);
-        thrown.expectMessage("\"D:\\log\" is not a file.");
+        thrown.expectMessage("\"D:\\log\" 不是有效的输出文件");
         checker.checkOut("D:\\log");
     }
 
     @Test
     public void checkOutNull() throws Exception {
         thrown.expect(Exception.class);
-        thrown.expectMessage("value of arg \"-out\" is required.");
+        thrown.expectMessage("\"-out\" 不能为空");
         checker.checkOut(null);
     }
 
@@ -75,15 +75,15 @@ public class ListCheckerTest {
 
     @Test
     public void checkDateError1() throws Exception {
-        thrown.expect(ParseException.class);
-        thrown.expectMessage("Unparseable date: \"2020-2-30\"");
+        thrown.expect(Exception.class);
+        thrown.expectMessage("日期非法或格式错误");
         checker.checkDate("2020-2-30");
     }
 
     @Test
     public void checkDateError2() throws Exception {
-        thrown.expect(ParseException.class);
-        thrown.expectMessage("Unparseable date: \"2020 2-3\"");
+        thrown.expect(Exception.class);
+        thrown.expectMessage("日期非法或格式错误");
         checker.checkDate("2020 2-3");
     }
 
@@ -104,7 +104,7 @@ public class ListCheckerTest {
         types.add("ss");
 
         thrown.expect(Exception.class);
-        thrown.expectMessage("Unknown type：ss");
+        thrown.expectMessage("无效 type 参数值：ss");
         checker.checkType(types);
     }
 

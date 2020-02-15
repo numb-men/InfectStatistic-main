@@ -1,5 +1,7 @@
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,6 +16,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LogReaderTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     public List<String> fileContent(String filePath) {
         List<String> content = new ArrayList<>();
@@ -79,13 +84,10 @@ public class LogReaderTest {
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         format.setLenient(false);
-        List<String> list = LogReader.readLog(new Date(), new File("D:\\log"));
-        for (String str : list) {
-            System.out.println(str);
-        }
 
-        Assert.assertEquals(list.size(), expected.size());
-        assertTrue(list.containsAll(expected));
+        thrown.expect(Exception.class);
+        thrown.expectMessage("日期超出范围");
+        LogReader.readLog(new Date(), new File("D:\\log"));
     }
 
 }

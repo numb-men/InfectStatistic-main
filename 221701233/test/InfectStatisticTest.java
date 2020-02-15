@@ -1,3 +1,4 @@
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Tag;
@@ -14,10 +15,26 @@ public class InfectStatisticTest {
     final static ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
     /**
+     * 测试方法开始前重置 ByteArrayOutputStream 流
+     */
+    @Before
+    public void resetStream() {
+        outContent.reset();
+    }
+
+    /**
+     * 测试方法结束后 将输出流重定向至控制台
+     */
+    @After
+    public void resetOut() {
+        System.setOut(System.out);
+    }
+
+    /**
      * 原例1
      */
     @Test
-    public void main1() {
+    public void main0() {
         String data = "list"
                 + " -log 221701233\\test\\resources\\log"
                 + " -out 221701233\\test\\resources\\result\\listOutput1.txt"
@@ -35,7 +52,7 @@ public class InfectStatisticTest {
      * 原例2
      */
     @Test
-    public void main2() {
+    public void main1() {
         String data = "list"
                 + " -log 221701233\\test\\resources\\log"
                 + " -out 221701233\\test\\resources\\result\\listOutput2.txt"
@@ -54,7 +71,7 @@ public class InfectStatisticTest {
      * 原例3
      */
     @Test
-    public void main3() {
+    public void main2() {
         String data = "list"
                 + " -log 221701233\\test\\resources\\log"
                 + " -out 221701233\\test\\resources\\result\\listOutput3.txt"
@@ -75,7 +92,7 @@ public class InfectStatisticTest {
      * 缺省日期
      */
     @Test
-    public void main4() {
+    public void main3() {
         String data = "list"
                 + " -log 221701233\\test\\resources\\log"
                 + " -out 221701233\\test\\resources\\result\\listOutput4.txt";
@@ -93,7 +110,7 @@ public class InfectStatisticTest {
      * 缺省类型
      */
     @Test
-    public void main5() {
+    public void main4() {
         String data = "list"
                 + " -log 221701233\\test\\resources\\log"
                 + " -out 221701233\\test\\resources\\result\\listOutput4.txt";
@@ -111,7 +128,7 @@ public class InfectStatisticTest {
      * 空日志文件夹
      */
     @Test
-    public void main6() {
+    public void main5() {
         String data = "list"
                 + " -log 221701233\\test\\resources\\emptylog"
                 + " -out 221701233\\test\\resources\\result\\listOutput5.txt"
@@ -129,8 +146,9 @@ public class InfectStatisticTest {
      * 缺少list
      */
     @Test
-    public void main7() {
+    public void main6() {
         // 更改输出流
+        outContent.reset();
         System.setOut(new PrintStream(outContent));
 
         String data = "-log 221701233\\test\\resources\\log"
@@ -138,17 +156,17 @@ public class InfectStatisticTest {
 
         String[] arg = data.split(" ");
         assertDoesNotThrow(() -> InfectStatistic.main(arg));
-        assertEquals("error: Unknown command '-log'", outContent.toString());
+        assertEquals("error: 未知命令 '-log'", outContent.toString());
+
         // 重置输出流
-        outContent.reset();
-        System.setOut(System.out);
+
     }
 
     /**
      * 缺少'-log'
      */
     @Test
-    public void main8() {
+    public void main7() {
         // 更改输出流
         System.setOut(new PrintStream(outContent));
 
@@ -156,17 +174,14 @@ public class InfectStatisticTest {
 
         String[] arg = data.split(" ");
         assertDoesNotThrow(() -> InfectStatistic.main(arg));
-        assertEquals("error: value of arg \"-log\" is required.", outContent.toString());
-        // 重置输出流
-        outContent.reset();
-        System.setOut(System.out);
+        assertEquals("error: \"-log\" 不能为空", outContent.toString());
     }
 
     /**
      * 缺少'-out'
      */
     @Test
-    public void main9() {
+    public void main8() {
         // 更改输出流
         System.setOut(new PrintStream(outContent));
 
@@ -174,17 +189,14 @@ public class InfectStatisticTest {
 
         String[] arg = data.split(" ");
         assertDoesNotThrow(() -> InfectStatistic.main(arg));
-        assertEquals("error: value of arg \"-out\" is required.", outContent.toString());
-        // 重置输出流
-        outContent.reset();
-        System.setOut(System.out);
+        assertEquals("error: \"-out\" 不能为空", outContent.toString());
     }
 
     /**
      * 错误日期
      */
     @Test
-    public void main10() {
+    public void main9() {
         // 更改输出流
         System.setOut(new PrintStream(outContent));
 
@@ -198,9 +210,6 @@ public class InfectStatisticTest {
         String[] arg = data.split(" ");
         assertDoesNotThrow(() -> InfectStatistic.main(arg));
         assertEquals("error: 日期超出范围", outContent.toString());
-        // 重置输出流
-        outContent.reset();
-        System.setOut(System.out);
     }
 
     /**

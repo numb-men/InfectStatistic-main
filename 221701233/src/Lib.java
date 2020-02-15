@@ -108,7 +108,7 @@ class CommandFactory {
             return (Command) this.getClass().getMethod(name.toLowerCase(), Class.forName("CommandReceiver"))
                     .invoke(this, receiver);
         } catch (Exception e) {
-            throw new NoSuchMethodException("Unknown command \'" + name + "\'");
+            throw new NoSuchMethodException("未知命令 \'" + name + "\'");
         }
 
     }
@@ -174,13 +174,13 @@ class ListChecker {
     public void checkLog(String receiverPath) throws Exception {
 
         if (receiverPath == null) {
-            throw new Exception("value of arg \"-log\" is required.");
+            throw new Exception("\"-log\" 不能为空");
         }
 
         File receiverDir = new File(receiverPath);
 
         if (!receiverDir.isDirectory()) {
-            throw new Exception("\"" + receiverPath + "\" is not a directory.");
+            throw new Exception("\"" + receiverPath + "\" 不是有效的日志目录");
         }
     }
 
@@ -193,14 +193,14 @@ class ListChecker {
     public void checkOut(String outPath) throws Exception {
 
         if (outPath == null) {
-            throw new Exception("value of arg \"-out\" is required.");
+            throw new Exception("\"-out\" 不能为空");
         }
 
         File outFile = new File(outPath);
         outFile.createNewFile();
 
         if (!outFile.isFile()) {
-            throw new Exception("\"" + outPath + "\" is not a file.");
+            throw new Exception("\"" + outPath + "\" 不是有效的输出文件");
         }
     }
 
@@ -243,7 +243,7 @@ class ListChecker {
 
         for (String type : argTypes) {
             if (!defaultTypes.contains(type)) {
-                throw new Exception("Unknown type：" + type);
+                throw new Exception("无效 type 参数值：" + type);
             }
         }
     }
