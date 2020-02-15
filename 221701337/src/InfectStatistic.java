@@ -343,12 +343,12 @@ class Command
         if(date.is_exist && date.param != "")//有date参数且date后参数不为空
         {
             List<File> file_list = Parameter.get_file_list(log.param);
-            execute_date(date.param,file_list);
+            execute_date(date.param,file_list,date.is_exist);
             new_info.doOut();
         }
     }
 
-    private void execute_date(String date,List<File> file_list) throws MyException
+    private void execute_date(String date,List<File> file_list,boolean exist) throws MyException
     {
         Date date_param;
         BufferedReader reader  = null;
@@ -359,6 +359,8 @@ class Command
             Date date_now = date_format.parse(date_format.format(new Date()).toString());
             if(date_param.compareTo(date_now) > 0)
                 throw new MyException("输入时间大于系统当前时间");
+            if(!exist)
+                date_param = date_now;
             for(File file : file_list)
             {
                 String data_row;
