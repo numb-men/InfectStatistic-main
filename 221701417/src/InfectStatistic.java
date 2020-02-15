@@ -166,5 +166,114 @@ class InfectStatistic {
 				}
 			}
 			
+			Integer allGanran = 0;
+			Integer allYisi = 0;
+			Integer allZhiyu = 0;
+			Integer allSiwang = 0;
 			
+			ArrayList<String> endResult = new ArrayList<String>();
+			
+			for (int i = 0; i < siteList.size(); i++) {
+				
+				Integer ganran = 0;
+				Integer yisi = 0;
+				Integer zhiyu = 0;
+				Integer siwang = 0;
+				
+				String site = siteList.get(i).toString();
+				
+				for (int j = 0; j < allList.size(); j++) {
+					if(site.equals(allList.get(j).split(" ")[0])) {
+						if(allList.get(j).split(" ").length == 3) {
+							if(allList.get(j).split(" ")[1].equals("死亡")) {
+								String countString = allList.get(j).split(" ")[2];
+								Integer count = Integer.parseInt(countString.substring(0, countString.length()-1));
+								siwang += count;
+								ganran -= count;
+							}else {
+								String countString = allList.get(j).split(" ")[2];
+								Integer count = Integer.parseInt(countString.substring(0, countString.length()-1));
+								zhiyu += count;
+								ganran -= count;
+							}
+						}else if (allList.get(j).split(" ").length == 4) {
+							if(allList.get(j).split(" ")[1].equals("新增") && allList.get(j).split(" ")[2].equals("感染患者")) {
+								String countString = allList.get(j).split(" ")[3];
+								Integer count = Integer.parseInt(countString.substring(0, countString.length()-1));
+								ganran += count;
+							}else if (allList.get(j).split(" ")[1].equals("新增") && allList.get(j).split(" ")[2].equals("疑似患者")) {
+								String countString = allList.get(j).split(" ")[3];
+								Integer count = Integer.parseInt(countString.substring(0, countString.length()-1));
+								yisi += count;
+							}else if (allList.get(j).split(" ")[1].equals("疑似患者") && allList.get(j).split(" ")[2].equals("确诊感染")) {
+								String countString = allList.get(j).split(" ")[3];
+								Integer count = Integer.parseInt(countString.substring(0, countString.length()-1));
+								ganran += count;
+								yisi -= count;
+							}else if (allList.get(j).split(" ")[1].equals("排除") && allList.get(j).split(" ")[2].equals("疑似患者")) {
+								String countString = allList.get(j).split(" ")[3];
+								Integer count = Integer.parseInt(countString.substring(0, countString.length()-1));
+								yisi -= count;
+							}
+						}else if (allList.get(j).split(" ").length == 5) {
+							if(allList.get(j).split(" ")[1].equals("感染患者")) {
+								String countString = allList.get(j).split(" ")[4];
+								Integer count = Integer.parseInt(countString.substring(0, countString.length()-1));
+								ganran -= count;
+							}else if (allList.get(j).split(" ")[1].equals("疑似患者")) {
+								String countString = allList.get(j).split(" ")[4];
+								Integer count = Integer.parseInt(countString.substring(0, countString.length()-1));
+								yisi -= count;
+							}
+						}
+					}else {
+						if(allList.get(j).split(" ")[1].equals("感染患者") && site.equals(allList.get(j).split(" ")[3])) {
+							String countString = allList.get(j).split(" ")[4];
+							Integer count = Integer.parseInt(countString.substring(0, countString.length()-1));
+							ganran += count;
+						}else if(allList.get(j).split(" ")[1].equals("疑似患者") && site.equals(allList.get(j).split(" ")[3])){
+							String countString = allList.get(j).split(" ")[4];
+							Integer count = Integer.parseInt(countString.substring(0, countString.length()-1));
+							yisi += count;
+						}
+					}
+					
+				}
+				
+				endResult.add(site + " 感染患者" + ganran.toString() + " 疑似患者" + yisi.toString() + " 治愈" + zhiyu.toString() + " 死亡" + siwang.toString() + "人");
+				
+				allGanran += ganran;
+				allYisi += yisi;
+				allZhiyu += zhiyu;
+				allSiwang += siwang;
+				
+			}
+		
+			
+			endResult.add(0,"全国 感染患者" + allGanran.toString() + " 疑似患者" + allYisi.toString() + " 治愈" + allZhiyu + " 死亡" + allSiwang + "人");
+			
+			String outText = "";
+			for (int i = 0; i < endResult.size(); i++) {
+				if(province.size() <= 0) {
+					outText += endResult.get(i).toString() + System.lineSeparator();
+				}else {
+					for (int k = 0; k < province.size(); k++) {
+						if(endResult.get(i).toString().split(" ")[0].equals(province.get(k).toString())) {
+							outText += endResult.get(i).toString() + System.lineSeparator();
+						}
+					}
+				}
+			}
+
+			outText += "// 该文档并非真实数据，仅供测试使用" + System.lineSeparator();
+			outText += cmd;
+			System.out.println(outText);
+			writeTxt(out, outText);
+			System.out.println("文件写出成功，保存路径为" + out);
+			
+		}
+		
+		
+
+	}
 }
