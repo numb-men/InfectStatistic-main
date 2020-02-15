@@ -15,7 +15,7 @@ import java.util.Arrays;
  * TODO
  *
  * @author 衡天宇
- * @version 7.0
+ * @version 7.1
  * 
  */
 public class InfectStatistic {
@@ -29,6 +29,7 @@ public class InfectStatistic {
     static String frompath=new String();//log文件路径
     static int index=0;//控制是否输入日期比日志最早一天还早，若是则值为-2
     static int isWrong=0;//输入日期是否出错（输入日期比最新的日志还晚）
+    
     	
     public static void main(String[] args) throws IOException {
     	if(args.length==0) {
@@ -212,30 +213,12 @@ public class InfectStatistic {
      *返回值：前<后返回true，前>后返回false
     */
     static boolean isBefore(String date1,String date2) {
-    	String[] dsp1=date1.split("-");
-    	String[] dsp2=date2.split("-");//分割年月日
-    	if(dsp1[0].compareTo(dsp2[0])>0) {//年份过大
+    	if(date1.compareTo(date2)>=0) {
     		return false;
-    	}
-    	else if(dsp1[0].equals(dsp2[0])){//年份相等
-    		if(dsp1[1].compareTo(dsp2[1])>0) {//月份过大
-    			return false;
-    		}
-    		else if(dsp1[1].equals(dsp2[1])) {//月份相等
-    			if(dsp1[2].compareTo(dsp2[2])>=0) {//日期过大
-    				return false;
-    			}
-    			else {
-    				return true;
-    			}
-    		}
-    		else {
-    			return true;
-    		}
     	}
     	else {
     		return true;
-    	}   		
+    	}
     }
     
     /*
@@ -260,6 +243,7 @@ public class InfectStatistic {
     static int findPot(String date) {
     	File file = new File(frompath);
         String[] filename = file.list();//获取所有日志文件名      
+        int mid=-1;//中间存储变量，暂存返回值
         if(isBefore(date,filename[0].substring(0,10))) {//输入日期比日志最早还早
         	return -2;
         }
@@ -267,14 +251,17 @@ public class InfectStatistic {
     		String datecut1=filename[i].substring(0,10);//只获取文件名前的日期
     		String datecut2=filename[i+1].substring(0,10);//前后两个日期
     		if(date.equals(datecut1)) {   	   			
-    			return i;    			
+    			mid=i;
+    			return mid;
     		}
     		else if(date.equals(datecut2)) {
-    			return i+1;
+    			mid=i+1;
+    			return mid;
     		}
     		else if(isBefore(datecut1,date)&&isBefore(date,datecut2)) {//所给日期在两天有记录的日志之间
-    			return i;
-    		}
+    			mid=i;
+    			return mid;
+    		}   		
     	}    	
     	return -1;   	
     }
@@ -497,8 +484,7 @@ public class InfectStatistic {
         Arrays.sort(location, cmp);
         int i=0; 
         int j=0;//控制省份拼音顺序索引
-        while(j<num) {
-        	
+        while(j<num) {       	
         	while(i<num) {
 	        	if(wannasort[i].location.equals(location[j])) {
 	        		result[j]=wannasort[i];
@@ -535,12 +521,11 @@ public class InfectStatistic {
     	while(i<num) {
         	if(wannasort[i].location.equals(location[j])) {
         		aa[j]=wannasort[i];
-        		//System.out.print(aa[j].printline()+"  \n");
         		j++;       		
         		if(j>=num) {
         			break;
         		}
-        		i=-1;
+        		i=-1;//重新开始循环
         	}
         	i++;
     	}    
@@ -626,7 +611,8 @@ public class InfectStatistic {
 			type[seltypecount]=args[i];
 			seltypecount++;
 			i++;
-		}    
+		}
+		
     	return type;
     }
       
