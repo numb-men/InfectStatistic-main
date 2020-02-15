@@ -1128,7 +1128,10 @@ class FileOperate {
         if (file != null) {
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
+                //编码格式
+                String encoding = "UTF-8";
+                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream,encoding);
+
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
                 StringBuffer sb = new StringBuffer();
@@ -1153,17 +1156,18 @@ class FileOperate {
      * @return void
      */
     public static void writeTxt(String path, String content) {
-        FileOutputStream fileOutputStream = null;
         File file = new File(path);
         try {
             if (file.exists()) {
                 //判断文件是否存在，如果不存在就新建一个txt
                 file.createNewFile();
             }
-            fileOutputStream = new FileOutputStream(file);
-            fileOutputStream.write(content.getBytes());
-            fileOutputStream.flush();
-            fileOutputStream.close();
+            //编码格式
+            String encoding = "UTF-8";
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(file), encoding));
+            writer.write(content);
+            writer.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1191,4 +1195,3 @@ class FileOperate {
         throw new FileNotFoundException("文件路径错误");
     }
 }
-

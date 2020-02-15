@@ -1,3 +1,4 @@
+
 import java.io.FileNotFoundException;
 
 /**
@@ -11,8 +12,8 @@ import java.io.FileNotFoundException;
  */
 class InfectStatistic {
     public static void main(String[] args) {
-        String cmdLine = "list -log D:\\log\\ -out D:\\ListOut7.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建";
-        args = cmdLine.split(" ");
+//        String cmdLine = "list -log D:\\log\\ -out D:\\ListOut7.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建";
+//        args = cmdLine.split(" ");
         Lib lib = new Lib(args);
         try {
             lib.execute();

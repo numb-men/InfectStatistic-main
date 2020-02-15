@@ -181,36 +181,6 @@ class CmdArgs {
         }
         return null;
     }
-
-    /**
-     * 判断该命令是否有对应的参数
-     *
-     * @param key
-     * @return
-     */
-    public boolean has(String key) {
-        return this.argMap.containsKey(key);
-    }
-
-    //---------------------------getter/setter-----------------↓-------------------
-
-    public HashMap<String, String[]> getArgMap() {
-        return argMap;
-    }
-
-    public void setArgMap(HashMap<String, String[]> argMap) {
-        this.argMap = argMap;
-    }
-
-    public String[] getArgs() {
-        return args;
-    }
-
-    public void setArgs(String[] args) {
-        this.args = args;
-    }
-
-    //---------------------------getter/setter----------------↑--------------------
 }
 
 //------------------------------命令模式实现list命令--------------↓-----------------------
@@ -313,7 +283,7 @@ class MyList {
         if (this.cmdArgs == null || this.dir == null) {
             return;
         }
-        getLogPath();
+        getLogPaths();
     }
 
     /**
@@ -401,7 +371,7 @@ class MyList {
      *
      * @throws FileNotFoundException
      */
-    private void getLogPath() throws FileNotFoundException {
+    private void getLogPaths() throws FileNotFoundException {
         logPath = FileOperate.getAllFileName(dir);
         //-date 参数日期
         String dateValue = this.cmdArgs.getArgVal(PARAMS[2]);
@@ -510,6 +480,66 @@ class MyList {
         outStr += REMIND;
         return outStr;
     }
+
+    //------------------------------------getter/setter-----------↓------------------------------
+
+    public String getDir() {
+        return dir;
+    }
+
+    public void setDir(String dir) {
+        this.dir = dir;
+    }
+
+    public ArrayList<String> getLogPath() {
+        return logPath;
+    }
+
+    public void setLogPath(ArrayList<String> logPath) {
+        this.logPath = logPath;
+    }
+
+    public String[] getProvinceValue() {
+        return provinceValue;
+    }
+
+    public void setProvinceValue(String[] provinceValue) {
+        this.provinceValue = provinceValue;
+    }
+
+    public String[] getOutType() {
+        return outType;
+    }
+
+    public void setOutType(String[] outType) {
+        this.outType = outType;
+    }
+
+    public String getOutPath() {
+        return outPath;
+    }
+
+    public void setOutPath(String outPath) {
+        this.outPath = outPath;
+    }
+
+    public CmdArgs getCmdArgs() {
+        return cmdArgs;
+    }
+
+    public void setCmdArgs(CmdArgs cmdArgs) {
+        this.cmdArgs = cmdArgs;
+    }
+
+    public LinkedHashMap<String, ProvinceStatus> getLinkedHashMap() {
+        return linkedHashMap;
+    }
+
+    public void setLinkedHashMap(LinkedHashMap<String, ProvinceStatus> linkedHashMap) {
+        this.linkedHashMap = linkedHashMap;
+    }
+
+    //------------------------------------getter/setter-----------↑------------------------------
 }
 
 /**
@@ -1083,7 +1113,7 @@ class ProvinceStatus {
  * 实现对文件的操作
  *
  * @author 221701414 黎家泽
- * @version 1.0
+ * @version 2.0
  * @since 2020年2月8日10:41:51
  */
 class FileOperate {
@@ -1098,7 +1128,10 @@ class FileOperate {
         if (file != null) {
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
+                //编码格式
+                String encoding = "UTF-8";
+                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream,encoding);
+
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
                 StringBuffer sb = new StringBuffer();
@@ -1123,17 +1156,18 @@ class FileOperate {
      * @return void
      */
     public static void writeTxt(String path, String content) {
-        FileOutputStream fileOutputStream = null;
         File file = new File(path);
         try {
             if (file.exists()) {
                 //判断文件是否存在，如果不存在就新建一个txt
                 file.createNewFile();
             }
-            fileOutputStream = new FileOutputStream(file);
-            fileOutputStream.write(content.getBytes());
-            fileOutputStream.flush();
-            fileOutputStream.close();
+            //编码格式
+            String encoding = "UTF-8";
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(file), encoding));
+            writer.write(content);
+            writer.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1161,4 +1195,3 @@ class FileOperate {
         throw new FileNotFoundException("文件路径错误");
     }
 }
-
