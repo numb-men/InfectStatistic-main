@@ -7,8 +7,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,9 +44,7 @@ public class LogReaderTest {
         expected.addAll(fileContent("D:\\log\\2020-01-22.log.txt"));
         expected.addAll(fileContent("D:\\log\\2020-01-23.log.txt"));
 
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        format.setLenient(false);
-        List<String> list = LogReader.readLog(format.parse("2020-01-23"), new File("D:\\log"));
+        List<String> list = LogReader.readLog(Tools.DATE_FORMAT.parse("2020-01-23"), new File("D:\\log"));
         for (String str : list) {
             System.out.println(str);
         }
@@ -64,9 +60,7 @@ public class LogReaderTest {
         expected.addAll(fileContent("D:\\log\\2020-01-23.log.txt"));
         expected.addAll(fileContent("D:\\log\\2020-01-27.log.txt"));
 
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        format.setLenient(false);
-        List<String> list = LogReader.readLog(format.parse("2020-01-27"), new File("D:\\log"));
+        List<String> list = LogReader.readLog(Tools.DATE_FORMAT.parse("2020-01-27"), new File("D:\\log"));
         for (String str : list) {
             System.out.println(str);
         }
@@ -81,9 +75,6 @@ public class LogReaderTest {
         expected.addAll(fileContent("D:\\log\\2020-01-22.log.txt"));
         expected.addAll(fileContent("D:\\log\\2020-01-23.log.txt"));
         expected.addAll(fileContent("D:\\log\\2020-01-27.log.txt"));
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        format.setLenient(false);
 
         thrown.expect(Exception.class);
         thrown.expectMessage("日期超出范围");

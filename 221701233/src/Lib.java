@@ -215,10 +215,9 @@ class ListChecker {
             return;
         }
 
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        format.setLenient(false);
+        Tools.DATE_FORMAT.setLenient(false);
         try {
-            format.parse(dateStr);
+            Tools.DATE_FORMAT.parse(dateStr);
         } catch (Exception e) {
             throw new Exception("日期非法或格式错误");
         }
@@ -276,8 +275,7 @@ class ListCommandUtil {
         util.out = new File(line.getValue("-out"));
 
         try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            util.date = format.parse(line.getValue("-date"));
+            util.date = Tools.DATE_FORMAT.parse(line.getValue("-date"));
         } catch (Exception ignored) {
         }
 
@@ -322,9 +320,8 @@ class LogReader {
         File[] fileList = logDir.listFiles();
         List<String> logLines = new ArrayList<>();
 
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        format.setLenient(false);
-        Date latestDate = format.parse("2000-01-01");
+        Tools.DATE_FORMAT.setLenient(false);
+        Date latestDate = Tools.DATE_FORMAT.parse("2000-01-01");
 
         for (File file : fileList) {
             if (file.isFile()) {
@@ -332,7 +329,7 @@ class LogReader {
 
                 // 过滤日期不规范的日志文件
                 try {
-                    logDate = format.parse(getLogDate(file));
+                    logDate = Tools.DATE_FORMAT.parse(getLogDate(file));
                 } catch (Exception e) {
                     continue;
                 }
@@ -900,7 +897,6 @@ class LogWriter {
  */
 class Sorter {
     public static void sortByRegion(List<String> results) {
-        Comparator<Object> CHINA_COMPARE = Collator.getInstance(Locale.CHINA);
 
         results.sort((o1, o2) -> {
             String rg1 = o1.substring(0, o1.indexOf(' ')).replace("重庆", "冲庆");
@@ -909,8 +905,21 @@ class Sorter {
             if (rg1.equals("全国") || rg2.equals("全国")) {
                 return (rg1.equals("全国")) ? -1 : 1;
             }
-            return CHINA_COMPARE.compare(rg1, rg2);
+            return Tools.CHINA_COMPARE.compare(rg1, rg2);
         });
 
+    }
+}
+
+/**
+ * 工具类
+ */
+class Tools {
+    static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+    static final Comparator<Object> CHINA_COMPARE = Collator.getInstance(Locale.CHINA);
+
+    static {
+        DATE_FORMAT.setLenient(false);
     }
 }
