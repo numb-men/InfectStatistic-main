@@ -6,15 +6,15 @@ import java.util.regex.Pattern;
  * InfectStatistic
  * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author 221701312
+ * @version 1.5
+ * @since 2020-02-11
  */
 class InfectStatistic {
     public static void main(String[] args)
     {
         CommandIdentity cmdit=new CommandIdentity(args);
-        //cmdit.PrintCommand();
+        cmdit.PrintCommand();
         cmdit.Identify();
     }
 }
@@ -26,6 +26,7 @@ class FileManager{
     public int[] SuspectedPatients=new int[31];
     public int[] CurePatients=new int[31];
     public int[] DeadPatients=new int[31];
+    public boolean[] IsVisited = new boolean[31];
     public int AllIP=0,AllSP=0,AllCP=0,AllDP=0;
     private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";// 中文正则
     ArrayList<String> fileNames = new ArrayList<>();
@@ -57,10 +58,16 @@ class FileManager{
                 }
             }
         }
+
+        if(dateparam=="") {
+            flag = 1;
+            stopPoint=fileNames.size();
+        }
         if(flag==0){
             System.out.println("输入的日期超出范围！");
             return;
         }
+
         try {
             for(int i=0;i<=stopPoint;i++) {
                 String SingleFile = FilePath + "\\" + fileNames.get(i);
@@ -78,6 +85,34 @@ class FileManager{
         GetStatistic(fileContent);
     }
 
+    public void WriteFile(String FileName,ArrayList<String> typeparam,ArrayList<String> provinceparam){
+        File file = new File(FileName);
+        FileWriter fileWriter;
+        try{
+            if(!file.exists())
+                file.createNewFile();
+            fileWriter=new FileWriter(file,true);
+
+            /*String s=String.format("全国 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
+                    AllIP,AllSP,AllCP,AllDP);
+            fileWriter.write(s);*/
+
+            for(int i=0;i<31;i++){
+                if(IsVisited[i]){
+                    String st=String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
+                            provinces[i], InfectedPatients[i], SuspectedPatients[i],
+                            CurePatients[i], DeadPatients[i]);
+                    fileWriter.write(st);
+                }
+            }
+
+            fileWriter.flush();
+            fileWriter.close();
+        }catch (Exception e){
+
+        }
+    }
+
     public void GetStatistic(ArrayList<String> fileContent){
         for(int i=0;i<fileContent.size();i++){
             String[] temp=fileContent.get(i).split(" ");
@@ -86,9 +121,11 @@ class FileManager{
         System.out.printf("全国 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
                 AllIP,AllSP,AllCP,AllDP);
         for(int i=0;i<31;i++){
-            System.out.printf("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
-                    provinces[i],InfectedPatients[i],SuspectedPatients[i],
-                    CurePatients[i],DeadPatients[i]);
+            if(IsVisited[i]) {
+                System.out.printf("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
+                        provinces[i], InfectedPatients[i], SuspectedPatients[i],
+                        CurePatients[i], DeadPatients[i]);
+            }
         }
     }
 
@@ -96,6 +133,7 @@ class FileManager{
         int index = 0;
         int increase;
         String tes=str[str.length-1];
+        //除去中文字符
         Pattern pat = Pattern.compile(REGEX_CHINESE);
         Matcher mat = pat.matcher(tes);
         increase=Integer.parseInt(mat.replaceAll(""));
@@ -109,13 +147,13 @@ class FileManager{
             if(str[2].equals("感染患者")){
                 InfectedPatients[index]+=increase;
                 AllIP+=increase;
-                return;
             }
             else if(str[2].equals("疑似患者")){
                 SuspectedPatients[index]+=increase;
                 AllSP+=increase;
-                return;
             }
+            IsVisited[index]=true;
+            return;
         }
         else if(str[1].equals("感染患者")){
             InfectedPatients[index]-=increase;
@@ -126,6 +164,7 @@ class FileManager{
                 }
             }
             InfectedPatients[index]+=increase;
+            IsVisited[index]=true;
             return;
         }
         else if(str[1].equals("疑似患者")){
@@ -138,6 +177,7 @@ class FileManager{
                     }
                 }
                 SuspectedPatients[index]+=increase;
+                IsVisited[index]=true;
                 return;
             }
             else if(str[2].equals("确诊感染")){
@@ -145,6 +185,7 @@ class FileManager{
                 InfectedPatients[index]+=increase;
                 AllSP-=increase;
                 AllIP+=increase;
+                IsVisited[index]=true;
                 return;
             }
         }
@@ -153,6 +194,7 @@ class FileManager{
             DeadPatients[index]+=increase;
             AllIP-=increase;
             AllDP+=increase;
+            IsVisited[index]=true;
             return;
         }
         else if(str[1].equals("治愈")){
@@ -160,11 +202,13 @@ class FileManager{
             CurePatients[index]+=increase;
             AllIP-=increase;
             AllCP+=increase;
+            IsVisited[index]=true;
             return;
         }
         else if(str[1].equals("排除")){
             SuspectedPatients[index]-=increase;
             AllSP-=increase;
+            IsVisited[index]=true;
             return;
         }
     }
@@ -257,5 +301,6 @@ class CommandIdentity{
         }
         FileManager fm = new FileManager();
         fm.ReadFile(logparam,dateparam);
+        fm.WriteFile(outparam,typeparam,provinceparam);
     }
 }
