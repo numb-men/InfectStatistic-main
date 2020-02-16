@@ -43,7 +43,8 @@ public class InfectStatistic {
         CommandParser cmParser = new CommandParser(args);
         CommandRun commandRun = new CommandRun(cmParser);
         commandRun.runCommand();
-          
+
+
     }
 }
 
@@ -93,6 +94,7 @@ class CommandParser{
                     }
                     i++;
                 }
+                
                 if (typeList.size() == 4) {
                     hasType = false;
                 }
@@ -127,11 +129,13 @@ class CommandRun{
     
     public CommandRun(CommandParser parser) {
         if (!parser.dateString.equals("")) {
-            hasDate = true;
-        }else if (parser.hasType) {
-            hasType = true;
-        }else if (parser.hasProvince) {
-            hasProvince = true;
+            this.hasDate = true;
+        }
+        if (parser.hasType) {
+            this.hasType = true;
+        }
+        if (parser.hasProvince) {
+            this.hasProvince = true;
         }
         this.parser = parser;
     }
@@ -140,7 +144,6 @@ class CommandRun{
         InfectedMap map = new InfectedMap();
         FileInputUtils reader = new FileInputUtils();
         FileOutputUtils writer = new FileOutputUtils();
-        
         
         try {
             
@@ -193,6 +196,7 @@ class FileInputUtils{
         String absolutePath = "";
         if (hasDate) {
             absolutePath = dirPath + dateString + ".log.txt";
+
         }
         for (int i = 0; i<filesName.size(); i++) {
             srcPath = filesName.get(i);
@@ -242,6 +246,7 @@ class FileOutputUtils{
                 List<String> provinceList) throws IOException {    
         OutputStream outStream = new FileOutputStream(dstPath);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outStream));
+
         if (hasProvince && !hasType) {
             String provinceName = "";
             for (int i = 0; i < provinceList.size(); i++) {
