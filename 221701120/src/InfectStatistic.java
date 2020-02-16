@@ -1,13 +1,27 @@
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,13 +39,31 @@ class InfectStatistic {
         CommandParser cmParser = new CommandParser(args);
         InfectedMap map = new InfectedMap();
         FileInputUtils reader = new FileInputUtils();
+        FileOutputUtils writer = new FileOutputUtils();
+       
         try {
             reader.parseFile(cmParser.getSrcPath(), map);
+            //writer.writeFile(cmParser.getDstPath(), map);
+            //map.sortByProvince();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        /*
+        String line = "甘肃 新增 感染患者 5人";
+        String cutString = " ";
+        String[] newLine = line.split(cutString);
         
+        //获取人数信息
+        int len = newLine.length;
+        String regEx="[^0-9]";  
+        Pattern p = Pattern.compile(regEx);  
+        Matcher m = p.matcher(newLine[len-1]); 
+        String numString= m.replaceAll("").trim();
+        int num = Integer.valueOf(numString);
+        
+        System.out.println(num);  
+        */
         for (HashMap.Entry<String, InfectedArea> entry : map.map.entrySet()) {
             System.out.println("Key = " + entry.getKey() + 
                     ", Value = infect:" + entry.getValue().infectedNum +
@@ -40,7 +72,7 @@ class InfectStatistic {
                     ",dead:" + entry.getValue().deadNum);
         }
        
-        //System.out.println(numString);      
+           
     }
 }
 
@@ -108,14 +140,14 @@ class CommandParser{
  * @since 2020.2.15
  */
 class FileInputUtils{    
-    public static void parseFile(String srcPath, InfectedMap map) throws IOException {
+    public void parseFile(String srcPath, InfectedMap map) throws IOException {
         InputStream inStream = new FileInputStream(srcPath);
         String line; 
         BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
         line = reader.readLine(); 
         InfoParser infoParser = new InfoParser();
         while (line != null) { 
-            if (!line.matches("//(.*)")) {
+            if (!line.matches("//(.*)") && !line.equals("")) {
                 infoParser.parseInfo(line, map);
                 //System.out.println(line);
                 
@@ -127,6 +159,29 @@ class FileInputUtils{
     }
 }
 
+/**
+ * 
+ * 文件输出的工具类
+ * TODO
+ *
+ * @author 221701120_hxy
+ * @version 1.0
+ * @since 2020.2.15
+ */
+class FileOutputUtils{
+    public void writeFile(String dstPath, InfectedMap map) throws IOException {
+        OutputStream outStream = new FileOutputStream(dstPath);
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outStream));
+        
+        bufferedWriter.write("全国 ");
+        if(map.map.get("全国").infectedNum > 0)
+        bufferedWriter.write("感染患者" + map.map.get("全国").infectedNum + "人");
+        
+        
+        bufferedWriter.close();
+        outStream.close();
+    }
+}
 /**
  * 
  * 存储被感染省份地区的相关信息
@@ -153,6 +208,51 @@ class InfectedMap{
         InfectedArea countryArea = new InfectedArea();
         map.put(wholeCountry, countryArea);
     }
+    
+    /*
+     * 将map表中的数据根据key值进行排序
+     */
+    public void sortByProvince() {
+        List<String> regulationOrder = Arrays.asList(
+                "全国", "安徽", "北京",
+                "重庆", "福建", "甘肃", "广东", "广西", "贵州",
+                "海南", "河北", "河南", "黑龙江","湖北", "湖南",
+                "吉林", "江苏", "江西", "辽宁", "内蒙古","宁夏",
+                "青海", "山东", "山西", "陕西", "上海",  "四川", 
+                "天津", "西藏", "新疆", "云南", "浙江" );
+     
+        Set<Entry<String,InfectedArea>> set = map.entrySet();
+        List<Entry<String,InfectedArea>> list = new ArrayList<>();
+        
+        //把set加到list中去
+        Iterator<Entry<String,InfectedArea>> it = set.iterator(); 
+        while(it.hasNext()) {
+            Entry<String,InfectedArea> entry = it.next();
+            list.add(entry);
+        }
+        
+        
+        Collections.sort(list, new Comparator<Entry<String,InfectedArea>>() {
+ 
+            @Override
+            public int compare(Entry<String, InfectedArea> o1, Entry<String, InfectedArea> o2) {
+                String value1 = o1.getKey();
+                String value2 = o2.getKey();
+                int index1 = regulationOrder.indexOf(value1);
+                int index2 = regulationOrder.indexOf(value2);
+                
+                return index1-index2;
+            }
+            
+        });
+        //对list排序完成后放入LinkedHashMap即可。
+        HashMap<String, InfectedArea> map2 = new LinkedHashMap<>();
+        for (Entry<String, InfectedArea> entry : list) {
+            map2.put(entry.getKey(), entry.getValue());
+            map = map2;
+        }
+
+    }
 }
 /**
  * 
@@ -177,6 +277,7 @@ class InfoParser{
         Matcher m = p.matcher(newLine[len-1]); 
         String numString= m.replaceAll("").trim();
         int num = Integer.valueOf(numString);
+        
         //查找infectedMap中是否含有该地区
         boolean existed = infectedMap.map.containsKey(newLine[0]);
         
@@ -237,4 +338,5 @@ class InfoParser{
     
   
 }
+
 
