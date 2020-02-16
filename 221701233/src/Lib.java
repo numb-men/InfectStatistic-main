@@ -85,6 +85,11 @@ class CommandLine {
         return -1;
     }
 
+    /**
+     * list命令入口
+     *
+     * @throws Exception
+     */
     public void execute() throws Exception {
         command.execute(this);
     }
@@ -146,7 +151,7 @@ class ListCommand implements Command {
     @Override
     public void execute(CommandLine commandLine) throws Exception {
         checker.check(commandLine);
-        receiver.list(ListCommandUtil.Mapper(commandLine));
+        receiver.list(ListCommandEntity.Mapper(commandLine));
     }
 
 }
@@ -216,9 +221,8 @@ class ListChecker {
             return;
         }
 
-        Helper.DATE_FORMAT.setLenient(false);
         try {
-            Helper.DATE_FORMAT.parse(dateStr);
+            Util.DATE_FORMAT.parse(dateStr);
         } catch (Exception e) {
             throw new Exception("日期非法或格式错误");
         }
@@ -231,7 +235,7 @@ class ListChecker {
      * @throws Exception
      */
     public void checkType(List<String> argTypes) throws Exception {
-        List<String> defaultTypes = new ArrayList<>(Arrays.asList("ip","sp","cure","dead"));
+        List<String> defaultTypes = new ArrayList<>(Arrays.asList("ip", "sp", "cure", "dead"));
 
         if (argTypes.size() == 0) {
             return;
@@ -261,7 +265,7 @@ class ListChecker {
 /**
  * List命令实体
  */
-class ListCommandUtil {
+class ListCommandEntity {
 
     public List<String> log;
 
@@ -279,26 +283,26 @@ class ListCommandUtil {
      * @param line
      * @return
      */
-    public static ListCommandUtil Mapper(CommandLine line) throws Exception {
-        ListCommandUtil util = new ListCommandUtil();
+    public static ListCommandEntity Mapper(CommandLine line) throws Exception {
+        ListCommandEntity entity = new ListCommandEntity();
 
-        util.out = new File(line.getValue("-out"));
+        entity.out = new File(line.getValue("-out"));
 
         try {
-            util.date = Helper.DATE_FORMAT.parse(line.getValue("-date"));
+            entity.date = Util.DATE_FORMAT.parse(line.getValue("-date"));
         } catch (Exception ignored) {
         }
 
-        util.log = LogReader.readLog(util.date, new File(line.getValue("-log")));
+        entity.log = LogReader.readLog(entity.date, new File(line.getValue("-log")));
 
         List<String> types = line.getValues("-type");
         if (types.size() != 0) {
-            util.type = types;
+            entity.type = types;
         }
 
-        util.province = line.getValues("-province");
+        entity.province = line.getValues("-province");
 
-        return util;
+        return entity;
     }
 }
 
@@ -330,8 +334,7 @@ class LogReader {
         File[] fileList = logDir.listFiles();
         List<String> logLines = new ArrayList<>();
 
-        Helper.DATE_FORMAT.setLenient(false);
-        Date latestDate = Helper.DATE_FORMAT.parse("2000-01-01");
+        Date latestDate = Util.DATE_FORMAT.parse("2000-01-01");
 
         for (File file : fileList) {
             if (file.isFile()) {
@@ -339,7 +342,7 @@ class LogReader {
 
                 // 过滤日期不规范的日志文件
                 try {
-                    logDate = Helper.DATE_FORMAT.parse(getLogDate(file));
+                    logDate = Util.DATE_FORMAT.parse(getLogDate(file));
                 } catch (Exception e) {
                     continue;
                 }
@@ -385,11 +388,11 @@ class CommandReceiver {
     /**
      * list命令
      *
-     * @param util
+     * @param entity
      */
-    public void list(ListCommandUtil util) throws Exception {
-        List<String> results = LogParser.parse(util);
-        LogWriter.write(util.out.getAbsolutePath(), results);
+    public void list(ListCommandEntity entity) throws Exception {
+        List<String> results = LogParser.parse(entity);
+        LogWriter.write(entity.out.getAbsolutePath(), results);
         StatisticResult.reset();
     }
 
@@ -437,7 +440,7 @@ class Add extends AbstractAction {
     private String regex = "(\\S+) 新增 (\\S+) (\\d+)人";
 
     Add(AbstractAction nextAction) {
-        this.typeNum = AbstractAction.ADD_IP;
+        this.typeNum = ADD_IP;
         this.nextAction = nextAction;
     }
 
@@ -465,7 +468,7 @@ class FlowIn extends AbstractAction {
     private String regex = "(\\S+) (\\S+) 流入 (\\S+) (\\d+)人";
 
     FlowIn(AbstractAction nextAction) {
-        this.typeNum = AbstractAction.FLOW_IN;
+        this.typeNum = FLOW_IN;
         this.nextAction = nextAction;
     }
 
@@ -495,7 +498,7 @@ class DeadOrCure extends AbstractAction {
     private String regex = "(\\S+) (\\S+) (\\d+)人";
 
     DeadOrCure(AbstractAction nextAction) {
-        this.typeNum = AbstractAction.DEAD_OR_CURE;
+        this.typeNum = DEAD_OR_CURE;
         this.nextAction = nextAction;
     }
 
@@ -521,7 +524,7 @@ class Diagnosis extends AbstractAction {
     String regex = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
 
     Diagnosis(AbstractAction nextAction) {
-        this.typeNum = AbstractAction.DGS;
+        this.typeNum = DGS;
         this.nextAction = nextAction;
     }
 
@@ -546,7 +549,7 @@ class Exclusive extends AbstractAction {
     String regex = "(\\S+) 排除 疑似患者 (\\d+)人";
 
     Exclusive(AbstractAction nextAction) {
-        this.typeNum = AbstractAction.EXC;
+        this.typeNum = EXC;
         this.nextAction = nextAction;
     }
 
@@ -564,10 +567,12 @@ class Exclusive extends AbstractAction {
 }
 
 /**
- * 正则工具类
+ * 工具类
  */
-class RegexUtil {
-    static String[] REGEXS = {
+class Util {
+
+    // 正则表达式集
+    static final String[] REGEXS = {
             "(\\S+) 新增 (\\S+) (\\d+)人",
             "(\\S+) (\\S+) 流入 (\\S+) (\\d+)人",
             "(\\S+) (\\S+) (\\d+)人",
@@ -575,7 +580,19 @@ class RegexUtil {
             "(\\S+) 排除 疑似患者 (\\d+)人",
     };
 
+    // 日期格式标准
+    static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
+    static {
+        DATE_FORMAT.setLenient(false);
+    }
+
+    /**
+     * 匹配日志类型
+     *
+     * @param logLine 日志的一条记录
+     * @return 正则表达式的索引；匹配失败返回-1
+     */
     public static int logType(String logLine) {
         for (int i = 0; i < REGEXS.length; i++) {
             if (logLine.matches(REGEXS[i])) {
@@ -880,7 +897,7 @@ class StatisticResult {
 
         for (String logLine : logLines) {
             setChecked(logLine.substring(0, logLine.indexOf(" ")));
-            exclusive.passOn(RegexUtil.logType(logLine), logLine);
+            exclusive.passOn(Util.logType(logLine), logLine);
         }
     }
 
@@ -944,7 +961,7 @@ class LogParser {
      * @param entity
      * @return
      */
-    public static List<String> parse(ListCommandUtil entity) {
+    public static List<String> parse(ListCommandEntity entity) {
         StatisticResult.doStatistic(entity.log);
 
         return StatisticResult.filterTypeAndProvince(entity.type, entity.province);
@@ -972,14 +989,3 @@ class LogWriter {
     }
 }
 
-
-/**
- * 帮助类
- */
-class Helper {
-    static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-
-    static {
-        DATE_FORMAT.setLenient(false);
-    }
-}
