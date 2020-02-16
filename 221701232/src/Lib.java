@@ -24,9 +24,10 @@ public class Lib {
     public static String countryStr = "全国";
     public static String skip = "//";
     public static String[] allType = {"ip", "sp", "cure", "dead"};
-    public static Map<String, String>  PolyphoneMap = new HashMap<String, String>(1){
-        {put("重庆", "冲");}
-    };
+    public static String[] provinces = {"安徽", "北京","重庆","福建","甘肃","广东","广西","贵州",
+            "海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏",
+            "江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西",
+            "上海","四川","天津","西藏","新疆","云南","浙江"};
 }
 
 class CommonUtil {
@@ -222,10 +223,18 @@ class CommonUtil {
 }
 
 class ChinaComparator implements Comparator<String>{
+    public static Map<String, Integer> provinceMap = new HashMap<>();
+    static {
+        int index = 0;
+        for (String str : Lib.provinces) {
+            provinceMap.put(str, index);
+            index++;
+        }
+    }
+
     @Override
     public int compare(String str1, String str2) {
-        Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);
-        return cmp.compare(str1,str2);
+        return (provinceMap.get(str1) - provinceMap.get(str2));
     }
 }
 

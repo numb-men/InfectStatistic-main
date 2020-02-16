@@ -231,14 +231,6 @@ class Container {
     }
 
     public void sortByProvince() {
-        // fix bug for "重庆" -> replace to "冲"
-        for (Map.Entry<String, String> entry : Lib.PolyphoneMap.entrySet()) {
-            if (recordMap.containsKey(entry.getKey())) {
-                Record record = recordMap.get(entry.getKey());
-                recordMap.remove(entry.getKey());
-                recordMap.put(entry.getValue(), record);
-            }
-        }
         ChinaComparator mapKeyComparator = new ChinaComparator();
         recordMap = CommonUtil.sortMapByKey(recordMap, mapKeyComparator);
     }
