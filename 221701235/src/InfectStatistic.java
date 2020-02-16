@@ -6,7 +6,7 @@
  * @version 1.0
  * @since 2020-02-16
  */
-
+import java.io.File;
 
 public class InfectStatistic {
     public static void main(String[] args) {
@@ -30,14 +30,28 @@ public class InfectStatistic {
             "贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁",
             "内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆",
             "云南","浙江"};
-        //省份出现标记数组
+        //指定省份出现标记数组，大小是全国1+31个可能出现的省份
         int provinceAppear [] = new int[32];
         for (int i=0; i < 32; i++) {
             //初始化
             provinceAppear[i] = 0;
         }
+        //结合可能出现的所有省 和 所有感染情况类型 可以建立一个二维数组来统计人数
+        int totalTable [][] = new int[32][4];
+        for (int i = 0; i < totalTable.length; i++) {
+            for (int j = 0; j < totalTable[i].length; j++) {
+                //初始化
+                totalTable[i][j] = 0;
+            }
+        }
+        //处理过程中省份出现标记数组，大小也是32
+        int provinceReade [] = new int[32];
+        for (int i=0; i < 32; i++) {
+            //初始化
+            provinceReade[i] = 0;
+        }
         
-        //合法性检验待定
+        //合法性检验待定，处理参数
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-log")) {
                 logCount++;
@@ -94,31 +108,50 @@ public class InfectStatistic {
                 }
             }
         }
-        System.out.println("命令解析完毕，测试输出如下：");
-        //合法性检验待定
-        System.out.println("读取路径：" + logPath);
-        System.out.println("输出路径：" + outPath);
-        if (dateCount > 0) {
-            System.out.println("指定日期：" + dateInput);
-        }
-        if (typeCount > 0) {
-            System.out.println("指定类型：");
-            for (int i = 0; i < typeAppear.length; i++) {
-                if (typeAppear[i] == 1) {
-                    //此处先输出缩写
-                    System.out.print(allType[i] + " ");
+        //"-log" 和 "-out"都有附带的情况下才能继续进行
+        if ((logCount == 1) && (outCount == 1)) {
+            //获取文件名列表
+            File file = new File(logPath);
+            if (file.isDirectory()) {
+                String names [] = file.list();
+                if (dateCount == 0) {
+                    //未指定日期,获取最后一个文件名，即最新日志文件
+                    dateInput = names[names.length-1];
+                } else {
+                    dateInput = dateInput + ".log.txt";
+                }
+                for (String name : names) {
+                    int res = dateInput.compareTo(name);
+                    if (res > 0) {
+                        //当前name的日期比指定日期（未指定则认为指定日志最后一个日期即最新）早
+                        //读取 String filePath = logPath + "/" + name 文件
+                        //处理，统计
+                    } else if (res == 0) {
+                        //当前name处理就可以退出了
+                        //读取 String filePath = logPath + "/" + name 文件
+                        //处理，统计
+                        break;
+                    } else {
+                        //指定日期比name的日期晚
+                        break;
+                    }
+                }
+                //处理统计完毕后进行写入
+                //先判断provinceCount 是否为 0，为0即未指定省份，需要列出日志中出现的所有省份以及全国
+                //指定省份则输出指定的省份
+                if (provinceCount == 0) {
+                    //遍历provinceReade数组，找到值为1的下标
+                    //向outPath写入对应的totalTable的值
+                    //输出过程中同样对类型type进行分析
+                    
+                } else {
+                    //遍历provinceAppear数组，找到值为1的下标
+                    //向outPath写入对应的totalTable的值
+                    //输出过程中同样对类型type进行分析
                 }
             }
-            System.out.println();
         }
-        if (provinceCount > 0) {
-            System.out.println("指定省份：");
-            for (int i = 0; i < provinceAppear.length; i++) {
-                if (provinceAppear[i] == 1) {
-                    System.out.print(allProvince[i] + " ");
-                }
-            }
-        }
+      
     }
     public static int getIndex(String str [],String value) {
         for (int i = 0; i < str.length; i++) {
