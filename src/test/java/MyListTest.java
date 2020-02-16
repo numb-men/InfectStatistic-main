@@ -55,19 +55,62 @@ public class MyListTest {
 
     @Test
     public void out() {
+/*        while(true){
+            try {
+                String[] lists=FileOperate.readFile("./src/test/resource/list/list.txt").split("#");
+                String[] listOuts=FileOperate.readFile("./src/test/resource/list/listOut.txt").split("#");
+
+                for(int i=0;i<lists.length;i++){
+                    CmdArgs cmdArgs=new CmdArgs(lists[i]);
+
+                    MyList list = new MyList(cmdArgs);
+                    ControlCommand controlCommand = new ControlCommand();
+                    //list -log
+                    controlCommand.setCommands(0, new ListLogCommand(list));
+                    //list -date
+                    controlCommand.setCommands(1, new ListDateCommand(list));
+                    //list -province
+                    controlCommand.setCommands(2, new ListProvinceCommand(list));
+                    //list -type
+                    controlCommand.setCommands(3, new ListTypeCommand(list));
+                    //list -out 输出在最后执行
+                    controlCommand.setCommands(4, new ListOutCommand(list));
+                    //执行全部命令
+                    controlCommand.sureExecuteAll();
+
+                    String outStr=FileOperate.readFile(list.getOutPath());
+                    String rightStr=FileOperate.readFile(listOuts[i]);
+
+                    assertTrue(outStr.equals(rightStr));
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }*/
+
         try {
             String[] lists=FileOperate.readFile("./src/test/resource/list/list.txt").split("#");
             String[] listOuts=FileOperate.readFile("./src/test/resource/list/listOut.txt").split("#");
 
             for(int i=0;i<lists.length;i++){
-                MyList myList=new MyList(new CmdArgs(lists[i]));
-                myList.log();
-                myList.date();
-                myList.province();
-                myList.type();
-                myList.out();
+                CmdArgs cmdArgs=new CmdArgs(lists[i]);
 
-                String outStr=FileOperate.readFile(myList.getOutPath());
+                MyList list = new MyList(cmdArgs);
+                ControlCommand controlCommand = new ControlCommand();
+                //list -log
+                controlCommand.setCommands(0, new ListLogCommand(list));
+                //list -date
+                controlCommand.setCommands(1, new ListDateCommand(list));
+                //list -province
+                controlCommand.setCommands(2, new ListProvinceCommand(list));
+                //list -type
+                controlCommand.setCommands(3, new ListTypeCommand(list));
+                //list -out 输出在最后执行
+                controlCommand.setCommands(4, new ListOutCommand(list));
+                //执行全部命令
+                controlCommand.sureExecuteAll();
+
+                String outStr=FileOperate.readFile(list.getOutPath());
                 String rightStr=FileOperate.readFile(listOuts[i]);
 
                 assertTrue(outStr.equals(rightStr));
