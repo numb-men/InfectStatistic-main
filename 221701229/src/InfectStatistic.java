@@ -3,26 +3,17 @@
  * TODO
  *
  * @author 221701229
- * @version 1.0
+ * @version 1.0.0
  * @since 2020
  */
-import sun.rmi.log.LogHandler;
-
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
 class InfectStatistic {
     public static void main(String[] args) {
-                /*String s="list -date 2020-01-22 -log D:/log/ -out D:/output.txt";
-                String[] sl=s.split("\\s+");
-                for (String ss:sl)
-                {
-                    System.out.println(ss);
-                }
-                CommandManager cm=new CommandManager(sl);
-                cm.getArguments();*/
-
+                String arg[]="list  -log E:/log/ -out E:/out/output.txt".split("\\s+");
+                CommandInvoker cmdinvoke=new CommandInvoker(arg);
 
         }
     }
@@ -36,29 +27,6 @@ interface Command{
      void execute(String[] args);
 
      String getCmdName();
-}
-
-
-/**
- *不同类型日志行
- */
-class LogLine {
-
-    private Pattern reg;
-    private String logline;
-    LogLine(String arg)
-    {
-        logline=arg;
-        reg=Pattern.compile(arg);
-    }
-
-    public Pattern getReg() {
-        return reg;
-    }
-
-    public String getLogline() {
-        return logline;
-    }
 }
 
 /**
@@ -107,9 +75,11 @@ class CommandManager {
         {
             /*
             *
-            *错误输出
+            *找不到命令错误输出
             *
             */
+            System.out.println("没有对应的命令！");
+            System.exit(1);
         }
     }
 
@@ -156,14 +126,15 @@ class CommandManager {
 /**
  命令的解析与调用执行
  * */
+
 class CommandInvoker{
-    String[] args;
-        //从初始命令中解析出字符串数组
-        public static void getCommandArgs(String cmd)
+        private String[] args;
+        CommandInvoker(String[] arg)
         {
-            String [] spString = cmd.split("\\s+");
+            args=arg;
+            CommandManager cm=new CommandManager(args);
+            cm.setCommand();
         }
-        CommandManager cm=new CommandManager(args);
 
 }
 
@@ -172,8 +143,17 @@ class CommandInvoker{
  * */
 class list implements Command{
     final String cmdname="list";
+    final List<String> provinceorder=Arrays.asList("安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东",
+            "山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江");
+    private Comparator<String> comp;   //省份比较器
     private String log=null;  //日志文件夹路径
     private String out=null;  //输出文件路径
+    private ArrayList type=null;  //指定的输出类型
+    private ArrayList province=null;  //指定的省份
+    private Set<String> allprovinceSet;//日志中出现的省份
+    private ArrayList allprovinceList;//日志中出现的省份
+    private String date=null;
+    private int[] all={0,0,0,0};
     private HashMap<String,Integer> infected;
     private HashMap<String,Integer> suspected;
     private HashMap<String,Integer> cured;
@@ -186,6 +166,12 @@ class list implements Command{
         suspected=new HashMap<>();
         cured=new HashMap<>();
         died=new HashMap<>();
+        comp=new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return provinceorder.indexOf(o1)-provinceorder.indexOf(o2);
+            }
+        };
     }
 
     public void execute(String[] args)
@@ -197,16 +183,30 @@ class list implements Command{
         //提取两个必需的参数
         while (it.hasNext())
         {
-            if(((ArrayList)it.next()).get(0).equals("-log"))
+            ArrayList para=((ArrayList)it.next());
+            if(para.get(0).equals("-log"))
             {
-                log=(String) ((ArrayList)it.next()).get(1);
-                it.remove();
+                log=(String)para.get(1);
+                //it.remove();
             }
-            else if(((ArrayList)it.next()).get(0).equals("-out"))
+            else if(para.get(0).equals("-out"))
             {
-                out=(String) ((ArrayList)it.next()).get(1);
-                it.remove();
+                out=(String) para.get(1);
+                //it.remove();
             }
+            else if(para.get(0).equals("-date"))
+            {
+                date=(String) para.get(1);
+            }
+            else if(para.get(0).equals("-type"))
+            {
+                type=para;
+            }
+            else if(para.get(0).equals("-province"))
+            {
+                province=para;
+            }
+
         }
         if(log==null||out==null)
         {
@@ -215,29 +215,44 @@ class list implements Command{
             * 必要参数缺失错误
             *
             * */
+            System.out.println("缺少必要参数log或out");
+            System.exit(1);
         }
 
         File logFiles=new File(log);
+
         if(!logFiles.exists())
         {
+            System.out.println("file name"+log);
             /*
             * 文件不存在错误
             *
             * */
+            System.out.println("指定的读取文件路径不存在!");
+            System.exit(1);
+        }
+        if(!(new File(out)).exists())
+        {
+            System.out.println("指定的输出文件路径不存在!");
+            System.exit(1);
         }
         File[] files=logFiles.listFiles();
         //遍历提供的文件夹下的日志
+        String readbuff=null;
         for (File f:files)
         {
             try
             {
-                FileReader fr=new FileReader(f.getName());
-                BufferedReader br=new BufferedReader(fr);
-                while (br.readLine()!=null)
+                BufferedReader br=new BufferedReader(new FileReader(f));
+                while ((readbuff=br.readLine())!=null)
                 {
                     //把读出来的日志行交给下面处理
-                    handler.logHandlerList(br.readLine(),infected,suspected,cured,died);
-
+                    handler.logHandlerList(readbuff,infected,suspected,cured,died);
+                }
+                //有指定截至日期时读取完文件判断日期
+                if(null!=date&&f.getName().equals(date))
+                {
+                    break;
                 }
                 br.close();
             }
@@ -249,6 +264,166 @@ class list implements Command{
             catch (IOException ie)
             {
                 System.out.println("null content");
+                System.exit(1);
+            }
+        }
+
+        //处理文件遍历完的结果，按选项输出到指定文件
+        // /type ip sp cure dead /province /out
+
+        if(type!=null)
+        {
+            boolean ip=false;
+            boolean sp=false;
+            boolean cure=false;
+            boolean dead=false;
+           type.remove(0);
+           Iterator typeit=type.iterator();
+           String typ=null;
+           //筛选有设定的选项
+           while (typeit.hasNext())
+           {
+               typ=(String)it.next();
+               if("ip".equals(typ))
+               {
+                   ip=true;
+               }else if("sp".equals(typ))
+               {
+                   sp=true;
+               }else if("cure".equals(typ))
+               {
+                   cure=true;
+               }else if("dead".equals(typ))
+               {
+                   dead=true;
+               }
+           }
+
+           try{
+               File f=new File(out);
+               FileWriter fw=new FileWriter(f);
+               int i,s,c,d;
+               String prov=null;
+           if(null!=province)
+           {
+               province.sort(comp); //排序
+               Iterator proiter=province.iterator();
+               while (proiter.hasNext())
+               {
+                   prov=(String) proiter.next();
+                   //数据不存在则设置为0
+                   if(infected.get(prov)==null)i=0;
+                   else i=infected.get(prov);
+                   if(suspected.get(prov)==null)s=0;
+                   else s=suspected.get(prov);
+                   if(cured.get(prov)==null)c=0;
+                   else c=cured.get(prov);
+                   if(died.get(prov)==null)d=0;
+                   else d=died.get(prov);
+                   fw.write(prov+" ");
+                   if(ip)fw.write("感染患者"+i+"人 ");
+                   if(sp)fw.write("疑似患者"+s+"人 ");
+                   if(cure)fw.write("治愈"+c+"人 ");
+                   if(dead)fw.write("死亡"+d+"人");
+                   fw.write('\n');
+               }
+           }
+           else
+           {
+               allprovinceSet=infected.keySet();
+               allprovinceSet.addAll(suspected.keySet());
+               allprovinceSet.addAll(cured.keySet());
+               allprovinceSet.addAll(died.keySet());
+               allprovinceList=new ArrayList(allprovinceSet);
+               //计算全国
+               //给所有省份按给定的顺序排序
+               allprovinceList.sort(comp);
+               Iterator proiter=allprovinceList.iterator();
+               while (proiter.hasNext())
+               {
+                   prov=(String) proiter.next();
+                   //数据不存在则设置为0
+                   if(infected.get(prov)==null)i=0;
+                   else i=infected.get(prov);
+                   if(suspected.get(prov)==null)s=0;
+                   else s=suspected.get(prov);
+                   if(cured.get(prov)==null)c=0;
+                   else c=cured.get(prov);
+                   if(died.get(prov)==null)d=0;
+                   else d=died.get(prov);
+                   fw.write(prov+" ");
+                   if(ip)fw.write("感染患者"+i+"人 ");
+                   if(sp)fw.write("疑似患者"+s+"人 ");
+                   if(cure)fw.write("治愈"+c+"人 ");
+                   if(dead)fw.write("死亡"+d+"人");
+                   fw.write('\n');
+               }
+           }
+            fw.close();
+        }catch (IOException io){
+               System.out.println("file error");
+           }
+
+        }
+
+        //四项全部输出
+        else
+        {
+            try{
+                File f=new File(out);
+                FileWriter fw=new FileWriter(f);
+                int i,s,c,d;
+                String prov=null;
+                if(null!=province)
+                {
+
+                    province.sort(comp); //排序
+                    Iterator proiter=province.iterator();
+                    while (proiter.hasNext())
+                    {
+                        prov=(String) proiter.next();
+                        //数据不存在则设置为0
+                        if(infected.get(prov)==null)i=0;
+                        else i=infected.get(prov);
+                        if(suspected.get(prov)==null)s=0;
+                        else s=suspected.get(prov);
+                        if(cured.get(prov)==null)c=0;
+                        else c=cured.get(prov);
+                        if(died.get(prov)==null)d=0;
+                        else d=died.get(prov);
+                        fw.write(prov+" "+"感染患者"+i+"人 "+"疑似患者"+s+"人 "+"治愈"+c+"人 "+"死亡"+d+"人"+'\n');
+                    }
+                }
+                else
+                {
+                    allprovinceSet=new HashSet<>();
+                   allprovinceSet.addAll(infected.keySet());
+                   allprovinceSet.addAll(suspected.keySet());
+                   allprovinceSet.addAll(cured.keySet());
+                   allprovinceSet.addAll(died.keySet());
+                   allprovinceList=new ArrayList(allprovinceSet);
+                   //计算全国
+                   //给所有省份按给定的顺序排序
+                    allprovinceList.sort(comp);
+                    Iterator proiter=allprovinceList.iterator();
+                    while (proiter.hasNext())
+                    {
+                        prov=(String) proiter.next();
+                        //数据不存在则设置为0
+                        if(infected.get(prov)==null)i=0;
+                        else i=infected.get(prov);
+                        if(suspected.get(prov)==null)s=0;
+                        else s=suspected.get(prov);
+                        if(cured.get(prov)==null)c=0;
+                        else c=cured.get(prov);
+                        if(died.get(prov)==null)d=0;
+                        else d=died.get(prov);
+                        fw.write(prov+" "+"感染患者"+i+"人 "+"疑似患者"+s+"人 "+"治愈"+c+"人 "+"死亡"+d+"人"+'\n');
+                    }
+                }
+                fw.close();
+            }catch (IOException io){
+                System.out.println("file write error");
             }
         }
 
@@ -266,6 +441,7 @@ class list implements Command{
 class LogHandle{
     private ArrayList<MyPatterns> pat=new ArrayList<>();
     private MyPatterns mypattern;
+
     //命令的处理
     LogHandle()
     {
@@ -295,6 +471,10 @@ class LogHandle{
 
 }
 
+/**
+* 各种正则表达式
+*
+* */
 abstract class MyPatterns
 {
     String InfectedPatients="([\\u4e00-\\u9fa5])+ 新增 感染患者 (\\d+)人";//<省> 新增 感染患者 n人
