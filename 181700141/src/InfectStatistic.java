@@ -238,8 +238,8 @@ class ListCommand {
                 list.add(provincesArray[i]);
         return list;
     }
-    
-    public List<String> getInputProvinces(){
+
+    public List<String> getInputProvinces() {
         return provinces;
     }
 
@@ -255,9 +255,24 @@ class ListCommand {
 
     // 读取目录下的日志文件
     public void handleFiles(File file) throws Exception {
+        // 获得目录下全部文件列表
         String[] logFiles = file.list();
-        Arrays.sort(logFiles);
         int l = logFiles.length;
+        // 提取出符合XXXX-XX-XX.log.txt命名要求的日志文件
+        List<String> legalFiles = new ArrayList<String>();
+        for (int i = 0; i < l; i++) {
+            if (logFiles[i].matches("\\d{4}-\\d{2}-\\d{2}\\.log\\.txt"))
+                legalFiles.add(logFiles[i]);
+        }
+
+        // 将符合要求的日志文件列表存入logFiles数组中
+        l = legalFiles.size();
+        if (l == 0)
+            throw new IllegalException("错误，该日志目录下不存在合法的日志文件");
+        logFiles = new String[l];
+        legalFiles.toArray(logFiles);
+        Arrays.sort(logFiles);
+
         if (date != null && date.compareTo(logFiles[l - 1]) > 0)
             throw new IllegalException("错误，日期非法，超出日志最晚时间");
         if (date == null)
@@ -266,7 +281,7 @@ class ListCommand {
             date = date + ".log.txt";
         // 读取满足要求的日志文件并进行数据更新
         for (int i = 0; i < l; i++) {
-            if (logFiles[i].matches("\\S+\\.log\\.txt") && date.compareTo(logFiles[i]) >= 0) {
+            if (date.compareTo(logFiles[i]) >= 0) {
                 handleFile(inDirectory + "/" + logFiles[i]);
             }
         }
@@ -426,7 +441,7 @@ class ListCommand {
                 int ipSum = ipMap.get(province);
                 // 更新感染人数
                 ipMap.put(province, ipSum - deadSum);
-                
+
                 deadSum += deadMap.get(province);
                 deadMap.put(province, deadSum);
             } else if (strLine.matches(s6)) {
@@ -493,13 +508,13 @@ class ListCommand {
             types.toArray(needTypes);
             if (size == 1) {
                 if (needTypes[0].equals("ip"))
-                    writer.write(" 感染患者" + ipMap.get(province)+"人\n");
+                    writer.write(" 感染患者" + ipMap.get(province) + "人\n");
                 else if (needTypes[0].equals("sp"))
-                    writer.write(" 疑似患者" + spMap.get(province)+"人\n");
+                    writer.write(" 疑似患者" + spMap.get(province) + "人\n");
                 else if (needTypes[0].equals("cure"))
-                    writer.write(" 治愈" + cureMap.get(province)+"人\n");
+                    writer.write(" 治愈" + cureMap.get(province) + "人\n");
                 else
-                    writer.write(" 死亡" + deadMap.get(province)+"人\n");
+                    writer.write(" 死亡" + deadMap.get(province) + "人\n");
                 continue;
             }
             if (needTypes[0].equals("ip"))
