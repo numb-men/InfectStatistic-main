@@ -227,6 +227,25 @@ public class Lib {
             return map;
         }
     }
+    public class RegTwo {
+        private final String REGEX = "(\\S+) 新增 疑似患者 (\\d+)人";
+
+        // 返回一个省份对应信息的映射
+        public Map<String, Integer[]> process(String line) {
+            Map<String,Integer[]> map = new HashMap<>();
+            String[] result = line.split(" ");
+            // 获取省份
+            String province = result[0];
+            // 获取人数
+            Integer population = Integer.parseInt(result[3].substring(0,result[3].length()-1));
+
+            // 封装成map
+            Integer[] num = {0,population,0,0};
+            map.put(province,num);
+            map.put("全国",new Integer[]{0,population,0,0});
+            return map;
+        }
+    }
 }
 
 
