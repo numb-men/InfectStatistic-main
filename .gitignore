@@ -1,7 +1,12 @@
+#忽略学号文件内容
 /221701416/*
+#但不忽略codestyle和README文件
 !/221701416/codestyle.md
 !/221701416/README.md
+#记得不忽略src文件夹
 !/221701416/src/
+#再把src文件内容忽略
 /221701416/src/*
+#不忽略InfectStatistic和Lib文件
 !/221701416/src/InfectStatistic.java
 !/221701416/src/Lib.java
