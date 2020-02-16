@@ -1,9 +1,6 @@
-import junit.framework.TestCase;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
@@ -53,7 +50,7 @@ class Read {
         try {
             File file = new File(Log_Path);//传入log的路径
             String strline=null;//用来存储读出的一行
-            BufferedReader bufferedReader=new BufferedReader(new FileReader(file));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
             while((strline=bufferedReader.readLine())!=null){//一次读一行
                 Dealtxt(strline);
             }
@@ -64,6 +61,7 @@ class Read {
     }
 
     public void Dealtxt(String a){
+        System.out.println(a);
         num.province[0]++;
         String addinfect = "(\\S+) 新增 感染患者 (\\d+)人";
         String adddoubt = "(\\S+) 新增 疑似患者 (\\d+)人";
@@ -237,6 +235,10 @@ class Cmdlist {
                 }
             }
         }
+        if(b==0){
+            System.out.println("必须输入log参数");
+            return false;
+        }
         for(int i=1;i<args.length;i++){
             if (args[i].equals("-out")) {
                 a++;
@@ -251,6 +253,10 @@ class Cmdlist {
                 }
             }
         }
+        if(a==0){
+            System.out.println("必须输入out参数");
+            return false;
+        }
         for(int i=1;i<args.length;i++){
             if (args[i].equals("-date")){
                 _date++;
@@ -260,20 +266,7 @@ class Cmdlist {
                     return true;
                 }
                 bool_date=makedate(args[i+1]);
-                //  System.out.println(date);
-                if(bool_date==false){
-                    System.out.println("你输入的日期格式不符合yyyy-mm-dd");
-                    return false;
-                }
             }
-        }
-        if(b==0){
-            System.out.println("必须输入log参数");
-            return false;
-        }
-        if(a==0){
-            System.out.println("必须输入out参数");
-            return false;
         }
         return true;
     }
@@ -297,10 +290,18 @@ class Cmdlist {
     public boolean makedate(String date2){
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         try {
-            Date date1 = format.parse(date2);
-            if(date2.equals(format.format(date1))){
-                date=date1;
-                return true;
+            Date date3=new Date(System.currentTimeMillis());
+            if(date2.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
+                Date date1 = format.parse(date2);
+                if (date2.equals(format.format(date1))) {
+                    date = date1;
+                    return true;
+                }
+                else{
+                    date = new Date(System.currentTimeMillis());
+                    System.out.println("您没有输入具体日期或输入格式有误，将按照今天的日期计算");
+                    return true;
+                }
             }
             else{
                 date = new Date(System.currentTimeMillis());
@@ -421,14 +422,24 @@ class Write {
                         }
                     }
                 }
-            } else {
+            }
+            else {
                 if (num.provinces[0].quantify == 0) {
                     for (int i = 0; i < 35; i++) {
                         if (num.province[i] != 0) {
                             fw.write(num.province2[i]+" ");
-                            for(int j=0;j<4;j++){
-                                if(num.kinds[j].quantify!=0)
-                                    fw.write(num.kinds[j].name+num.province_infectpeople[num.provinces[i].num]+"人"+" ");
+                            for(int j=0;j<4;j++) {
+                                if (num.kinds[j].quantify != 0) {
+                                    fw.write(num.kinds[j].name);
+                                    if (num.kinds[j].name == "感染患者")
+                                        fw.write(num.province_infectpeople[num.provinces[i].num] + "人" + " ");
+                                    else if (num.kinds[j].name == "疑似患者")
+                                        fw.write(num.province_doubtpeople[num.provinces[i].num] + "人" + " ");
+                                    else if (num.kinds[j].name == "治愈")
+                                        fw.write(num.province_curepeople[num.provinces[i].num] + "人" + " ");
+                                    else if (num.kinds[j].name == "死亡")
+                                        fw.write(num.province_deadpeople[num.provinces[i].num] + "人" + " ");
+                                }
                             }
                             fw.write("\n");
                         }
@@ -439,8 +450,17 @@ class Write {
                         if (num.provinces[i].quantify != 0) {
                             fw.write(num.provinces[i].name+" ");
                             for(int j=0;j<4;j++){
-                                if(num.kinds[j].quantify!=0)
-                                    fw.write(num.kinds[j].name+num.province_infectpeople[num.provinces[i].num]+"人"+" ");
+                                if(num.kinds[j].quantify!=0){
+                                    fw.write(num.kinds[j].name);
+                                    if (num.kinds[j].name == "感染患者")
+                                        fw.write(num.province_infectpeople[num.provinces[i].num] + "人" + " ");
+                                    else if (num.kinds[j].name == "疑似患者")
+                                        fw.write(num.province_doubtpeople[num.provinces[i].num] + "人" + " ");
+                                    else if (num.kinds[j].name == "治愈")
+                                        fw.write(num.province_curepeople[num.provinces[i].num] + "人" + " ");
+                                    else if (num.kinds[j].name == "死亡")
+                                        fw.write(num.province_deadpeople[num.provinces[i].num] + "人" + " ");
+                                }
 
                             }
                             fw.write("\n");
