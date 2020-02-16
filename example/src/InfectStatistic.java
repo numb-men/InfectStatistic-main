@@ -4,17 +4,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 /**
  * InfectStatistic
- * TODO
+ * FINISHED
  *
  * @author 221701312 张庭博
- * @version 1.8
+ * @version 1.9
  * @since 2020-02-11
  */
 class InfectStatistic {
     public static void main(String[] args)
     {
         CommandIdentity cmdit=new CommandIdentity(args);
-        //cmdit.PrintCommand();
+        /*cmdit.PrintCommand();*/
         cmdit.Identify();
     }
 }
@@ -28,7 +28,7 @@ class FileManager{
     public int[] DeadPatients=new int[31];
     public boolean[] IsVisited = new boolean[31];
     public int AllIP=0,AllSP=0,AllCP=0,AllDP=0;
-    private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";// 中文正则
+    private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";/* 中文正则*/
     ArrayList<String> FileNames = new ArrayList<>();
     ArrayList<String> FileContent = new ArrayList<>();
 
@@ -37,17 +37,19 @@ class FileManager{
     }
     public int ReadFile(String FilePath,String dateparam){
         File f = new File(FilePath);
-        int stopPoint=0;//判断读取哪些文件的断点
-        int flag=0;//判断日期是否合法
+        int stopPoint=0;/*判断读取哪些文件的断点*/
+        int flag=0;/*判断日期是否合法*/
         String stopDate = dateparam + ".log.txt";
         if(f.isDirectory()) {
             String[] temp = f.list();
             for(int i=0;i<temp.length;i++)
                 FileNames.add(temp[i]);
         }
-        else
+        else {
             System.out.println("log文件目录错误！");
-        //找到断点
+            return 0;
+        }
+        /*找到断点*/
         if(dateparam.equals(""))
             stopPoint=FileNames.size();
         else{
@@ -93,7 +95,7 @@ class FileManager{
                 file.createNewFile();
             fileWriter = new FileWriter(file, true);
 
-            if (provinceparam.size() == 0) {//-province没有参数
+            if (provinceparam.size() == 0) {/*-province没有参数*/
                 String s = GetStringByType(typeparam,"全国");
                 fileWriter.write(s);
                 for (int i = 0; i < 31; i++) {
@@ -103,7 +105,7 @@ class FileManager{
                     }
                 }
             }
-            if(provinceparam.size() > 0) {//-province有参数
+            if(provinceparam.size() > 0) {/*-province有参数*/
                 for(int i=0;i<provinceparam.size();i++){
                     String s=GetStringByType(typeparam,provinceparam.get(i));
                     fileWriter.write(s);
@@ -190,7 +192,7 @@ class FileManager{
         int index = 0;
         int increase;
         String tes=str[str.length-1];
-        //除去中文字符
+        /*除去中文字符*/
         Pattern pat = Pattern.compile(REGEX_CHINESE);
         Matcher mat = pat.matcher(tes);
         increase=Integer.parseInt(mat.replaceAll(""));
@@ -285,10 +287,12 @@ class CommandIdentity{
         ArrayList<String > typeparam=new ArrayList<>();
         ArrayList<String > provinceparam = new ArrayList<>();
         String logparam="",outparam="",dateparam="";
-        if(!command[0].equals("list"))
+        if(!command[0].equals("list")) {
             System.out.println("命令格式错误！");
+            return ;
+        }
         else{
-            //log命令位置获取和参数
+            /*log命令位置获取和参数*/
             for(int i=0;i<command.length;i++) {
                 if (command[i].equals("-log")) {
                     logpos = i;
@@ -296,7 +300,7 @@ class CommandIdentity{
                 }
             }
             logparam=command[logpos+1];
-            //out命令位置获取和参数
+            /*out命令位置获取和参数*/
             for(int i=0;i<command.length;i++) {
                 if(command[i].equals("-out")) {
                     outpos = i;
@@ -304,7 +308,7 @@ class CommandIdentity{
                 }
             }
             outparam=command[outpos+1];
-            //date命令位置获取和参数
+            /*date命令位置获取和参数*/
             for(int i=0;i<command.length;i++) {
                 if (command[i].equals("-date")) {
                     datepos = i;
@@ -315,7 +319,7 @@ class CommandIdentity{
                 dateparam="";
             else
                 dateparam=command[datepos+1];
-            //type命令位置获取和参数
+            /*type命令位置获取和参数*/
             for(int i=0;i<command.length;i++) {
                 if (command[i].equals("-type")) {
                     typepos = i;
@@ -328,7 +332,7 @@ class CommandIdentity{
                 else
                     typeparam.add(command[i]);
             }
-            //province命令位置获取和参数
+            /*province命令位置获取和参数*/
             for(int i=0;i<command.length;i++) {
                 if (command[i].equals("-province")) {
                     provincepos = i;
