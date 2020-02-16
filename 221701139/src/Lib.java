@@ -463,6 +463,63 @@ public class Lib {
             info.put("浙江", new Integer[]{0, 0, 0, 0});
 
         }
+
+        // 通过reg类返回的map信息设置要写入的文件信息
+        public void setting(Map<String,Integer[]> lineInfo) {
+            // 得到要写入的键
+            Set<String> keys = lineInfo.keySet();
+            for (String key:keys) {
+
+                // 得到要写入的整数信息
+                Integer[] newInfo = lineInfo.get(key);
+
+                // 得到原始的整数信息
+                Integer[] oriInfo = info.get(key);
+                System.out.println("修改完成前");
+                System.out.println(key+" "+oriInfo[0]+" "+oriInfo[1]+" "+oriInfo[2]+" "+oriInfo[3]+" ");
+
+                for (int i = 0;i<newInfo.length;i++) {
+                    // 找到不为0的信息修改
+                    oriInfo[i] = oriInfo[i]+newInfo[i];
+                }
+                System.out.println("修改完成hou");
+                System.out.println(key+" "+oriInfo[0]+" "+oriInfo[1]+" "+oriInfo[2]+" "+oriInfo[3]+" ");
+                info.put(key,oriInfo);
+            }
+        }
+
+        // 将读入的文件的每一行经过正则表达式处理
+        public void processInfo(String filePath) {
+            // filePath 为要处理的文件名
+            try {
+                // 准备输入流
+                FileInputStream fis = new FileInputStream(filePath);
+                InputStreamReader inputStreamReader = new InputStreamReader(fis);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String line;
+                Map<String,Integer[]> lineInfo;
+                // 读取文件的每一行
+                while((line = bufferedReader.readLine())!=null && !line.startsWith("//")) {
+                    System.out.println(line);
+                    lineInfo = judgeReg(line);
+
+                    // 设置信息
+                    Set<String> keys = lineInfo.keySet();
+                    for (String key:keys) {
+                        Integer[] num = lineInfo.get(key);
+                        System.out.println(key+"---"+num[0]+"--"+num[1]+"--"+num[2]+"--"+num[3]);
+                    }
+                    this.setting(lineInfo);
+                }
+            }
+            catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 }
 
