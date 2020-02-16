@@ -415,6 +415,55 @@ public class Lib {
             return map;
         }
     }
+
+    public class AllInformation {
+        private Map<String, Integer[]> info;
+        String REGEX1 = "(\\S+) 新增 感染患者 (\\d+)人";
+        String REGEX2 = "(\\S+) 新增 疑似患者 (\\d+)人";
+        String REGEX3 = "(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
+        String REGEX4 = "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
+        String REGEX5 = "(\\S+) 死亡 (\\d+)人";
+        String REGEX6 = "(\\S+) 治愈 (\\d+)人";
+        String REGEX7 = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
+        String REGEX8 = "(\\S+) 排除 疑似患者 (\\d+)人";
+
+        public AllInformation() {
+            info = new LinkedHashMap<>();
+            info.put("全国", new Integer[]{0, 0, 0, 0});
+            info.put("安徽", new Integer[]{0, 0, 0, 0});
+            info.put("北京", new Integer[]{0, 0, 0, 0});
+            info.put("重庆", new Integer[]{0, 0, 0, 0});
+            info.put("福建", new Integer[]{0, 0, 0, 0});
+            info.put("甘肃", new Integer[]{0, 0, 0, 0});
+            info.put("广东", new Integer[]{0, 0, 0, 0});
+            info.put("广西", new Integer[]{0, 0, 0, 0});
+            info.put("贵州", new Integer[]{0, 0, 0, 0});
+            info.put("海南", new Integer[]{0, 0, 0, 0});
+            info.put("河北", new Integer[]{0, 0, 0, 0});
+            info.put("河南", new Integer[]{0, 0, 0, 0});
+            info.put("黑龙", new Integer[]{0, 0, 0, 0});
+            info.put("湖北", new Integer[]{0, 0, 0, 0});
+            info.put("湖南", new Integer[]{0, 0, 0, 0});
+            info.put("吉林", new Integer[]{0, 0, 0, 0});
+            info.put("江苏", new Integer[]{0, 0, 0, 0});
+            info.put("江西", new Integer[]{0, 0, 0, 0});
+            info.put("辽宁", new Integer[]{0, 0, 0, 0});
+            info.put("内蒙", new Integer[]{0, 0, 0, 0});
+            info.put("宁夏", new Integer[]{0, 0, 0, 0});
+            info.put("青海", new Integer[]{0, 0, 0, 0});
+            info.put("山东", new Integer[]{0, 0, 0, 0});
+            info.put("山西", new Integer[]{0, 0, 0, 0});
+            info.put("陕西", new Integer[]{0, 0, 0, 0});
+            info.put("上海", new Integer[]{0, 0, 0, 0});
+            info.put("四川", new Integer[]{0, 0, 0, 0});
+            info.put("天津", new Integer[]{0, 0, 0, 0});
+            info.put("西藏", new Integer[]{0, 0, 0, 0});
+            info.put("新疆", new Integer[]{0, 0, 0, 0});
+            info.put("云南", new Integer[]{0, 0, 0, 0});
+            info.put("浙江", new Integer[]{0, 0, 0, 0});
+
+        }
+    }
 }
 
 
