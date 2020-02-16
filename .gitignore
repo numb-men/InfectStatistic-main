@@ -4,9 +4,9 @@
 
 # IntelliJ project files
 .idea
-*.iml
-out
-log
-result
-.idea
+221701434/*.iml
+221701434/out
+221701434/log
+221701434/result
+221701434/.idea
 InfectStatistic-example.iml
