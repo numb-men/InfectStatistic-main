@@ -41,23 +41,17 @@ class CmdArgs {
     }
 
     void action() {
-        switch (args[0]) {
-            case "list": {
-                new CmdList(args).action();
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-    /**
-     * 获取命令
-     * 
-     * @return
-     */
-    String[] getArgs() {
-        return this.args;
+    	if (isLegalCmd())
+    		switch (args[0]) {
+            	case "list": {
+                	new CmdList(args).action();
+                	break;
+            	}
+            	default: {
+                	System.out.println("命令有误");
+                	break;
+            	}
+    		}
     }
 
     /**
@@ -67,9 +61,8 @@ class CmdArgs {
      */
     String getCmd() {
         String cmd = new String(args[0]);
-        for (int i = 1; i < args.length; i++) {
+        for (int i = 1; i < args.length; i++)
             cmd += " " + args[i];
-        }
         return cmd;
     }
 
@@ -95,16 +88,13 @@ class CmdArgs {
             return null;
         }
         ArrayList<String> values = new ArrayList<>();
-        for (int i = 0; i < args.length - 1; i++) {
-            if (args[i].equals(key)) {
+        for (int i = 0; i < args.length - 1; i++)
+            if (args[i].equals(key))
                 for (int j = i + 1; j < args.length; j++) {
-                    if (args[j].charAt(0) == '-') {
+                    if (args[j].charAt(0) == '-')
                         break;
-                    }
                     values.add(args[j]);
                 }
-            }
-        }
         return values;
     }
 
@@ -115,17 +105,13 @@ class CmdArgs {
      * @return
      */
     boolean hasValue(String key) {
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].equals(key)) {
-                if (i + 1 < args.length) {
-                    if (args[i + 1].charAt(0) != '-') {
+        for (int i = 0; i < args.length; i++)
+            if (args[i].equals(key))
+                if (i + 1 < args.length)
+                    if (args[i + 1].charAt(0) != '-')
                         return true;
-                    } else {
+                    else
                         break;
-                    }
-                }
-            }
-        }
         return false;
     }
 
@@ -140,16 +126,13 @@ class CmdArgs {
         String[] patterns = { "list.*-log.*-out.*" }; // 命令集 包括命令及其必须的参数
         int i; // 命令在指令集中的位置
         // 获取命令在命令集中的位置 用于判断是什么命令
-        for (i = 0; i < patterns.length; i++) {
-            if (Pattern.matches(patterns[i], cmd)) {
+        for (i = 0; i < patterns.length; i++)
+            if (Pattern.matches(patterns[i], cmd))
                 break;
-            }
-        }
         switch (i) {
             case 0: {
-                if (new CmdList(args).isLegal()) {
+                if (new CmdList(args).isLegal())
                     result = true;
-                }
                 break;
             }
             default: {
@@ -185,26 +168,27 @@ class CmdList extends CmdArgs {
         if (isLegal()) {
             this.logPath = argVal("-log");
             this.outPath = argVal("-out");
-            if (getCmd().contains("-date")) {
+            if (getCmd().contains("-date"))
                 this.date = argVal("-date");
-            }
-            if (getCmd().contains("-type")) {
+            if (getCmd().contains("-type"))
                 this.type = argVals("-type");
-            }
-            if (getCmd().contains("-province")) {
+            if (getCmd().contains("-province"))
                 this.province = argVals("-province");
-            }
         }
         logDir = new File(logPath);
         if (logDir.isDirectory()) {
             this.files = logDir.list();
             Arrays.sort(files);
-            if (getCmd().contains("-date")) {
+            if (getCmd().contains("-date"))
                 Log.rmAfter(files, getDate() + ".log.txt");
-            }
         }
+        else
+        	System.out.println("日志文件路径有误");
     }
 
+    /**
+     * 执行命令
+     */
     void action() {
         try {
             readLog(this.logPath, this.files, this.logs);
@@ -217,6 +201,7 @@ class CmdList extends CmdArgs {
     
     /**
      * 读取日志文件并储存在logs里，然后调用logToRegion将日志文件转换并保存
+     * 
      * @param logPath
      * @throws IOException
      */
@@ -228,17 +213,16 @@ class CmdList extends CmdArgs {
             FileInputStream fis = new FileInputStream(logPath + name);
             InputStreamReader isr = new InputStreamReader(fis, "utf-8");
             br = new BufferedReader(isr);
-            while((line = br.readLine()) != null) {
-                if(!Log.isIgnore(line)) {
+            while((line = br.readLine()) != null)
+                if(!Log.isIgnore(line))
                     logs.add(line);
-                }
-            }
             br.close();
         }
     }
 
     /**
      * 向指定路径输出结果
+     * 
      * @param outPath
      * @throws IOException
      */
@@ -249,46 +233,41 @@ class CmdList extends CmdArgs {
         Log.Region all = Log.sumAll(regions);
         osw.write(regionToLine(all) + "\n");
         osw.flush();
-        for (Log.Region region : regions) {
+        for (Log.Region region : regions)
             if(isAssign(this.province, region)) {
                 osw.write(regionToLine(region) + "\n");
                 osw.flush();
             }
-        }
         osw.close();
     }
 
     /**
      * 获取当前地区是否为指定输出的地区
+     * 
      * @param province
      * @param region
      * @return
      */
     boolean isAssign(ArrayList<String> province, Log.Region region) {
-        if (province == null) {
+        if (province == null)
             return true;
-        } else if (province.contains(region.name)) {
+        else if (province.contains(region.name))
             return true;
-        } else {
+        else
             return false;
-        }
     }
 
     String regionToLine(Log.Region region) {
         String line = region.name;
         if (this.type != null) {
-            if (this.type.contains("ip")) {
+            if (this.type.contains("ip"))
                 line += " 感人患者" + Log.Region.regionItemToInt(region, region.ip) + "人";
-            }
-            if (this.type.contains("sp")) {
+            if (this.type.contains("sp"))
                 line += " 疑似患者" + Log.Region.regionItemToInt(region, region.sp) + "人";
-            }
-            if (this.type.contains("cure")) {
+            if (this.type.contains("cure"))
                 line += " 治愈" + Log.Region.regionItemToInt(region, region.cure) + "人";
-            }
-            if (this.type.contains("dead")) {
+            if (this.type.contains("dead"))
                 line += " 死亡" + Log.Region.regionItemToInt(region, region.dead) + "人";
-            }
         } else {
             line += " 感人患者" + Log.Region.regionItemToInt(region, region.ip) + "人";
             line += " 疑似患者" + Log.Region.regionItemToInt(region, region.sp) + "人";
@@ -297,33 +276,6 @@ class CmdList extends CmdArgs {
         }
         return line;
     }
-
-    /**
-     * 获取日志文件的文件名
-     * @return
-     */
-    String[] getFiles() {
-        return this.files;
-    }
-
-
-    /**
-     * 获取日志文件的路径
-     * 
-     * @return
-     */
-    String getLogPath() {
-        return this.logPath;
-    }
-
-    /**
-     * 获取日志文件输出路径
-     * @return
-     */
-    String getOutPath() {
-        return this.outPath;
-    }
-
     /**
      * 获取命令中日期参数的值
      * 
@@ -331,30 +283,6 @@ class CmdList extends CmdArgs {
      */
     String getDate() {
         return this.date;
-    }
-
-    /**
-     * 获取命令中类型参数的值
-     * @return
-     */
-    ArrayList<String> getType() {
-        return this.type;
-    }
-
-    /**
-     * 获取命令中地区参数的值
-     * @return
-     */
-    ArrayList<String> getProvince() {
-        return this.province;
-    }
-
-    /**
-     * 获取暂存的地区数据
-     * @return
-     */
-    ArrayList<Log.Region> getRegions() {
-        return this.regions;
     }
 
     /**
@@ -391,41 +319,22 @@ class CmdList extends CmdArgs {
  * 处理日志文件
  */
 class Log {
-    private String logPath = null;  //日志文件路径
-    private File logDir = null; //日志文件的文件夹
-    private String[] files = null;  //日志文件的文件名
     private static String ignore = "//.*"; //行忽略标志
 
     /**
-     * 传入命令类并初始化日志文件的路径和文件列表
-     * @param cmd
-     */
-    Log(CmdList cmdList) {
-        logPath = cmdList.getLogPath();
-        logDir = new File(logPath);
-        if (logDir.isDirectory()) {
-            this.files = logDir.list();
-            Arrays.sort(files);
-            if (cmdList.getCmd().contains("-date")) {
-                rmAfter(files, cmdList.getDate() + ".log.txt");
-            }
-        }
-    }
-
-    /**
      * 将指定日期之后的文件名置为""
+     * 
      * @param date
      */
     static void rmAfter(String[] files, String date) {
         if(files.length > 0) {
             List<String> fileList = new ArrayList<String>(Arrays.asList(files));
             List<String> tmpList = new ArrayList<String>(Arrays.asList(files));
-            for (String file : tmpList) {
+            for (String file : tmpList)
                 if (date.compareTo(file) < 0) {
                     int index = fileList.indexOf(file);
                     fileList.set(index, "");
                 }
-            }
             files = fileList.toArray(files);
         }
     }    
@@ -440,38 +349,35 @@ class Log {
      */
     static boolean isIgnore(String line) {
         boolean result = false;
-        if (Pattern.matches(ignore, line)) {
+        if (Pattern.matches(ignore, line))
             result = true;
-        }
         return result;
     }
 
     /**
      * 获取全国地区总的数据
+     * 
      * @param regions
      * @return
      */
     static Region sumAll(ArrayList<Region> regions) {
         Region all = new Log.Region("全国");
         for (Region region : regions) {
-            for (int num : region.ip) {
+            for (int num : region.ip)
                 all.ip.add(num);
-            }
-            for (int num : region.sp) {
+            for (int num : region.sp)
                 all.sp.add(num);
-            }
-            for (int num : region.cure) {
+            for (int num : region.cure)
                 all.cure.add(num);
-            }
-            for (int num : region.dead) {
+            for (int num : region.dead)
                 all.dead.add(num);
-            }
         }
         return all;
     }
 
     /**
      * 将日志文件转换为地区类并储存
+     * 
      * @param logs
      */
     static void logToRegion(ArrayList<String> logs, ArrayList<Log.Region> regions) {
@@ -479,19 +385,16 @@ class Log {
             String[] items = log.split("[\\s]+");
             int index = Log.Region.indexOfRegion(regions, items[0]);
             int num = 0;
-            for (String item : items) {
-                if (item.endsWith("人")) {
+            for (String item : items)
+                if (item.endsWith("人"))
                     num = Integer.valueOf(item.replace("人", ""));
-                }
-            }
             Log.Region region = regions.get(index);
             switch (items[1]) {
             case "新增": {
-                if (items[2].equals("感染患者")) {
+                if (items[2].equals("感染患者"))
                     region.ip.add(num);
-                } else if (items[2].equals("疑似患者")) {
+                else if (items[2].equals("疑似患者"))
                     region.sp.add(num);
-                }
                 break;
             }
             case "感染患者": {
@@ -583,29 +486,35 @@ class Log {
             });
         }
 
+        /**
+         * 统计地区类中的患者人数
+         * 
+         * @param region
+         * @param nums
+         * @return
+         */
         static int regionItemToInt(Region region, ArrayList<Integer> nums) {
             int result = 0;
-            for (Integer num : nums) {
+            for (Integer num : nums)
                 result += num;
-            }
             return result;
         }
 
-    /**
-     * 获取指定地区在动态数组中的下表，如果数组中没有，则向动态数组中加入该地区
-     * 
-     * @param name
-     * @return
-     */
-    static int indexOfRegion(ArrayList<Region> regions, String name) {
-        int index = -1;
-        Region region = new Region(name);
-        if (!regions.contains(region)) {
-            region = new Region(name);
-            regions.add(region);
+        /**
+        * 获取指定地区在动态数组中的下表，如果数组中没有，则向动态数组中加入该地区
+        * 
+        * @param name
+        * @return
+        */
+        static int indexOfRegion(ArrayList<Region> regions, String name) {
+            int index = -1;
+            Region region = new Region(name);
+            if (!regions.contains(region)) {
+                region = new Region(name);
+                regions.add(region);
+            }
+            index = regions.indexOf(region);
+            return index;
         }
-        index = regions.indexOf(region);
-        return index;
-    }
     }
 }
