@@ -85,8 +85,12 @@ class CommandParser{
                 i++;
                 this.hasType = true;
                 int index = i;
-                for (int j = 0; j < args.length - index && !args[i].equals("-province"); j++) {
+                for (int j = 0; j < args.length - index ; j++) {
                     this.typeList.add(args[i]);
+                    if (args[i].equals("-province")) {
+                        i --;
+                        break;
+                    }
                     i++;
                 }
                 if (typeList.size() == 4) {
@@ -262,7 +266,26 @@ class FileOutputUtils{
                 bufferedWriter.write("\n");  
                }
         }else if (hasProvince && hasType) {
-            
+            String provinceName = "";
+            for (int i = 0; i < provinceList.size(); i++) {
+                provinceName = provinceList.get(i);
+                InfectedArea province = map.map.get(provinceName);
+                String keyString = provinceName;
+                bufferedWriter.write(keyString);
+                if(typeList.contains("ip")) {
+                    bufferedWriter.write(" 感染患者" + province.infectedNum + "人");
+                }
+                if(typeList.contains("sp")) {
+                    bufferedWriter.write(" 疑似患者" + province.potentialNum + "人");
+                }
+                if(typeList.contains("cure")) {
+                    bufferedWriter.write(" 治愈" + province.curedNum + "人");
+                }
+                if(typeList.contains("dead")) {
+                    bufferedWriter.write(" 死亡" + province.deadNum + "人");
+                }
+                bufferedWriter.write("\n");  
+            }
         }else {
             for (HashMap.Entry<String, InfectedArea> entry : map.map.entrySet()) {
                 String keyString = entry.getKey();
