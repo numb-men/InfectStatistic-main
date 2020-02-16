@@ -1,6 +1,13 @@
 package src;
 
+import java.io.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.*;
 import java.util.*;
+
+import javax.swing.text.DateFormatter;
 
 
 /**
@@ -14,12 +21,16 @@ class InfectStatistic {
     public static void main(String[] args) {
 
     	String[] string= {
-    			"-province","浙江","福建","-log", "D:/log/","-date","2020-01-22", "-out", "D:/output.txt",
+    			"-province","浙江","福建","-type","sp","dead","-log", "D:/log/","-date","2020-01-22", "-out", "D:/output.txt",
         	};
     	
-    	ListParameters lp=new ListParameters(string);
-    	lp.formatParameters();
+    	//ListParameters lp=new ListParameters(string);
+    	//lp.formatParameters();
     	
+    	//LogFileReader lfr=new LogFileReader("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log");
+    	File f=new File("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log\\2020-01-22.log.txt");
+    	
+    	LogFileReader.formatFileContent(f);
     }
 }
 
@@ -187,6 +198,7 @@ class ListParameters implements Parameters{
 			}
 		}
 		System.out.println(this.toString());
+		
 	}
 	
 
@@ -212,9 +224,7 @@ class ListParameters implements Parameters{
 		return "ListParameters [listParameterMap=" + listParameterMap + ", "
 				+ "parameters=" + Arrays.toString(parameters)+ "]\n";
 	}
-	
-	
-	
+
 }
 
 
@@ -239,9 +249,19 @@ class CommandLineParser{
 		ListParameters listParameters=new ListParameters(parameters);
 		listParameters.formatParameters();
 //		listParameters.judgeParameters();
-//		ParameterMap=listParameters.getParametersMap();
+		ParameterMap=listParameters.getParametersMap();
 	}
 	
+	
+	public void excuteListCommand() {
+		
+		String logAddress=(String) ParameterMap.get("-log").value;
+		LogFileReader logFileReader=new LogFileReader(logAddress);
+		
+		
+		
+		
+	}
 	
 	
 	
@@ -305,17 +325,141 @@ class DailyInfectItem{
 
 
 /**
- * 日志文件读取器
+ * 	日志文件读取器
  * 
  * @author ZhangYuhui
  * @version 1.0
  */
 class LogFileReader{
 	
-	String logAddress;
+	String logDirectory;
+	Map<LocalDate,File> dateLogFilesMap=new HashMap<LocalDate, File>();
+	LocalDate endDate;
+	LocalDate startDate;
+	LocalDate parameterDate;
+	DateFormat formatter=new SimpleDateFormat("yyyy-MM-dd");
 	
-	public void readFile() {
+	
+	public LogFileReader(String logDirectory) {
 		
+		this.startDate=this.endDate=null;
+		
+	}
+	
+	/**
+	 * 	获取日志文件数组
+	 * 
+	 * @param logDirectory 放置日志的目录
+	 * @return
+	 */
+	public File[] logFiles(String logDirectory) {
+		File logDir=new File(logDirectory);
+		if(logDir.exists()&&logDir.isDirectory()) {
+			File[] logList=logDir.listFiles();
+			
+			return logList;
+//			Date date = null;
+//			LocalDate lDate=null;
+//			for(int i=0;i<logList.length;i++) {
+//				
+//				if(logList[i].isFile()) {
+//					String logName=logList[i].getName();
+//					logName=logName.substring(0, logName.indexOf('.'));
+//					
+//					try {
+//						date=formatter.parse(logName);
+//					}catch (Exception e) {
+//						// TODO: handle exception
+//						e.printStackTrace();
+//					}
+//					
+//					lDate=date2LocalDate(date);
+//					//ManageDateArrange(lDate);
+//					dateLogFilesMap.put(lDate, logList[i]);
+//				}
+//			}
+
+		}else {
+			//	TODO:处理日志所在文件目录异常
+			return null;
+		}
+	}
+	
+	/**
+	 * 	维护需要读取的日志文件，获得最大日期和最小日期
+	 * 
+	 * @param lDate
+	 */
+	public void ManageDateArrange(File[] logs) {
+	
+		Date date = null;
+		LocalDate lDate=null;
+		for(int i=0;i<logs.length;i++) {
+			String logName=logs[i].getName();
+			logName=logName.substring(0, logName.indexOf('.'));
+			try {
+				date=formatter.parse(logName);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			lDate=date2LocalDate(date);
+			if(i==0) {
+				endDate=lDate;
+				startDate=lDate;
+			}else {
+				if(lDate.isAfter(endDate)) {
+					endDate=lDate;
+				}
+				if(lDate.isBefore(startDate)) {
+					startDate=lDate;
+				}
+			}
+		}
+		
+	}
+	
+	
+	public void generateDailyMap() {
+		
+	}
+	/**
+	 * Date转换成LocalDate
+	 * 
+	 * @param date
+	 * @return
+	 */
+    public static LocalDate date2LocalDate(Date date) {
+        if(null == date) {
+            return null;
+        }
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+	
+	/**
+	 * 	将文件中的有效信息行读出到一个字符串中存储
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static String formatFileContent(File file) {
+		
+		StringBuilder sb=new StringBuilder();
+		try {
+			BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+			String s = null;
+			while((s=br.readLine())!=null&&!s.startsWith("//")) {
+				sb.append(s+"\n");
+			}
+			
+			br.close();
+		}catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+		System.out.println(sb.toString());
+		return sb.toString();
 	}
 	
 	
@@ -323,14 +467,15 @@ class LogFileReader{
 }
 
 /**
- * 每个省每日感染情况
+ * 	命令结果输出器
  * 
  * @author ZhangYuhui
  * @version 1.0
  */
-class InfectItem{
+class ResultOutputter{
 	
 }
+
 
 /**
  * 正则表达式
