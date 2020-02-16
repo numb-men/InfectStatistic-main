@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Date;
  *
  * @author Spike
  * @version 1.0
- * @since 2020/2/12
+ * @since 2020-2-12
  */
 class InfectStatistic{
     public static void main(String[] args) {
@@ -28,8 +29,9 @@ class InfectStatistic{
             }
             HandleLog handleObject = new HandleLog(cmdObject.getLogLocation(),cmdObject.getOutLocation(),cmdObject.getLogDate(),
             		cmdObject.getTypeOrder(),cmdObject.getProvinceShow());
-            //handleObject.showAll();   
             handleObject.readLog();
+            handleObject.showAll();   
+            
         }
         
     }
@@ -40,27 +42,27 @@ class InfectStatistic{
  */
 class CmdAnalysis{
 	
-	private String[] cmdString;
-	private String logLocation;
-	private String outLocation;
-	private String logDate;
+	private String[] cmdString;    //命令行参数
+	private String logLocation;    //日志文件位置
+	private String outLocation;    //输出位置
+	private String logDate;    //输出至此日期
 	private int[] typeOrder = {0,1,2,3};	//默认全输出顺序,-1不必输出
-	static String[] typeString = {"ip","sp","cure","dead"};
+	static String[] typeString = {"ip","sp","cure","dead"};    //四种类型
 	private int[] provinceShow = new int[32];	//默认全输出顺序,-1不必输出,0需要输出
-	static String[] province = {"全国", "安徽","北京", "重庆","福建","甘肃",
+	static String[] province = {"全国", "安徽","北京", "重庆","福建","甘肃",    //各省份排序，便于对比
 			"广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
 			"江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海",
-			"四川", "天津", "西藏", "新疆", "云南", "浙江"};
+			"四川", "天津", "西藏", "新疆", "云南", "浙江"};    //省份名称
 	
-	public CmdAnalysis(String []args) {
+	public CmdAnalysis(String []args) {    //构造函数并含相关变量的初始化
 	    cmdString = args;
 	    //设置默认指定日期为一个接近无穷大的日期，这样方便比较，设置默认为全部统计
 	    logDate = "9999-12-31";
 	    for(int i = 0;i < provinceShow.length;i++)
-	    	provinceShow[i] = 0;
+	    	provinceShow[i] = 0;    //默认0全输出，-1则该省份不输出显示
 	}
 	/*
-                *判断命令行参数是否正确，若正确则赋值保存
+     *判断命令行参数是否正确，若正确则赋值保存
 	 */
 	public boolean isCmdString() {
 		
@@ -73,77 +75,39 @@ class CmdAnalysis{
 		for(int i = 0;i < cmdString.length;i++) {
 			if(cmdString[i].equals("-log")) {
 				mustLog = true;
-				//检测日志文件路径合法性
-				if(!isLogLocation(++i)) {
-					System.out.println("日志文件路径不合法");
-					return false;
-				}
+				logLocation = cmdString[++i];
 			}
-			if(cmdString[i].equals("-out")) {
+			else if(cmdString[i].equals("-out")) {
 				mustOut = true;
-				//检测输出路径合法性
-				if(!isOutLocation(++i)) {
-					System.out.println("输出路径不合法");
-					return false;
-				}
+				outLocation = cmdString[++i];
 			}
-			if(cmdString[i].equals("-date")) {
+			else if(cmdString[i].equals("-date")) {
 				//检测日期合法性
 				if(!isCorrectDate(++i)) {
 					System.out.println("指定日期不合法");
 					return false;
 				}
 			}
-			if(cmdString[i].equals("-type")) {
+			else if(cmdString[i].equals("-type")) {
 				if(!isType(++i)) {
 					System.out.println("指定类型不合法");
 					return false;
 				}
 			}
-			if(cmdString[i].equals("-province")) {
+			else if(cmdString[i].equals("-province")) {
 				if(!isProvince(++i)) {
 					System.out.println("指定省份不合法");
 					return false;
 				}
 			}
 		}
-		if(mustLog && mustOut)
+		if(mustLog && mustOut)    //验证必选项是否输入
 			return true;
 		else {
 			System.out.println("缺少输入-log 或 -out");
 			return false;
 		}
 			
-	}
-	/*
-    	*判断日志目录路径是否正确
-	 */
-	private boolean isLogLocation(int i) {
-		
-		if(i<cmdString.length) {
-			String regex = "^[A-z]:(/|\\\\)(.+?(/|\\\\))*$";
-			if(cmdString[i].matches(regex)) {
-				logLocation = cmdString[i];
-				return true;
-			}else
-				return false;
-		}else
-			return false;
-	}
-		/*
-		  *判断输出路径是否正确
-		 */
-	private boolean isOutLocation(int i) {
-		
-		if(i<cmdString.length) {
-			String regex = "^[A-z]:(/|\\\\)(.+?(/|\\\\))*(.+\\.txt)$";
-			if(cmdString[i].matches(regex)) {
-				outLocation = cmdString[i];
-				return true;
-			}else
-				return false;
-		}else
-			return false;
 	}
 	/*
 	  *判断指定日期是否正确
@@ -167,7 +131,7 @@ class CmdAnalysis{
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		try {
             format.setLenient(false);
-            Date date = format.parse(strDate);
+            Date date = format.parse(strDate);    //利用创建日期来判断格式，若抛出异常则日期格式有误
             String[] sArray = strDate.split("-");
             for (String s : sArray) {
                 boolean isNum = s.matches("[0-9]+");
@@ -182,7 +146,7 @@ class CmdAnalysis{
         return true;
 	}
 	/*
-	  *判断指定类型是否正确
+	  *判断指定类型是否正确，正确则记录输出类型的种类及顺序
 	 */
 	private boolean isType(int i) {
 
@@ -292,12 +256,18 @@ class HandleLog{
 	private String logDate;
 	private int[] typeOrder;
 	private int[] provinceShow = new int[32];
+	//统计各省 各类型患者 数目
+	private int[][] sum = new int[32][4];    //32行表示全国~浙江 4列表示ip,sp,cure,dead	初始为0
+	
 	public HandleLog(String logLocation,String outLocation,String logDate,int[] typeOrder,int[] provinceShow) {
 		this.logLocation = logLocation;
 		this.outLocation = outLocation;
 		this.logDate = logDate;
 		this.typeOrder = (int[])typeOrder.clone();
 		this.provinceShow = (int[])provinceShow.clone();
+		
+		for(int i = 0;i < sum.length;i++)
+			Arrays.fill(sum[i], 0);    //各省各类型起始数目起始化为0 
 	}
 	/*
 	 * 进入log目录读取日志文件
@@ -308,21 +278,24 @@ class HandleLog{
 		for(int i = 0;i < files.length;i++) {
 			if(file.isDirectory()) {
 				String filePath = files[i].getPath();
-				if(filePath.compareTo(logLocation + logDate) <= 0) {
-					System.out.println(filePath);
+				String fileName = files[i].getName();
+				//System.out.println(fileName);
+				if(fileName.compareTo(logDate + ".log.txt") <= 0) {
+					//System.out.println(filePath);
 					statistics(filePath);
 				}
 			}
 		}
 	}
 	/*
-	 * 分类别统计：0新增 感染，1新增 疑似，2感染 流入，3疑似 流入，4死亡，5治愈，6确诊感染，7排除
+	 * 分类别统计：0新增 感染，1新增 疑似，2感染 流入，3疑似 流入，4死亡，5治愈，6疑似确诊感染，7排除
 	 */
 	private void statistics(String filePath) {
-		String handleType[] = {"\\S+ 新增 感染患者 \\d+人","\\S+ 新增 疑似患者 \\d+人",
-				"\\S+ 感染患者 流入 \\S+ \\d+人","\\S+ 疑似患者 流入 \\S+ \\d+人",
-				"\\S+ 死亡 \\d+人","\\S+ 治愈 \\d+人","\\S+ 疑似患者 确诊感染 \\d+人",
-				"\\S+ 排除 疑似患者 \\d+人"};
+		//[\\u4E00-\\u9FA5]+ 匹配多个中文字符
+		String handleType[] = {"[\\u4E00-\\u9FA5]+ 新增 感染患者 \\d+人","[\\u4E00-\\u9FA5]+ 新增 疑似患者 \\d+人",
+				"[\\u4E00-\\u9FA5]+ 感染患者 流入 [\\u4E00-\\u9FA5]+ \\d+人","[\\u4E00-\\u9FA5]+ 疑似患者 流入 [\\u4E00-\\u9FA5]+ \\d+人",
+				"[\\u4E00-\\u9FA5]+ 死亡 \\d+人","[\\u4E00-\\u9FA5]+ 治愈 \\d+人","[\\u4E00-\\u9FA5]+ 疑似患者 确诊感染 \\d+人",
+				"[\\u4E00-\\u9FA5]+ 排除 疑似患者 \\d+人"};
 		BufferedReader reader = null;
 		try {
 			// 指定读取文件的编码格式，要和写入的格式一致，以免出现中文乱码
@@ -350,13 +323,13 @@ class HandleLog{
 						cure(str);
 					}
 					else if(str.matches(handleType[6])){
-						ipDiagnose(str);
+						spDiagnose(str);
 					}
 					else if(str.matches(handleType[7])){
-						exclude(str);
+						spExclude(str);
 					}
 				}
-				System.out.println(str);
+				//System.out.println(str);
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -372,42 +345,118 @@ class HandleLog{
 	}
 	
 	private void increaseIp(String str) {
-		
+		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
+		String numIp = strArray[3].substring(0, strArray[3].length()-1);    //感染人数
+		int num = Integer.parseInt(numIp);    //转换为整数便于四则运算
+		sum[0][0] += num;    //全国感染人数增加
+		for(int i = 0;i < CmdAnalysis.province.length;i++) {
+			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省感染人数增加
+				sum[i][0] += num;
+			}
+		}
 	}
 	
 	private void increaseSp(String str) {
-		
+		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
+		String numSp = strArray[3].substring(0, strArray[3].length()-1);    //疑似人数
+		int num = Integer.parseInt(numSp);    //转换为整数便于四则运算
+		sum[0][1] += num;    //全国感染人数增加
+		for(int i = 0;i < CmdAnalysis.province.length;i++) {
+			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省感染人数增加
+				sum[i][1] += num;
+			}
+		}
 	}
 	
 	private void ipTransfer(String str) {
-		
+		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
+		String numIp = strArray[4].substring(0, strArray[4].length()-1);    //感染流动人数
+		int num = Integer.parseInt(numIp);    //转换为整数便于四则运算
+		//全国感染人数不变
+		for(int i = 0;i < CmdAnalysis.province.length;i++) {
+			if(strArray[0].equals(CmdAnalysis.province[i])) {   //流出省感染人数减少
+				sum[i][0] -= num;
+			}
+			else if(strArray[3].equals(CmdAnalysis.province[i])) {   //流入感染人数增加
+				sum[i][0] += num;
+			}
+		}
 	}
 	
 	private void spTransfer(String str) {
-		
+		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
+		String numSp = strArray[4].substring(0, strArray[4].length()-1);    //疑似流动人数
+		int num = Integer.parseInt(numSp);    //转换为整数便于四则运算
+		//全国感染人数不变
+		for(int i = 0;i < CmdAnalysis.province.length;i++) {
+			if(strArray[0].equals(CmdAnalysis.province[i])) {   //流出省疑似人数减少
+				sum[i][1] -= num;
+			}
+			else if(strArray[3].equals(CmdAnalysis.province[i])) {   //流入疑似人数增加
+				sum[i][1] += num;
+			}
+		}
 	}
 	
 	private void dead(String str) {
-		
+		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
+		String numDead = strArray[2].substring(0, strArray[2].length()-1);    //死亡或者治愈人数
+		int num = Integer.parseInt(numDead);    //转换为整数便于四则运算
+		sum[0][0] -= num;    
+		sum[0][3] += num;    //全国感染人数减少 死亡人数增加
+		for(int i = 0;i < CmdAnalysis.province.length;i++) {
+			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省感染人数减少
+				sum[i][0] -= num;
+				sum[i][3] += num;
+			}
+		}
 	}
 	
 	private void cure(String str) {
-		
+		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
+		String numDead = strArray[2].substring(0, strArray[2].length()-1);    //死亡或者治愈人数
+		int num = Integer.parseInt(numDead);    //转换为整数便于四则运算
+		sum[0][0] -= num;    
+		sum[0][2] += num;    //全国感染人数减少 治愈人数增加
+		for(int i = 0;i < CmdAnalysis.province.length;i++) {
+			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省感染人数减少
+				sum[i][0] -= num;
+				sum[i][2] += num; 
+			}
+		}
 	}
 	
-	private void ipDiagnose(String str) {
-		
+	private void spDiagnose(String str) {
+		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
+		String numDiagnose = strArray[3].substring(0, strArray[3].length()-1);    //疑似确诊感染人数
+		int num = Integer.parseInt(numDiagnose);    //转换为整数便于四则运算
+		sum[0][0] += num; 
+		sum[0][1] -= num;//全国疑似人数减少，感染人数增多
+		for(int i = 0;i < CmdAnalysis.province.length;i++) {
+			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省疑似人数减少，感染人数增多
+				sum[i][0] += num;
+				sum[i][1] -= num;
+			}
+		}
 	}
 	
-	private void exclude(String str) {
-		
+	private void spExclude(String str) {
+		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
+		String numDead = strArray[3].substring(0, strArray[3].length()-1);    //疑似排除人数
+		int num = Integer.parseInt(numDead);    //转换为整数便于四则运算
+		sum[0][1] -= num;    //全国疑似人数减少
+		for(int i = 0;i < CmdAnalysis.province.length;i++) {
+			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省疑似人数减少
+				sum[i][1] -= num;
+			}
+		}
 	}
 	
 	/**
 	 * 用于测试输入
 	 */
 	public void showAll() {
-		System.out.println(logLocation);
+		/*System.out.println(logLocation);
 		System.out.println(outLocation);
 		System.out.println(logDate);
 		for(int i = 0;i < typeOrder.length;i++) {
@@ -421,6 +470,13 @@ class HandleLog{
 				System.out.println(CmdAnalysis.province[i]);
 			}
 			
+		}*/
+		for(int i = 0;i < sum.length;i++) {
+			System.out.print(CmdAnalysis.province[i]+" ");
+			for(int j = 0;j < sum[i].length;j++) {
+				System.out.print(CmdAnalysis.typeString[j]+sum[i][j]+"人 ");
+			}
+			System.out.println();
 		}
 	}
 	
