@@ -198,15 +198,20 @@ class FileInputUtils{
             absolutePath = dirPath + dateString + ".log.txt";
 
         }
+        
+        String lastFile = filesName.get(filesName.size() - 1);
+        if (lastFile.compareTo(absolutePath) < 0) {
+            System.out.println("！错误：输入date参数比最新log文件更新！");
+        }
         for (int i = 0; i<filesName.size(); i++) {
             srcPath = filesName.get(i);
-            inputFile(srcPath, map);
             //若命令中有 -date参数
             if(hasDate) {
-                if (srcPath.equals(absolutePath)) {
+                if (srcPath.compareTo(absolutePath) > 0) {
                     break;
                 }
             }
+            inputFile(srcPath, map);
         }
         
     }
