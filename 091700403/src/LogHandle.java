@@ -2,8 +2,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.Iterator;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,18 +44,42 @@ public class LogHandle {
     }
 
     public StringBuilder ShowHm() {
+        int sumIp = 0;
+        int sumSp = 0;
+        int sumCure = 0;
+        int sumDead = 0;
+
         StringBuilder sb = new StringBuilder();
-        for (Entry<String, InflectInfo> entry : hm.entrySet()) {
-
-            InflectInfo value = entry.getValue();
-
-            // System.out.println(entry.getKey() + " 感染患者" + value.getIp() + "人
-            // 疑似患者" + value.getSp() + "人 治愈"
-            // + value.getCure() + "人 死亡" + value.getDead() + "人\n");
-            sb.append(entry.getKey() + " 感染患者" + value.getIp() + "人 疑似患者" + value.getSp() + "人 治愈" + value.getCure()
+        ArrayList<String> list = new ArrayList<>(hm.keySet());
+        Collections.sort(list, Collator.getInstance(Locale.CHINA));
+        Iterator<String> iterator = list.iterator();
+        // 迭代排序后的key的list
+        while ((iterator.hasNext())) {
+            String key = iterator.next();
+            InflectInfo value = hm.get(key);
+            sb.append(value.getArea() + " 感染患者" + value.getIp() + "人 疑似患者" + value.getSp() + "人 治愈" + value.getCure()
                     + "人 死亡" + value.getDead() + "人\n");
+            sumIp += value.getIp();
+            sumSp += value.getSp();
+            sumCure += value.getCure();
+            sumDead += value.getDead();
 
         }
+        String str = "全国 感染患者" + sumIp + "人 疑似患者" + sumSp + "人 治愈" + sumCure + "人 死亡" + sumDead + "人\n";
+        sb.insert(0, str);
+
+        // for (Entry<String, InflectInfo> entry : hm.entrySet()) {
+        //
+        // InflectInfo value = entry.getValue();
+        //
+        // // System.out.println(entry.getKey() + " 感染患者" + value.getIp() + "人
+        // // 疑似患者" + value.getSp() + "人 治愈"
+        // // + value.getCure() + "人 死亡" + value.getDead() + "人\n");
+        // sb.append(entry.getKey() + " 感染患者" + value.getIp() + "人 疑似患者" +
+        // value.getSp() + "人 治愈" + value.getCure()
+        // + "人 死亡" + value.getDead() + "人\n");
+        //
+        // }
         return sb;
 
     }
