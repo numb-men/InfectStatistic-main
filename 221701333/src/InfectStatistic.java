@@ -18,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -40,11 +41,12 @@ class ReceiveCommand
 	private int[][] data;//存储各个省份疫情出具
 	private String[] provinceName;//存取省份
 	private String[] state;//存取type选项值
-	
+	private boolean[] ifChanged;//存取日志中的省份
 	
 	public ReceiveCommand() 
 	{
 		data = new int[4][32];
+		ifChanged = new boolean[32];
 		
 		for(int i = 0;i < 4;i++) 
 		{
@@ -52,6 +54,12 @@ class ReceiveCommand
 			{
 				data[i][j] = 0;
 			}
+		}
+		
+		ifChanged[0] = true;
+		for(int i = 1;i < 32;i++)
+		{
+			ifChanged[i] = false;
 		}
 		
 		provinceName = new String[] {
@@ -79,12 +87,15 @@ class ReceiveCommand
 	public int[] getProvinceIds(ArrayList<String> provinceParameter)
 	{
 		int size = provinceParameter.size();
+		int swap;
 		int[] ids= new int[size];
 		
 		for(int i = 0;i < size;i++)
 		{
 			ids[i] = this.getProvinceId(provinceParameter.get(i));
 		}
+		
+		Arrays.sort(ids);
 		return ids;
 	}
 	
@@ -135,14 +146,16 @@ class ReceiveCommand
                     	number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
                     	num = Integer.parseInt(number);
                     	number1 = this.getProvinceId(splited[0]);
-                    	data[0][number1] = data[0][number1] + num;                   	
+                    	data[0][number1] = data[0][number1] + num;     
+                    	ifChanged[number1] = true;
                 		break;
                 		
                 	case 2:                		
                     	number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
                     	num = Integer.parseInt(number);
                     	number1 = this.getProvinceId(splited[0]);
-                    	data[1][number1] = data[1][number1] + num;                   	
+                    	data[1][number1] = data[1][number1] + num;   
+                    	ifChanged[number1] = true;
                 		break;
                 		
                 	case 3:
@@ -151,7 +164,9 @@ class ReceiveCommand
                     	number1 = this.getProvinceId(splited[0]);
                     	number2 = this.getProvinceId(splited[3]);
                     	data[0][number1] = data[0][number1] - num;
-                    	data[0][number2] = data[0][number2] + num;                    	
+                    	data[0][number2] = data[0][number2] + num;     
+                    	ifChanged[number1] = true;
+                    	ifChanged[number2] = true;
                 		break;
                 		
                 	case 4:
@@ -160,7 +175,9 @@ class ReceiveCommand
                     	number1 = this.getProvinceId(splited[0]);
                     	number2 = this.getProvinceId(splited[3]);
                     	data[1][number1] = data[1][number1] - num;
-                    	data[1][number2] = data[1][number2] + num;                    	
+                    	data[1][number2] = data[1][number2] + num;  
+                    	ifChanged[number1] = true;
+                    	ifChanged[number2] = true;
                 		break;
                 		
                 	case 5:
@@ -168,7 +185,8 @@ class ReceiveCommand
                     	num = Integer.parseInt(number);
                     	number1 = this.getProvinceId(splited[0]);
                     	data[0][number1] = data[0][number1] - num;
-                    	data[3][number1] = data[3][number1] + num;                    	
+                    	data[3][number1] = data[3][number1] + num;  
+                    	ifChanged[number1] = true;
                 		break;
                 		
                 	case 6:
@@ -177,6 +195,7 @@ class ReceiveCommand
                     	number1 = this.getProvinceId(splited[0]);
                     	data[0][number1] = data[0][number1] - num;
                     	data[2][number1] = data[2][number1] + num;
+                    	ifChanged[number1] = true;
                 		break;
                 		
                 	case 7:
@@ -185,13 +204,15 @@ class ReceiveCommand
                     	number1 = this.getProvinceId(splited[0]);
                     	data[1][number1] = data[1][number1] - num;
                     	data[0][number1] = data[0][number1] + num;
+                    	ifChanged[number1] = true;
                 		break;
                 		
                 	case 8:
                 		number = regularExpression.getSubUtilSimple(splited[splited.length-1]);
                     	num = Integer.parseInt(number);
                     	number1 = this.getProvinceId(splited[0]);
-                    	data[1][number1] = data[1][number1] - num;    
+                    	data[1][number1] = data[1][number1] - num;   
+                    	ifChanged[number1] = true;
                 		break;
                 		
                 	default:
@@ -251,6 +272,8 @@ class ReceiveCommand
 	{
 		/*输出所有结果*/
 		for(int i = 0;i < 32;i++) {
+			if(!ifChanged[i])
+				continue;
 			System.out.print(provinceName[i]);
 			for(int j = 0;j < 4;j++) {
 				switch(j)
@@ -288,6 +311,8 @@ class ReceiveCommand
 		int[] type = this.getState(listCommand.getTypeParameter());
 		
 		for(int i = 0;i < 32;i++) {
+			if(!ifChanged[i])
+				continue;
 			System.out.print(provinceName[i]);
 			for(int j = 0;j < type.length;j++) {
 				switch(type[j])
@@ -307,7 +332,7 @@ class ReceiveCommand
 				default:
 					break;
 				}
-				System.out.print(data[j][i]+"人");
+				System.out.print(data[type[j]][i]+"人");
 				
 			}
 			System.out.print("\n");
@@ -349,9 +374,46 @@ class ReceiveCommand
 		}
 	}
 	
-	public void outPutBoth()
+	public void outPutBoth(ListCommand listCommand)
 	{
+		if(listCommand.getProvinceParameter().size() == 0)
+		{
+			System.out.println("省份选项参数不能为空");
+			return;
+		}
 		
+		if(listCommand.getTypeParameter().size() == 0)
+		{
+			this.outPutProvince(listCommand);
+			return;
+		}
+		int[] type = this.getState(listCommand.getTypeParameter());
+		int[] ids = this.getProvinceIds(listCommand.getProvinceParameter());
+		for(int i = 0;i < ids.length;i++) {
+			System.out.print(provinceName[ids[i]]);
+			for(int j = 0;j < type.length;j++) {
+				switch(type[j])
+				{
+				case 0:
+					System.out.print(" 感染患者");
+					break;
+				case 1:
+					System.out.print(" 疑似患者");
+					break;
+				case 2:
+					System.out.print(" 治愈");
+					break;
+				case 3:
+					System.out.print(" 死亡");
+					break;
+				default:
+					break;
+				}
+				System.out.print(data[type[j]][ids[i]]+"人");
+				
+			}
+			System.out.print("\n");
+		}
 	}
 	/*输出函数*/
 	public void outPut(ListCommand listCommand)
@@ -359,8 +421,7 @@ class ReceiveCommand
 		this.chinaDate();
 		if(listCommand.getOption()[1]&&!listCommand.getOption()[2])
 		{
-			this.outPutType(listCommand);
-			
+			this.outPutType(listCommand);		
 		}
 		else if(!listCommand.getOption()[1]&&listCommand.getOption()[2])
 		{
@@ -368,7 +429,7 @@ class ReceiveCommand
 		}
 		else if(listCommand.getOption()[1]&&listCommand.getOption()[2])
 		{
-			
+			this.outPutBoth(listCommand);
 		}
 		else//只有date命令输出
 		{
@@ -594,12 +655,17 @@ class ListCommand
 		{					
 			i++;
 		}
+		
+		/*如果选项是最后一个，则无参数，直接返回*/
+		if(i == cmd.length - 1)
+			return;
+		
 		i++;
-		while(!RegularExpression.isMatch(compile, cmd[i]) && i < cmd.length)
+		while(i < cmd.length && !RegularExpression.isMatch(compile, cmd[i]))
 		{
 			dateParameter.add(cmd[i]);
 			i++;
-		}
+		}		
 	}
 	
 	public void typeParameter()
@@ -613,12 +679,17 @@ class ListCommand
 		{					
 			i++;
 		}
+		
+		/*如果选项是最后一个，则无参数，直接返回*/
+		if(i == cmd.length - 1)
+			return;
+		
 		i++;
-		while(!RegularExpression.isMatch(compile, cmd[i]) && i < cmd.length)
+		while(i < cmd.length && !RegularExpression.isMatch(compile, cmd[i]))
 		{
 			typeParameter.add(cmd[i]);
 			i++;
-		}
+		}		
 	}
 	
 	public void provinceParameter()
@@ -627,21 +698,28 @@ class ListCommand
 		String start = "-province";
 		String compile = "-\\w+";
 		
+		
 		/*读取province参数，后可在此进行验证参数格式*/
 		while(!start.equals(cmd[i]) && i < cmd.length)
 		{					
 			i++;
 		}
+		
+		/*如果选项是最后一个，则无参数，直接返回*/
+		if(i == cmd.length - 1)
+			return;
+		
 		i++;
-		while(!RegularExpression.isMatch(compile, cmd[i]) && i < cmd.length)
+		while(i < cmd.length && !RegularExpression.isMatch(compile, cmd[i]))
 		{
 			provinceParameter.add(cmd[i]);
 			i++;
-		}
+		}		
 	}
 	
 	
 }
+
 /*
  * 文件操作类
  */
@@ -740,7 +818,7 @@ class RegularExpression
 	/*正则匹配验证list命令格式是否正确*/
 	public static boolean isListRight(String str) 
 	{
-		String cmdCompile = "list(\\s+-\\w+)+\\s+-log\\s+\\S+\\s+-out\\s+\\S+\\s*";
+		String cmdCompile = "list(\\s+-\\w+)*\\s+-log\\s+\\S+\\s+-out\\s+\\S+(\\\\s+-\\\\w+)*";
 		Pattern p = Pattern.compile(cmdCompile);
 		Matcher m = p.matcher(str);
 		boolean isValid = m.matches();
@@ -806,7 +884,7 @@ class RegularExpression
 	}
 }
 
-public class InfectStatistic {
+public class test {
 
 	public static void main(String[] args) {
 		
