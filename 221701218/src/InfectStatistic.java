@@ -1,6 +1,3 @@
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * InfectStatistic
  * TODO
@@ -9,32 +6,41 @@ import java.util.Date;
  * @version 1.0
  * @since 2020/2/12
  */
+import java.text.SimpleDateFormat;
+import java.util.Date;
 class InfectStatistic{
     public static void main(String[] args) {
         System.out.println("It's testing!");
-        //test        
-        CmdAnalysis test = new CmdAnalysis(args);
-        if(test.isCmdString()) {
-            System.out.println("正确");
-            test.showAll();
+        //test       
+        if(args.length!=0) {
+        	CmdAnalysis test = new CmdAnalysis(args);
+            if(test.isCmdString()) {
+                System.out.println("正确命令");
+                //test.showAll();
+            }else {
+            	System.out.println("错误命令");
+            }
+            readAndWriteLog raw = new readAndWriteLog(test.getLogLocation(),test.getOutLocation(),test.getLogDate(),
+            test.getTypeOrder(),test.getProvinceShow());
+            raw.showAll();   
         }
-        else
-            System.out.println("错误");
+        
     }
     
 }
+/**
+ *解析命令行参数
+ */
 class CmdAnalysis{
-	/*
-	      解析命令行参数
-	 */
+	
 	private String[] cmdString;
 	private String logLocation;
 	private String outLocation;
 	private String logDate;
 	private int[] typeOrder = {0,1,2,3};	//默认全输出顺序,-1不必输出
-	private String[] typeString = {"ip","sp","cure","dead"};
+	static String[] typeString = {"ip","sp","cure","dead"};
 	private int[] provinceShow = new int[32];	//默认全输出顺序,-1不必输出
-	private String[] province = {"全国", "安徽","北京", "重庆","福建","甘肃",
+	static String[] province = {"全国", "安徽","北京", "重庆","福建","甘肃",
 			"广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
 			"江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海",
 			"四川", "天津", "西藏", "新疆", "云南", "浙江"};
@@ -46,10 +52,11 @@ class CmdAnalysis{
 	    for(int i = 0;i < provinceShow.length;i++)
 	    	provinceShow[i] = 0;
 	}
+	/*
+                *判断命令行参数是否正确，若正确则赋值保存
+	 */
 	public boolean isCmdString() {
-		/*
-		      判断命令行参数是否正确，若正确则赋值保存
-		 */
+		
 		boolean mustLog = false;
 		boolean mustOut = false;
 		if(!cmdString[0].equals("list")) {
@@ -101,10 +108,11 @@ class CmdAnalysis{
 		}
 			
 	}
+	/*
+    	*判断日志目录路径是否正确
+	 */
 	private boolean isLogLocation(int i) {
-		/*
-		      判断目录路径是否正确
-		 */
+		
 		if(i<cmdString.length) {
 			String regex = "^[A-z]:(/|\\\\)(.+?(/|\\\\))*$";
 			if(cmdString[i].matches(regex)) {
@@ -115,11 +123,11 @@ class CmdAnalysis{
 		}else
 			return false;
 	}
-	
-	private boolean isOutLocation(int i) {
 		/*
-		     判断输出路径是否正确
+		  *判断输出路径是否正确
 		 */
+	private boolean isOutLocation(int i) {
+		
 		if(i<cmdString.length) {
 			String regex = "^[A-z]:(/|\\\\)(.+?(/|\\\\))*(.+\\.txt)$";
 			if(cmdString[i].matches(regex)) {
@@ -130,11 +138,11 @@ class CmdAnalysis{
 		}else
 			return false;
 	}
-	
+	/*
+	  *判断指定日期是否正确
+	 */
 	private boolean isCorrectDate(int i) {
-		/*
-	             判断指定日期是否正确
-	   */
+		
 		if(i<cmdString.length) {
 			if(isValidDate(cmdString[i])) {
 				logDate = cmdString[i];
@@ -144,11 +152,11 @@ class CmdAnalysis{
 		}else
 			return false;
 	}
-	
+	/*
+	  *判断指定日期格式是否满足yyyy-MM-dd 字符串是否为数字
+	 */
 	private boolean isValidDate(String strDate) {
-		/*
-	     	判断指定日期格式是否满足yyyy-MM-dd 字符串是否为数字
-	   */
+		
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		try {
             format.setLenient(false);
@@ -166,10 +174,11 @@ class CmdAnalysis{
         }
         return true;
 	}
+	/*
+	  *判断指定类型是否正确
+	 */
 	private boolean isType(int i) {
-		/*
-	             判断指定类型是否正确
-	   */
+
 		for(int a = 0;a < typeOrder.length;a++)
 			typeOrder[a] = -1;	
 		int currentIndex = i;
@@ -207,10 +216,11 @@ class CmdAnalysis{
 		}else
 			return false;
 	}
+	/*
+	  * 判断指定省份是否正确
+	 */
 	private boolean isProvince(int i) {
-		/*
-	             判断指定省份是否正确
-	   */
+
 		int currentIndex = i;
 		if(i<cmdString.length) {
 			for(;currentIndex < cmdString.length; currentIndex ++) {
@@ -224,7 +234,21 @@ class CmdAnalysis{
 			return false;
 	}
 	
-	
+	public String getLogLocation() {
+		return logLocation;
+	}
+	public String getOutLocation() {
+		return outLocation;
+	}
+	public String getLogDate() {
+		return logDate;
+	}
+	public int[] getTypeOrder() {
+		return typeOrder;
+	}
+	public int[] getProvinceShow() {
+		return provinceShow;
+	}
 	
 	
 	public void showAll() {
@@ -247,4 +271,40 @@ class CmdAnalysis{
 			
 		}
 	}
+}
+
+/**
+ *读取并统计日志文件
+ */
+class readAndWriteLog{
+	private String logLocation;
+	private String outLocation;
+	private String logDate;
+	private int[] typeOrder;
+	private int[] provinceShow = new int[32];
+	public readAndWriteLog(String logLocation,String outLocation,String logDate,int[] typeOrder,int[] provinceShow) {
+		this.logLocation = logLocation;
+		this.outLocation = outLocation;
+		this.logDate = logDate;
+		this.typeOrder = (int[])typeOrder.clone();
+		this.provinceShow = (int[])provinceShow.clone();
+	}
+	public void showAll() {
+		System.out.println(logLocation);
+		System.out.println(outLocation);
+		System.out.println(logDate);
+		for(int i = 0;i < typeOrder.length;i++) {
+			if(typeOrder[i] != -1) {
+				System.out.println(CmdAnalysis.typeString[typeOrder[i]]);
+			}
+			
+		}
+		for(int i = 0;i < provinceShow.length;i++) {
+			if(provinceShow[i] != 0) {
+				System.out.println(CmdAnalysis.province[i]);
+			}
+			
+		}
+	}
+	
 }
