@@ -24,7 +24,7 @@ class InfectStatistic {
         
         CommandParser cmParser = new CommandParser(args);
         InfectedMap map = new InfectedMap();
-        FileUtils reader = new FileUtils();
+        FileInputUtils reader = new FileInputUtils();
         try {
             reader.parseFile(cmParser.getSrcPath(), map);
         } catch (IOException e) {
@@ -107,7 +107,7 @@ class CommandParser{
  * @version 1.0
  * @since 2020.2.15
  */
-class FileUtils{    
+class FileInputUtils{    
     public static void parseFile(String srcPath, InfectedMap map) throws IOException {
         InputStream inStream = new FileInputStream(srcPath);
         String line; 
