@@ -15,12 +15,12 @@ import java.text.SimpleDateFormat;
 class InfectStatistic {
     public static void main(String[] args) {
         
-        String[] ProvinceList=
-        {
-            "全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江",
-            "湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海",
-            "四川","天津","西藏","新疆","云南","浙江"
-        };
+        // String[] ProvinceList=
+        // {
+        //     "全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江",
+        //     "湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海",
+        //     "四川","天津","西藏","新疆","云南","浙江"
+        // };
 
 
 
@@ -154,18 +154,18 @@ class Command
                 System.out.println("抱歉，province功能暂未实现");
                 i++;
             }
-            else
+            else    //判断2：是否含有指定命令之外的输入
             {
                 System.out.println("输入有误！");
             }
         }
 
-        if(!this.hasLog||!this.hasOut)//判断2：是否含有log和out
+        if(!this.hasLog||!this.hasOut)//判断3：是否含有log和out
         {
             System.out.println("缺少必须携带的-log或-out");
             System.exit(1);
         }
-        else if(this.LogPath==""||this.OutPath=="")//判断3：log和out后是否写入路径
+        else if(this.LogPath==""||this.OutPath=="")//判断4：log和out后是否写入路径
         {
             System.out.println("缺少-log或-out后的路径");
             System.exit(1);
@@ -173,7 +173,7 @@ class Command
         else
         {
             File file=new File(LogPath);
-            if(!file.exists())//判断4：log后的路径是否存在
+            if(!file.exists())//判断5：log后的路径是否存在
             {
                 System.out.println("log路径不存在");
                 System.exit(1);
@@ -182,12 +182,7 @@ class Command
 
         if(this.hasDate)
         {
-            if(this.DateName=="")//判断5：在写入-date命令情况下是否写入具体日期
-            {
-                System.out.println("缺少具体日期");
-                System.exit(1);
-            }
-            else if(!isLegalDate(this.DateName))//判断6：写入的日期是否合法
+            if(!isLegalDate(this.DateName))//判断6：写入的日期是否合法
             {
                 System.out.println("输入日期非法");
                 System.exit(1);
@@ -243,7 +238,8 @@ class OpenReadFile
         "(\\W+) 新增 疑似患者 (\\d+)人",
         "(\\W+) 感染患者 流入 (\\W+) (\\d+)人",
         "(\\W+) 疑似患者 流入 (\\W+) (\\d+)人",
-        "(\\W+) 死亡 (\\d+)人","(\\W+) 治愈 (\\d+)人",
+        "(\\W+) 死亡 (\\d+)人",
+        "(\\W+) 治愈 (\\d+)人",
 		"(\\W+) 疑似患者 确诊感染 (\\d+)人",
 		"(\\W+) 排除 疑似患者 (\\d+)人"
     };
@@ -257,8 +253,10 @@ class OpenReadFile
         this.num=0;
     }
 
+}
 
-    
+
+
 
 
  /**
@@ -268,8 +266,6 @@ class OpenReadFile
  * @version 1.0.0
  * @since 2020.2.13
  */
-}
-
 class WriteNewFile
 {
     // Province[] ProvinceList;
