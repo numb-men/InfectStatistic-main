@@ -92,6 +92,120 @@ public class Lib {
         }
     }
 
+    public interface Command {
+        void execute();
+    }
+
+    public class CommandReceiver {
+
+        // list命令
+        public void list(String[] args) {
+            // 封装参数
+            argument.ArgParser argParser = new argument.ArgParser(args);
+            argParser.printArg();
+            // 根据参数调用不同的类
+            String root = argParser.getVals("-log").get(0);
+            String outFileName = argParser.getVals("-out").get(0);
+            List<String> dates = argParser.getVals("-date");
+
+            //执行完成,输出提示信息
+            File path = new File(root);
+            // 读取文件
+            File[] files = path.listFiles();
+            String filePath = null;
+
+            if (dates!=null) {
+                // 如果提供了要处理的文件的日期名
+                for (File file:files) {
+                    if (file.getName().contains(dates.get(0))) {
+                        filePath = path + "/" + file.getName();
+                    }
+                    break;
+                }
+            }
+            else {
+                // 如果没有给定日期就使用文件的最后一个
+                File lastFile = files[files.length-1];
+                filePath = path+"/"+lastFile.getName();
+            }
+
+            AllInformation allInformation = new AllInformation();
+            allInformation.processInfo(filePath);
+            allInformation.writeIntoLog(outFileName,argParser);
+
+            allInformation.printInfo();
+//        System.out.println("list命令执行完成");
+        }
+        // 下面还可以有其他命令
+
+    }
+
+    public class ListCommand implements Command {
+        private String[] args;  //参数数组
+        private CommandReceiver receiver;
+
+        /**
+         * 构造函数
+         * @param args
+         * @param receiver
+         */
+        public ListCommand(String[] args, CommandReceiver receiver) {
+            this.args = args;
+            this.receiver = receiver;
+        }
+
+        @Override
+        public void execute() {
+            receiver.list(args);
+        }
+
+        /**
+         * 判断有没有给定参数日期
+         */
+        public boolean judgeDate(ArgParser argParer) {
+            return argParer.hasKey("-date");
+        }
+
+        // 将需要输出的转换为下标
+        public List<Integer> judgeType(ArgParser argParser) {
+            List<String> types = argParser.getVals("-type");
+            List<Integer> newTypes = new ArrayList<>();
+
+            // 如果没有给type参数就按顺序输出
+            if (types==null) {
+                newTypes.add(0);
+                newTypes.add(1);
+                newTypes.add(2);
+                newTypes.add(3);
+                return newTypes;
+            }
+            // 如果有给type参数就按type参数值的顺序输出
+            for (String type:types) {
+                if (type.equals("ip")) {
+                    newTypes.add(0);
+                }
+                else if (type.equals("sp")) {
+                    newTypes.add(1);
+                }
+                else if (type.equals("cure")) {
+                    newTypes.add(2);
+                }
+                else if (type.equals("dead")){
+                    newTypes.add(3);
+                }
+            }
+            return newTypes;
+        }
+    }
+
+    public class NoCommand implements Command {
+        @Override
+        public void execute() {
+
+        }
+    }
+
+
 }
 
 
