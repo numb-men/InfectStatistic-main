@@ -9,5 +9,4 @@
 功能包括：统计并输出指定日志文件夹下在包括指定日期前的指定类型、指定地区的患者人数
 作业连接：https://github.com/XTG-L/InfectStatistic-main
 博客链接：https://www.cnblogs.com/xtg-log/p/12312487.html
-描述你的项目，包括如何运行、功能简介、作业链接、博客链接等
 >>>>>>> Stashed changes
