@@ -1,6 +1,5 @@
 import java.io.*;
 import java.io.File;
-import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -36,22 +35,289 @@ class InfectStatistic {
                 if (str != null){
                     String[] arr = new String[ParsingValue.size()];
                     ParsingValue.toArray(arr);
-                    arguments.put(key,arr);
+                    arguments.put(str,arr);
                     ParsingValue.clear();
                 }
                 str = arg;
             }
             else {
-                arrValue.add(arg);
+                ParsingValue.add(arg);
             }
         }
         if(str != null){
             String[] argsValue = new String[ParsingValue.size()];
             ParsingValue.toArray(argsValue);
-            arguments.put(key,argsValue);
+            arguments.put(str,argsValue);
             ParsingValue.clear();
         }
         return arguments;
+    }
+    /**
+     * TODO
+     * 正則匹配工具类
+     * @author hmx1
+     * @version 1.0.0
+     */
+    static class RegularMatch {
+        Pattern p1 = Pattern.compile("(.*) 新增 感染患者 (\\d*)人");
+        Pattern p2 = Pattern.compile("(.*) 新增 疑似患者 (\\d*)人");
+        Pattern p3 = Pattern.compile("(.*) 感染患者 流入 (.*) (\\d*)人");
+        Pattern p4 = Pattern.compile("(.*) 疑似患者 流入 (.*) (\\d*)人");
+        Pattern p5 = Pattern.compile("(.*) 死亡 (\\d*)人");
+        Pattern p6 = Pattern.compile("(.*) 治愈 (\\d*)人");
+        Pattern p7 = Pattern.compile("(.*) 疑似患者 确诊感染 (\\d*)人");
+        Pattern p8 = Pattern.compile("(.*) 排除 疑似患者 (\\d*)人");
+        /**
+         * TODO
+         * 处理：新增感染者
+         * @author hmx1
+         * @version 1.0.0
+         */
+        public static void addIp (Matcher m, ArrayList<statement> list) {
+            if(!isListName(list, m.group(1))){
+                statement st = new statement(m.group(1),Integer.parseInt(m.group(2)),0,0,0);
+                list.add(st);
+            }
+            else{
+                for(int j = 0; j < list.size(); j++){
+                    if(list.get(j).getprovinceName().equals(m.group(1))){
+                        list.get(j).setIp(Integer.parseInt(m.group(2)) + list.get(j).getIp());//修改该省份的感染患者人数
+                    }
+                }
+            }
+        }
+        /**
+         * TODO
+         * 处理：新增疑似患者
+         * @author hmx1
+         * @version 1.0.0
+         */
+        public static void addSp (Matcher m, ArrayList<statement> list) {
+            if(!isListName(list, m.group(1))){
+                statement st =new statement(m.group(1),0,Integer.parseInt(m.group(2)),0,0);
+                list.add(st);
+            }
+            else{
+                for(int j = 0; j < list.size(); j++){
+                    if(list.get(j).getprovinceName().equals(m.group(1))){
+                        list.get(j).setSp(Integer.parseInt(m.group(2)) + list.get(j).getSp());//修改该省份的疑似患者人数
+                    }
+                }
+            }
+        }
+        /**
+         * TODO
+         * 处理：死亡
+         * @author hmx1
+         * @version 1.0.0
+         */
+        public static void dead (Matcher m, ArrayList<statement> list) {
+            if(!isListName(list, m.group(1))){
+                System.out.println("该省份无感染患者，无法死亡！");
+            }
+            else{
+                for(int j = 0; j < list.size(); j++){
+                    if(list.get(j).getprovinceName().equals(m.group(1))){
+                        list.get(j).setIp(list.get(j).getIp() - Integer.parseInt(m.group(2)));//修改该省份的感染患者人数
+                        list.get(j).setDead(Integer.parseInt(m.group(2)) + list.get(j).getDead());//修改该省份的死亡人数
+                    }
+                }
+            }
+        }
+        /**
+         * TODO
+         * 处理：治愈
+         * @author hmx1
+         * @version 1.0.0
+         */
+        public static void cure (Matcher m, ArrayList<statement> list) {
+            if(!isListName(list, m.group(1))){
+                System.out.println("该省份无感染患者，无法治愈！");
+            }
+            else{
+                for(int j = 0; j < list.size(); j++){
+                    if(list.get(j).getprovinceName().equals(m.group(1))){
+                        list.get(j).setIp(list.get(j).getIp() - Integer.parseInt(m.group(2)));//修改该省份的感染患者人数
+                        list.get(j).setCure(Integer.parseInt(m.group(2)) + list.get(j).getCure());//修改该省份的治愈人数
+                    }
+                }
+            }
+        }
+        /**
+         * TODO
+         * 处理：感染患者迁移
+         * @author hmx1
+         * @version 1.0.0
+         */
+        public static void ipTransfer (Matcher m, ArrayList<statement> list) {
+            if(!isListName(list, m.group(1))){
+                System.out.println("该省份不存在，无法流出！");
+            }
+            else if(!isListName(list, m.group(2))) {
+                statement st =new statement(m.group(2),Integer.parseInt(m.group(3)),0,0,0);
+                list.add(st);
+            }
+            else{
+                for(int j = 0; j < list.size(); j++){
+                    if(list.get(j).getprovinceName().equals(m.group(1))){
+                        list.get(j).setIp(list.get(j).getIp() - Integer.parseInt(m.group(3)));//修改流出省的感染患者人数
+                    }
+                    if(list.get(j).getprovinceName().equals(m.group(2))){
+                        list.get(j).setIp(list.get(j).getIp() + Integer.parseInt(m.group(3)));//修改流入省的感染患者人数
+                    }
+                }
+            }
+        }
+        /**
+         * TODO
+         * 处理：疑似患者确诊感染
+         * @author hmx1
+         * @version 1.0.0
+         */
+        public static void spToIp (Matcher m, ArrayList<statement> list) {
+            if (!isListName(list, m.group(1))) {
+                System.out.println("该省份无疑似患者，无法确诊！");
+            } else {
+                for (int j = 0; j < list.size(); j++) {
+                    if (list.get(j).getprovinceName().equals(m.group(1))) {
+                        list.get(j).setIp(Integer.parseInt(m.group(2)) + list.get(j).getIp());//修改该省份的感染患者人数
+                        list.get(j).setSp(list.get(j).getSp() - Integer.parseInt(m.group(2)));//修改该省份的疑似患者人数
+                    }
+                }
+            }
+        }
+        /**
+         * TODO
+         * 处理：排除疑似患者
+         * @author hmx1
+         * @version 1.0.0
+         */
+        public static void deleteSp(Matcher m, ArrayList<statement> list) {
+            if(!isListName(list, m.group(1))){
+                System.out.println("该省份无疑似患者，无法排除！");
+            }
+            else{
+                for(int j = 0; j < list.size(); j++){
+                    if(list.get(j).getprovinceName().equals(m.group(1))){
+                        //修改该省份的疑似患者人数
+                        list.get(j).setSp(list.get(j).getSp() - Integer.parseInt(m.group(2)));
+                    }
+                }
+            }
+        }
+        /**
+         * TODO
+         * 处理：疑似者迁移
+         * @author hmx1
+         * @version 1.0.0
+         */
+        public static void  spTransfer(Matcher m, ArrayList<statement> list) {
+            if(!isListName(list, m.group(1))){
+                System.out.println("该省份不存在，无法流出！");
+            }
+            else if(!isListName(list, m.group(2))) {
+                statement st =new statement(m.group(2),0,Integer.parseInt(m.group(3)),0,0);
+                list.add(st);
+            }
+            else{
+                for(int j = 0; j < list.size(); j++){
+                    if(list.get(j).getprovinceName().equals(m.group(1))){
+                        list.get(j).setSp(list.get(j).getSp() - Integer.parseInt(m.group(3)));//修改流出省的疑似患者人数
+                    }
+                    if(list.get(j).getprovinceName().equals(m.group(2))){
+                        list.get(j).setSp(list.get(j).getSp() + Integer.parseInt(m.group(3)));//修改流入省的疑似患者人数
+                    }
+                }
+            }
+        }
+        /**
+         * TODO
+         * 对读取到的内容正则匹配
+         * @author hmx1
+         * @version 1.0.0
+         */
+        public static ArrayList<statement> match(String[] allContent){
+            RegularMatch regularMatch = null;
+            ArrayList<statement> list = new ArrayList<>();
+            try{
+                for(int i = 0; i<allContent.length; i++){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(allContent[i].getBytes())));
+                    String s;
+                    while((s = br.readLine()) != null){
+                        Matcher m1 = regularMatch.p1.matcher(s);
+                        Matcher m2 = regularMatch.p2.matcher(s);
+                        Matcher m3 = regularMatch.p3.matcher(s);
+                        Matcher m4 = regularMatch.p4.matcher(s);
+                        Matcher m5 = regularMatch.p5.matcher(s);
+                        Matcher m6 = regularMatch.p6.matcher(s);
+                        Matcher m7 = regularMatch.p7.matcher(s);
+                        Matcher m8 = regularMatch.p8.matcher(s);
+                        //新增感染患者
+                        while(m1.find()){
+                            addIp(m1, list);
+                        }
+                        //新增疑似患者
+                        while(m2.find()){
+                            addSp(m2, list);
+                        }
+                        //感染患者迁移
+                        while(m3.find()){
+                            ipTransfer(m3, list);
+                        }
+                        //疑似患者迁移
+                        while(m4.find()){
+                            spTransfer(m4, list);
+                        }
+                        //死亡
+                        while(m5.find()){
+                            dead(m5, list);
+                        }
+                        //治愈
+                        while(m6.find()){
+                            cure(m6, list);
+                        }
+                        //疑似患者确诊感染
+                        while(m7.find()){
+                            spToIp(m7, list);
+                        }
+                        //排除疑似患者
+                        while(m8.find()){
+                            deleteSp(m8, list);
+                        }
+                    }
+                }
+                //计算全国情况
+                int allIp = 0;
+                int allSp = 0;
+                int allCure = 0;
+                int allDead = 0;
+                for(int i = 0; i < list.size(); i++){
+                    allIp += list.get(i).getIp();
+                    allSp += list.get(i).getSp();
+                    allCure += list.get(i).getCure();
+                    allDead += list.get(i).getDead();
+                }
+                statement country = new statement("全国", allIp, allSp, allCure, allDead );
+                list.add(country);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return list;
+        }
+    }
+    /**
+     * TODO
+     * 判断list中是否含有指定provinceName属性的province
+     * @author hmx1
+     * @version 1.0.0
+     */
+    private static boolean isListName(ArrayList<statement> list, String name){
+        for(int i = 0; i < list.size(); i++){
+            if (list.get(i).getprovinceName().equals(name)){
+                return true;
+            }
+        }
+        return false;
     }
     /**
      * TODO
@@ -60,23 +326,23 @@ class InfectStatistic {
      * @version 1.0.0
      */
     static class statement{
-        private String infestorName;
+        private String provinceName;
         private int ip;//感染
         private int sp;//疑似
         private int cure;//治愈
         private int dead;//死亡
-        statement(String infestorName, int ip, int sp, int cure, int dead){
-            this.infestorName = infestorName;
+        statement(String provinceName, int ip, int sp, int cure, int dead){
+            this.provinceName = provinceName;
             this.ip = ip;
             this.sp = sp;
             this.cure = cure;
             this.dead = dead;
         }
-        public String getInfestorName(){
-            return infestorName;
+        public String getprovinceName(){
+            return provinceName;
         }
-        public void setInfestorName(String infestorName) {
-            this.infestorName = infestorName;
+        public void setprovinceName(String infestorName) {
+            this.provinceName = infestorName;
         }
         public int getIp(){
             return ip;
@@ -103,7 +369,7 @@ class InfectStatistic {
             this.dead = dead;
         }
         public String printStatement(){
-            return infestorName+" 感染患者" + ip + "人" + " 疑似患者" + sp + "人" + " 治愈" + cure + "人" + " 死亡" + dead + "人";
+            return provinceName+" 感染患者" + ip + "人" + " 疑似患者" + sp + "人" + " 治愈" + cure + "人" + " 死亡" + dead + "人";
         }
         public String printIp() {
             return " 感染患者" + ip + "人";
@@ -120,9 +386,8 @@ class InfectStatistic {
     }
     /**
      * TODO
-     * 清空文件内容
+     * 清空文件内容,func
      * @author hmx1
-     * @version 1.0.0
      */
     public static void clearInfoForFile(String fileName) {
         File file =new File(fileName);
@@ -140,10 +405,9 @@ class InfectStatistic {
     }
     /**
      * TODO
-     * 将字符串写入文件
+     * 将字符串写入文件,func
      * @author hmx1
      * @version 1.0.0
-     * @since 2020.2.11
      */
     public static void WriteStringToFile(String fileName, String str) {
         try {
@@ -160,13 +424,12 @@ class InfectStatistic {
      * 读取目录下的所有日志
      * @author hmx1
      * @version 1.0.0
-     * @since 2020.2.11
      */
-    public static String[] readFile(String path,String date) throws ParseException {
+    public static String[] readFile(String path,String date) throws ParseException, IOException {
         List allFilePath = getFileName(path,date);
-        String[] allContent = new String[allPath.size()];
-        for (int i = 0; i < allPath.size(); i++){
-            File file = new File(String.valueOf(allPath.get(i)));
+        String[] allContent = new String[allFilePath.size()];
+        for (int i = 0; i < allFilePath.size(); i++){
+            File file = new File(String.valueOf(allFilePath.get(i)));
             StringBuilder result = new StringBuilder();
             // 构造一个BufferedReader类来读取文件
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
@@ -185,36 +448,47 @@ class InfectStatistic {
      * 读取文件夹下所有文件的文件名
      * @author hmx1
      * @version 1.0.0
-     * @since 2020.2.11
      */
     public static List getFileName(String path, String date) throws ParseException {
-        List listFileName = new ArrayList<>();
+        //检验文件名是否合理
+        String str,str1,str2;
+        List FileNameList = new ArrayList<>();
         File file = new File(path);
         if (file.isDirectory()) {
-            // 获取路径下的所有文件
             File[] files = file.listFiles();
-            for (int i = 0; i < files.length; i++) {
-                // 如果还是文件夹 递归获取里面的文件与文件夹
+            for (int i=0; i<files.length; i++) {
+                // 如果还是文件夹 递归获取里面的文件 文件夹
                 if (files[i].isDirectory()) {
                     //System.out.println("目录：" + files[i].getPath());
-                    getFiles(files[i].getPath());
+                    getFileName(files[i].getPath(), date);
                 } else {
-                    listFileName.add(files[i].getPath());
                     //System.out.println("文件：" + files[i].getPath());
+                    str = String.valueOf(file);
+                    str1 = str.substring(str.length() - 18, str.length() - 8);
+                    str2 = str.substring(str.length() - 8);
+                    if (isValidDate(str1) && str2.matches(".log.txt") && isBefore(str1, date)) {//判断文件名是否符合标准
+                        FileNameList.add(file);
+                    }
                 }
             }
-        } else {
-            listFileName.add(file.getPath());
-            //System.out.println("文件：" + file.getPath());
         }
-        return listFileName;
+        else {
+            //System.out.println("文件：" + file.getPath());
+            str = String.valueOf(file);
+            str1 = str.substring(str.length() - 18, str.length() - 8);
+            str2 = str.substring(str.length() - 8);
+            if (isValidDate(str1) && str2.matches(".log.txt") && isBefore(str1, date)) {//判断文件名是否符合标准
+                FileNameList.add(file);
+            }
+        }
+
+        return FileNameList;
     }
     /**
      * TODO
      * 判断字符串是否为日期格式yyyy-mm-dd
      * @author hmx1
      * @version 1.0.0
-     * @since 2020.2.10
      */
     private static boolean isValidDate(String str) {
         boolean flag = true;
@@ -226,21 +500,20 @@ class InfectStatistic {
         } catch (Exception e) {
             flag = false;
         }
-        return convertSuccess;
+        return flag;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * TODO
+     * 比较日期前后，time1日期比time2前则返回true
+     * @author hmx1
+     * @version 1.0.0
+     */
+    private static boolean isBefore(String time1, String time2) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd");
+        Date date1 =  simpleDateFormat.parse(time1);
+        Date date2 =  simpleDateFormat.parse(time2);
+        return !date1.after(date2);
+    }
 
 
     public static void main(String[] args) {
