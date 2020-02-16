@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -268,75 +269,101 @@ class ReceiveCommand
 		}
 	}
 	
-	public void outPutAll()
+	public void outPutAll(ListCommand listCommand)
 	{
-		/*输出所有结果*/
-		for(int i = 0;i < 32;i++) {
-			if(!ifChanged[i])
-				continue;
-			System.out.print(provinceName[i]);
-			for(int j = 0;j < 4;j++) {
-				switch(j)
-				{
-				case 0:
-					System.out.print(" 感染患者");
-					break;
-				case 1:
-					System.out.print(" 疑似患者");
-					break;
-				case 2:
-					System.out.print(" 治愈");
-					break;
-				case 3:
-					System.out.print(" 死亡");
-					break;
-				default:
-					break;
+		try 
+		{
+			FileWriter fw = new FileWriter(listCommand.getOutPath(),true);	
+			/*输出所有结果*/
+			for(int i = 0;i < 32;i++) {
+				if(!ifChanged[i])
+					continue;
+				fw.write(provinceName[i]);
+				for(int j = 0;j < 4;j++) {
+					switch(j)
+					{
+					case 0:
+						fw.write(" 感染患者");
+						break;
+					case 1:
+						fw.write(" 疑似患者");
+						break;
+					case 2:
+						fw.write(" 治愈");
+						break;
+					case 3:
+						fw.write(" 死亡");
+						break;
+					default:
+						break;
+					}
+					fw.write(data[j][i]+"人");
 				}
-				System.out.print(data[j][i]+"人");
-				
+				if(i < 31)
+				{
+					fw.write("\n");					
+				}
 			}
-			System.out.print("\n");
+			fw.close();
+		}	
+		catch(IOException e)
+		{
+			e.printStackTrace();
 		}
+		
+		
 	}
 	
 	public void outPutType(ListCommand listCommand)
 	{
 		if(listCommand.getTypeParameter().size() == 0)
 		{
-			this.outPutAll();
+			this.outPutAll(listCommand);
 			return;
 		}
 		
 		int[] type = this.getState(listCommand.getTypeParameter());
 		
-		for(int i = 0;i < 32;i++) {
-			if(!ifChanged[i])
-				continue;
-			System.out.print(provinceName[i]);
-			for(int j = 0;j < type.length;j++) {
-				switch(type[j])
-				{
-				case 0:
-					System.out.print(" 感染患者");
-					break;
-				case 1:
-					System.out.print(" 疑似患者");
-					break;
-				case 2:
-					System.out.print(" 治愈");
-					break;
-				case 3:
-					System.out.print(" 死亡");
-					break;
-				default:
-					break;
+		try 
+		{
+			FileWriter fw = new FileWriter(listCommand.getOutPath(),true);	
+			for(int i = 0;i < 32;i++) {
+				if(!ifChanged[i])
+					continue;
+				fw.write(provinceName[i]);
+				for(int j = 0;j < type.length;j++) {
+					switch(type[j])
+					{
+					case 0:
+						fw.write(" 感染患者");						
+						break;
+					case 1:
+						fw.write(" 疑似患者");		
+						break;
+					case 2:
+						fw.write(" 治愈");		
+						break;
+					case 3:
+						fw.write(" 死亡");		
+						break;
+					default:
+						break;
+					}
+					fw.write(data[type[j]][i]+"人");		
+					
 				}
-				System.out.print(data[type[j]][i]+"人");
-				
+				if(i < 31)
+				{
+					fw.write("\n");					
+				}
 			}
-			System.out.print("\n");
+			fw.close();
 		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void outPutProvince(ListCommand listCommand) 
@@ -347,31 +374,45 @@ class ReceiveCommand
 			return;
 		}
 		int[] ids = this.getProvinceIds(listCommand.getProvinceParameter());
-		for(int i = 0;i < ids.length;i++) {
-			System.out.print(provinceName[ids[i]]);
-			for(int j = 0;j < 4;j++) {
-				switch(j)
-				{
-				case 0:
-					System.out.print(" 感染患者");
-					break;
-				case 1:
-					System.out.print(" 疑似患者");
-					break;
-				case 2:
-					System.out.print(" 治愈");
-					break;
-				case 3:
-					System.out.print(" 死亡");
-					break;
-				default:
-					break;
+		
+		try 
+		{
+			FileWriter fw = new FileWriter(listCommand.getOutPath(),true);	
+			for(int i = 0;i < ids.length;i++) {
+				fw.write(provinceName[ids[i]]);			
+				for(int j = 0;j < 4;j++) {
+					switch(j)
+					{
+					case 0:
+						fw.write(" 感染患者");	
+						break;
+					case 1:
+						fw.write(" 疑似患者");	
+						break;
+					case 2:
+						fw.write(" 治愈");	
+						break;
+					case 3:
+						fw.write(" 死亡");	
+						break;
+					default:
+						break;
+					}
+					fw.write(data[j][ids[i]]+"人");					
+					
 				}
-				System.out.print(data[j][ids[i]]+"人");
-				
+				if(i < ids.length - 1)
+				{
+					fw.write("\n");
+				}
 			}
-			System.out.print("\n");
+			fw.close();
 		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void outPutBoth(ListCommand listCommand)
@@ -389,31 +430,45 @@ class ReceiveCommand
 		}
 		int[] type = this.getState(listCommand.getTypeParameter());
 		int[] ids = this.getProvinceIds(listCommand.getProvinceParameter());
-		for(int i = 0;i < ids.length;i++) {
-			System.out.print(provinceName[ids[i]]);
-			for(int j = 0;j < type.length;j++) {
-				switch(type[j])
-				{
-				case 0:
-					System.out.print(" 感染患者");
-					break;
-				case 1:
-					System.out.print(" 疑似患者");
-					break;
-				case 2:
-					System.out.print(" 治愈");
-					break;
-				case 3:
-					System.out.print(" 死亡");
-					break;
-				default:
-					break;
+		
+		try
+		{
+			FileWriter fw = new FileWriter(listCommand.getOutPath(),true);	
+			for(int i = 0;i < ids.length;i++) {
+				fw.write(provinceName[ids[i]]);
+				for(int j = 0;j < type.length;j++) {
+					switch(type[j])
+					{
+					case 0:
+						fw.write(" 感染患者");
+						break;
+					case 1:
+						fw.write(" 疑似患者");
+						break;
+					case 2:
+						fw.write(" 治愈");
+						break;
+					case 3:
+						fw.write(" 死亡");
+						break;
+					default:
+						break;
+					}
+					fw.write(data[type[j]][ids[i]]+"人");
+					
 				}
-				System.out.print(data[type[j]][ids[i]]+"人");
-				
+				if(i < ids.length - 1)
+				{
+					fw.write("\n");				
+				}
 			}
-			System.out.print("\n");
+			fw.close();
 		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+		
 	}
 	/*输出函数*/
 	public void outPut(ListCommand listCommand)
@@ -433,7 +488,7 @@ class ReceiveCommand
 		}
 		else//只有date命令输出
 		{
-			this.outPutAll();
+			this.outPutAll(listCommand);
 		}
 	}
 	
@@ -818,7 +873,7 @@ class RegularExpression
 	/*正则匹配验证list命令格式是否正确*/
 	public static boolean isListRight(String str) 
 	{
-		String cmdCompile = "list(\\s+-\\w+)*\\s+-log\\s+\\S+\\s+-out\\s+\\S+(\\\\s+-\\\\w+)*";
+		String cmdCompile = "list(\\s+-\\w+\\S*)*\\s+-log\\s+\\S+(\\s+-\\w+\\S*)*\\s+-out\\s+\\S+(\\s+-\\w+\\S*)*\\s*";
 		Pattern p = Pattern.compile(cmdCompile);
 		Matcher m = p.matcher(str);
 		boolean isValid = m.matches();
@@ -884,7 +939,7 @@ class RegularExpression
 	}
 }
 
-public class test {
+public class InfectStatistic {
 
 	public static void main(String[] args) {
 		
