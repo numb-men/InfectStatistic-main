@@ -7,14 +7,14 @@ import java.util.regex.Pattern;
  * TODO
  *
  * @author 221701312 张庭博
- * @version 1.6
+ * @version 1.7
  * @since 2020-02-11
  */
 class InfectStatistic {
     public static void main(String[] args)
     {
         CommandIdentity cmdit=new CommandIdentity(args);
-        cmdit.PrintCommand();
+        //cmdit.PrintCommand();
         cmdit.Identify();
     }
 }
@@ -29,8 +29,8 @@ class FileManager{
     public boolean[] IsVisited = new boolean[31];
     public int AllIP=0,AllSP=0,AllCP=0,AllDP=0;
     private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";// 中文正则
-    ArrayList<String> fileNames = new ArrayList<>();
-    ArrayList<String> fileContent = new ArrayList<>();
+    ArrayList<String> FileNames = new ArrayList<>();
+    ArrayList<String> FileContent = new ArrayList<>();
 
     public FileManager(){
 
@@ -43,16 +43,16 @@ class FileManager{
         if(f.isDirectory()) {
             String[] temp = f.list();
             for(int i=0;i<temp.length;i++)
-                fileNames.add(temp[i]);
+                FileNames.add(temp[i]);
         }
         else
             System.out.println("log文件目录错误！");
         //找到断点
         if(dateparam.equals(""))
-            stopPoint=fileNames.size();
+            stopPoint=FileNames.size();
         else{
-            for(int i=0;i<fileNames.size();i++){
-                if(fileNames.get(i).compareTo(stopDate) == 0){
+            for(int i=0;i<FileNames.size();i++){
+                if(FileNames.get(i).compareTo(stopDate) == 0){
                     stopPoint=i;
                     flag=1;
                 }
@@ -61,7 +61,7 @@ class FileManager{
 
         if(dateparam=="") {
             flag = 1;
-            stopPoint=fileNames.size();
+            stopPoint=FileNames.size();
         }
         if(flag==0){
             System.out.println("输入的日期超出范围！");
@@ -70,19 +70,19 @@ class FileManager{
 
         try {
             for(int i=0;i<=stopPoint;i++) {
-                String SingleFile = FilePath + "\\" + fileNames.get(i);
+                String SingleFile = FilePath + "\\" + FileNames.get(i);
                 BufferedReader br = new BufferedReader(new InputStreamReader(
                         new FileInputStream(SingleFile),"UTF-8"));
                 String line = "";
                 while((line=br.readLine())!=null) {
                     if(!line.startsWith("/"))
-                        fileContent.add(line);
+                        FileContent.add(line);
                 }
             }
         }catch (Exception e){
 
         }
-        GetStatistic(fileContent);
+        GetStatistic(FileContent);
     }
 
     public void WriteFile(String FileName,ArrayList<String> typeparam,ArrayList<String> provinceparam){
@@ -103,7 +103,7 @@ class FileManager{
                     }
                 }
             }
-            if(provinceparam.size()!=0) {//-province有参数
+            if(provinceparam.size() > 0) {//-province有参数
                 for(int i=0;i<provinceparam.size();i++){
                     String s=GetStringByType(typeparam,provinceparam.get(i));
                     fileWriter.write(s);
@@ -124,9 +124,9 @@ class FileManager{
         }
     }
 
-    public void GetStatistic(ArrayList<String> fileContent){
-        for(int i=0;i<fileContent.size();i++){
-            String[] temp=fileContent.get(i).split(" ");
+    public void GetStatistic(ArrayList<String> FileContent){
+        for(int i=0;i<FileContent.size();i++){
+            String[] temp=FileContent.get(i).split(" ");
             DealStrings(temp);
         }
     }
@@ -282,8 +282,8 @@ class CommandIdentity{
     }
     public void Identify(){
         int logpos=0,outpos=0,datepos=0,typepos=0,provincepos=0;
-        ArrayList<String > typeparam=new ArrayList<String>(50);
-        ArrayList<String > provinceparam = new ArrayList<String>(50);
+        ArrayList<String > typeparam=new ArrayList<>();
+        ArrayList<String > provinceparam = new ArrayList<>();
         String logparam="",outparam="",dateparam="";
         if(!command[0].equals("list"))
             System.out.println("命令格式错误！");
