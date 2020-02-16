@@ -1,4 +1,5 @@
 
+import java.awt.RenderingHints.Key;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -43,8 +44,9 @@ class InfectStatistic {
        
         try {
             reader.parseFile(cmParser.getSrcPath(), map);
-            //writer.writeFile(cmParser.getDstPath(), map);
-            //map.sortByProvince();
+            map.sortByProvince();
+            writer.writeFile(cmParser.getDstPath(), map);
+            
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -63,7 +65,7 @@ class InfectStatistic {
         int num = Integer.valueOf(numString);
         
         System.out.println(num);  
-        */
+        
         for (HashMap.Entry<String, InfectedArea> entry : map.map.entrySet()) {
             System.out.println("Key = " + entry.getKey() + 
                     ", Value = infect:" + entry.getValue().infectedNum +
@@ -71,7 +73,7 @@ class InfectStatistic {
                     ",cure:" + entry.getValue().curedNum +
                     ",dead:" + entry.getValue().deadNum);
         }
-       
+       */
            
     }
 }
@@ -169,15 +171,28 @@ class FileInputUtils{
  * @since 2020.2.15
  */
 class FileOutputUtils{
-    public void writeFile(String dstPath, InfectedMap map) throws IOException {
+    public void writeFile(String dstPath, InfectedMap map) throws IOException {    
         OutputStream outStream = new FileOutputStream(dstPath);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outStream));
         
-        bufferedWriter.write("全国 ");
-        if(map.map.get("全国").infectedNum > 0)
-        bufferedWriter.write("感染患者" + map.map.get("全国").infectedNum + "人");
-        
-        
+
+        for (HashMap.Entry<String, InfectedArea> entry : map.map.entrySet()) {
+            String keyString = entry.getKey();
+            bufferedWriter.write(keyString);            
+            if(map.map.get(keyString).infectedNum > 0) {
+                bufferedWriter.write(" 感染患者" + map.map.get(keyString).infectedNum + "人");
+            }
+            if(map.map.get(keyString).potentialNum > 0) {
+                bufferedWriter.write(" 疑似患者" + map.map.get(keyString).potentialNum + "人");
+            }
+            if(map.map.get(keyString).curedNum > 0) {
+                bufferedWriter.write(" 治愈" + map.map.get(keyString).curedNum + "人");
+            }
+            if(map.map.get(keyString).deadNum > 0) {
+                bufferedWriter.write(" 死亡" + map.map.get(keyString).deadNum + "人");
+            }
+            bufferedWriter.write("\n");    
+        }
         bufferedWriter.close();
         outStream.close();
     }
