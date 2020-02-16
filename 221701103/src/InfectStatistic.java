@@ -15,7 +15,7 @@ import java.util.Arrays;
  * TODO
  *
  * @author 衡天宇
- * @version 7.2
+ * @version 7.3
  * 
  */
 public class InfectStatistic {
@@ -29,8 +29,7 @@ public class InfectStatistic {
     static String frompath=new String();//log文件路径
     static int index=0;//控制是否输入日期比日志最早一天还早，若是则值为-2
     static int isWrong=0;//输入日期是否出错（输入日期比最新的日志还晚）
-    
-    	
+        	
     public static void main(String[] args) throws IOException {
     	if(args.length==0) {
     		System.out.println("输入命令行为空，请重新输入！");
@@ -470,7 +469,8 @@ public class InfectStatistic {
         output.write(calAll(result,count).printline()+"\n");
         for(int i=0;i<count;i++) {//写入统计数据
         	output.write(result[i].printline()+"\n");
-        }        
+        }
+        output.write("//该文档并非真实数据，仅供测试使用");
     	output.close();
     }
     
@@ -665,6 +665,7 @@ public class InfectStatistic {
         		output.write(selresult[i].printline()+"\n");
         	}
         }
+        output.write("//该文档并非真实数据，仅供测试使用");
     	output.close();
     	if(flag!=-1) {//有全国信息，提前
 	    	for(int i=1;i<=flag;i++) {
@@ -728,6 +729,7 @@ public class InfectStatistic {
 		    j++;
 		    output.write("\n");
 	    }
+	    output.write("//该文档并非真实数据，仅供测试使用");
 		output.close();
 	}    
 }
