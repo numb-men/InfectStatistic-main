@@ -66,7 +66,8 @@ class CommandParser{
     //存放-type
     public String typeString = "";
     //存放-province
-    public String provinceString ="";
+    public boolean hasProvince = false;
+    public List<String> provinceList = new ArrayList<String>();
     
     public CommandParser(String[] args) {
         for (int i = 1; i < args.length; i++){
@@ -83,8 +84,15 @@ class CommandParser{
                 i++;
                 this.typeString = args[i];
             } else if (args[i].equals("-province")){
+                //若含有province参数，则要对其后参数进行记录
+                this.hasProvince = true;
                 i++;
-                this.provinceString = args[i];
+                int index = i;
+                for (int j = 0; j < args.length - index; j++) {
+                    this.provinceList.add(args[i]);
+                    System.out.println(this.provinceList.get(j));
+                    i++;
+                }
             }                 
         }
     }   
@@ -110,7 +118,7 @@ class CommandRun{
             hasDate = true;
         }else if (!parser.typeString.equals("")) {
             hasType = true;
-        }else if (!parser.provinceString.equals("")) {
+        }else if (parser.hasProvince) {
             hasProvince = true;
         }
         this.parser = parser;
@@ -126,7 +134,7 @@ class CommandRun{
             
             reader.parseFile(parser.srcPath, map, hasDate, parser.dateString);
             map.sortByProvince();
-            writer.writeFile(parser.dstPath, map,hasType,hasProvince);
+            writer.writeFile(parser.dstPath, map, hasType, hasProvince, parser.provinceList);
             
         } catch (IOException e) {
             e.printStackTrace();
@@ -215,29 +223,58 @@ class FileInputUtils{
  */
 class FileOutputUtils{
     public void writeFile(String dstPath, InfectedMap map,
-                boolean hasType, boolean hasProvince) throws IOException {    
+                boolean hasType, boolean hasProvince ,
+                List<String> provinceList) throws IOException {    
         OutputStream outStream = new FileOutputStream(dstPath);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outStream));
-
-        for (HashMap.Entry<String, InfectedArea> entry : map.map.entrySet()) {
-            String keyString = entry.getKey();
-            bufferedWriter.write(keyString);            
-            if(map.map.get(keyString).infectedNum > 0) {
-                bufferedWriter.write(" 感染患者" + map.map.get(keyString).infectedNum + "人");
+        if (hasProvince && !hasType) {
+            String provinceName = "";
+            for (int i = 0; i < provinceList.size(); i++) {
+                provinceName = provinceList.get(i);
+                InfectedArea province = map.map.get(provinceName);
+                writeAll(provinceName, bufferedWriter, province);
             }
-            if(map.map.get(keyString).potentialNum > 0) {
-                bufferedWriter.write(" 疑似患者" + map.map.get(keyString).potentialNum + "人");
-            }
-            if(map.map.get(keyString).curedNum > 0) {
-                bufferedWriter.write(" 治愈" + map.map.get(keyString).curedNum + "人");
-            }
-            if(map.map.get(keyString).deadNum > 0) {
-                bufferedWriter.write(" 死亡" + map.map.get(keyString).deadNum + "人");
-            }
-            bufferedWriter.write("\n");    
+           
+        }else if (!hasProvince && hasType) {
+            
+        }else if (hasProvince && hasType) {
+            
+        }else {
+            for (HashMap.Entry<String, InfectedArea> entry : map.map.entrySet()) {
+                String keyString = entry.getKey();
+                writeAll(keyString, bufferedWriter, map.map.get(keyString));
+               }
         }
+        
+            
+        
         bufferedWriter.close();
         outStream.close();
+    }
+    
+    /*
+     * 来向文件写信息
+     */
+    public void writeAll(String keyString, BufferedWriter bufferedWriter, InfectedArea infectedArea) {
+        try {
+            bufferedWriter.write(keyString);
+            if(infectedArea.infectedNum > 0) {
+                bufferedWriter.write(" 感染患者" + infectedArea.infectedNum + "人");
+            }
+            if(infectedArea.potentialNum > 0) {
+                bufferedWriter.write(" 疑似患者" + infectedArea.potentialNum + "人");
+            }
+            if(infectedArea.curedNum > 0) {
+                bufferedWriter.write(" 治愈" + infectedArea.curedNum + "人");
+            }
+            if(infectedArea.deadNum > 0) {
+                bufferedWriter.write(" 死亡" + infectedArea.deadNum + "人");
+            }
+            bufferedWriter.write("\n");  
+        } catch (IOException e) {
+            e.printStackTrace();
+        }            
+          
     }
 }
 
