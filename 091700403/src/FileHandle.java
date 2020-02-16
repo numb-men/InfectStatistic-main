@@ -77,16 +77,39 @@ public class FileHandle {
         String FileDateStr = "";
         Date fileData = new Date();
         Date argDate = null;
+        Date maxData = null;
+        String maxDataStr = nameStrings[0].substring(0, nameStrings[0].indexOf('.'));// 截取文件名中的日期
 
         try {
-            argDate = dFormat.parse(sdate);// 将参数转为日期形式
+            maxData = dFormat.parse(maxDataStr);
+        } catch (ParseException e1) {
+
+            // Auto-generated catch block
+            e1.printStackTrace();
+
+        }
+        try {
 
             for (int i = 0; i < nameStrings.length; i++) {
                 FileDateStr = nameStrings[i].substring(0, nameStrings[i].indexOf('.'));// 截取文件名中的日期
 
                 fileData = dFormat.parse(FileDateStr);
+                if (fileData.getTime() >= maxData.getTime()) {
+                    maxData = fileData;// 找出最大日期
 
-                // argDate = dFormat.parse(sdate);// 指定日期
+                }
+
+            }
+            if (sdate != null) {
+                argDate = dFormat.parse(sdate);// 将参数转为日期形式
+            } else {
+                argDate = maxData;
+            }
+
+            for (int i = 0; i < nameStrings.length; i++) {
+                FileDateStr = nameStrings[i].substring(0, nameStrings[i].indexOf('.'));// 截取文件名中的日期
+
+                fileData = dFormat.parse(FileDateStr);
 
                 if (fileData.getTime() <= argDate.getTime()) {
 
