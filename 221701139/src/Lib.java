@@ -144,19 +144,22 @@ class CommandReceiver {
             // 如果没有给定日期就处理所有文件
 //                File lastFile = files[files.length-1];
 //                filePath = path+"/"+lastFile.getName();
-            AllInformation allInformation = new AllInformation();
+            AllInformation prev = new AllInformation();
             for (File file : files) {
                 filePath = path + "/" + file.getName();
 
-
+                AllInformation allInformation = new AllInformation();
                 // 获取上一个文件处理的信息,写入这个这次的文件中
-                Map<String, Integer[]> info = allInformation.getInfo();
+                Map<String, Integer[]> info = prev.getInfo();
                 allInformation.setting(info);
-                allInformation.processInfo(filePath);
 
+                // 之后处理这个文件的信息
+                allInformation.processInfo(filePath);
+                // 写入文件
+                allInformation.writeIntoLog(outFileName, argParser);
+                prev = allInformation;
             }
-            // 写入文件
-            allInformation.writeIntoLog(outFileName, argParser);
+
         }
 
     }
@@ -290,7 +293,6 @@ class RegThree {
 
 class RegFour {
 //    private final String REGEX = "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
-
     // 返回一个省份对应信息的映射
 
     public Map<String, Integer[]> process(String line) {
@@ -456,15 +458,21 @@ class AllInformation {
 
             // 得到原始的整数信息
             Integer[] oriInfo = info.get(key);
-            System.out.println("修改完成前");
-            System.out.println(key+" "+oriInfo[0]+" "+oriInfo[1]+" "+oriInfo[2]+" "+oriInfo[3]+" ");
+            if ("福建".equals(key)) {
+                System.out.println("修改完成前");
+                System.out.println(key+" "+oriInfo[0]+" "+oriInfo[1]+" "+oriInfo[2]+" "+oriInfo[3]+" ");
+            }
+
 
             for (int i = 0;i<newInfo.length;i++) {
                 // 找到不为0的信息修改
                 oriInfo[i] = oriInfo[i]+newInfo[i];
             }
-            System.out.println("修改完成hou");
-            System.out.println(key+" "+oriInfo[0]+" "+oriInfo[1]+" "+oriInfo[2]+" "+oriInfo[3]+" ");
+
+            if ("福建".equals(key)) {
+                System.out.println("修改完成hou");
+                System.out.println(key + " " + oriInfo[0] + " " + oriInfo[1] + " " + oriInfo[2] + " " + oriInfo[3] + " ");
+            }
             info.put(key,oriInfo);
         }
     }
@@ -481,15 +489,15 @@ class AllInformation {
             Map<String,Integer[]> lineInfo;
             // 读取文件的每一行
             while((line = bufferedReader.readLine())!=null && !line.startsWith("//")) {
-                System.out.println(line);
+//                System.out.println(line);
                 lineInfo = judgeReg(line);
 
                 // 设置信息
                 Set<String> keys = lineInfo.keySet();
-                for (String key:keys) {
-                    Integer[] num = lineInfo.get(key);
-                    System.out.println(key+"---"+num[0]+"--"+num[1]+"--"+num[2]+"--"+num[3]);
-                }
+//                for (String key:keys) {
+//                    Integer[] num = lineInfo.get(key);
+//                    System.out.println(key+"   "+num[0]+"  "+num[1]+"  "+num[2]+"  "+num[3]);
+//                }
                 this.setting(lineInfo);
             }
         }
@@ -521,42 +529,40 @@ class AllInformation {
         Matcher matcher8 = pattern8.matcher(line);
 
         if(matcher1.find()) {
-            System.out.println("1");
             lineInfo = new RegOne().process(line);
         }
         else if (matcher2.find()) {
             lineInfo = new RegTwo().process(line);
-            System.out.println("2");
+
         }
         else if (matcher3.find()) {
             lineInfo = new RegThree().process(line);
-            System.out.println("3");
+
         }
         else if (matcher4.find()) {
             lineInfo = new RegFour().process(line);
-            System.out.println("4");
+
         }
         else if (matcher5.find()) {
             lineInfo = new RegFive().process(line);
-            System.out.println("5");
+
         }
         else if (matcher6.find()) {
             lineInfo = new RegSix().process(line);
-            System.out.println("6");
+
         }
         else if (matcher7.find()) {
-            System.out.println("===============================");
             lineInfo = new RegSeven().process(line);
-            System.out.println("7");
+
 
         }
         else if (matcher8.find()) {
             lineInfo = new RegEight().process(line);
-            System.out.println("8");
         }
         return lineInfo;
     }
 
+    // 打印allinformation里面的信息
     public void printInfo() {
         Set<String> keys = info.keySet();
         for (String key:keys) {
@@ -599,7 +605,6 @@ class AllInformation {
                         line.append(" ").append(types.get(index)).append(populations[index]).append("人");
                     }
                     line.append("\n");
-                    System.out.println(line);
                     // line = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
                     // province,populations[0],populations[1],populations[2],populations[3]);
                     // 写入信息
