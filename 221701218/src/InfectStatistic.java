@@ -15,80 +15,80 @@ class InfectStatistic{
         //test        
         CmdAnalysis test = new CmdAnalysis(args);
         if(test.isCmdString()) {
-            System.out.println("ÕıÈ·");
+            System.out.println("æ­£ç¡®");
             test.showAll();
         }
         else
-            System.out.println("´íÎó");
+            System.out.println("é”™è¯¯");
     }
     
 }
 class CmdAnalysis{
 	/*
-	      ½âÎöÃüÁîĞĞ²ÎÊı
+	      è§£æå‘½ä»¤è¡Œå‚æ•°
 	 */
 	private String[] cmdString;
 	private String logLocation;
 	private String outLocation;
 	private String logDate;
-	private int[] typeOrder = {0,1,2,3};	//Ä¬ÈÏÈ«Êä³öË³Ğò,-1²»±ØÊä³ö
+	private int[] typeOrder = {0,1,2,3};	//é»˜è®¤å…¨è¾“å‡ºé¡ºåº,-1ä¸å¿…è¾“å‡º
 	private String[] typeString = {"ip","sp","cure","dead"};
-	private int[] provinceShow = new int[32];	//Ä¬ÈÏÈ«Êä³öË³Ğò,-1²»±ØÊä³ö
-	private String[] province = {"È«¹ú", "°²»Õ","±±¾©", "ÖØÇì","¸£½¨","¸ÊËà",
-			"¹ã¶«", "¹ãÎ÷", "¹óÖİ", "º£ÄÏ", "ºÓ±±", "ºÓÄÏ", "ºÚÁú½­", "ºş±±", "ºşÄÏ", "¼ªÁÖ",
-			"½­ËÕ", "½­Î÷", "ÁÉÄş", "ÄÚÃÉ¹Å", "ÄşÏÄ", "Çàº£", "É½¶«", "É½Î÷", "ÉÂÎ÷", "ÉÏº£",
-			"ËÄ´¨", "Ìì½ò", "Î÷²Ø", "ĞÂ½®", "ÔÆÄÏ", "Õã½­"};
+	private int[] provinceShow = new int[32];	//é»˜è®¤å…¨è¾“å‡ºé¡ºåº,-1ä¸å¿…è¾“å‡º
+	private String[] province = {"å…¨å›½", "å®‰å¾½","åŒ—äº¬", "é‡åº†","ç¦å»º","ç”˜è‚ƒ",
+			"å¹¿ä¸œ", "å¹¿è¥¿", "è´µå·", "æµ·å—", "æ²³åŒ—", "æ²³å—", "é»‘é¾™æ±Ÿ", "æ¹–åŒ—", "æ¹–å—", "å‰æ—",
+			"æ±Ÿè‹", "æ±Ÿè¥¿", "è¾½å®", "å†…è’™å¤", "å®å¤", "é’æµ·", "å±±ä¸œ", "å±±è¥¿", "é™•è¥¿", "ä¸Šæµ·",
+			"å››å·", "å¤©æ´¥", "è¥¿è—", "æ–°ç–†", "äº‘å—", "æµ™æ±Ÿ"};
 	
 	public CmdAnalysis(String []args) {
 	    cmdString = args;
-	    //ÉèÖÃÄ¬ÈÏÖ¸¶¨ÈÕÆÚÎªÒ»¸ö½Ó½üÎŞÇî´óµÄÈÕÆÚ£¬ÕâÑù·½±ã±È½Ï£¬ÉèÖÃÄ¬ÈÏÎªÈ«²¿Í³¼Æ
+	    //è®¾ç½®é»˜è®¤æŒ‡å®šæ—¥æœŸä¸ºä¸€ä¸ªæ¥è¿‘æ— ç©·å¤§çš„æ—¥æœŸï¼Œè¿™æ ·æ–¹ä¾¿æ¯”è¾ƒï¼Œè®¾ç½®é»˜è®¤ä¸ºå…¨éƒ¨ç»Ÿè®¡
 	    logDate = "9999-12-31";
 	    for(int i = 0;i < provinceShow.length;i++)
 	    	provinceShow[i] = 0;
 	}
 	public boolean isCmdString() {
 		/*
-		      ÅĞ¶ÏÃüÁîĞĞ²ÎÊıÊÇ·ñÕıÈ·£¬ÈôÕıÈ·Ôò¸³Öµ±£´æ
+		      åˆ¤æ–­å‘½ä»¤è¡Œå‚æ•°æ˜¯å¦æ­£ç¡®ï¼Œè‹¥æ­£ç¡®åˆ™èµ‹å€¼ä¿å­˜
 		 */
 		boolean mustLog = false;
 		boolean mustOut = false;
 		if(!cmdString[0].equals("list")) {
-			System.out.println("ÃüÁîĞĞ²ÎÊıÈ±ÉÙlist");
+			System.out.println("å‘½ä»¤è¡Œå‚æ•°ç¼ºå°‘list");
 			return false;
 		}
 		for(int i = 0;i < cmdString.length;i++) {
 			if(cmdString[i].equals("-log")) {
 				mustLog = true;
-				//¼ì²âÈÕÖ¾ÎÄ¼şÂ·¾¶ºÏ·¨ĞÔ
+				//æ£€æµ‹æ—¥å¿—æ–‡ä»¶è·¯å¾„åˆæ³•æ€§
 				if(!isLogLocation(++i)) {
-					System.out.println("ÈÕÖ¾ÎÄ¼şÂ·¾¶²»ºÏ·¨");
+					System.out.println("æ—¥å¿—æ–‡ä»¶è·¯å¾„ä¸åˆæ³•");
 					return false;
 				}
 			}
 			if(cmdString[i].equals("-out")) {
 				mustOut = true;
-				//¼ì²âÊä³öÂ·¾¶ºÏ·¨ĞÔ
+				//æ£€æµ‹è¾“å‡ºè·¯å¾„åˆæ³•æ€§
 				if(!isOutLocation(++i)) {
-					System.out.println("Êä³öÂ·¾¶²»ºÏ·¨");
+					System.out.println("è¾“å‡ºè·¯å¾„ä¸åˆæ³•");
 					return false;
 				}
 			}
 			if(cmdString[i].equals("-date")) {
-				//¼ì²âÈÕÆÚºÏ·¨ĞÔ
+				//æ£€æµ‹æ—¥æœŸåˆæ³•æ€§
 				if(!isCorrectDate(++i)) {
-					System.out.println("Ö¸¶¨ÈÕÆÚ²»ºÏ·¨");
+					System.out.println("æŒ‡å®šæ—¥æœŸä¸åˆæ³•");
 					return false;
 				}
 			}
 			if(cmdString[i].equals("-type")) {
 				if(!isType(++i)) {
-					System.out.println("Ö¸¶¨ÀàĞÍ²»ºÏ·¨");
+					System.out.println("æŒ‡å®šç±»å‹ä¸åˆæ³•");
 					return false;
 				}
 			}
 			if(cmdString[i].equals("-province")) {
 				if(!isProvince(++i)) {
-					System.out.println("Ö¸¶¨Ê¡·İ²»ºÏ·¨");
+					System.out.println("æŒ‡å®šçœä»½ä¸åˆæ³•");
 					return false;
 				}
 			}
@@ -96,14 +96,14 @@ class CmdAnalysis{
 		if(mustLog && mustOut)
 			return true;
 		else {
-			System.out.println("È±ÉÙÊäÈë-log »ò -out");
+			System.out.println("ç¼ºå°‘è¾“å…¥-log æˆ– -out");
 			return false;
 		}
 			
 	}
 	private boolean isLogLocation(int i) {
 		/*
-		      ÅĞ¶ÏÄ¿Â¼Â·¾¶ÊÇ·ñÕıÈ·
+		      åˆ¤æ–­ç›®å½•è·¯å¾„æ˜¯å¦æ­£ç¡®
 		 */
 		if(i<cmdString.length) {
 			String regex = "^[A-z]:(/|\\\\)(.+?(/|\\\\))*$";
@@ -118,7 +118,7 @@ class CmdAnalysis{
 	
 	private boolean isOutLocation(int i) {
 		/*
-		     ÅĞ¶ÏÊä³öÂ·¾¶ÊÇ·ñÕıÈ·
+		     åˆ¤æ–­è¾“å‡ºè·¯å¾„æ˜¯å¦æ­£ç¡®
 		 */
 		if(i<cmdString.length) {
 			String regex = "^[A-z]:(/|\\\\)(.+?(/|\\\\))*(.+\\.txt)$";
@@ -133,7 +133,7 @@ class CmdAnalysis{
 	
 	private boolean isCorrectDate(int i) {
 		/*
-	             ÅĞ¶ÏÖ¸¶¨ÈÕÆÚÊÇ·ñÕıÈ·
+	             åˆ¤æ–­æŒ‡å®šæ—¥æœŸæ˜¯å¦æ­£ç¡®
 	   */
 		if(i<cmdString.length) {
 			if(isValidDate(cmdString[i])) {
@@ -147,7 +147,7 @@ class CmdAnalysis{
 	
 	private boolean isValidDate(String strDate) {
 		/*
-	     	ÅĞ¶ÏÖ¸¶¨ÈÕÆÚ¸ñÊ½ÊÇ·ñÂú×ãyyyy-MM-dd ×Ö·û´®ÊÇ·ñÎªÊı×Ö
+	     	åˆ¤æ–­æŒ‡å®šæ—¥æœŸæ ¼å¼æ˜¯å¦æ»¡è¶³yyyy-MM-dd å­—ç¬¦ä¸²æ˜¯å¦ä¸ºæ•°å­—
 	   */
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		try {
@@ -168,7 +168,7 @@ class CmdAnalysis{
 	}
 	private boolean isType(int i) {
 		/*
-	             ÅĞ¶ÏÖ¸¶¨ÀàĞÍÊÇ·ñÕıÈ·
+	             åˆ¤æ–­æŒ‡å®šç±»å‹æ˜¯å¦æ­£ç¡®
 	   */
 		for(int a = 0;a < typeOrder.length;a++)
 			typeOrder[a] = -1;	
@@ -209,7 +209,7 @@ class CmdAnalysis{
 	}
 	private boolean isProvince(int i) {
 		/*
-	             ÅĞ¶ÏÖ¸¶¨Ê¡·İÊÇ·ñÕıÈ·
+	             åˆ¤æ–­æŒ‡å®šçœä»½æ˜¯å¦æ­£ç¡®
 	   */
 		int currentIndex = i;
 		if(i<cmdString.length) {
