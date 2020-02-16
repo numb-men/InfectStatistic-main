@@ -9,3 +9,12 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+
+/InfectStatistic.class
+/Lib.class
+/array$cmdArgs.class
+/array$line.class
+/array.class
+/InfectStatistic$cmdArgs.class
+/InfectStatistic$line.class
+/bin/
