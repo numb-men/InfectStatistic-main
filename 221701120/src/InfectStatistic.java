@@ -246,13 +246,15 @@ class FileOutputUtils{
                 List<String> provinceList) throws IOException {    
         OutputStream outStream = new FileOutputStream(dstPath);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outStream));
-
+        
         if (hasProvince && !hasType) {
             String provinceName = "";
             for (int i = 0; i < provinceList.size(); i++) {
                 provinceName = provinceList.get(i);
-                InfectedArea province = map.map.get(provinceName);
-                writeAll(provinceName, bufferedWriter, province);
+                if (map.map.get(provinceName) != null) {
+                    InfectedArea province = map.map.get(provinceName);
+                    writeAll(provinceName, bufferedWriter, province);
+                }
             }
            
         }else if (!hasProvince && hasType) {
@@ -277,22 +279,24 @@ class FileOutputUtils{
             String provinceName = "";
             for (int i = 0; i < provinceList.size(); i++) {
                 provinceName = provinceList.get(i);
-                InfectedArea province = map.map.get(provinceName);
-                String keyString = provinceName;
-                bufferedWriter.write(keyString);
-                if(typeList.contains("ip")) {
-                    bufferedWriter.write(" 感染患者" + province.infectedNum + "人");
+                if (map.map.get(provinceName) != null) {
+                    InfectedArea province = map.map.get(provinceName);
+                    String keyString = provinceName;
+                    bufferedWriter.write(keyString);
+                    if(typeList.contains("ip")) {
+                        bufferedWriter.write(" 感染患者" + province.infectedNum + "人");
+                    }
+                    if(typeList.contains("sp")) {
+                        bufferedWriter.write(" 疑似患者" + province.potentialNum + "人");
+                    }
+                    if(typeList.contains("cure")) {
+                        bufferedWriter.write(" 治愈" + province.curedNum + "人");
+                    }
+                    if(typeList.contains("dead")) {
+                        bufferedWriter.write(" 死亡" + province.deadNum + "人");
+                    }
+                    bufferedWriter.write("\n");  
                 }
-                if(typeList.contains("sp")) {
-                    bufferedWriter.write(" 疑似患者" + province.potentialNum + "人");
-                }
-                if(typeList.contains("cure")) {
-                    bufferedWriter.write(" 治愈" + province.curedNum + "人");
-                }
-                if(typeList.contains("dead")) {
-                    bufferedWriter.write(" 死亡" + province.deadNum + "人");
-                }
-                bufferedWriter.write("\n");  
             }
         }else {
             for (HashMap.Entry<String, InfectedArea> entry : map.map.entrySet()) {
