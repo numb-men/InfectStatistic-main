@@ -111,15 +111,9 @@ class CmdList implements Cmd {
 	public void doCmd(Param pm) throws Exception {
 		FileHandle l=new FileHandle();
     	String[] require=null;
-    	if (!pm.isType()) {
-    		pm.setTypeValue();
-    	}
-		if (!pm.isDate()) {
-			pm.setDateValue("");
-		}
-    	if (pm.isProvince()) {
-    		require=pm.getProvinceValue();
-    	}
+    	if (!pm.isType()) pm.setTypeValue();
+		if (!pm.isDate()) pm.setDateValue("");
+    	if (pm.isProvince()) require=pm.getProvinceValue();
     	l.dealFile(pm.getLogValue(),pm.getDateValue(),require);
     	l.writeFile(pm.getOutValue(),pm.getTypeValue());
 	}
@@ -334,8 +328,7 @@ class Param {
 
 //文件处理类
 class FileHandle {
-	//存放所有文件的处理结果
-	private List<LogResult> all=new ArrayList<>();
+	private List<LogResult> all=new ArrayList<>();//存放所有文件的处理结果
 	
 	//读文件（输入参数：路径）
 	public void readFile(String path) throws IOException {
@@ -498,19 +491,19 @@ class LogResult {
 	public String toString(TypeValue type) {
 		String res=province;
 		TypeStruct[] set=type.getSet();
-		for (TypeStruct typeStruct : set) {
+		for (TypeStruct typeStruct:set) {
 			switch (typeStruct.getName()) {
 				case "ip":
-					if (typeStruct.getIsExist()) res += " 感染患者" + ip + "人";
+					if (typeStruct.getIsExist()) res+=" 感染患者"+ip+"人";
 					break;
 				case "sp":
-					if (typeStruct.getIsExist()) res += " 疑似患者" + sp + "人";
+					if (typeStruct.getIsExist()) res+=" 疑似患者"+sp+"人";
 					break;
 				case "cure":
-					if (typeStruct.getIsExist()) res += " 治愈" + cure + "人";
+					if (typeStruct.getIsExist()) res+=" 治愈"+cure+"人";
 					break;
 				case "dead":
-					if (typeStruct.getIsExist()) res += " 死亡" + dead + "人";
+					if (typeStruct.getIsExist()) res+=" 死亡"+dead+"人";
 					break;
 			}
 		}
@@ -540,7 +533,7 @@ class DataHandle {
 		addIpHandler.getData(str);
 	}
 	
-	////计算全国的数据并加在处理好的数据后合并
+	//计算全国的数据并加在处理好的数据后合并
 	public List<LogResult> calNationData() {
 		LogResult all=new LogResult("全国");
 		List<LogResult> res=new ArrayList<>();
@@ -834,6 +827,4 @@ class DataHandle {
 			else return null;
 		}		
 	}
-
 }
-
