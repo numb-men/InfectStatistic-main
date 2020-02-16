@@ -12,5 +12,5 @@
 /src/
 /target/
 /pom.xml
-!/example/
-!/README.md
+/example/
+/README.md
