@@ -13,10 +13,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,34 +41,9 @@ class InfectStatistic {
     public static void main(String[] args){
         
         CommandParser cmParser = new CommandParser(args);
-        CommandRun commandRun = new CommandRun();
-        commandRun.runCommand(cmParser);
-        
-        
-        /*
-        String line = "甘肃 新增 感染患者 5人";
-        String cutString = " ";
-        String[] newLine = line.split(cutString);
-        
-        //获取人数信息
-        int len = newLine.length;
-        String regEx="[^0-9]";  
-        Pattern p = Pattern.compile(regEx);  
-        Matcher m = p.matcher(newLine[len-1]); 
-        String numString= m.replaceAll("").trim();
-        int num = Integer.valueOf(numString);
-        
-        System.out.println(num);  
-        
-        for (HashMap.Entry<String, InfectedArea> entry : map.map.entrySet()) {
-            System.out.println("Key = " + entry.getKey() + 
-                    ", Value = infect:" + entry.getValue().infectedNum +
-                    ",potential:" + entry.getValue().potentialNum +
-                    ",cure:" + entry.getValue().curedNum +
-                    ",dead:" + entry.getValue().deadNum);
-        }
-       */
-           
+        CommandRun commandRun = new CommandRun(cmParser);
+        commandRun.runCommand();
+          
     }
 }
 
@@ -122,19 +100,35 @@ class CommandParser{
  * @since 2020.2.15
  */
 class CommandRun{
-    public void runCommand(CommandParser parser) {
+    CommandParser parser;
+    boolean hasDate = false;
+    boolean hasType = false;
+    boolean hasProvince = false;
+    
+    public CommandRun(CommandParser parser) {
+        if (!parser.dateString.equals("")) {
+            hasDate = true;
+        }else if (!parser.typeString.equals("")) {
+            hasType = true;
+        }else if (!parser.provinceString.equals("")) {
+            hasProvince = true;
+        }
+        this.parser = parser;
+    }
+    
+    public void runCommand() {
         InfectedMap map = new InfectedMap();
         FileInputUtils reader = new FileInputUtils();
         FileOutputUtils writer = new FileOutputUtils();
         
         
         try {
-            reader.parseFile(parser.srcPath, map);
+            
+            reader.parseFile(parser.srcPath, map, hasDate, parser.dateString);
             map.sortByProvince();
-            writer.writeFile(parser.dstPath, map);
+            writer.writeFile(parser.dstPath, map,hasType,hasProvince);
             
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -148,8 +142,52 @@ class CommandRun{
  * @version 1.0
  * @since 2020.2.15
  */
-class FileInputUtils{    
-    public void parseFile(String srcPath, InfectedMap map) throws IOException {
+class FileInputUtils{
+    /*
+     * 对传入log文件夹目录下的所有文件进行处理
+     */
+    public void parseFile(String dirPath, InfectedMap map, boolean hasDate, String dateString) throws IOException{
+        //获取文件目录
+        File dirFile = new File(dirPath);
+        //获取目录下所有*.log.txt文件
+        File[] logFiles = dirFile.listFiles();
+        //存放所有的文件名
+        List<String> filesName = new ArrayList<String>();
+        List<File> filesList = Arrays.asList(logFiles);
+
+        //对filesList根据文件名按照时间进行排序
+        //覆写compare方法
+        Collections.sort(filesList, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        for (int i = 0; i < filesList.size() ;i++) {
+                filesName.add(filesList.get(i).toString());
+            }
+        
+        String srcPath = "";
+        
+        for (int i = 0; i<filesName.size(); i++) {
+            srcPath = filesName.get(i);
+            inputFile(srcPath, map);
+            //若命令中有 -date参数
+            if(hasDate) {
+                if (srcPath.equals(dateString)) {
+                    break;
+                }
+            }
+
+            System.out.println(filesName.get(i));
+        }
+        
+    }
+    
+    /*
+     * 解析每个*.log.txt文件的内容
+     */
+    public void inputFile(String srcPath, InfectedMap map) throws IOException {
         InputStream inStream = new FileInputStream(srcPath);
         String line; 
         BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
@@ -158,8 +196,6 @@ class FileInputUtils{
         while (line != null) { 
             if (!line.matches("//(.*)") && !line.equals("")) {
                 infoParser.parseInfo(line, map);
-                //System.out.println(line);
-                
             }     
             line = reader.readLine(); 
         }
@@ -178,10 +214,10 @@ class FileInputUtils{
  * @since 2020.2.15
  */
 class FileOutputUtils{
-    public void writeFile(String dstPath, InfectedMap map) throws IOException {    
+    public void writeFile(String dstPath, InfectedMap map,
+                boolean hasType, boolean hasProvince) throws IOException {    
         OutputStream outStream = new FileOutputStream(dstPath);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outStream));
-        
 
         for (HashMap.Entry<String, InfectedArea> entry : map.map.entrySet()) {
             String keyString = entry.getKey();
@@ -204,6 +240,7 @@ class FileOutputUtils{
         outStream.close();
     }
 }
+
 /**
  * 
  * 存储被感染省份地区的相关信息
