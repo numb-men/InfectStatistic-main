@@ -36,11 +36,7 @@ class Read {
         File[] filelist = files.listFiles();//获取目录下的所有文件
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");//规范日期格式
         String today = sdf.format(now);
-        //System.out.println(now);
-        //System.out.println(today);
         for (int i = 0; i < filelist.length; i++) {
-            // System.out.println(filelist[i].getName());
-            //System.out.println(today+".log");
             if (filelist[i].getName().compareTo(today+".log.txt") <= 0)
                 ReadLog(Log_Path + filelist[i].getName());
         }
@@ -61,7 +57,6 @@ class Read {
     }
 
     public void Dealtxt(String a){
-        System.out.println(a);
         num.province[0]++;
         String addinfect = "(\\S+) 新增 感染患者 (\\d+)人";
         String adddoubt = "(\\S+) 新增 疑似患者 (\\d+)人";
