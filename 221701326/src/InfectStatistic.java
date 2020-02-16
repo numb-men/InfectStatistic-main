@@ -59,7 +59,7 @@ class province{
 		            	"黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东",
 		            	"山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
 	
-	public int getmark1(String province) {
+	public int getmark(String province) {
 		int mark=0;
 		for(mark=0;mark<provinces.length;mark++)
 			if(provinces[mark]==province)
@@ -79,7 +79,59 @@ class province{
 	
 }
 class state{
-	String patterns[]= {"","",};
-	
+	String pattern1= ".*新增 感染患者.*";
+	String pattern2= ".*新增 疑似患者.*";
+	String pattern3=".*治愈.*";
+	String pattern4=".*死亡.*";	
+	String pattern5= ".*感染患者 流入.*";
+	String pattern6= ".*疑似患者 流入.*";	
+	String pattern7=".*疑似患者 确诊感染.*";
+	String pattern8=".*排除 疑似患者.*";
+	public int judgetxtline(String textstr) {	
+		int type=0;
+		if(Pattern.matches(pattern1,textstr)) 
+		    type=1;
+		else if(Pattern.matches(pattern2,textstr)) 
+		    type=2;
+		else if(Pattern.matches(pattern3,textstr)) 
+			type=3;
+		else if(Pattern.matches(pattern4,textstr)) 
+			type=4;
+		else if(Pattern.matches(pattern5,textstr)) 
+			type=5;
+		else if(Pattern.matches(pattern6,textstr)) 
+			type=6;
+		else if(Pattern.matches(pattern7,textstr)) 
+			type=7;
+		else if(Pattern.matches(pattern8,textstr)) 
+			type=8;
+		else {
+			System.out.println("该行日志文本文本格式错误!");
+			System.exit(1);
+		}
+		return type;
+	}
+	public int judgeprovince(String str){
+		province a=new province();
+		int num=a.getmark(str);
+		return num;
+	}
+	public void conditions(String textstr) {
+		String strs[]=textstr.split(" ");
+		String conditions[][]=new String[32][4];
+		int choice=this.judgetxtline(textstr);
+	}
+    /*System.out.println(strs[2].toString());*/ 
+	public static void main(String args[]) {
+		String list1[][]=new String[2][3];
+		for(int i=0;i<list1.length;i++) 
+			for(int j=0;j<3;j++)
+				list1[i][j]="4人";
+		for(int i=0;i<list1.length;i++) 
+			for(int j=0;j<3;j++)
+				list1[i][j]+="2人";
+		System.out.println(list1[1][1]);
 			
+	}
+	
 }
