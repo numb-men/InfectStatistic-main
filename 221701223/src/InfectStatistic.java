@@ -1,5 +1,6 @@
 /**
  * InfectStatistic
+ *
  * @author ybn
  */
 public class InfectStatistic {
@@ -10,8 +11,7 @@ public class InfectStatistic {
      * @param args args
      */
     public static void main(String[] args) {
-        ArgumentParser parser = new ArgumentParser(args);
-        Command command = parser.makeCommand();
+        ArgumentContainer argumentContainer = ArgumentHandler.getArgumentContainer(args);
         RecordContainer recordContainer = new RecordContainer() {{
             init();
         }};

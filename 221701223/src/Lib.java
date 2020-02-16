@@ -29,24 +29,50 @@ import java.util.*;
  */
 public class Lib {
 
+    /**
+     * PROVINCE_LIST
+     */
     public static final String[] PROVINCE_LIST = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南",
         "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西",
         "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"
     };
 
+    /**
+     * CHINESE_CHARACTER
+     */
     public final static String CHINESE_CHARACTER = "[\u4e00-\u9fa5]";
 
+    /**
+     * INFECTED
+     */
     public final static String INFECTED = "感染患者";
+    /**
+     * SUSPECTED
+     */
     public final static String SUSPECTED = "疑似患者";
+    /**
+     * CURED
+     */
     public final static String CURED = "治愈";
+    /**
+     * DEAD
+     */
     public final static String DEAD = "死亡";
+    /**
+     * CONFIRMED
+     */
     public final static String CONFIRMED = "确诊感染";
+    /**
+     * INCREASED
+     */
     public final static String INCREASED = "新增";
+    /**
+     * REMOVED
+     */
     public final static String REMOVED = "排除";
 
     /**
      * Validate format of date string boolean
-     * 用来验证log文件名中对日期是否符合格式要求
      *
      * @param dateString date string
      * @return the boolean
@@ -64,7 +90,6 @@ public class Lib {
 
     /**
      * Gets index from strings *
-     * 顺序查找目标字符串在字符串数组中的索引
      *
      * @param strings strings
      * @param target  target
@@ -79,6 +104,12 @@ public class Lib {
         return -1;
     }
 
+    /**
+     * Extract number from string int
+     *
+     * @param string string
+     * @return the int
+     */
     public static int extractNumberFromString(String string) {
         return Integer.parseInt(string.replaceAll(CHINESE_CHARACTER, "").trim());
     }
@@ -86,45 +117,95 @@ public class Lib {
 
 /**
  * Record
- *
- * @author ybn
  */
 class Record {
+    /**
+     * Infected
+     */
     private int infected = 0;
+    /**
+     * Suspected
+     */
     private int suspected = 0;
+    /**
+     * Cured
+     */
     private int cured = 0;
+    /**
+     * Dead
+     */
     private int dead = 0;
 
+    /**
+     * Gets string of infected *
+     *
+     * @return the string of infected
+     */
     String getStringOfInfected() {
         return " " + Lib.INFECTED + infected + "人";
     }
 
+    /**
+     * Gets string of suspected *
+     *
+     * @return the string of suspected
+     */
     String getStringOfSuspected() {
         return " " + Lib.SUSPECTED + suspected + "人";
     }
 
+    /**
+     * Gets string of cured *
+     *
+     * @return the string of cured
+     */
     String getStringOfCured() {
         return " " + Lib.CURED + cured + "人";
     }
 
+    /**
+     * Gets string of dead *
+     *
+     * @return the string of dead
+     */
     String getStringOfDead() {
         return " " + Lib.DEAD + dead + "人";
     }
 
+    /**
+     * Update infected *
+     *
+     * @param number number
+     */
     void updateInfected(int number) {
         infected += number;
     }
 
+    /**
+     * Update suspected *
+     *
+     * @param number number
+     */
     void updateSuspected(int number) {
         suspected += number;
     }
 
+    /**
+     * Update cured *
+     *
+     * @param number number
+     */
     void updateCured(int number) {
         cured += number;
         //治愈数增加了，感染数就要同步减少
         updateInfected(-number);
     }
 
+    /**
+     * Update dead *
+     *
+     * @param number number
+     */
     void updateDead(int number) {
         dead += number;
 
@@ -136,10 +217,18 @@ class Record {
         return (infected == 0 && suspected == 0 && cured == 0 && dead == 0);
     }
 
+    /**
+     * Print all
+     */
     void printAll() {
         System.out.printf("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", infected, suspected, cured, dead);
     }
 
+    /**
+     * Print with patient type filter *
+     *
+     * @param filter filter
+     */
     void printWithPatientTypeFilter(ArrayList<String> filter) {
         for (String type : filter) {
             System.out.print(" ");
@@ -163,6 +252,12 @@ class Record {
         System.out.println();
     }
 
+    /**
+     * Gets string with patient type filter *
+     *
+     * @param filter filter
+     * @return the string with patient type filter
+     */
     String getStringWithPatientTypeFilter(ArrayList<String> filter) {
         StringBuilder builder = new StringBuilder();
         for (String type : filter) {
@@ -193,11 +288,17 @@ class Record {
 class RecordContainer {
 
     /**
-     * Container
+     * Map container
      */
     LinkedHashMap<String, Record> mapContainer;
+    /**
+     * Whole country
+     */
     Record wholeCountry;
 
+    /**
+     * Init
+     */
     public void init() {
         mapContainer = new LinkedHashMap<>() {{
             for (String province : Lib.PROVINCE_LIST) {
@@ -207,6 +308,13 @@ class RecordContainer {
         wholeCountry = new Record();
     }
 
+    /**
+     * Update record *
+     *
+     * @param province    province
+     * @param patientType patient type
+     * @param number      number
+     */
     private void updateRecord(String province, String patientType, int number) {
         switch (patientType) {
             case Lib.CURED:
@@ -231,6 +339,14 @@ class RecordContainer {
 
     }
 
+    /**
+     * Update record *
+     *
+     * @param province    province
+     * @param operation   operation
+     * @param patientType patient type
+     * @param number      number
+     */
     private void updateRecord(String province, String operation, String patientType, int number) {
         switch (patientType) {
             case Lib.INFECTED:
@@ -265,6 +381,14 @@ class RecordContainer {
         }
     }
 
+    /**
+     * Update record *
+     *
+     * @param provinceOut province out
+     * @param patientType patient type
+     * @param number      number
+     * @param provinceIn  province in
+     */
     private void updateRecord(String provinceOut, String patientType, int number, String provinceIn) {
         switch (patientType) {
             case Lib.INFECTED:
@@ -281,6 +405,11 @@ class RecordContainer {
         }
     }
 
+    /**
+     * Parse single line *
+     *
+     * @param line line
+     */
     void parseSingleLine(String line) {
         //将一行log用空格分隔成字符串数组
         String[] log = line.split(" ");
@@ -319,6 +448,11 @@ class RecordContainer {
         }
     }
 
+    /**
+     * Print records filter by arguments *
+     *
+     * @param argumentContainer argument container
+     */
     public void printRecordsFilterByArguments(ArgumentContainer argumentContainer) {
         for (String province : argumentContainer.provinceList) {
             System.out.print(province);
@@ -328,7 +462,7 @@ class RecordContainer {
 }
 
 /**
- * Argument parser
+ * Argument handler
  */
 class ArgumentHandler {
 
@@ -344,9 +478,10 @@ class ArgumentHandler {
     }};
 
     /**
-     * Make command command
+     * Gets argument container *
      *
-     * @return the command
+     * @param originalArguments original arguments
+     * @return the argument container
      */
     public static ArgumentContainer getArgumentContainer(String[] originalArguments) {
         String date = getDate(originalArguments);
@@ -362,10 +497,23 @@ class ArgumentHandler {
         return new ArgumentContainer(logPath, outPah, date, patientType, provinceList);
     }
 
+    /**
+     * Gets index of command *
+     *
+     * @param originalArguments original arguments
+     * @param command           command
+     * @return the index of command
+     */
     private static int getIndexOfCommand(String[] originalArguments, String command) {
         return Lib.getIndexFromStrings(originalArguments, command);
     }
 
+    /**
+     * Gets date *
+     *
+     * @param originalArguments original arguments
+     * @return the date
+     */
     private static String getDate(String[] originalArguments) {
 
         int index = getIndexOfCommand(originalArguments, "-date");
@@ -382,6 +530,12 @@ class ArgumentHandler {
         }
     }
 
+    /**
+     * Gets patient type *
+     *
+     * @param originalArguments original arguments
+     * @return the patient type
+     */
     @NotNull
     private static ArrayList<String> getPatientType(String[] originalArguments) {
 
@@ -452,7 +606,7 @@ class ArgumentHandler {
 }
 
 /**
- * Arguments
+ * Argument container
  */
 class ArgumentContainer {
 
@@ -469,7 +623,7 @@ class ArgumentContainer {
      */
     String outPath;
     /**
-     * Type
+     * Patient types
      */
     ArrayList<String> patientTypes;
     boolean patientTypeRegistered = false;
@@ -516,24 +670,32 @@ class ArgumentContainer {
 class FileTools {
 
     /**
-     * LOG_FILTER
-     * 用正则表达式比转换为Date对象更快一点
+     * FILE_NAME_FILTER
      */
     public final static String FILE_NAME_FILTER = "(19|20)[0-9][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]).log.txt";
 
     /**
      * Log path
-     * log文件存放的目录
      */
     String logPath;
     /**
      * Out path
-     * 统计结果输出的完整路径（包括文件名）
      */
     String outPath;
-    ArrayList<String> provinceList;
+    /**
+     * Province list
+     */
+    HashSet<String> provinceList;
+    /**
+     * File list
+     */
     ArrayList<String> fileList;
 
+    /**
+     * File tools
+     *
+     * @param arguments arguments
+     */
     public FileTools(ArgumentContainer arguments) {
 
         this.logPath = arguments.logPath;
@@ -547,6 +709,9 @@ class FileTools {
         }
     }
 
+    /**
+     * Init file list
+     */
     private void initFileList() {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(logPath))) {
             fileList = new ArrayList<>() {{
@@ -561,6 +726,11 @@ class FileTools {
         }
     }
 
+    /**
+     * Init file list with date limit *
+     *
+     * @param newestFileName newest file name
+     */
     private void initFileListWithDateLimit(String newestFileName) {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(logPath))) {
             fileList = new ArrayList<>() {{
@@ -585,6 +755,11 @@ class FileTools {
         }
     }
 
+    /**
+     * Read file *
+     *
+     * @param container container
+     */
     public void readFile(RecordContainer container) {
         try {
             //makeRecordContainer
@@ -604,6 +779,11 @@ class FileTools {
         }
     }
 
+    /**
+     * Create output file *
+     *
+     * @param recordStrings record strings
+     */
     public void createOutputFile(ArrayList<String> recordStrings) {
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(outPath), StandardCharsets.UTF_8);
