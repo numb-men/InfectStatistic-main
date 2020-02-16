@@ -1,3 +1,7 @@
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * InfectStatistic
  * TODO
@@ -6,23 +10,20 @@
  * @version 1.0
  * @since 2020/2/12
  */
-import java.text.SimpleDateFormat;
-import java.util.Date;
 class InfectStatistic{
     public static void main(String[] args) {
-        System.out.println("It's testing!");
-        //test       
+        System.out.println("It's testing!");       
         if(args.length!=0) {
-        	CmdAnalysis test = new CmdAnalysis(args);
-            if(test.isCmdString()) {
+        	CmdAnalysis cmdObject = new CmdAnalysis(args);
+            if(cmdObject.isCmdString()) {
                 System.out.println("正确命令");
-                //test.showAll();
+                //cmdObject.showAll();
             }else {
             	System.out.println("错误命令");
             }
-            readAndWriteLog raw = new readAndWriteLog(test.getLogLocation(),test.getOutLocation(),test.getLogDate(),
-            test.getTypeOrder(),test.getProvinceShow());
-            raw.showAll();   
+            HandleLog handleObject = new HandleLog(cmdObject.getLogLocation(),cmdObject.getOutLocation(),cmdObject.getLogDate(),
+            		cmdObject.getTypeOrder(),cmdObject.getProvinceShow());
+            //handleObject.showAll();   
         }
         
     }
@@ -250,7 +251,9 @@ class CmdAnalysis{
 		return provinceShow;
 	}
 	
-	
+	/**
+	 * 用于测试输入
+	 */
 	public void showAll() {
 		for(int i = 0;i < cmdString.length;i++) {
 			System.out.println(cmdString[i]);
@@ -276,19 +279,49 @@ class CmdAnalysis{
 /**
  *读取并统计日志文件
  */
-class readAndWriteLog{
+class HandleLog{
 	private String logLocation;
 	private String outLocation;
 	private String logDate;
 	private int[] typeOrder;
 	private int[] provinceShow = new int[32];
-	public readAndWriteLog(String logLocation,String outLocation,String logDate,int[] typeOrder,int[] provinceShow) {
+	public HandleLog(String logLocation,String outLocation,String logDate,int[] typeOrder,int[] provinceShow) {
 		this.logLocation = logLocation;
 		this.outLocation = outLocation;
 		this.logDate = logDate;
 		this.typeOrder = (int[])typeOrder.clone();
 		this.provinceShow = (int[])provinceShow.clone();
 	}
+	/*
+	 * 进入log目录读取日志文件
+	 */
+	private boolean readLog() {
+		File file = new File(logLocation); 
+		File[] files = file.listFiles();
+		for(int i = 0;i < files.length;i++) {
+			if(file.isDirectory()) {
+				String filePath = files[i].getPath();
+				if(filePath.compareTo(logDate) <= 0) {
+					statistics(filePath);
+				}
+			}else {
+				System.out.println("文件:"+files[i].getPath());
+			}
+			
+			}
+		return true;
+	}
+	
+	private boolean statistics(String filePath) {
+		
+		return true;
+	}
+	
+	
+	
+	/**
+	 * 用于测试输入
+	 */
 	public void showAll() {
 		System.out.println(logLocation);
 		System.out.println(outLocation);
