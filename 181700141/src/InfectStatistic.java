@@ -83,7 +83,6 @@ class ListCommand {
     private LinkedHashMap<String, Integer> cureMap = new LinkedHashMap<>();
     // 存储各省及全国死亡人数
     private LinkedHashMap<String, Integer> deadMap = new LinkedHashMap<>();
-   
 
     // 记录日志目录路径
     private String inDirectory = null;
@@ -111,8 +110,8 @@ class ListCommand {
     String s7 = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
     String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
 
-    private String[] provincesArray = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北",
-            "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南",
+    private String[] provincesArray = { "全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江",
+            "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南",
             "浙江" };
 
     public ListCommand() {
@@ -122,7 +121,7 @@ class ListCommand {
             spMap.put(provincesArray[i], 0);
             cureMap.put(provincesArray[i], 0);
             deadMap.put(provincesArray[i], 0);
-        }      
+        }
     }
 
     /**
@@ -197,7 +196,7 @@ class ListCommand {
                         break;
                     if (provinces.contains(args[j]))
                         throw new IllegalException("错误，参数-province出现重复参数值");
-                    if (!legalProvinces.contains(args[j]) )
+                    if (!legalProvinces.contains(args[j]))
                         throw new IllegalException("错误，参数-province出现的参数值非法（省份非法）");
                     i = j;
                     provinces.add(args[j]);
@@ -239,6 +238,10 @@ class ListCommand {
                 list.add(provincesArray[i]);
         return list;
     }
+    
+    public List<String> getInputProvinces(){
+        return provinces;
+    }
 
     // 执行各参数所要求的操作
     public void carryOutActions() throws Exception {
@@ -275,34 +278,35 @@ class ListCommand {
         int deadAmount = 0;
         for (Integer i : ipMap.values())
             ipAmount += i;
-        ipMap.put("全国",ipAmount);
+        ipMap.put("全国", ipAmount);
         for (Integer i : spMap.values())
             spAmount += i;
-        spMap.put("全国",spAmount);
+        spMap.put("全国", spAmount);
         for (Integer i : cureMap.values())
             cureAmount += i;
-        cureMap.put("全国",cureAmount);
+        cureMap.put("全国", cureAmount);
         for (Integer i : deadMap.values())
             deadAmount += i;
-        deadMap.put("全国",deadAmount);
+        deadMap.put("全国", deadAmount);
 
         File outFile = new File(outDirectory);
         FileWriter writer = new FileWriter(outFile, false);
         if (typeIsExist) {
             if (!provinceIsExist) {
-                //未提供要输出的省份，则输出日志文件有提供的省份的数据，
-                List<String> list=new ArrayList<String>();
-                int size=provincesArray.length;
-                for(int i=0; i<size; i++) {
-                    //全是0则不输出其数据
-                    if(ipMap.get(provincesArray[i])==0&&spMap.get(provincesArray[i])==0&&cureMap.get(provincesArray[i])==0&&deadMap.get(provincesArray[i])==0)
+                // 未提供要输出的省份，则输出日志文件有提供的省份的数据，
+                List<String> list = new ArrayList<String>();
+                int size = provincesArray.length;
+                for (int i = 0; i < size; i++) {
+                    // 全是0则不输出其数据
+                    if (ipMap.get(provincesArray[i]) == 0 && spMap.get(provincesArray[i]) == 0
+                            && cureMap.get(provincesArray[i]) == 0 && deadMap.get(provincesArray[i]) == 0)
                         continue;
                     else
                         list.add(provincesArray[i]);
                 }
-                out(writer,list);
+                out(writer, list);
             } else {
-                out(writer,provinces);
+                out(writer, provinces);
             }
         } else {
             if (provinceIsExist) {
@@ -312,7 +316,7 @@ class ListCommand {
                 }
 
             } else {
-                
+
                 // 将各省数据填入相应状态数组内，由于前面集合是有顺序插入所以下面的数据也是有顺序
                 Integer[] ipProvincesAmount = new Integer[ipMap.size()];
                 ipMap.values().toArray(ipProvincesAmount);
@@ -323,7 +327,7 @@ class ListCommand {
                 Integer[] deadProvincesAmount = new Integer[deadMap.size()];
                 deadMap.values().toArray(deadProvincesAmount);
 
-                // 将数据填入文件，全部为0将不输入
+                // 将数据填入文件(由于未提供要输出的省故全部为0将不输入)
                 int size = provincesArray.length;
                 for (int i = 0; i < size; i++) {
                     if (ipProvincesAmount[i] == 0 && spProvincesAmount[i] == 0 && cureProvincesAmount[i] == 0
@@ -389,10 +393,10 @@ class ListCommand {
                 int sum = getAmount(strLine);
                 index = strLine.indexOf(Integer.toString(sum));
                 // 取出流入省份
-                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index - 1);          
+                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index - 1);
 
                 ipMap.put(outProvince, ipMap.get(outProvince) - sum);
-                ipMap.put(inProvince, ipMap.get(inProvince) + sum); 
+                ipMap.put(inProvince, ipMap.get(inProvince) + sum);
             } else if (strLine.matches(s4)) {
                 // String s4 = "\\s*\\S+ 疑似患者 流入 \\S+ \\d+人\\s*";
                 int index = strLine.indexOf(" 疑似患者 流入");
@@ -422,7 +426,7 @@ class ListCommand {
                 int ipSum = ipMap.get(province);
                 // 更新感染人数
                 ipMap.put(province, ipSum - deadSum);
-
+                
                 deadSum += deadMap.get(province);
                 deadMap.put(province, deadSum);
             } else if (strLine.matches(s6)) {
@@ -480,13 +484,24 @@ class ListCommand {
         m.find();
         return Integer.parseInt(s.substring(m.start(), m.end()));
     }
-    
-    public void out(FileWriter writer,List<String> provinces)throws Exception {
+
+    public void out(FileWriter writer, List<String> provinces) throws Exception {
         for (String province : provinces) {
             writer.write(province);
             int size = types.size();
             String[] needTypes = new String[size];
             types.toArray(needTypes);
+            if (size == 1) {
+                if (needTypes[0].equals("ip"))
+                    writer.write(" 感染患者" + ipMap.get(province)+"人\n");
+                else if (needTypes[0].equals("sp"))
+                    writer.write(" 疑似患者" + spMap.get(province)+"人\n");
+                else if (needTypes[0].equals("cure"))
+                    writer.write(" 治愈" + cureMap.get(province)+"人\n");
+                else
+                    writer.write(" 死亡" + deadMap.get(province)+"人\n");
+                continue;
+            }
             if (needTypes[0].equals("ip"))
                 writer.write(" 感染患者" + ipMap.get(province));
             else if (needTypes[0].equals("sp"))
@@ -498,22 +513,22 @@ class ListCommand {
 
             for (int i = 1; i < size - 1; i++) {
                 if (needTypes[i].equals("ip"))
-                    writer.write("人 感染患者"+ipMap.get(province));
-                else if(needTypes[i].equals("sp"))
-                    writer.write("人 疑似患者"+spMap.get(province));
-                else if(needTypes[i].equals("cure"))
-                    writer.write("人 治愈"+cureMap.get(province));
-                else 
-                    writer.write("人 死亡"+deadMap.get(province));
+                    writer.write("人 感染患者" + ipMap.get(province));
+                else if (needTypes[i].equals("sp"))
+                    writer.write("人 疑似患者" + spMap.get(province));
+                else if (needTypes[i].equals("cure"))
+                    writer.write("人 治愈" + cureMap.get(province));
+                else
+                    writer.write("人 死亡" + deadMap.get(province));
             }
-            if (needTypes[size-1].equals("ip"))
-                writer.write("人 感染患者" + ipMap.get(province)+"人\n");
-            else if (needTypes[size-1].equals("sp"))
-                writer.write("人 疑似患者" + spMap.get(province)+"人\n");
-            else if (needTypes[size-1].equals("cure"))
-                writer.write("人 治愈" + cureMap.get(province)+"人\n");
+            if (needTypes[size - 1].equals("ip"))
+                writer.write("人 感染患者" + ipMap.get(province) + "人\n");
+            else if (needTypes[size - 1].equals("sp"))
+                writer.write("人 疑似患者" + spMap.get(province) + "人\n");
+            else if (needTypes[size - 1].equals("cure"))
+                writer.write("人 治愈" + cureMap.get(province) + "人\n");
             else
-                writer.write("人 死亡" + deadMap.get(province)+"人\n");
+                writer.write("人 死亡" + deadMap.get(province) + "人\n");
         }
     }
 
