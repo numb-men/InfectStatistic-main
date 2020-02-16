@@ -350,6 +350,11 @@ class InfectStatistic {
                         else if(!isListName(list, m3.group(2))) {//流入省不存在则新建
                             province pro =new province(m3.group(2),Integer.parseInt(m3.group(3)),0,0,0);
                             list.add(pro);
+                            for(int j = 0; j < list.size(); j++){
+                                if(list.get(j).getName().equals(m3.group(1))){
+                                    list.get(j).setIp(list.get(j).getIp() - Integer.parseInt(m3.group(3)));//修改流出省的感染患者人数
+                                }
+                            }
                         }
                         else{//流出流入省都存在，则修改两省的ip
                             for(int j = 0; j < list.size(); j++){
@@ -369,6 +374,11 @@ class InfectStatistic {
                         else if(!isListName(list, m4.group(2))) {//流入省不存在则新建
                             province pro =new province(m4.group(2),0,Integer.parseInt(m4.group(3)),0,0);
                             list.add(pro);
+                            for(int j = 0; j < list.size(); j++){
+                                if(list.get(j).getName().equals(m4.group(1))){
+                                    list.get(j).setSp(list.get(j).getSp() - Integer.parseInt(m4.group(3)));//修改流出省的疑似患者人数
+                                }
+                            }
                         }
                         else{//流出流入省都存在，则修改两省的sp
                             for(int j = 0; j < list.size(); j++){
@@ -518,9 +528,9 @@ class InfectStatistic {
         return !date1.after(date2);
     }
     public static void main(String[] args) throws ParseException {
-        //String cmdLine = "list -date 2020-01-27 -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log" +
-                //" -out G:/output.txt";
-        //args = cmdLine.split(" ");
+        /*String cmdLine = "list -date 2020-01-27 -log C:/Users/ASUS/Documents/GitHub/InfectStatistic-main/221701429/log" +
+                " -out G:/output.txt";
+        args = cmdLine.split(" ");*/
         HashMap<String, String[]> parseArgs = parseArgs(args);
         func(parseArgs,args);
     }
