@@ -520,6 +520,78 @@ public class Lib {
             }
 
         }
+
+        // 判断用哪个正则表达式
+        public Map<String,Integer[]> judgeReg(String line) {
+            int regNo = 0;
+            Map<String,Integer[]> lineInfo = new HashMap<>();
+            Pattern pattern1 = Pattern.compile(REGEX1);
+            Pattern pattern2 = Pattern.compile(REGEX2);
+            Pattern pattern3 = Pattern.compile(REGEX3);
+            Pattern pattern4 = Pattern.compile(REGEX4);
+            Pattern pattern5 = Pattern.compile(REGEX5);
+            Pattern pattern6 = Pattern.compile(REGEX6);
+            Pattern pattern7 = Pattern.compile(REGEX7);
+            Pattern pattern8 = Pattern.compile(REGEX8);
+
+            Matcher matcher1 = pattern1.matcher(line);
+            Matcher matcher2 = pattern2.matcher(line);
+            Matcher matcher3 = pattern3.matcher(line);
+            Matcher matcher4 = pattern4.matcher(line);
+            Matcher matcher5 = pattern5.matcher(line);
+            Matcher matcher6 = pattern6.matcher(line);
+            Matcher matcher7 = pattern7.matcher(line);
+            Matcher matcher8 = pattern8.matcher(line);
+
+            if(matcher1.find()) {
+                System.out.println("1");
+                lineInfo = new RegOne().process(line);
+            }
+            else if (matcher2.find()) {
+                lineInfo = new RegTwo().process(line);
+                System.out.println("2");
+            }
+            else if (matcher3.find()) {
+                lineInfo = new RegThree().process(line);
+                System.out.println("3");
+            }
+            else if (matcher4.find()) {
+                lineInfo = new RegFour().process(line);
+                System.out.println("4");
+            }
+            else if (matcher5.find()) {
+                lineInfo = new RegFive().process(line);
+                System.out.println("5");
+            }
+            else if (matcher6.find()) {
+                lineInfo = new RegSix().process(line);
+                System.out.println("6");
+            }
+            else if (matcher7.find()) {
+                System.out.println("===============================");
+                lineInfo = new RegSeven().process(line);
+                System.out.println("7");
+
+            }
+            else if (matcher8.find()) {
+                lineInfo = new RegEight().process(line);
+                System.out.println("8");
+            }
+            return lineInfo;
+        }
+
+        public void printInfo() {
+            Set<String> keys = info.keySet();
+            for (String key:keys) {
+                Integer[] integers = info.get(key);
+                System.out.println(String.format("%s %d %d %d %d",key,integers[0],
+                        integers[1],integers[2],integers[3]));
+            }
+        }
+
+        public Map<String,Integer[]> getInfo() {
+            return this.info;
+        }
     }
 }
 
