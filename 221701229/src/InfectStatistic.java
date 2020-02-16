@@ -12,8 +12,8 @@ import java.util.regex.*;
 
 class InfectStatistic {
     public static void main(String[] args) {
-                String arg[]="list  -log E:/log/ -out E:/out/output.txt".split("\\s+");
-                CommandInvoker cmdinvoke=new CommandInvoker(arg);
+
+                CommandInvoker cmdinvoke=new CommandInvoker(args);
 
         }
     }
@@ -69,6 +69,7 @@ class CommandManager {
         if(match)
         {
             //执行命令
+            System.out.println("执行命令"+cmd.getCmdName());
             cmd.execute(args);
         }
         else
@@ -128,11 +129,9 @@ class CommandManager {
  * */
 
 class CommandInvoker{
-        private String[] args;
         CommandInvoker(String[] arg)
         {
-            args=arg;
-            CommandManager cm=new CommandManager(args);
+            CommandManager cm=new CommandManager(arg);
             cm.setCommand();
         }
 
@@ -151,7 +150,7 @@ class list implements Command{
     private ArrayList type=null;  //指定的输出类型
     private ArrayList province=null;  //指定的省份
     private Set<String> allprovinceSet;//日志中出现的省份
-    private ArrayList allprovinceList;//日志中出现的省份
+    private ArrayList<String> allprovinceList;//日志中出现的省份
     private String date=null;
     private int[] all={0,0,0,0};
     private HashMap<String,Integer> infected;
@@ -200,10 +199,12 @@ class list implements Command{
             }
             else if(para.get(0).equals("-type"))
             {
+                para.remove(0);
                 type=para;
             }
             else if(para.get(0).equals("-province"))
             {
+                para.remove(0);
                 province=para;
             }
 
@@ -247,6 +248,7 @@ class list implements Command{
                 while ((readbuff=br.readLine())!=null)
                 {
                     //把读出来的日志行交给下面处理
+                    System.out.println(readbuff);
                     handler.logHandlerList(readbuff,infected,suspected,cured,died);
                 }
                 //有指定截至日期时读取完文件判断日期
@@ -306,7 +308,7 @@ class list implements Command{
                String prov=null;
            if(null!=province)
            {
-               province.sort(comp); //排序
+               //province.sort(comp); //排序
                Iterator proiter=province.iterator();
                while (proiter.hasNext())
                {
@@ -334,10 +336,10 @@ class list implements Command{
                allprovinceSet.addAll(suspected.keySet());
                allprovinceSet.addAll(cured.keySet());
                allprovinceSet.addAll(died.keySet());
-               allprovinceList=new ArrayList(allprovinceSet);
+               allprovinceList=new ArrayList<String>(allprovinceSet);
                //计算全国
                //给所有省份按给定的顺序排序
-               allprovinceList.sort(comp);
+               //allprovinceList.sort(comp);
                Iterator proiter=allprovinceList.iterator();
                while (proiter.hasNext())
                {
@@ -377,7 +379,7 @@ class list implements Command{
                 if(null!=province)
                 {
 
-                    province.sort(comp); //排序
+                    //province.sort(comp); //排序
                     Iterator proiter=province.iterator();
                     while (proiter.hasNext())
                     {
@@ -401,24 +403,22 @@ class list implements Command{
                    allprovinceSet.addAll(suspected.keySet());
                    allprovinceSet.addAll(cured.keySet());
                    allprovinceSet.addAll(died.keySet());
-                   allprovinceList=new ArrayList(allprovinceSet);
+                   allprovinceList=new ArrayList<String>(allprovinceSet);
                    //计算全国
                    //给所有省份按给定的顺序排序
-                    allprovinceList.sort(comp);
-                    Iterator proiter=allprovinceList.iterator();
-                    while (proiter.hasNext())
-                    {
-                        prov=(String) proiter.next();
+                    //allprovinceList.sort(comp);
+                    for (Object o : allprovinceList) {
+                        prov = (String) o;
                         //数据不存在则设置为0
-                        if(infected.get(prov)==null)i=0;
-                        else i=infected.get(prov);
-                        if(suspected.get(prov)==null)s=0;
-                        else s=suspected.get(prov);
-                        if(cured.get(prov)==null)c=0;
-                        else c=cured.get(prov);
-                        if(died.get(prov)==null)d=0;
-                        else d=died.get(prov);
-                        fw.write(prov+" "+"感染患者"+i+"人 "+"疑似患者"+s+"人 "+"治愈"+c+"人 "+"死亡"+d+"人"+'\n');
+                        if (infected.get(prov) == null) i = 0;
+                        else i = infected.get(prov);
+                        if (suspected.get(prov) == null) s = 0;
+                        else s = suspected.get(prov);
+                        if (cured.get(prov) == null) c = 0;
+                        else c = cured.get(prov);
+                        if (died.get(prov) == null) d = 0;
+                        else d = died.get(prov);
+                        fw.write(prov + " " + "感染患者" + i + "人 " + "疑似患者" + s + "人 " + "治愈" + c + "人 " + "死亡" + d + "人" + '\n');
                     }
                 }
                 fw.close();
@@ -440,7 +440,7 @@ class list implements Command{
  * */
 class LogHandle{
     private ArrayList<MyPatterns> pat=new ArrayList<>();
-    private MyPatterns mypattern;
+
 
     //命令的处理
     LogHandle()
@@ -456,6 +456,7 @@ class LogHandle{
     }
     public void logHandlerList(String line,HashMap<String,Integer> infected,HashMap<String,Integer> suspected,HashMap<String,Integer> cured,HashMap<String,Integer> died)
     {
+        MyPatterns mypattern;
         Iterator it=pat.iterator();
         while(it.hasNext())
         {
@@ -489,7 +490,7 @@ abstract class MyPatterns
     abstract String getReg();
 }
 
-class InfectedPatients extends   MyPatterns{
+class InfectedPatients extends  MyPatterns{
     public String reg="([\\u4e00-\\u9fa5])+ 新增 感染患者 (\\d+)人";//<省> 新增 感染患者 n人
     //根据
     public void doCount(String line,HashMap<String,Integer> infected,HashMap<String,Integer> suspected,HashMap<String,Integer> cured,HashMap<String,Integer> died)
