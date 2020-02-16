@@ -16,29 +16,30 @@ class InfectStatistic
 {
     public static void main(String[] args)
     {
-        String[] x=new String [9];
-        x[0]="list";
-        x[1]="-date";
-        x[2]="2020-1-22";
-        x[3]="-log";
-        x[4]="F:\\GitHub\\InfectStatistic-main\\log\\";
-        x[5]="-out";
-        x[6]="F:\\GitHub\\InfectStatistic-main\\result\\ListOut1.txt";
-        x[7]="-province";
-        x[8]="福建";
+//        args=new String [10];
+//        args[0]="list";
+//        args[1]="-date";
+//        args[2]="2020-1-22";
+//        args[3]="-log";
+//        args[4]="F:\\GitHub\\InfectStatistic-main\\log\\";
+//        args[5]="-type";
+//        args[6]="sp";
+//        args[7]="-province";
+//        args[8]="全国";
+//        args[9]="福建";
         try
         {
-            if (x.length == 0)
+            if (args.length == 0)
             {
                 throw new MyException("不能输入空命令!");
             }
-            else if (!x[0].equals("list"))
+            else if (!args[0].equals("list"))
             {
                 throw new MyException("请输入正确命令!");
             }
             else
             {
-                Command command = new Command(x);
+                Command command = new Command(args);
                 command.execute_command();
             }
         }
@@ -57,6 +58,7 @@ class Parameter
     public String param;
     public List<String> param_list;
     public int type;
+    private List<String> has_param;
     Parameter(String name,int type)
     {
         this.name = name;
@@ -64,6 +66,12 @@ class Parameter
         is_exist = false;
         param = "";
         param_list = new ArrayList<>();
+        has_param = new ArrayList<>();
+        has_param.add("-log");
+        has_param.add("-out");
+        has_param.add("-date");
+        has_param.add("-type");
+        has_param.add("-province");
     }
     public void set(String[] args) throws MyException
     {
@@ -75,11 +83,15 @@ class Parameter
                 if(args[i].equals(name))
                 {
                     is_exist = true;
-                    param = args[i+1];
+                    if(has_param.contains(args[i+1]))
+                        break;
+                    param = args[i + 1];
                     break;
                 }
             }
-            if(i == args.length && param.equals(""))
+            if(is_exist != true)
+                throw new MyException("必须有参数" + name);
+            if(i == args.length && param.equals("") && is_exist == true)
                 throw new MyException("log,out和date后必须含有参数");
         }
         if(type == 2)
@@ -420,7 +432,7 @@ class Command
         if(province.is_exist)
         {
             if(province.param_list ==null || province.param_list.size() == 0)
-                throw new MyException("-province必须含有省份名称");
+                throw new MyException("-province后必须含有省份名称");
             execute_province(province.param_list);
         }
         new_info.execute_out_file(out.param);
