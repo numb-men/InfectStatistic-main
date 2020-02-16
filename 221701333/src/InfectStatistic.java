@@ -7,7 +7,6 @@
  * @since 2020/2/11
  */
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -552,6 +551,7 @@ class CommandAnalyze
 {
 	public String[] cmd;
 	public String wholeCmd;
+	
 	public CommandAnalyze(String[] args)
 	{
 		wholeCmd = "";
@@ -560,7 +560,7 @@ class CommandAnalyze
 		for(int i = 0;i < args.length;i++)
 		{
 			cmd[i] = args[i];
-			wholeCmd = wholeCmd + args;
+			wholeCmd = wholeCmd + args[i];
 			if(i != args.length - 1)
 				wholeCmd = wholeCmd + " ";
 		}
@@ -572,7 +572,7 @@ class CommandAnalyze
 		{
 		case "list":
 		{
-			if(RegularExpression.isListRight(wholeCmd))
+			if(!RegularExpression.isListRight(wholeCmd))
 			{
 				System.out.println("list命令格式错误");
 				return;
@@ -873,7 +873,7 @@ class RegularExpression
 	/*正则匹配验证list命令格式是否正确*/
 	public static boolean isListRight(String str) 
 	{
-		String cmdCompile = "list(\\s+-\\w+\\S*)*\\s+-log\\s+\\S+(\\s+-\\w+\\S*)*\\s+-out\\s+\\S+(\\s+-\\w+\\S*)*\\s*";
+		String cmdCompile = "list(\\s+-\\w+\\s+\\S*)*\\s+-log\\s+\\S+(\\s+-\\w+\\s+\\S*)*\\s+-out\\s+\\S+(\\s+-\\w+\\s+\\S*)*\\s*";
 		Pattern p = Pattern.compile(cmdCompile);
 		Matcher m = p.matcher(str);
 		boolean isValid = m.matches();
