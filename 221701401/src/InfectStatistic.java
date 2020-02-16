@@ -55,9 +55,13 @@ class CmdHandle {
 				else throw new Exception("日期非法");
 				break;
 			case "-out":
+				p.setOut(true);
 				p.setOutValue(args[i+1]);
 				break;
 			case "-log":
+				File f=new File(args[i+1]);
+				if(!f.exists()) throw new Exception("目录不存在");	
+				p.setLog(true);
 				p.setLogValue(args[i+1]);
 				break;
 			case "-type":
@@ -110,7 +114,8 @@ class CmdList implements Cmd {
 	//继承至命令接口
 	public void doCmd(Param pm) throws Exception {
 		FileHandle l=new FileHandle();
-    	String[] require=null;
+		String[] require=null;
+		if (!pm.isLog()||(!pm.isLog())) throw new Exception("-log -out为必需项");
     	if (!pm.isType()) pm.setTypeValue();
 		if (!pm.isDate()) pm.setDateValue("");
     	if (pm.isProvince()) require=pm.getProvinceValue();
@@ -123,7 +128,7 @@ class CmdList implements Cmd {
 class TypeStruct {
 	private int index;//顺序
 	private String name;//名称
-	private boolean isExist;//是否需要
+	private boolean isExist;//命令中是否有这个参数值
 	
 	TypeStruct(int i,String n,boolean e) {
 		index=i;
@@ -207,6 +212,9 @@ class TypeValue {
 
 //参数及参数值类
 class Param {
+	
+	private boolean out;
+	private boolean log;
 	private boolean date;
 	private boolean type;
 	private boolean province;
@@ -220,11 +228,29 @@ class Param {
 		date=false;
 		type=false;
 		province=false;
+		out=false;
+		log=false;
 		typeValue=new TypeValue();
 		logValue=outValue=dateValue="";
 		provinceValue=new String[] {};
 	}
 	
+	void setOut(boolean o) {
+		out=o;
+	}
+
+	boolean isOut() {
+		return out;
+	}
+
+	void setLog(boolean g) {
+		log=g;
+	}
+
+	boolean isLog() {
+		return log;
+	}
+
 	String getOutValue() {
 		return outValue;
 	}
@@ -244,7 +270,7 @@ class Param {
 	void setDate(boolean d) {
 		date=d;
 	}
-	
+
 	String getDateValue() {
 		return dateValue;
 	}
@@ -281,7 +307,9 @@ class Param {
 		return type;
 	}
 
-	public boolean isDate() { return date; }
+	public boolean isDate() { 
+		return date; 
+	}
 	
 	TypeValue getTypeValue() {
 		return typeValue;
@@ -350,9 +378,7 @@ class FileHandle {
 	
 	//找到日期对应文件进行处理(输入参数：路径，日期，要求的省份)
 	public void dealFile(String path,String date,String[] require) throws Exception {
-		File f=new File(path);
-		if(!f.exists()) throw new Exception("目录不存在");
-		String[] list=f.list();
+		String[] list=new File(path).list();
 		boolean isEnd=false;
 		//按日期排序
 		List<String> fileList=Arrays.asList(list);
@@ -512,6 +538,7 @@ class LogResult {
 	}
 }
 
+//数据处理类
 class DataHandle {
 	private Pattern addIp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 新增 感染患者 (\\d+)人");
 	private Pattern addSp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 新增 疑似患者 (\\d+)人");
@@ -521,7 +548,7 @@ class DataHandle {
 	private Pattern addCure=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 治愈 (\\d+)人");
 	private Pattern spToIp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 疑似患者 确诊感染 (\\d+)人");
 	private Pattern subSp=Pattern.compile("([\\u4e00-\\u9fa5]{0,}+) 排除 疑似患者 (\\d+)人");
-	private List<LogResult> list;
+	private List<LogResult> list;//存放处理好的数据
 	
 	DataHandle () {
 		list=new ArrayList<>();
