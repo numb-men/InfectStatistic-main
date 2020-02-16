@@ -143,7 +143,12 @@ class CommonUtil {
      * log file name : XX/XX/XX/YYYY-MM-dd.log.txt
      */
     public static Date parserDateFromLogFileName(String fileName) {
-        String[] strs1 = fileName.split("/");
+        String[] strs1 = null;
+        if (isWindows()) {
+            strs1 = fileName.split("\\\\");
+        } else {
+            strs1 = fileName.split("/");
+        }
         String[] strs2 = strs1[strs1.length - 1].split("\\.");
         return stringToDate(strs2[0]);
     }
@@ -184,7 +189,12 @@ class CommonUtil {
         if (fileList != null) {
             for (int i = 0; i < fileList.length; ++i) {
                 if (fileList[i].isFile()) {
-                    String[] temp = fileList[i].toString().split("/");
+                    String[] temp = null;
+                    if (CommonUtil.isWindows()) {
+                        temp = fileList[i].toString().split("\\\\");
+                    } else {
+                        temp = fileList[i].toString().split("/");
+                    }
                     // "2020-[0-1][0-9]-[0-3][0-9].log.txt"
                     if (!temp[temp.length - 1].matches(regex)) {
                         System.out.println("invalid file : " + temp[temp.length - 1] +" skip");
@@ -203,6 +213,11 @@ class CommonUtil {
         FileComparator fileComparator = new FileComparator();
         fileMap = CommonUtil.sortMapByKey(fileMap, fileComparator);
         return fileMap;
+    }
+
+    public static boolean isWindows() {
+        boolean isWindows = System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1;
+        return isWindows;
     }
 }
 

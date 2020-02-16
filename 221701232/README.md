@@ -37,6 +37,9 @@ PS : 每一行记录的输出顺序规则如下
 		-type (ip, sp, cure, dead, 可选)
 		-province (武汉, 福建, 北京, ..., 可选)
 		-show (print args, 可选)
+3.在Windows系统的命令行运行模式下输出文件会乱码,可以使用以下命令
+java -D"file.encoding=UTF-8" -classpath "XXX" InfectStatistic list -date 2020-01-22 -log D:/log/ -out D:/output.txt
+
 ```
 **功能简介**
 ````
