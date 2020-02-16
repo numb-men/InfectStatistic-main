@@ -7,19 +7,19 @@ import java.util.regex.*;
  * InfectStatistic
  * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author 221701401
+ * @version 1.0
+ * @since 2.10
  */
 class InfectStatistic {
     public static void main(String[] args) throws Exception{
-    	CmdHandle cmdh=new CmdHandle();
-    	cmdh.setCmdArg(args);
-    	cmdh.isCmd();
+    	CmdHandle cmdr=new CmdHandle();
+    	cmdr.setCmdArg(args);
+    	cmdr.isCmd();
     }
 }
 
-//命令行类
+//命令行管理类
 class CmdHandle {
 	private String[] args=new String[] {};
 	private Param p=new Param();
@@ -27,11 +27,7 @@ class CmdHandle {
 	void setCmdArg(String[] arg) {
 		args=arg;
 	}
-	
-	Param getParamRes() {
-		return p;
-	}
-	
+
 	//是否命令
 	public void isCmd() throws Exception {
 		switch (args[0]) {
@@ -45,7 +41,7 @@ class CmdHandle {
 		}
 	}
 	
-	//参数分析
+	//参数分析，返回分解好的参数
 	public Param CmdAnalyse() throws Exception {
 		int len=args.length;
 		for (int i=1;i<len;i++) {
@@ -89,6 +85,7 @@ class CmdHandle {
 		return p;
 	}
 	
+	//判断传入的字符串是否合法日期，false为不合法
 	public boolean isCorrectDate(String date) {
 		SimpleDateFormat sd=new SimpleDateFormat("yyyy-MM-dd");
 		try {
@@ -104,18 +101,22 @@ class CmdHandle {
 
 //命令接口
 interface Cmd {
-	public abstract void doCmd(Param pm) throws IOException, Exception;//执行命令函数
+	//执行命令函数
+	public abstract void doCmd(Param pm) throws IOException, Exception;
 }
 
 //list命令类
 class CmdList implements Cmd {
+	//继承至命令接口
 	public void doCmd(Param pm) throws Exception {
 		FileHandle l=new FileHandle();
-    	//List<LogResult> res=new ArrayList<>();
     	String[] require=null;
     	if (!pm.isType()) {
     		pm.setTypeValue();
     	}
+		if (!pm.isDate()) {
+			pm.setDateValue("");
+		}
     	if (pm.isProvince()) {
     		require=pm.getProvinceValue();
     	}
@@ -163,8 +164,8 @@ class TypeValue {
 	private TypeStruct sp;
 	private TypeStruct cure;
 	private TypeStruct dead;
-	private TypeStruct[] set;
-	int maxIndex;
+	private TypeStruct[] set;//上述四种参数值的集合
+	int maxIndex;//有几个备选参数值
 	
 	TypeValue() {
 		ip=new TypeStruct(1,"ip",false);
@@ -178,31 +179,7 @@ class TypeValue {
 	TypeStruct[] getSet() {
 		return set;
 	}
-	
-	void setIp(int i,boolean b) {
-		ip.setIndex(i);
-		ip.setExist(b);
-	}
-	
-	void setSp(int i,boolean b) {
-		sp.setExist(b);
-		sp.setIndex(i);
-	}
-	
-	void setCure(int i,boolean b) {
-		cure.setExist(b);
-		cure.setIndex(i);
-	}
-	
-	void setDead(int i,boolean b) {
-		dead.setExist(b);
-		dead.setIndex(i);
-	}
-	
-	int getMaxIndex() {
-		return maxIndex;
-	}
-	
+
 	TypeStruct getIp() {
 		return ip;
 	}
@@ -222,9 +199,7 @@ class TypeValue {
 	//给参数值排序
 	public void sortSet() {
 		List<TypeStruct> list=new ArrayList<>();
-		for (int i=0;i<maxIndex;i++) {
-			list.add(set[i]);
-		}
+		list.addAll(Arrays.asList(set).subList(0, maxIndex));
 		Collections.sort(list,new Comparator<TypeStruct>() {
 			public int compare(TypeStruct r1,TypeStruct r2) {
 				return r1.getIndex()-r2.getIndex();
@@ -236,6 +211,7 @@ class TypeValue {
 	}
 }
 
+//参数及参数值类
 class Param {
 	private boolean date;
 	private boolean type;
@@ -280,8 +256,8 @@ class Param {
 	}
 	
 	void setDateValue(String d) {
-		if (d==null) {
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		if (d.equals("")) {
+			SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd");
 			dateValue=df.format(new Date());
 	    }
 		else dateValue=d;
@@ -310,6 +286,8 @@ class Param {
 	boolean isType() {
 		return type;
 	}
+
+	public boolean isDate() { return date; }
 	
 	TypeValue getTypeValue() {
 		return typeValue;
@@ -322,7 +300,7 @@ class Param {
 		typeValue.getDead().setExist(true);
 	}
 	
-	void setTypeValue(List<String> list) {
+	void setTypeValue(List<String> list) throws Exception {
 		if (list.isEmpty()) {
 			setTypeValue();
 		}
@@ -346,19 +324,20 @@ class Param {
 					typeValue.getDead().setIndex(i+1);
 					break;
 				default:
-					//throw new 
+					throw new Exception("参数值非法"); 
 				}
 			}
 		}
 		typeValue.sortSet();
-	}	
+	}
 }
 
 //文件处理类
 class FileHandle {
+	//存放所有文件的处理结果
 	private List<LogResult> all=new ArrayList<>();
 	
-	//读文件
+	//读文件（输入参数：路径）
 	public void readFile(String path) throws IOException {
 		FileInputStream fin=new FileInputStream(path);
         InputStreamReader reader=new InputStreamReader(fin,"UTF-8");
@@ -366,10 +345,9 @@ class FileHandle {
         String strTmp="";
         DataHandle dh=new DataHandle();
 		while ((strTmp=buffReader.readLine())!=null) {
-        	if (strTmp.startsWith("\uFEFF")) {
-        	   strTmp=strTmp.replace("\uFEFF","");
-        	}//win10无法建立无BOM,用此去掉开头
-        	//进行结果统计
+			//win10无法建立无BOM,用此去掉开头
+        	if (strTmp.startsWith("\uFEFF")) strTmp=strTmp.replace("\uFEFF","");
+        	//结果统计
         	dh.calResult(strTmp);
         }
 		List<LogResult> res=dh.calNationData();
@@ -377,7 +355,7 @@ class FileHandle {
 		buffReader.close();
 	}		
 	
-	//找到日期对应文件进行处理(待修改)
+	//找到日期对应文件进行处理(输入参数：路径，日期，要求的省份)
 	public void dealFile(String path,String date,String[] require) throws Exception {
 		File f=new File(path);
 		if(!f.exists()) throw new Exception("目录不存在");
@@ -391,19 +369,27 @@ class FileHandle {
 	    		return o1.compareTo(o2);
 	    	}
 	    });
-	    String lastDate=fileList.get(fileList.size()-1);
 	    //找文件
 		StringBuffer dt=new StringBuffer(date);
 		dt.append(".log.txt");
 		String targetDate=dt.toString();
-		if (targetDate.compareTo(lastDate)>0) throw new Exception("日期超出范围");
-		for (String file:fileList) {
-			if (file.contentEquals(dt)) isEnd=true; 
-			StringBuffer ph=new StringBuffer(path);
-			ph.append("/");
-			ph.append(file);
-			readFile(ph.toString());
-			if (isEnd) break;
+		String lastDate=fileList.get(fileList.size()-1);
+		String earlyDate=fileList.get(0);
+		if (targetDate.compareTo(lastDate)>0&&(!targetDate.contentEquals(dt))) throw new Exception("日期超出范围");
+		if (targetDate.compareTo(earlyDate)<0) {
+			LogResult lr=new LogResult("全国");
+			all.add(lr);
+		}
+		else {
+			for (String file:fileList) {
+				if (file.compareTo(targetDate)>0&&(!file.contentEquals(dt))) break;
+				if (file.contentEquals(dt)) isEnd=true;
+				StringBuffer ph=new StringBuffer(path);
+				ph.append("/");
+				ph.append(file);
+				readFile(ph.toString());
+				if (isEnd) break;
+			}
 		}
 		DataHandle dh=new DataHandle();
 		//转化成要求的省份
@@ -427,8 +413,7 @@ class FileHandle {
 		writer.write("//该文档并非真实数据，仅供测试使用\n");
         writer.flush();
         writer.close();
-	}
-	
+	}	
 }
 
 //日志结果类
@@ -501,32 +486,32 @@ class LogResult {
 		dead+=d;
 	}
 	
-	//得到省份在制定顺序中的次序
+	//得到省份在指定顺序中的次序
 	int getIndex (String str) {
 		for (int i=0;i<order.length;i++) {
 			if (str.equals(order[i])) return i;
 		}
 		return -1;
 	}
-
-	//toString（默认字符串形式输出）
+	
+	//按指定顺序输出信息（输入参数：type的参数值及顺序）
 	public String toString(TypeValue type) {
 		String res=province;
 		TypeStruct[] set=type.getSet();
-		for (int i=0;i<set.length;i++) {
-			switch (set[i].getName()) {
-			case "ip":
-				if (set[i].getIsExist()) res+=" 感染患者"+ip+"人";
-				break;
-			case "sp":
-				if (set[i].getIsExist()) res+=" 疑似患者"+sp+"人";
-				break;
-			case "cure":
-				if (set[i].getIsExist()) res+=" 治愈"+cure+"人";
-				break;
-			case "dead":
-				if (set[i].getIsExist()) res+=" 死亡"+dead+"人";
-				break;
+		for (TypeStruct typeStruct : set) {
+			switch (typeStruct.getName()) {
+				case "ip":
+					if (typeStruct.getIsExist()) res += " 感染患者" + ip + "人";
+					break;
+				case "sp":
+					if (typeStruct.getIsExist()) res += " 疑似患者" + sp + "人";
+					break;
+				case "cure":
+					if (typeStruct.getIsExist()) res += " 治愈" + cure + "人";
+					break;
+				case "dead":
+					if (typeStruct.getIsExist()) res += " 死亡" + dead + "人";
+					break;
 			}
 		}
 		res+="\n";
@@ -548,18 +533,14 @@ class DataHandle {
 	DataHandle () {
 		list=new ArrayList<>();
 	}
-	
-	List<LogResult> getList() {
-		return list;
-	}
-	
+
 	//将单行文本转换成LogResult并加入集合
 	public void calResult(String str) {
 		Handler addIpHandler=new AddIp(addIp);
 		addIpHandler.getData(str);
 	}
 	
-	//计算全国数据
+	////计算全国的数据并加在处理好的数据后合并
 	public List<LogResult> calNationData() {
 		LogResult all=new LogResult("全国");
 		List<LogResult> res=new ArrayList<>();
@@ -571,12 +552,12 @@ class DataHandle {
 		return res;
 	}
 	
-	//按要求省份输出
+	//将传入的list中的内容改为仅含传入字符串数组的省份的list
 	public List<LogResult> toFormatPro(String[] pro, List<LogResult> all) {
 		HashMap<String,LogResult> target=new HashMap<>();
-		for (int i=0;i<pro.length;i++) {
-			LogResult lr=new LogResult(pro[i]);
-			target.put(pro[i],lr);
+		for (String s : pro) {
+			LogResult lr = new LogResult(s);
+			target.put(s, lr);
 		}
 		for (LogResult lr:all) {
 			String tmp=lr.getProvince();
@@ -586,7 +567,6 @@ class DataHandle {
                 temp.setSp(target.get(tmp).getSp()+lr.getSp());
                 temp.setCure(target.get(tmp).getCure()+lr.getCure());
                 temp.setDead(target.get(tmp).getDead()+lr.getDead());
-                //HashMap不允许key重复，当有key重复时，前面key对应的value值会被覆盖
                 target.put(tmp,temp);
 			}
 		}
@@ -597,14 +577,13 @@ class DataHandle {
         return newList;
 	}
 	
-	//合并数据(参考)
+	//合并list中数据并去重（参考）
 	public List<LogResult> mergeResult(List<LogResult> list) {
 		HashMap<String,LogResult> tempMap=new HashMap<String,LogResult>();
         for (LogResult lr:list) {
             String tmpStr=lr.getProvince();
             if (tempMap.containsKey(tmpStr)) {
                 LogResult temp=new LogResult(tmpStr);
-                //合并
                 temp.setIp(tempMap.get(tmpStr).getIp()+lr.getIp());
                 temp.setSp(tempMap.get(tmpStr).getSp()+lr.getSp());
                 temp.setCure(tempMap.get(tmpStr).getCure()+lr.getCure());
@@ -620,11 +599,11 @@ class DataHandle {
         for (String temp:tempMap.keySet()) {
             newList.add(tempMap.get(temp));
         }
-        List<LogResult> sortList=ListSort(newList); 
+        List<LogResult> sortList=ListSort(newList);
         return sortList;
 	}
 	
-	//按省份排序
+	//将传入的list按照指定的省份顺序排序
 	public List<LogResult> ListSort (List<LogResult> list) {
 		Collections.sort(list,new Comparator<LogResult>() {
 			public int compare(LogResult r1,LogResult r2) {
@@ -634,14 +613,15 @@ class DataHandle {
 		return list;
 	}
 	
-	//尝试使用责任链模式，抽象类下方有八个类分别代表八种模式及对应的处理方法
-	//因为没有查到减少类的方法，所以就这么按照网上的例子写了,不是很懂变通
+	//尝试使用责任链模式，抽象类下方的八个类分别代表八种模式及对应的处理方法
+	//因为没有找到减少类的方法，所以就这么按照网上的例子写了，不是很懂
 	//总觉得代码重复率有点高
 	abstract class Handler {
-		protected Pattern ptn;  //正则表达式
-	    protected Handler nextHandler;  // 下一个处理者
+		protected Pattern ptn;//正则表达式
+	    protected Handler nextHandler;//下一个处理者
 	    
-	    public abstract LogResult getData(String str); // 提取数据
+	    //提取数据
+	    public abstract LogResult getData(String str);
 	}
 
 	//新增感染
@@ -717,7 +697,7 @@ class DataHandle {
 			else return nextHandler.getData(str);
 		}
 	}
-		
+	
 	//疑似流入
 	class AddAndSubSp extends Handler {
 		public AddAndSubSp(Pattern p) {
@@ -727,7 +707,6 @@ class DataHandle {
 
 		@Override
 		public LogResult getData(String str) {
-			// TODO 自动生成的方法存根
 			Matcher m=ptn.matcher(str);
 			boolean rs=m.find();
 			if (rs) {
