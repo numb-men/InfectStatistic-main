@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * @version 1.0
  * @since 2020.2.15
  */
-class InfectStatistic {
+public class InfectStatistic {
     public static void main(String[] args){
         
         CommandParser cmParser = new CommandParser(args);
@@ -189,17 +189,20 @@ class FileInputUtils{
         
         String srcPath = "";
         
+        //改成绝对路径
+        String absolutePath = "";
+        if (hasDate) {
+            absolutePath = dirPath + dateString + ".log.txt";
+        }
         for (int i = 0; i<filesName.size(); i++) {
             srcPath = filesName.get(i);
             inputFile(srcPath, map);
             //若命令中有 -date参数
             if(hasDate) {
-                if (srcPath.equals(dateString)) {
+                if (srcPath.equals(absolutePath)) {
                     break;
                 }
             }
-
-            System.out.println(filesName.get(i));
         }
         
     }
@@ -294,7 +297,7 @@ class FileOutputUtils{
         }
         
             
-        
+        bufferedWriter.write("//该数据并非真实数据，仅供测试程序使用\n"); 
         bufferedWriter.close();
         outStream.close();
     }
