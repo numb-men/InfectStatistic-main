@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  * TODO
  *
  * @author 221701312 张庭博
- * @version 1.7
+ * @version 1.8
  * @since 2020-02-11
  */
 class InfectStatistic {
