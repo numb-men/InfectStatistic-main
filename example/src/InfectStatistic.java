@@ -6,6 +6,8 @@
  * @version xxx
  * @since 2020.2.13-2020.2.15
  */
+import static org.junit.Assert.assertEquals;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -42,16 +44,15 @@ class InfectStatistic{
 			"感染患者","疑似患者","治愈","死亡"
 	};
 	
-    public static void main(String[] args)throws IOException{
+    public static void main(String[] args){
     	String log = null,out = null,date = null;//记录LOG文件位置，输出位置，输出日期
     	String[] content = new String[1];
     	content[0] = new String("");
     	boolean[] type = new boolean[5];//type[0]用于记录是否有-type命令行参数，1-4用于记录参数种类
     	boolean prov = false;//用于记录是否有输入-province参数
-    	
     	Province[] province = new Province[PROVINCE_NUM];
     	initProvince(province);//初始化省份信息
-    	
+		
     	if(args.length > 0 && args[0].equals("list")){
     		for(int i = 1;i+1 < args.length;i++){
     			if(args[i].substring(0,1).equals("-")){
@@ -78,11 +79,15 @@ class InfectStatistic{
     			System.out.println("没有输入log或没有输入out，请重新输入");
     			System.exit(0);
     		}
+    		else if(!new File(log).isDirectory()){
+				System.out.println("无法找到log的对应路径，请重新输入");
+    			System.exit(0);
+			}
     		else{
     			List<File> files = searchFiles(new File(log),".log.txt");//获取对应文件底下所有带有.log.txt后缀的文件列表
     			for(File file :files){
     				String[] file1 = file.getAbsolutePath().split("\\\\");//获取文件名
-    				if(date == null || timeCompare(date,file1[file1.length-1].substring(0,10)) > 0){//比较时间判断是否读取文件信息
+    				if(date == null || timeCompare(date,file1[file1.length-1].substring(0,10))){//比较时间判断是否读取文件信息
     					update(file.getAbsolutePath(),province);
     				}
     				
@@ -299,7 +304,7 @@ class InfectStatistic{
 	
 	
 	/*比较两个时间前后*/
-	public static int timeCompare(String time1,String time2){
+	public static boolean timeCompare(String time1,String time2){
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");		
 		Calendar c1=Calendar.getInstance();
 		Calendar c2=Calendar.getInstance();
@@ -312,8 +317,8 @@ class InfectStatistic{
 			e.printStackTrace();
 		}
 		
-		int result=c1.compareTo(c2);
-		return result;
+
+		return !(c2.compareTo(c1) > 0);
 	}
 	
 	
