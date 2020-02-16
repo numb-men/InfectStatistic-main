@@ -4,6 +4,7 @@
 
 .project
 .class
+.vscode
 # IntelliJ project files
 .idea
 *.iml

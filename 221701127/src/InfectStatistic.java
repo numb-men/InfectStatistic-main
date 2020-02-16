@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  * 
  * @author XTG-L
  * @version 0.2
- * @since 2020-2-8
+ * @since 2020-2-15
  */
 class InfectStatistic {
     public static void main(String[] args) {
@@ -150,7 +150,7 @@ class CmdArgs {
 class CmdList extends CmdArgs {
     private String logPath = null; // 日志文件路径
     private String outPath = null; // 输出文件路径
-    private File logDir = null; //日志文件的文件夹
+    private File logDir; //日志文件的文件夹
     private String[] files = null;  //日志文件的文件名
     private ArrayList<String> logs = new ArrayList<>(); //用于储存日志文件的动态数组
     private ArrayList<Log.Region> regions = new ArrayList<>();  //用于储存地区类的动态数组
@@ -338,9 +338,7 @@ class Log {
             files = fileList.toArray(files);
         }
     }    
-
- 
-
+    
     /**
      * 判断一行日志是否为注释行
      * 
@@ -440,7 +438,7 @@ class Log {
     /** 
      * Region 用于暂存日志文件内容的类对象
      */
-    static class Region {
+    public static class Region {
         protected String name; // 地区名称
         protected ArrayList<Integer> ip, sp, cure, dead; // 感染患者，疑似患者，治愈，死亡患者
 
@@ -478,7 +476,7 @@ class Log {
          * @param regions
          */
         public static void sort(ArrayList<Region> regions) {
-            Collections.sort(regions, new Comparator<Region>() {
+            Collections.sort(regions, new Comparator<Log.Region>() {
                 @Override
                 public int compare(Region r1, Region r2) {
                     return r1.name.compareTo(r2.name);
