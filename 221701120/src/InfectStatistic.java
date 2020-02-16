@@ -259,6 +259,8 @@ class FileOutputUtils{
                 if (map.map.get(provinceName) != null) {
                     InfectedArea province = map.map.get(provinceName);
                     writeAll(provinceName, bufferedWriter, province);
+                }else {
+                    System.out.println(provinceName + "暂无疫情信息");
                 }
             }
            
@@ -301,6 +303,8 @@ class FileOutputUtils{
                         bufferedWriter.write(" 死亡" + province.deadNum + "人");
                     }
                     bufferedWriter.write("\n");  
+                }else {
+                    System.out.println(provinceName + "暂无疫情信息");
                 }
             }
         }else {
