@@ -1,5 +1,7 @@
 /221701416/*
-!/221701416/src
-/src/*
+!/221701416/codestyle.md
+!/221701416/README.md
+!/221701416/src/
+/221701416/src/*
 !/221701416/src/InfectStatistic.java
 !/221701416/src/Lib.java
