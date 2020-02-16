@@ -6,8 +6,8 @@ import java.util.regex.Pattern;
  * InfectStatistic
  * TODO
  *
- * @author 221701312
- * @version 1.5
+ * @author 221701312 张庭博
+ * @version 1.6
  * @since 2020-02-11
  */
 class InfectStatistic {
@@ -87,29 +87,40 @@ class FileManager{
 
     public void WriteFile(String FileName,ArrayList<String> typeparam,ArrayList<String> provinceparam){
         File file = new File(FileName);
-        FileWriter fileWriter;
-        try{
-            if(!file.exists())
+        FileWriter fileWriter = null;
+        try {
+            if (!file.exists())
                 file.createNewFile();
-            fileWriter=new FileWriter(file,true);
+            fileWriter = new FileWriter(file, true);
 
-            /*String s=String.format("全国 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
-                    AllIP,AllSP,AllCP,AllDP);
-            fileWriter.write(s);*/
-
-            for(int i=0;i<31;i++){
-                if(IsVisited[i]){
-                    String st=String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
-                            provinces[i], InfectedPatients[i], SuspectedPatients[i],
-                            CurePatients[i], DeadPatients[i]);
-                    fileWriter.write(st);
+            if (provinceparam.size() == 0) {//-province没有参数
+                String s = GetStringByType(typeparam,"全国");
+                fileWriter.write(s);
+                for (int i = 0; i < 31; i++) {
+                    if (IsVisited[i]) {
+                        String st = GetStringByType(typeparam,provinces[i]);
+                        fileWriter.write(st);
+                    }
                 }
             }
-
+            if(provinceparam.size()!=0) {//-province有参数
+                for(int i=0;i<provinceparam.size();i++){
+                    String s=GetStringByType(typeparam,provinceparam.get(i));
+                    fileWriter.write(s);
+                }
+            }
+            fileWriter.write("//该文档并非真实数据，仅供测试使用\n");
             fileWriter.flush();
             fileWriter.close();
         }catch (Exception e){
 
+        }
+        finally {
+            try {
+                fileWriter.close();
+            }catch (Exception ee){
+
+            }
         }
     }
 
@@ -118,15 +129,61 @@ class FileManager{
             String[] temp=fileContent.get(i).split(" ");
             DealStrings(temp);
         }
-        System.out.printf("全国 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
-                AllIP,AllSP,AllCP,AllDP);
+    }
+
+    public String GetStringByType(ArrayList<String> type,String province){
+        String result="";
+        int index=0;
         for(int i=0;i<31;i++){
-            if(IsVisited[i]) {
-                System.out.printf("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
-                        provinces[i], InfectedPatients[i], SuspectedPatients[i],
-                        CurePatients[i], DeadPatients[i]);
+            if(province.equals(provinces[i]))
+                index=i;
+        }
+        result+=province + " ";
+        if(province.equals("全国")) {
+            if(type.size()!=0) {
+                for (int i = 0; i < type.size(); i++) {
+                    if (type.get(i).equals("ip")) {
+                        result += "感染患者" + AllIP + "人 ";
+                    }
+                    if (type.get(i).equals("sp")) {
+                        result += "疑似患者" + AllSP + "人 ";
+                    }
+                    if (type.get(i).equals("cure")) {
+                        result += "治愈" + AllCP + "人 ";
+                    }
+                    if (type.get(i).equals("dead")) {
+                        result += "死亡" + AllDP + "人 ";
+                    }
+                }
+            }
+            else{
+                result+=String.format("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人",
+                        AllIP,AllSP,AllCP,AllDP);
+            }
+            return result + "\n";
+        }
+        if(type.size()==0){
+            result +=String.format("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人",
+                    InfectedPatients[index], SuspectedPatients[index],
+                    CurePatients[index], DeadPatients[index]);
+        }
+        else {
+            for (int i = 0; i < type.size(); i++) {
+                if (type.get(i).equals("ip")) {
+                    result += "感染患者" + InfectedPatients[index] + "人 ";
+                }
+                if (type.get(i).equals("sp")) {
+                    result += "疑似患者" + SuspectedPatients[index] + "人 ";
+                }
+                if (type.get(i).equals("cure")) {
+                    result += "治愈" + CurePatients[index] + "人 ";
+                }
+                if (type.get(i).equals("dead")) {
+                    result += "死亡" + DeadPatients[index] + "人 ";
+                }
             }
         }
+        return result + "\n";
     }
 
     public void DealStrings(String[] str){
@@ -219,9 +276,6 @@ class CommandIdentity{
         command = x;
     }
     public void PrintCommand(){
-        /*for(String s:command){
-            System.out.print(s);
-        }*/
         for(int i=0;i< command.length;i++)
             System.out.print(command[i]);
         System.out.println();
@@ -287,17 +341,6 @@ class CommandIdentity{
                 else
                     provinceparam.add(command[i]);
             }
-            /*System.out.printf("-log的位置为：%d  参数为：%s\n",logpos,logparam);
-            System.out.printf("-out的位置为：%d  参数为：%s\n",outpos,outparam);
-            System.out.printf("-date的位置为：%d  参数为：%s\n",datepos,dateparam);
-            System.out.printf("-type的位置为：%d  参数为：",typepos);
-            for(String s:typeparam)
-                System.out.print(s + " ");
-            System.out.println();
-            System.out.printf("-province的位置为：%d  参数为：",provincepos);
-            for(String s:provinceparam)
-                System.out.print(s + " ");
-            System.out.println();*/
         }
         FileManager fm = new FileManager();
         fm.ReadFile(logparam,dateparam);
