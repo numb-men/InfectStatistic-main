@@ -101,7 +101,12 @@ public class FileHandle {
 
             }
             if (sdate != null) {
+
                 argDate = dFormat.parse(sdate);// 将参数转为日期形式
+                if (argDate.getTime() > maxData.getTime()) {
+                    System.out.println("日期超出范围");
+                    System.exit(0);
+                }
             } else {
                 argDate = maxData;
             }
