@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,18 +15,21 @@ import java.text.SimpleDateFormat;
 
 public class ListCommand implements Command{
 	//常量定义
-	private static final String[] PATIENTS_TYPE= {"ip","sp","cure","dead"};
-	private static final String[] PROVINCE_STR= {"全国", "安徽", "澳门" ,"北京", "重庆", "福建","甘肃","广东", "广西", "贵州", "海南",
+	private static final List<String> PATIENTS_TYPE=new ArrayList<String>(Arrays.asList("ip","sp","cure","dead"));
+	private static final List<String> PROVINCE_STR=new ArrayList<String>(Arrays.asList("全国", "安徽","北京", "重庆", "福建","甘肃","广东", "广西", "贵州", "海南",
 								"河北", "河南", "黑龙江", "湖北", "湖南", "吉林","江苏", "江西", "辽宁", "内蒙古", "宁夏", 
-								"青海", "山东", "山西", "陕西", "上海","四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
+								"青海", "山东", "山西", "陕西", "上海","四川", "天津", "西藏", "新疆", "云南", "浙江"));
+	/*private static final String[] PROVINCE_STR= {"全国", "安徽","北京", "重庆", "福建","甘肃","广东", "广西", "贵州", "海南",
+								"河北", "河南", "黑龙江", "湖北", "湖南", "吉林","江苏", "江西", "辽宁", "内蒙古", "宁夏", 
+								"青海", "山东", "山西", "陕西", "上海","四川", "天津", "西藏", "新疆", "云南", "浙江"};*/
 	//private String[] pattern={""}
-	
+	public int[][] data=new int[PROVINCE_STR.size()][PATIENTS_TYPE.size()];
 	public String[] args;
 	public String logPath;
 	public String outPath;
 	public String date;
 	public List<String> type=new ArrayList<String>();
-	
+	public List<String> province=new ArrayList<String>();
 	public boolean log_exist=false;
 	public boolean out_exist=false;
 	
@@ -41,6 +45,7 @@ public class ListCommand implements Command{
 		for(String s:PATIENTS_TYPE) {
 			type.add(s);
 		}
+		province.add(PROVINCE_STR.get(0));
 		args=argsStr.split("\\s+");
 		int argsLength=args.length;
 		for(int i=0;i<argsLength;i++) {
@@ -61,6 +66,16 @@ public class ListCommand implements Command{
 					type.add(args[j]);
 					j++;
 				}
+			}
+			if(args[i].toLowerCase().equals("-province")) {
+				int j=i+1;
+				province.clear();
+				while(j<args.length&&!args[j].startsWith("-")) {
+					province.add(args[j]);
+					j++;
+				}
+				
+				
 			}
 		}  
 	}
@@ -158,7 +173,8 @@ public class ListCommand implements Command{
 			Pattern r1 = Pattern.compile(pattern1);
 			Matcher m1=r1.matcher(line);
 			if(m1.find()) {
-				System.out.println(m1.group(2));
+				data[PROVINCE_STR.indexOf(m1.group(1))][0]+=Integer.parseInt(m1.group(2));
+				data[0][0]+=Integer.parseInt(m1.group(2));
 			}
 		}
 		
@@ -167,7 +183,8 @@ public class ListCommand implements Command{
 			Pattern r2 = Pattern.compile(pattern2);
 			Matcher m2=r2.matcher(line);
 			if(m2.find()) {
-				System.out.println(m2.group(3));
+				data[PROVINCE_STR.indexOf(m2.group(1))][0]-=Integer.parseInt(m2.group(3));
+				data[PROVINCE_STR.indexOf(m2.group(2))][0]+=Integer.parseInt(m2.group(3));
 			}
 		}
 	}
@@ -178,7 +195,8 @@ public class ListCommand implements Command{
 			Pattern r1 = Pattern.compile(pattern1);
 			Matcher m1=r1.matcher(line);
 			if(m1.find()) {
-				System.out.println(m1.group(2));
+				data[PROVINCE_STR.indexOf(m1.group(1))][1]+=Integer.parseInt(m1.group(2));
+				data[0][1]+=Integer.parseInt(m1.group(2));
 			}
 		}
 		
@@ -187,7 +205,8 @@ public class ListCommand implements Command{
 			Pattern r2 = Pattern.compile(pattern2);
 			Matcher m2=r2.matcher(line);
 			if(m2.find()) {
-				System.out.println(m2.group(3));
+				data[PROVINCE_STR.indexOf(m2.group(1))][1]-=Integer.parseInt(m2.group(3));
+				data[PROVINCE_STR.indexOf(m2.group(2))][1]+=Integer.parseInt(m2.group(3));
 			}
 		}
 		
@@ -196,7 +215,10 @@ public class ListCommand implements Command{
 			Pattern r3 = Pattern.compile(pattern3);
 			Matcher m3=r3.matcher(line);
 			if(m3.find()) {
-				System.out.println(m3.group(2));
+				data[PROVINCE_STR.indexOf(m3.group(1))][1]-=Integer.parseInt(m3.group(2));
+				data[0][1]-=Integer.parseInt(m3.group(2));
+				data[PROVINCE_STR.indexOf(m3.group(1))][0]+=Integer.parseInt(m3.group(2));
+				data[0][0]+=Integer.parseInt(m3.group(2));
 			}
 		}
 		
@@ -205,7 +227,8 @@ public class ListCommand implements Command{
 			Pattern r4 = Pattern.compile(pattern4);
 			Matcher m4=r4.matcher(line);
 			if(m4.find()) {
-				System.out.println(m4.group(2));
+				data[PROVINCE_STR.indexOf(m4.group(1))][1]-=Integer.parseInt(m4.group(2));
+				data[0][1]-=Integer.parseInt(m4.group(2));
 			}
 		}
 	}
@@ -216,7 +239,10 @@ public class ListCommand implements Command{
 			Pattern r1 = Pattern.compile(pattern1);
 			Matcher m1=r1.matcher(line);
 			if(m1.find()) {
-				System.out.println(m1.groupCount());
+				data[PROVINCE_STR.indexOf(m1.group(1))][2]+=Integer.parseInt(m1.group(2));
+				data[0][2]+=Integer.parseInt(m1.group(2));
+				data[PROVINCE_STR.indexOf(m1.group(1))][0]-=Integer.parseInt(m1.group(2));
+				data[0][0]-=Integer.parseInt(m1.group(2));
 			}
 		}
 	}
@@ -227,7 +253,10 @@ public class ListCommand implements Command{
 			Pattern r1 = Pattern.compile(pattern1);
 			Matcher m1=r1.matcher(line);
 			if(m1.find()) {
-				System.out.println(m1.group(2));
+				data[PROVINCE_STR.indexOf(m1.group(1))][3]+=Integer.parseInt(m1.group(2));
+				data[0][3]+=Integer.parseInt(m1.group(2));
+				data[PROVINCE_STR.indexOf(m1.group(1))][0]-=Integer.parseInt(m1.group(2));
+				data[0][0]-=Integer.parseInt(m1.group(2));
 			}
 		}
 	}
@@ -251,5 +280,9 @@ public class ListCommand implements Command{
 			e.printStackTrace();
 		}
 		}
+		
+		System.out.println(data[0][0]+" "+data[0][1]+" "+data[0][2]+" "+data[0][3]);
+		System.out.println(data[4][0]+" "+data[4][1]+" "+data[4][2]+" "+data[4][3]);
+		System.out.println(data[13][0]+" "+data[13][1]+" "+data[13][2]+" "+data[13][3]);
 	}
 }
