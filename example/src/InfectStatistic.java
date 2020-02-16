@@ -35,7 +35,7 @@ class FileManager{
     public FileManager(){
 
     }
-    public void ReadFile(String FilePath,String dateparam){
+    public int ReadFile(String FilePath,String dateparam){
         File f = new File(FilePath);
         int stopPoint=0;//判断读取哪些文件的断点
         int flag=0;//判断日期是否合法
@@ -65,24 +65,24 @@ class FileManager{
         }
         if(flag==0){
             System.out.println("输入的日期超出范围！");
-            return;
+            return 0;
         }
-
         try {
-            for(int i=0;i<=stopPoint;i++) {
+            for (int i = 0; i <= stopPoint; i++) {
                 String SingleFile = FilePath + "\\" + FileNames.get(i);
                 BufferedReader br = new BufferedReader(new InputStreamReader(
-                        new FileInputStream(SingleFile),"UTF-8"));
+                        new FileInputStream(SingleFile), "UTF-8"));
                 String line = "";
-                while((line=br.readLine())!=null) {
-                    if(!line.startsWith("/"))
+                while ((line = br.readLine()) != null) {
+                    if (!line.startsWith("/"))
                         FileContent.add(line);
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
         GetStatistic(FileContent);
+        return 1;
     }
 
     public void WriteFile(String FileName,ArrayList<String> typeparam,ArrayList<String> provinceparam){
@@ -342,8 +342,10 @@ class CommandIdentity{
                     provinceparam.add(command[i]);
             }
         }
+        int result;
         FileManager fm = new FileManager();
-        fm.ReadFile(logparam,dateparam);
-        fm.WriteFile(outparam,typeparam,provinceparam);
+        result = fm.ReadFile(logparam,dateparam);
+        if(result==1)
+            fm.WriteFile(outparam,typeparam,provinceparam);
     }
 }
