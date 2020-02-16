@@ -1,4 +1,9 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -24,6 +29,7 @@ class InfectStatistic{
             HandleLog handleObject = new HandleLog(cmdObject.getLogLocation(),cmdObject.getOutLocation(),cmdObject.getLogDate(),
             		cmdObject.getTypeOrder(),cmdObject.getProvinceShow());
             //handleObject.showAll();   
+            handleObject.readLog();
         }
         
     }
@@ -40,7 +46,7 @@ class CmdAnalysis{
 	private String logDate;
 	private int[] typeOrder = {0,1,2,3};	//默认全输出顺序,-1不必输出
 	static String[] typeString = {"ip","sp","cure","dead"};
-	private int[] provinceShow = new int[32];	//默认全输出顺序,-1不必输出
+	private int[] provinceShow = new int[32];	//默认全输出顺序,-1不必输出,0需要输出
 	static String[] province = {"全国", "安徽","北京", "重庆","福建","甘肃",
 			"广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
 			"江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海",
@@ -221,13 +227,14 @@ class CmdAnalysis{
 	  * 判断指定省份是否正确
 	 */
 	private boolean isProvince(int i) {
-
+		for(int k = 0;k < provinceShow.length;k++)
+	    	provinceShow[k] = -1;
 		int currentIndex = i;
 		if(i<cmdString.length) {
 			for(;currentIndex < cmdString.length; currentIndex ++) {
 				for(int j = 0;j < province.length;j++) {
 					if(cmdString[currentIndex].equals(province[j]))
-						provinceShow[j] = 1;
+						provinceShow[j] = 0;
 				}
 			}
 			return true;
@@ -268,7 +275,7 @@ class CmdAnalysis{
 			
 		}
 		for(int i = 0;i < provinceShow.length;i++) {
-			if(provinceShow[i] != 0) {
+			if(provinceShow[i] != -1) {
 				System.out.println(province[i]);
 			}
 			
@@ -295,29 +302,106 @@ class HandleLog{
 	/*
 	 * 进入log目录读取日志文件
 	 */
-	private boolean readLog() {
+	public void readLog() {
 		File file = new File(logLocation); 
 		File[] files = file.listFiles();
 		for(int i = 0;i < files.length;i++) {
 			if(file.isDirectory()) {
 				String filePath = files[i].getPath();
-				if(filePath.compareTo(logDate) <= 0) {
+				if(filePath.compareTo(logLocation + logDate) <= 0) {
+					System.out.println(filePath);
 					statistics(filePath);
 				}
-			}else {
-				System.out.println("文件:"+files[i].getPath());
 			}
-			
+		}
+	}
+	/*
+	 * 分类别统计：0新增 感染，1新增 疑似，2感染 流入，3疑似 流入，4死亡，5治愈，6确诊感染，7排除
+	 */
+	private void statistics(String filePath) {
+		String handleType[] = {"\\S+ 新增 感染患者 \\d+人","\\S+ 新增 疑似患者 \\d+人",
+				"\\S+ 感染患者 流入 \\S+ \\d+人","\\S+ 疑似患者 流入 \\S+ \\d+人",
+				"\\S+ 死亡 \\d+人","\\S+ 治愈 \\d+人","\\S+ 疑似患者 确诊感染 \\d+人",
+				"\\S+ 排除 疑似患者 \\d+人"};
+		BufferedReader reader = null;
+		try {
+			// 指定读取文件的编码格式，要和写入的格式一致，以免出现中文乱码
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8")); 
+			String str = null;
+			while ((str = reader.readLine()) != null) {
+				// 注释部分 "//"不处理
+				if(!str.startsWith("//")) {
+					if(str.matches(handleType[0])) {
+						increaseIp(str);
+					}
+					else if(str.matches(handleType[1])){
+						increaseSp(str);
+					}
+					else if(str.matches(handleType[2])){
+						ipTransfer(str);
+					}
+					else if(str.matches(handleType[3])){
+						spTransfer(str);
+					}
+					else if(str.matches(handleType[4])){
+						dead(str);
+					}
+					else if(str.matches(handleType[5])){
+						cure(str);
+					}
+					else if(str.matches(handleType[6])){
+						ipDiagnose(str);
+					}
+					else if(str.matches(handleType[7])){
+						exclude(str);
+					}
+				}
+				System.out.println(str);
 			}
-		return true;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
-	private boolean statistics(String filePath) {
+	private void increaseIp(String str) {
 		
-		return true;
 	}
 	
+	private void increaseSp(String str) {
+		
+	}
 	
+	private void ipTransfer(String str) {
+		
+	}
+	
+	private void spTransfer(String str) {
+		
+	}
+	
+	private void dead(String str) {
+		
+	}
+	
+	private void cure(String str) {
+		
+	}
+	
+	private void ipDiagnose(String str) {
+		
+	}
+	
+	private void exclude(String str) {
+		
+	}
 	
 	/**
 	 * 用于测试输入
@@ -333,7 +417,7 @@ class HandleLog{
 			
 		}
 		for(int i = 0;i < provinceShow.length;i++) {
-			if(provinceShow[i] != 0) {
+			if(provinceShow[i] != -1) {
 				System.out.println(CmdAnalysis.province[i]);
 			}
 			
