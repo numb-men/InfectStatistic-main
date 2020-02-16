@@ -7,6 +7,9 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 
@@ -25,10 +28,12 @@ class InfectStatistic {
     			"-province","浙江","福建","-type","sp","dead","-log", "D:/log/","-date","2020-01-22", "-out", "D:/output.txt",
         	};
     	
+   
+    	
     	//ListParameters lp=new ListParameters(string);
     	//lp.formatParameters();
     	
-    	LogFileReader lfr=new LogFileReader("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log");
+    	//LogFileReader lfr=new LogFileReader("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log");
 //    	File f=new File("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log\\2020-01-22.log.txt");
 //    	
 //    	LogFileReader.formatFileContent(f);
@@ -291,6 +296,7 @@ class DailyInfectItem{
 		this.dead = dead;
 	}
 
+
 	public int getIp() {
 		return ip;
 	}
@@ -322,6 +328,27 @@ class DailyInfectItem{
 	public void setDead(int dead) {
 		this.dead = dead;
 	}
+
+	
+	public String getAllResult() {
+		return " 感染患者"+ip+"人"+" 疑似患者"+sp+"人"+ " 治愈"+cure+"人"+" 死亡"+dead+"人";
+	}
+	
+	public String getIpResult() {
+		return " 感染患者"+ip+"人";
+	}
+	
+	public String getSpResult() {
+		return " 疑似患者"+sp+"人";
+	}
+	
+	public String getCureResult() {
+		return " 治愈"+cure+"人";
+	}
+	
+	public String getDeadResult() {
+		return " 死亡"+dead+"人";
+	}
 	
 }
 
@@ -334,19 +361,23 @@ class DailyInfectItem{
  * @version 1.0
  */
 class LogFileReader{
-	
+
+
+	private Map<String,String> dailyInfectMap=new HashMap<String,String>();
 	String logDirectory;
-	Map<LocalDate,File> dateLogFilesMap=new HashMap<LocalDate, File>();
-	LocalDate endDate;
-	LocalDate startDate;
-	LocalDate parameterDate;
-	DateFormat formatter=new SimpleDateFormat("yyyy-MM-dd");
-	
+	private LocalDate endDate;
+	private LocalDate startDate;
+	private LocalDate parameterDate;
+	final DateFormat formatter=new SimpleDateFormat("yyyy-MM-dd");
 	
 	public LogFileReader(String logDirectory) {
-		
 		this.startDate=this.endDate=null;
-		
+		getBetweenDate();
+		generateDailyMap();
+	}
+	
+	public Map<String, String> getDailyInfectMap() {
+		return dailyInfectMap;
 	}
 	
 	/**
@@ -360,28 +391,8 @@ class LogFileReader{
 		if(logDir.exists()&&logDir.isDirectory()) {
 			File[] logList=logDir.listFiles();
 			
+			
 			return logList;
-//			Date date = null;
-//			LocalDate lDate=null;
-//			for(int i=0;i<logList.length;i++) {
-//				
-//				if(logList[i].isFile()) {
-//					String logName=logList[i].getName();
-//					logName=logName.substring(0, logName.indexOf('.'));
-//					
-//					try {
-//						date=formatter.parse(logName);
-//					}catch (Exception e) {
-//						// TODO: handle exception
-//						e.printStackTrace();
-//					}
-//					
-//					lDate=date2LocalDate(date);
-//					//ManageDateArrange(lDate);
-//					dateLogFilesMap.put(lDate, logList[i]);
-//				}
-//			}
-
 		}else {
 			//	TODO:处理日志所在文件目录异常
 			return null;
@@ -426,7 +437,7 @@ class LogFileReader{
 	 * 
 	 * @return
 	 */
-	public   List<String> getBetweenDate(){
+	public  List<String> getBetweenDate(){
 			
 		List<String> dateList=new ArrayList<String>();
 		
@@ -449,19 +460,29 @@ class LogFileReader{
 	 * 
 	 * @return	Map<String,String>日期-感染情况map
 	 */
-	public Map<String,String> generateDailyMap() {
+	public void generateDailyMap() {
 		List<String> dateList=getBetweenDate();
-		Map<String,String> dailyInfectMap=new HashMap<String,String>();
+		
 		
 		for(int i=0;i<dateList.size();i++) {
 			dailyInfectMap.put(dateList.get(i), null);
 		}
 		
-		
-		
-		
-
-		return dailyInfectMap;
+		File logDir=new File(logDirectory);
+		if(logDir.exists()&&logDir.isDirectory()) {
+			File[] logList=logDir.listFiles();
+			
+			for(int i=0;i<logList.length;i++) {
+				
+				if(logList[i].isFile()) {
+					String logName=logList[i].getName();
+					logName=logName.substring(0, logName.indexOf('.'));
+					dailyInfectMap.put(logName, getFileContent(logList[i]));
+				}
+			}
+		}
+		//TODO
+		System.out.println(dailyInfectMap.toString());
 	}
 	
 	/**
@@ -484,7 +505,7 @@ class LogFileReader{
 	 * @param file
 	 * @return
 	 */
-	public static String formatFileContent(File file) {
+	public static String getFileContent(File file) {
 		
 		StringBuilder sb=new StringBuilder();
 		try {
@@ -504,6 +525,45 @@ class LogFileReader{
 		return sb.toString();
 	}
 	
+	public void paraseContent(String logContent) {
+		String[] lines=logContent.split("\n");
+		
+	}
+
+	
+}
+
+/**
+ * 	对日志进行解析
+ * 
+ * @author ZhangYuhui
+ * @version 1.0
+ */
+
+class LogContentParaser{
+	
+	Map<String,DailyInfectItem[]> dailyInfectItemMap=new HashMap<String, DailyInfectItem[]>();
+	
+	/**
+	 * 	将字符串形式的感染状况转化为结构体形式的每日感染状况
+	 * 
+	 * @param dailyInfectMap
+	 */
+	public void paraseLogContent(Map<String,String> dailyInfectMap) {
+		DailyInfectItem item=null;
+		String date=null;
+		String[] lines;
+		for(Map.Entry<String, String> entry:dailyInfectMap.entrySet()) {
+			item=new DailyInfectItem(0, 0, 0, 0);
+			date=entry.getKey();
+			lines=entry.getValue().split("\n");
+			for(String line:lines) {
+				// TODO:匹配正则表达式
+				
+				
+			}
+		}
+	}
 	
 	
 }
@@ -515,27 +575,155 @@ class LogFileReader{
  * @version 1.0
  */
 class ResultOutputter{
+	String logDirectory;
+	
+	public ResultOutputter(String logDirectory) {
+		
+	}
+	
 	
 }
 
 
 /**
- * 正则表达式
+ * 	正则表达式
  * 
  * @author ZhangYuhui
  * @version 1.0
  */
 class RegExp{
 	
+	//每日省份感染列表
+	DailyInfectItem item=new DailyInfectItem(0, 0, 0, 0);
+	Map<String,DailyInfectItem> provinceMap=new HashMap<String, DailyInfectItem>()
+;	ArrayList<Entry<String,DailyInfectItem>> provinceList=new ArrayList<>();
+	String[] provinces= {
+			"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林",
+			"江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江",
+	};
+	
+	public RegExp() {
+		for(int i=0;i<provinces.length;i++) {
+			provinceMap.put(provinces[i], null);
+		}
+	}
+	
 	//用于匹配类型的字符串
-    String IP_ADD_PATTERN = "\\W+ 新增 感染患者 \\d+人";
-    String SP_ADD_PATTERN = "\\W+ 新增 疑似患者 \\d+人";
-    String IP_FLOWIN_PATTERN = "\\W+ 感染患者 流入 \\W+ \\d+人";
-    String SP_FLOWIN_PATTERN = "\\W+ 疑似患者 流入 \\W+ \\d+人";
-    String DEAD_PATTERN = "\\W+ 死亡 \\d+人";
-    String CURE_PATTERN = "\\W+ 治愈 \\d+人";
-    String SP_CONFIRM_PATTERN = "\\W+ 疑似患者 确诊感染 \\d+人";
-    String SP_EXCLUDE_PATTERN = "\\W+ 排除 疑似患者 \\d+人";
+    final String IP_ADD_PATTERN = "(.*) 新增 感染患者 (\\d*)人";
+    final String SP_ADD_PATTERN = "(.*) 新增 疑似患者 (\\d*)人";
+    final String IP_FLOWIN_PATTERN = "(.*) 感染患者 流入 (.*) (\\d*)人";
+    final String SP_FLOWIN_PATTERN = "(.*) 疑似患者 流入 (.*) (\\d*)人";
+    final String DEAD_PATTERN = "(.*) 死亡 (\\d*)人";
+    final String CURE_PATTERN = "(.*) 治愈 (\\d*)人";
+    final String SP_CONFIRM_PATTERN = "(.*) 疑似患者 确诊感染 (\\d*)人";
+    final String SP_EXCLUDE_PATTERN = "(.*) 排除 疑似患者 (\\d*)人";
+    
+    
+    public void extractType(String line) {
+    	Pattern p1 = Pattern.compile(IP_ADD_PATTERN);
+        Pattern p2 = Pattern.compile(SP_ADD_PATTERN);
+        Pattern p3 = Pattern.compile(IP_FLOWIN_PATTERN);
+        Pattern p4 = Pattern.compile(SP_FLOWIN_PATTERN);
+        Pattern p5 = Pattern.compile(DEAD_PATTERN);
+        Pattern p6 = Pattern.compile(CURE_PATTERN);
+        Pattern p7 = Pattern.compile(SP_CONFIRM_PATTERN);
+        Pattern p8 = Pattern.compile(SP_EXCLUDE_PATTERN);
+        
+        matchIpAdd(p1,line);
+        matchSpAdd(p2,line);
+        matchIpFlowin(p3,line);
+        matchSpFlowin(p4, line);
+        matchDead(p5, line);
+        matchCure(p6, line);
+        matchSpConfirm(p7, line);
+        matchSpExclude(p8, line);
+
+    }
+    
+    /**
+     * 	新增感染患者
+     * 
+     * @param p
+     * @param line
+     */
+    public void matchIpAdd(Pattern p,String line) {
+    	Matcher m1=p.matcher(line);
+    	while(m1.find()) {
+    		
+    		
+    	}
+    	
+    }
+    
+    /**
+     * 	新增疑似患者
+     * 
+     * @param p
+     * @param line
+     */
+    public void matchSpAdd(Pattern p,String line) {
+    	
+    }
+    
+    /**
+     * 	新增感染患者
+     * 
+     * @param p
+     * @param line
+     */
+    public void matchIpFlowin(Pattern p,String line) {
+    	
+    }
+    
+    /**
+     * 	新增感染患者
+     * 
+     * @param p
+     * @param line
+     */
+    public void matchSpFlowin(Pattern p,String line) {
+    	
+    }
+    
+    /**
+     * 	新增感染患者
+     * 
+     * @param p
+     * @param line
+     */
+    public void matchDead(Pattern p,String line) {
+    	
+    }
+    
+    /**
+     * 	新增感染患者
+     * 
+     * @param p
+     * @param line
+     */
+    public void matchCure(Pattern p,String line) {
+    	
+    }
+    
+    /**
+     * 	新增感染患者
+     * 
+     * @param p
+     * @param line
+     */
+    public void matchSpConfirm(Pattern p,String line) {
+    	
+    }
+    
+    /**
+     * 	新增感染患者
+     * 
+     * @param p
+     * @param line
+     */
+    public void matchSpExclude(Pattern p,String line) {
+    	
+    }
     
     
 }
