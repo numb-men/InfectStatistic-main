@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
 
+
 /**
  * InfectStatistic
  * TODO
@@ -22,23 +23,23 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 
 	//以下为命令行参数解析以及文件中所用到的一些属性
 	
-	String logPath;  //日志文件所在地址
-	String outPath;  //输出文件所在地址
+	public String logPath;  //日志文件所在地址
+	public String outPath;  //输出文件所在地址
 	
 	//因为-date不设置则指定日期默认为所提供日志最新的一天，需要确保你处理了指定日期之前的所有log文件，所以提前设置时间为当前时间
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd"); 
 	Date d = new Date(System.currentTimeMillis());
-	String date = formatter.format(d);//当前时间设置
+	public String date = formatter.format(d);//当前时间设置
 	
 	//设置-type下的信息
-	int[] type; //类型输出判断数组，初始默认为0，序号1代表感染患者，序号2代表疑似患者，序号3代表治愈，序号4代表死亡
-	boolean  isTypeExist = false;  //判断-Type是否有指定
-	public String[] typeStr = {"", "感染患者", "疑似患者", "治愈", "死亡"};  //类型顺序排列
+	public int[] type = new int [5]; //类型输出判断数组，初始默认为0，序号1代表感染患者，序号2代表疑似患者，序号3代表治愈，序号4代表死亡
+	public int  isTypeExist = 0;  //判断-Type是否有指定
+	public String[] typeStr = {"感染患者", "疑似患者", "治愈", "死亡"};  //类型顺序排列
 	
 	//设置-province下的信息
-	boolean[] province;  //若有指定省份，用来判断省份是否输出数组,初始默认为false
-	boolean[] provinceExist;  //若没有指定省份，用来判断有哪些省份有记录，初始默认为false
-	boolean  isProvinceExist = false;  //判断-Province是否有指定 
+	public int[] province = new int [35];  //若有指定省份，用来判断省份是否输出数组,初始默认为false
+	public int[] provinceExist = new int [35] ;  //若没有指定省份，用来判断有哪些省份有记录，初始默认为false
+	public int  isProvinceExist = 0;  //判断-Province是否有指定 
 	public String[] provinceStr = {"全国", "安徽", "澳门" ,"北京", "重庆", "福建","甘肃","广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", 
 			"吉林","江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海","四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
 	//全国以及省份顺序排列
@@ -46,18 +47,18 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 	public  int[][] peopleNumber = new int [35][4];  //记录全国以及每个省份每个类型的人数，初始默认为0，按照上面类型和省份顺序排列
 	
 	
-	
 	public static  void main(String[] args) {  //主函数入口
 		
-		String[] argsStr=args;  //将命令行传递到字符串函数
-		CmdArgsParse  CmdArgs = new  InfectStatistic().new CmdArgsParse();
-		CmdArgs.isCurrentCmdArgs(argsStr); 
+		InfectStatistic infectStatistic = new InfectStatistic();
+    	InfectStatistic.CmdArgsParse CmdArgs = infectStatistic.new CmdArgsParse();
+    	 CmdArgs.isCurrentCmdArgs(args);
+    	
+    	InfectStatistic.FileDispose filehandle = infectStatistic.new FileDispose();
+    	filehandle.readFileList();
+    	filehandle.writeOutTxt();
 		
-		FileDispose filedispose = new InfectStatistic().new FileDispose();
-		filedispose.readFlieList();
-		filedispose.writeOutTxt();
+	}
 		
-	}		
 	
 	class CmdArgsParse {  //命令行解析类，主要对命令行参数进行解析
 		
@@ -76,7 +77,8 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			if(args[i].equals("-log")) {  //-log部分的解析
 				i++;  //将命令行参数移动到准备解析的部分
 				isLogExist = true ;  //-log存在的判断
-				if(getLogPath(i, args) == -1) {  //获得日志文件所在地址存在错误
+				i = getLogPath(i, args);
+				if(i == -1) {  //获得日志文件所在地址存在错误
 					System.out.println("命令行有误");
 					return false;
 				}
@@ -84,7 +86,9 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			
 			if(args[i].equals("-out")) {  //-out部分的解析
 				i++;  //将命令行参数移动到准备解析的部分
-				if(getOutPath(i, args) == -1) {  //获得日志文件所在地址存在错误
+				isOutExist = true; 
+				i = getOutPath(i, args);
+				if(i == -1) {  //获得日志文件所在地址存在错误
 					System.out.println("命令行有误");
 					return false;
 				}
@@ -92,25 +96,28 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			
 			if(args[i].equals("-date")) {  //-date部分的解析
 				i++;  //将命令行参数移动到准备解析的部分
-				if(getDate(i, args) == -1) {  //获得日志文件所在地址存在错误
+				i = getDate(i, args);
+				if(i == -1) {  //获得日志文件所在地址存在错误
 					System.out.println("命令行有误");
 					return false;
 				}
 			}
 			
 			if(args[i].equals("-type")) {  //-type部分的解析
-				isTypeExist = true;  //-type部分有指定
+				isTypeExist = 1;  //-type部分有指定
 				i++;  //将命令行参数移动到准备解析的部分
-				if(getType(i, args) == -1) {  //获得日志文件所在地址存在错误
+				i = getType(i, args);
+				if(i == -1) {  //获得日志文件所在地址存在错误
 					System.out.println("命令行有误");
 					return false;
 				}
 			}
 			
 			if(args[i].equals("-province")) {  //-province部分的解析
-				isProvinceExist = true;  //-province部分有指定
+				isProvinceExist = 1;  //-province部分有指定
 				i++;  //将命令行参数移动到准备解析的部分
-				if(getProvince(i, args) == -1) {  //获得日志文件所在地址存在错误
+				i = getProvince(i, args);
+				if(i == -1) {  //获得日志文件所在地址存在错误
 					System.out.println("命令行有误");
 					return false;
 				}
@@ -130,9 +137,9 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 		public int getLogPath(int i, String[] args) {  //获得日志文件所在地址
 	        if(args[i].matches("^[A-z]:\\\\(.+?\\\\)*$"))  //通过正则表达式来判断字符串是不是文件目录路径
 	        	logPath = args[i];
+	        
 	        else  
 	          return -1;
-	    
 	        return i;  
 		}
 	
@@ -185,11 +192,11 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 		public int getProvince(int i, String[] args) {  //获得指定省份
 			int j;
     		for(j = 0; j < 35; j++)  //判断省份输出数组置0
-    			province[j] = false;
+    			province[j] = 0;
     		while(i < args.length){
     			for(j = 0; j < 35; j++){
     				if(args[i].equals(provinceStr[j])){
-    					province[j] = true;
+    					province[j] = 1;
     					i++;
     					break;
     				 }
@@ -205,7 +212,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 		
 		FileDispose(){};  //空构造函数
 		
-		public void readFlieList() {  //读取指定路径下的文件名
+		public void readFileList() {  //读取指定路径下的文件名
 			for (int i = 0; i < 35; i++)
 				for (int j = 0; j<4; j++)
 					peopleNumber[i][j] = 0;  //记录省份类型人数置0
@@ -250,8 +257,6 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 		    String readLine7 = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
 		    String readLine8 = "(\\S+) 排除 疑似患者 (\\d+)人";
 		    
-		    for(int i = 0; i < 35; i++)
-		    	provinceExist[i] = false;  //省份记录判断置false
 		    
 		    if(Pattern.matches(readLine1, readLine))  //判断正则表达式是否一致，下同
 		    	addToIP(readLine);
@@ -288,7 +293,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为省份，下同
 			            peopleNumber[0][0] += number;  //全国感染患者人数增加
 			            peopleNumber[i][0] += number;  //该省份感染患者人数增加
-			            provinceExist[i] = true;
+			            provinceExist[i] = 1;
 			            break;
 			        }
 			    }
@@ -302,7 +307,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			        if(str[0].equals(provinceStr[i])) {  
 			            peopleNumber[0][1] += number;  //全国疑似患者人数增加
 			            peopleNumber[i][1] += number;  //该省份疑似患者人数增加
-			            provinceExist[i] = true;
+			            provinceExist[i] = 1;
 			            break;
 			        }
 			    }
@@ -317,7 +322,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			            peopleNumber[i][0] -= number;  //该省份感染患者人数减少
 			            peopleNumber[0][2] += number;  //全国治愈患者人数增加
 			            peopleNumber[i][2] += number;  //该省份治愈患者人数增加
-			            provinceExist[i] = true;
+			            provinceExist[i] = 1;
 			            break;
 			        }
 			    }
@@ -329,10 +334,10 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			    for(int i = 0; i < 35; i++) {
 			        if(str[0].equals(provinceStr[i])) {  
 			        	peopleNumber[0][0] -= number;  //全国感染患者人数减少
-			            peopleNumber[i][0] += number;  //该省份感染患者人数减少
-			            peopleNumber[0][2] -= number;  //全国死亡患者人数增加
-			            peopleNumber[i][2] += number;  //该省份死亡患者人数增加
-			            provinceExist[i] = true;
+			            peopleNumber[i][0] -= number;  //该省份感染患者人数减少
+			            peopleNumber[0][3] += number;  //全国死亡患者人数增加
+			            peopleNumber[i][3] += number;  //该省份死亡患者人数增加
+			            provinceExist[i] = 1;
 			            break;
 			        }
 			    }
@@ -342,16 +347,16 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			 String[] str = readLine.split(" ");  
 			 int number = Integer.valueOf(str[4].replace("人", ""));  //将人前的数字从字符串类型转化为整数类型，下同       
 			    for(int i = 0; i < 35; i++) {
-			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为省份
+			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为流出省份
 			            peopleNumber[i][0] -= number;  //该省份感染患者人数减少
-			            provinceExist[i] = true;
+			            provinceExist[i] = 1;
 			            break;
 			        }
 			    }
 			    for(int i = 0; i < 35; i++) {
-			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为省份
+			        if(str[3].equals(provinceStr[i])) {  //第四个字符串为流入省份
 			            peopleNumber[i][0] += number;  //该省份感染患者人数增加
-			            provinceExist[i] = true;
+			            provinceExist[i] = 1;
 			            break;
 			        }
 			    }
@@ -359,18 +364,18 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 		
 		public void flowIntoSP(String readLine){  //流入疑似患者的处理
 			 String[] str = readLine.split(" "); 
-			 int number = Integer.valueOf(str[3].replace("人", ""));       
+			 int number = Integer.valueOf(str[4].replace("人", ""));       
 			    for(int i = 0; i < 35; i++) {
 			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为流出省份
 			            peopleNumber[i][1] -= number;  //该省份疑似患者人数增加
-			            provinceExist[i] = true;
+			            provinceExist[i] = 1;
 			            break;
 			        }
 			    }
 			    for(int i = 0; i < 35; i++) {
 			        if(str[3].equals(provinceStr[i])) {  //第四个字符串为流入省份
 			            peopleNumber[i][1] += number;  //该省份疑似患者人数增加
-			            provinceExist[i] = true;
+			            provinceExist[i] = 1;
 			            break;
 			        }
 			    }
@@ -385,7 +390,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			            peopleNumber[i][0] += number;  //该省份感染患者人数增加
 			            peopleNumber[0][1] -= number;  //全国疑似患者人数减少
 			            peopleNumber[i][1] -= number;  //该省份疑似患者人数减少
-			            provinceExist[i] = true;
+			            provinceExist[i] = 1;
 			            break;
 			        }
 			    }
@@ -398,7 +403,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			        if(str[0].equals(provinceStr[i])) {  //第一个字符串为省份
 			            peopleNumber[0][1] -= number;  //全国疑似患者人数增加
 			            peopleNumber[i][1] -= number;  //该省份疑似患者人数增加
-			            provinceExist[i] = true;
+			            provinceExist[i] = 1;
 			            break;
 			        }
 			    }
@@ -408,38 +413,43 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 		public void writeOutTxt() {  //输出文件内容
 			FileWriter fwriter = null;
 			int i, j;	
+			provinceExist[0] = 1; 
 			try {
 				fwriter = new FileWriter(outPath);  
-				if(isProvinceExist == false){  //若-province未指定
-					for(i=0; i < 35; i++){
-						if(provinceExist[i] == true)
+				if(isProvinceExist == 0){  //若-province未指定
+					for(i = 0; i < 35; i++){
+						if(provinceExist[i] == 1){
 							fwriter.write(provinceStr[i] + " ");
-						if(isTypeExist == false){  //若-type未指定
-							for( j = 1; j <= 4; j++)
-								fwriter.write(typeStr[j] + peopleNumber[i][j] + "人 ");
+							if(isTypeExist == 0){  //若-type未指定
+								for( j = 0; j < 4; j++)
+									fwriter.write(typeStr[j] + peopleNumber[i][j] + "人 ");}
+							
+						
+							else{  //若-type指定
+								for( j = 0; j < 4; j++)
+									if(type[j] != 0)
+									fwriter.write(typeStr[type[j]] + peopleNumber[i][type[j+1]-1] + "人 ");
+							}
+							fwriter.write("\n");
 						}
-						else{  //若-type指定
-							for( j = 0; j < 4; j++)
-								if(type[j] != 0)
-									fwriter.write(typeStr[type[j]] + peopleNumber[i][type[j]] + "人 ");
-						} 
-						fwriter.write("\n");
 					}
 				}
 				else {  //若-province有指定
-					for(i=0; i < 35; i++){
-						if(province[i] == true)
+					for(i = 0; i < 35; i++){
+						if(province[i] == 1){
 							fwriter.write(provinceStr[i] + " ");
-						if(isTypeExist == false){  //若-type未指定
-							for( j = 1; j <= 4; j++)
-								fwriter.write(typeStr[j] + peopleNumber[i][j] + "人 ");
+							if(isTypeExist == 0){  //若-type未指定
+								for( j = 0; j < 4; j++)
+									fwriter.write(typeStr[j] + peopleNumber[i][j] + "人 ");
+							}
+							else{  //若-type指定
+								for( j = 0; j < 4; j++)
+									if(type[j+1] != 0)
+										fwriter.write(typeStr[type[j]] + peopleNumber[i][type[j+1]-1] + "人 ");
+							} 
+							fwriter.write("\n");
 						}
-						else{  //若-type指定
-							for( j = 0; j < 4; j++)
-								if(type[j] != 0)
-									fwriter.write(typeStr[type[j]] + peopleNumber[i][type[j]] + "人 ");
-						} 
-						fwriter.write("\n");
+							
 					}
 				}
 				        
@@ -458,10 +468,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			
 		}
 	}
-	
+
 	
 	}
-
-
-
 
