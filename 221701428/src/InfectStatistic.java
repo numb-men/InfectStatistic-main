@@ -11,7 +11,7 @@ class InfectStatistic {
     public static String[] paramenterStrings;
     /** index为参数名在哈希表中的位置，值为参数名在paramenterStrings中的下标，不存在参数名则为-1 */
     public static int[]  indexOfParamenterStrings = {-1, -1, -1, -1, -1, -1};
-    /** log 日志文件目录,项目必会附带 */
+    /** log 日志文件目录 */
     public static String inputDir = "";
     /** 统计到哪一天 */
     public static String toDateString = "";
@@ -106,6 +106,76 @@ class InfectStatistic {
                 }
             }
             return resString;
+        }
+    }
+
+    /** description:关于操作单行字符串（从文本读入的一行数据）的一些方法 */
+    static class OperateLineString {
+
+        /** description：获取一个字符串前的数字 */
+        public static int getNumber(String string) {
+            for (int i=0,len=string.length(); i < len; i++) {
+                if (Character.isDigit(string.charAt(i))) {
+                    ;
+                } else {
+                    string = string.substring(0, i);
+                    break;
+                }
+            }
+
+            return Integer.parseInt(string);
+        }
+        /** description：得到要修改数据的省份名称modifyProvinceName */
+        public static String[] getProvince(String[] strings) {
+            int len = strings.length;
+            String[] resStrings = new String[2];
+            if (len == 3 || len == 4) {
+                resStrings[0] = strings[0];
+                resStrings[1] = "";
+            } else if (len == 5) {
+                resStrings[0] = strings[0];
+                resStrings[1] = strings[3];
+            }
+            return resStrings;
+        }
+        /**  description：判断操作类型 */
+        public static int getOperateType(String[] strings) {
+            int len = strings.length;
+            int res = 0;
+            if (len == 3) {
+                if (strings[1].equals("死亡")) {
+                    res = 1;
+                } else if (strings[1].equals("治愈")) {
+                    res = 2;
+                }
+            } else if (len == 4) {
+                if (strings[1].equals("新增")) {
+                    if (strings[2].equals("感染患者")) {
+                        res = 3;
+                    } else if (strings[2].equals("疑似患者")) {
+                        res = 4;
+                    }
+                } else if (strings[1].equals("排除")) {
+                    res = 5;
+                } else {
+                    res = 6;
+                }
+            } else {
+                if (strings[1].equals("感染患者")) {
+                    res = 7;
+                } else {
+                    res = 8;
+                }
+            }
+            return res;
+        }
+        /** description：简单判断该行是注释行，仅判断前两个字符"//"，如果是空行也跳过 */
+        public static boolean isNotes(String lineString) {
+            if (lineString.equals("") || lineString.charAt(0) == '/' && lineString.charAt(1) == '/') {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
