@@ -38,19 +38,10 @@ class InfectStatistic {
     public static void main(String[] args){
         
         CommandParser cmParser = new CommandParser(args);
-        InfectedMap map = new InfectedMap();
-        FileInputUtils reader = new FileInputUtils();
-        FileOutputUtils writer = new FileOutputUtils();
-       
-        try {
-            reader.parseFile(cmParser.getSrcPath(), map);
-            map.sortByProvince();
-            writer.writeFile(cmParser.getDstPath(), map);
-            
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        CommandRun commandRun = new CommandRun();
+        commandRun.runCommand(cmParser);
+        
+        
         /*
         String line = "甘肃 新增 感染患者 5人";
         String cutString = " ";
@@ -89,15 +80,15 @@ class InfectStatistic {
  */
 class CommandParser{ 
     //存放-log
-    private String srcPath;
+    public String srcPath = "";
     //存放-out
-    private String dstPath;
+    public String dstPath = "";
     //存放-date
-    private String dateString;
+    public String dateString = "";
     //存放-type
-    private String typeString;
+    public String typeString = "";
     //存放-province
-    private String provinceString;
+    public String provinceString ="";
     
     public CommandParser(String[] args) {
         for (int i = 1; i < args.length; i++){
@@ -118,20 +109,36 @@ class CommandParser{
                 this.provinceString = args[i];
             }                 
         }
-    }
-
-    public String getSrcPath() {
-        return srcPath;
-    }
-    
-    public String getDstPath() {
-        return dstPath;
-    }
-  
-    
-    
+    }   
 }
 
+/**
+ * 
+ * 命令执行类
+ * TODO
+ *
+ * @author 221701120_hxy
+ * @version 1.0
+ * @since 2020.2.15
+ */
+class CommandRun{
+    public void runCommand(CommandParser parser) {
+        InfectedMap map = new InfectedMap();
+        FileInputUtils reader = new FileInputUtils();
+        FileOutputUtils writer = new FileOutputUtils();
+        
+        
+        try {
+            reader.parseFile(parser.srcPath, map);
+            map.sortByProvince();
+            writer.writeFile(parser.dstPath, map);
+            
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+}
 /**
  * 
  * 文件读取的工具类
