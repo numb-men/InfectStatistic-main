@@ -15,7 +15,7 @@ class InfectStatistic {
 		Command command = new Command(args);
 		command.getCommand(args);
 	}
-}
+} 
 
 /**
  * Command类
@@ -53,13 +53,12 @@ class Command {
  */
 class ListCommand {
 	/* 存储读取的命令行参数值 */
-	private static String[] args;
 	private static String log = null;
 	private static String out = null;
 	private static String date = null;
-	private static ArrayList<String> type = new ArrayList();
-	private static ArrayList<String> province = new ArrayList();
-	private static ArrayList<String> dateList = new ArrayList();
+	private static ArrayList<String> type = new ArrayList<String>();
+	private static ArrayList<String> province = new ArrayList<String>();
+	private static ArrayList<String> dateList = new ArrayList<String>();
 	private static HashMap<String, Province> provinceMap = new HashMap<String, Province>();
 	
 	/* 参数值的相关判断 */
@@ -91,7 +90,8 @@ class ListCommand {
 			if(!args[0].equals("list")) {
 				System.out.println("不是list命令！");
 				System.exit(0);
-			} else {
+			} 
+			else {
 				for(int i = 1; i < length; i++) {
 					switch(args[i]) {
 						case "-log":
@@ -118,7 +118,8 @@ class ListCommand {
 									type.add(args[i + 1]);
 									hasType = true;
 									i++;
-								} else {
+								} 
+								else {
 									System.out.println(args[i] + "是无效命令值！");
 									System.exit(0);
 								}
@@ -137,7 +138,8 @@ class ListCommand {
 					}
 				}
 			}
-		} else {
+		} 
+		else {
 			System.out.println("请输入命令行参数！");
 			System.exit(0);
 		}
@@ -152,20 +154,16 @@ class ListCommand {
 			System.out.println("请输入\"-log\"参数！");
 			System.exit(0);
 		}
-		if(hasLog) {
+		else {
 			File directory = new File(log);
 			if(!directory.exists()) {
-				directory.mkdirs();
+				System.out.println("\"-log\"参数值无效！");
+				System.exit(0);
 			}
 		}
 		if(!hasOut) {
 			System.out.println("请输入\"-out\"参数！");
 			System.exit(0);
-		}
-		if(!hasDate) {
-			//获得当前日期
-			Date current = new Date(System.currentTimeMillis());
-			date = formatter.format(current);
 		}
 		if(hasDate) {
 			if(!isValidDate(date)) {
@@ -194,10 +192,14 @@ class ListCommand {
 				}
 				if(lastDate == null) {
 					lastDate = fileDate;
-				} else {
+				} 
+				else {
 					if(fileDate.compareTo(lastDate) > 0) {
 						lastDate = fileDate;
 					}
+				}
+				if(!hasDate) {
+					date = lastDate;
 				}
 				if(date.compareTo(fileDate) >= 0) {
 					dateList.add(fileDate);
@@ -230,9 +232,9 @@ class ListCommand {
 		try {
 			File file = new File(fileName);
 			if(file.isFile() && file.exists()) {
-				BufferedReader reader;
+				InputStreamReader stream = new InputStreamReader(new FileInputStream(fileName),"UTF-8");
+				BufferedReader reader = new BufferedReader(stream);
 				try {
-					reader = new BufferedReader(new FileReader(file));
 					String line = reader.readLine();
 					while(line != null) {
 						if(!line.matches("[/]+.*")) {
@@ -243,7 +245,9 @@ class ListCommand {
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
-			} else {
+				reader.close();
+			}
+			else {
 				System.out.println("找不到指定的文件");
 			}
 		} catch(Exception e) {
@@ -310,7 +314,7 @@ class ListCommand {
 	 * 将-province中列出的省份排序
 	 */
 	public static void sortProvince() {
-		ArrayList<String> newProvince = new ArrayList();
+		ArrayList<String> newProvince = new ArrayList<String>();
 		for(EnumProvince e : EnumProvince.values()) {
         	for(String p : province) {
         		if(p.equals(e.value())) {
@@ -619,7 +623,8 @@ class SPHandler extends LogHandler {
 			Province province = provinceMap.get(pro);
 			province.setSp(province.getSp() + cnt);
 			provinceMap.put(pro, province);
-		} else {
+		} 
+		else {
 			if(getNextHandler() != null) {
 				getNextHandler().handleLog(str, provinceMap);
 			}
@@ -656,7 +661,8 @@ class ChangeIPHandler extends LogHandler {
 			Province province2 = provinceMap.get(pro2);
 			province2.setIp(province2.getIp() + cnt);
 			provinceMap.put(pro2, province2);
-		} else {
+		} 
+		else {
 			if(getNextHandler() != null) {
 				getNextHandler().handleLog(str, provinceMap);
 			}
@@ -693,7 +699,8 @@ class ChangeSPHandler extends LogHandler {
 			Province province2 = provinceMap.get(pro2);
 			province2.setSp(province2.getSp() + cnt);
 			provinceMap.put(pro2, province2);
-		} else {
+		} 
+		else {
 			if(getNextHandler() != null) {
 				getNextHandler().handleLog(str, provinceMap);
 			}
@@ -724,7 +731,8 @@ class NewIPHandler extends LogHandler {
 			province.setSp(province.getSp() - cnt);
 			province.setIp(province.getIp() + cnt);
 			provinceMap.put(pro, province);
-		} else {
+		} 
+		else {
 			if(getNextHandler() != null) {
 				getNextHandler().handleLog(str, provinceMap);
 			}
@@ -754,7 +762,8 @@ class RemoveSPHandler extends LogHandler {
 			Province province = provinceMap.get(pro);
 			province.setSp(province.getSp() - cnt);
 			provinceMap.put(pro, province);
-		} else {
+		} 
+		else {
 			if(getNextHandler() != null) {
 				getNextHandler().handleLog(str, provinceMap);
 			}
@@ -785,7 +794,8 @@ class CureHandler extends LogHandler {
 			province.setIp(province.getIp() - cnt);
 			province.setCure(province.getCure() + cnt);
 			provinceMap.put(pro, province);
-		} else {
+		} 
+		else {
 			if(getNextHandler() != null) {
 				getNextHandler().handleLog(str, provinceMap);
 			}
@@ -816,7 +826,8 @@ class DeadHandler extends LogHandler {
 			province.setIp(province.getIp() - cnt);
 			province.setDead(province.getDead() + cnt);
 			provinceMap.put(pro, province);
-		} else {
+		} 
+		else {
 			if(getNextHandler() != null) {
 				getNextHandler().handleLog(str, provinceMap);
 			}
