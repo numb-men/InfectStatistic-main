@@ -592,6 +592,54 @@ public class Lib {
         public Map<String,Integer[]> getInfo() {
             return this.info;
         }
+
+        // 写入日志文件
+        public void writeIntoLog(String logPath, argument.ArgParser argParser) {
+            // 经过上面处理已经获得了全部的要写入日志的信息
+            // 需要输出的类型
+            List<Integer> indexTypes = command.ListCommand.judgeType(argParser);
+            List<String>  types = new ArrayList<>();
+            types.add("感染患者");
+            types.add("疑似患者");
+            types.add("治愈");
+            types.add("死亡");
+            // 需要输出的省份名
+            List<String> outProvinces = argParser.getVals("-province");
+            try {
+                FileOutputStream fos = new FileOutputStream(logPath);
+                // 键为省份信息,第一个为全国,其他为按照拼音顺序
+                Set<String> provinces = info.keySet();
+                for (String province:provinces) {
+                    Integer[] populations = info.get(province);
+                    String line = province;
+
+                    // 如果要输出的省份中不包含就跳过
+                    // 这里有错
+                    if (outProvinces!=null && !outProvinces.contains(province)) { continue; }
+
+                    if (populations[0]!=0 || populations[1]!=0 || populations[2]!=0 || populations[3]!=0) {
+                        for (Integer index:indexTypes) {
+                            line+=" "+types.get(index)+populations[index]+"人";
+                        }
+                        line+="\n";
+                        System.out.println(line);
+                        //                    line = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
+                        //                            province,populations[0],populations[1],populations[2],populations[3]);
+                        // 写入信息
+                        fos.write(line.getBytes());
+                    }
+
+                }
+                String endLine = "// 该文档并非真实数据，仅供测试使用\n";
+                fos.write(endLine.getBytes());
+            }
+            catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
 
