@@ -23,16 +23,18 @@ public class InfectStatistic {
 	            int i=0;
 	            while ((str = in.readLine())!= null) {
 	                i++;
-	                byte[] bytes=str.getBytes();
-	                System.out.print("第"+i+"行："+str+"    ");	                	 
-	                String pattern = ".*runoob.*";
-	                	 
-	                boolean isMatch = Pattern.matches(pattern, str);
-	                System.out.println("字符串中是否包含了 'runoob' 子字符串? " + isMatch);
 	                
-	                System.out.println("第"+i+"行有"+bytes.length+"个字节"+str.length()+"个字符");//输出每一行的字符和字节个数
+	                System.out.print("第"+i+"行："+str+"\n");	                	 
+	                String pattern = ".*治愈.*";
+	                String[]  strs=str.split(" ");
+	                boolean isMatch = Pattern.matches(pattern, str);
+	                System.out.println("字符串中是否包含了 子字符串? " + isMatch);
+	                System.out.println(strs[2].toString());
+	                
+	                
+	                
 	            }
-	            System.out.println("该文本共有"+i+"行");
+	            
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        }
@@ -52,6 +54,32 @@ public class InfectStatistic {
 			    }
 	}
 }
+class province{
+	 String provinces[]= {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南",
+		            	"黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东",
+		            	"山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
+	
+	public int getmark1(String province) {
+		int mark=0;
+		for(mark=0;mark<provinces.length;mark++)
+			if(provinces[mark]==province)
+				break;
+		return mark;
+	}
 		
-
-
+	public static void main(String args[]) {
+		/*for(int i=0;i<conditions.length;i++)
+			for(int j=0;j<4;j++)
+		    System.out.println("人数为"+conditions[i][j]);
+		province p=new province();
+		int num=p.getmark1("福建");
+		System.out.println("代号为"+num);*/
+		
+	}
+	
+}
+class state{
+	String patterns[]= {"","",};
+	
+			
+}
