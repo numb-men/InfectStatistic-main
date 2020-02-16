@@ -9,7 +9,3 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
-*.classpath
-*.project
-*.class
-InfectStatisticTest.java
