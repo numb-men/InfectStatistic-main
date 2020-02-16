@@ -5,9 +5,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Stream;
 
-import javax.swing.text.DateFormatter;
 
 
 /**
@@ -27,10 +28,12 @@ class InfectStatistic {
     	//ListParameters lp=new ListParameters(string);
     	//lp.formatParameters();
     	
-    	//LogFileReader lfr=new LogFileReader("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log");
-    	File f=new File("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log\\2020-01-22.log.txt");
+    	LogFileReader lfr=new LogFileReader("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log");
+//    	File f=new File("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log\\2020-01-22.log.txt");
+//    	
+//    	LogFileReader.formatFileContent(f);
     	
-    	LogFileReader.formatFileContent(f);
+//    	List<String> betweenDate = lfr.getBetweenDate();
     }
 }
 
@@ -352,7 +355,7 @@ class LogFileReader{
 	 * @param logDirectory 放置日志的目录
 	 * @return
 	 */
-	public File[] logFiles(String logDirectory) {
+	public File[] getLogFiles(String logDirectory) {
 		File logDir=new File(logDirectory);
 		if(logDir.exists()&&logDir.isDirectory()) {
 			File[] logList=logDir.listFiles();
@@ -390,7 +393,7 @@ class LogFileReader{
 	 * 
 	 * @param lDate
 	 */
-	public void ManageDateArrange(File[] logs) {
+	public void getDateArrange(File[] logs) {
 	
 		Date date = null;
 		LocalDate lDate=null;
@@ -418,10 +421,49 @@ class LogFileReader{
 		
 	}
 	
-	
-	public void generateDailyMap() {
+	/**
+	 * 	获取两个日期间隔的所有日期
+	 * 
+	 * @return
+	 */
+	public   List<String> getBetweenDate(){
+			
+		List<String> dateList=new ArrayList<String>();
 		
+		long distance=ChronoUnit.DAYS.between(startDate, endDate);
+		if(distance<1) {
+			dateList.add(startDate.toString());
+			return dateList;
+		}
+		
+		Stream.iterate(startDate, d -> {
+			return d.plusDays(1);
+		}).limit(distance + 1).forEach(f -> {
+			dateList.add(f.toString());
+		});
+		return dateList;
 	}
+	
+	/**
+	 * 	生成日期感染情况的map
+	 * 
+	 * @return	Map<String,String>日期-感染情况map
+	 */
+	public Map<String,String> generateDailyMap() {
+		List<String> dateList=getBetweenDate();
+		Map<String,String> dailyInfectMap=new HashMap<String,String>();
+		
+		for(int i=0;i<dateList.size();i++) {
+			dailyInfectMap.put(dateList.get(i), null);
+		}
+		
+		
+		
+		
+
+		return dailyInfectMap;
+	}
+	
 	/**
 	 * Date转换成LocalDate
 	 * 
@@ -494,6 +536,8 @@ class RegExp{
     String CURE_PATTERN = "\\W+ 治愈 \\d+人";
     String SP_CONFIRM_PATTERN = "\\W+ 疑似患者 确诊感染 \\d+人";
     String SP_EXCLUDE_PATTERN = "\\W+ 排除 疑似患者 \\d+人";
+    
+    
 }
 
 
