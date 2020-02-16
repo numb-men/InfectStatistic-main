@@ -1272,10 +1272,11 @@ class InfectStatistic {
             //如果为文件
             if(file.isFile()) {
                 BufferedReader reader = null;
+                //BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
 
                 try {
                     System.out.println("以行为单位读取文件内容，一次读一整行：");
-                    reader = new BufferedReader(new FileReader(file));
+                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
                     String tempString = null;
                     int line = 1;
                     // 一次读入一行，直到读入null为文件结束
@@ -1497,10 +1498,13 @@ class InfectStatistic {
                         }
                     }
                 }
-                for (int i = 0; i < province.size(); i++) {
-                    for(String p :sr){
-                        if(p.equals(province.get(i))) {
-                            province.remove(i);
+
+                if(province!=null) {
+                    for (int i = 0; i < province.size(); i++) {
+                        for (String p : sr) {
+                            if (p.equals(province.get(i))) {
+                                province.remove(i);
+                            }
                         }
                     }
                 }
@@ -1527,7 +1531,7 @@ class InfectStatistic {
 
                 }
                 else{
-
+                    if(province!=null)
                     for(int j = 0 ; j<province.size(); j++) {
                         province_not_found = province.get(j) + " 感染患者0人" + " 疑似患者0人" + " 治愈0人" + " 死亡0人" + "\n";
                         out.write(province_not_found);
@@ -1535,7 +1539,7 @@ class InfectStatistic {
 
                 }
 
-                System.out.println(province.size());
+                //System.out.println(province.size());
 
                 out.write("// 该文档并非真实数据，仅供测试使用" + "\n");
                 out.write("// 命令：" + commandline + "\n");
