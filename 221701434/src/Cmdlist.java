@@ -187,7 +187,7 @@ public class Cmdlist {
         for(int i=x;i<args.length;i++){
             if (here.map1.containsKey(args[i])==true)
                 here.provinces[here.map1.get(args[i])].quantify+=k;
-            k--;
+
         }
     }
 }
