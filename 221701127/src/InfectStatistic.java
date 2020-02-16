@@ -153,7 +153,7 @@ class CmdArgs {
                 break;
             }
             default: {
-                System.out.println("Wrong cmd");
+                System.out.println("命令有误");
                 break;
             }
         }
@@ -208,12 +208,13 @@ class CmdList extends CmdArgs {
     void action() {
         try {
             readLog(this.logPath, this.files, this.logs);
-            logToRegion(this.logs, this.regions);
+            Log.logToRegion(this.logs, this.regions);
             outLog(this.outPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+    
     /**
      * 读取日志文件并储存在logs里，然后调用logToRegion将日志文件转换并保存
      * @param logPath
@@ -233,70 +234,6 @@ class CmdList extends CmdArgs {
                 }
             }
             br.close();
-        }
-    }
-
-    /**
-     * 将日志文件转换为地区类并储存
-     * @param logs
-     */
-    void logToRegion(ArrayList<String> logs, ArrayList<Log.Region> regions) {
-        for (String log : logs) {
-            String[] items = log.split("[\\s]+");
-            int index = Log.indexOfRegion(regions, items[0]);
-            int num = 0;
-            for (String item : items) {
-                if (item.endsWith("人")) {
-                    num = Integer.valueOf(item.replace("人", ""));
-                }
-            }
-            Log.Region region = regions.get(index);
-            switch (items[1]) {
-            case "新增": {
-                if (items[2].equals("感染患者")) {
-                    region.ip.add(num);
-                } else if (items[2].equals("疑似患者")) {
-                    region.sp.add(num);
-                }
-                break;
-            }
-            case "感染患者": {
-                if (items[2].equals("流入")) {
-                    region.ip.add(0 - num);
-                    Log.Region another = regions.get(Log.indexOfRegion(regions, items[3]));
-                    another.ip.add(num);
-                }
-                break;
-            }
-            case "疑似患者": {
-                if (items[2].equals("确诊感染")) {
-                    region.ip.add(num);
-                    region.sp.add(0 - num);
-                } else if (items[2].equals("流入")) {
-                    region.sp.add(0 - num);
-                    Log.Region another = regions.get(Log.indexOfRegion(regions, items[3]));
-                    another.sp.add(num);
-                }
-                break;
-            }
-            case "治愈": {
-                region.cure.add(num);
-                region.ip.add(0 - num);
-                break;
-            }
-            case "死亡": {
-                region.dead.add(num);
-                region.ip.add(0 - num);
-                break;
-            }
-            case "排除": {
-                region.sp.add(0 - num);
-                break;
-            }
-            default: {
-                break;
-            }
-            }
         }
     }
 
@@ -534,20 +471,67 @@ class Log {
     }
 
     /**
-     * 获取指定地区在动态数组中的下表，如果数组中没有，则向动态数组中加入该地区
-     * 
-     * @param name
-     * @return
+     * 将日志文件转换为地区类并储存
+     * @param logs
      */
-    static int indexOfRegion(ArrayList<Region> regions, String name) {
-        int index = -1;
-        Region region = new Region(name);
-        if (!regions.contains(region)) {
-            region = new Region(name);
-            regions.add(region);
+    static void logToRegion(ArrayList<String> logs, ArrayList<Log.Region> regions) {
+        for (String log : logs) {
+            String[] items = log.split("[\\s]+");
+            int index = Log.Region.indexOfRegion(regions, items[0]);
+            int num = 0;
+            for (String item : items) {
+                if (item.endsWith("人")) {
+                    num = Integer.valueOf(item.replace("人", ""));
+                }
+            }
+            Log.Region region = regions.get(index);
+            switch (items[1]) {
+            case "新增": {
+                if (items[2].equals("感染患者")) {
+                    region.ip.add(num);
+                } else if (items[2].equals("疑似患者")) {
+                    region.sp.add(num);
+                }
+                break;
+            }
+            case "感染患者": {
+                if (items[2].equals("流入")) {
+                    region.ip.add(0 - num);
+                    Log.Region another = regions.get(Log.Region.indexOfRegion(regions, items[3]));
+                    another.ip.add(num);
+                }
+                break;
+            }
+            case "疑似患者": {
+                if (items[2].equals("确诊感染")) {
+                    region.ip.add(num);
+                    region.sp.add(0 - num);
+                } else if (items[2].equals("流入")) {
+                    region.sp.add(0 - num);
+                    Log.Region another = regions.get(Log.Region.indexOfRegion(regions, items[3]));
+                    another.sp.add(num);
+                }
+                break;
+            }
+            case "治愈": {
+                region.cure.add(num);
+                region.ip.add(0 - num);
+                break;
+            }
+            case "死亡": {
+                region.dead.add(num);
+                region.ip.add(0 - num);
+                break;
+            }
+            case "排除": {
+                region.sp.add(0 - num);
+                break;
+            }
+            default: {
+                break;
+            }
+            }
         }
-        index = regions.indexOf(region);
-        return index;
     }
 
     /** 
@@ -606,5 +590,22 @@ class Log {
             }
             return result;
         }
+
+    /**
+     * 获取指定地区在动态数组中的下表，如果数组中没有，则向动态数组中加入该地区
+     * 
+     * @param name
+     * @return
+     */
+    static int indexOfRegion(ArrayList<Region> regions, String name) {
+        int index = -1;
+        Region region = new Region(name);
+        if (!regions.contains(region)) {
+            region = new Region(name);
+            regions.add(region);
+        }
+        index = regions.indexOf(region);
+        return index;
+    }
     }
 }
