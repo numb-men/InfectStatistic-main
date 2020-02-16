@@ -64,7 +64,8 @@ class CommandParser{
     //存放-date
     public String dateString = "";
     //存放-type
-    public String typeString = "";
+    public boolean hasType = false;
+    public List<String> typeList = new ArrayList<String>();
     //存放-province
     public boolean hasProvince = false;
     public List<String> provinceList = new ArrayList<String>();
@@ -82,7 +83,15 @@ class CommandParser{
                 this.dateString = args[i];
             } else if (args[i].equals("-type")){
                 i++;
-                this.typeString = args[i];
+                this.hasType = true;
+                int index = i;
+                for (int j = 0; j < args.length - index && !args[i].equals("-province"); j++) {
+                    this.typeList.add(args[i]);
+                    i++;
+                }
+                if (typeList.size() == 4) {
+                    hasType = false;
+                }
             } else if (args[i].equals("-province")){
                 //若含有province参数，则要对其后参数进行记录
                 this.hasProvince = true;
@@ -90,7 +99,6 @@ class CommandParser{
                 int index = i;
                 for (int j = 0; j < args.length - index; j++) {
                     this.provinceList.add(args[i]);
-                    System.out.println(this.provinceList.get(j));
                     i++;
                 }
             }                 
@@ -116,7 +124,7 @@ class CommandRun{
     public CommandRun(CommandParser parser) {
         if (!parser.dateString.equals("")) {
             hasDate = true;
-        }else if (!parser.typeString.equals("")) {
+        }else if (parser.hasType) {
             hasType = true;
         }else if (parser.hasProvince) {
             hasProvince = true;
@@ -134,7 +142,7 @@ class CommandRun{
             
             reader.parseFile(parser.srcPath, map, hasDate, parser.dateString);
             map.sortByProvince();
-            writer.writeFile(parser.dstPath, map, hasType, hasProvince, parser.provinceList);
+            writer.writeFile(parser.dstPath, map, hasType, parser.typeList, hasProvince, parser.provinceList);
             
         } catch (IOException e) {
             e.printStackTrace();
@@ -223,7 +231,7 @@ class FileInputUtils{
  */
 class FileOutputUtils{
     public void writeFile(String dstPath, InfectedMap map,
-                boolean hasType, boolean hasProvince ,
+                boolean hasType, List<String> typeList, boolean hasProvince ,
                 List<String> provinceList) throws IOException {    
         OutputStream outStream = new FileOutputStream(dstPath);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outStream));
@@ -236,7 +244,23 @@ class FileOutputUtils{
             }
            
         }else if (!hasProvince && hasType) {
-            
+            for (HashMap.Entry<String, InfectedArea> entry : map.map.entrySet()) {
+                String keyString = entry.getKey();
+                bufferedWriter.write(keyString);
+                if(typeList.contains("ip")) {
+                    bufferedWriter.write(" 感染患者" + map.map.get(keyString).infectedNum + "人");
+                }
+                if(typeList.contains("sp")) {
+                    bufferedWriter.write(" 疑似患者" + map.map.get(keyString).potentialNum + "人");
+                }
+                if(typeList.contains("cure")) {
+                    bufferedWriter.write(" 治愈" + map.map.get(keyString).curedNum + "人");
+                }
+                if(typeList.contains("dead")) {
+                    bufferedWriter.write(" 死亡" + map.map.get(keyString).deadNum + "人");
+                }
+                bufferedWriter.write("\n");  
+               }
         }else if (hasProvince && hasType) {
             
         }else {
@@ -327,7 +351,6 @@ class InfectedMap{
             list.add(entry);
         }
         
-        
         Collections.sort(list, new Comparator<Entry<String,InfectedArea>>() {
  
             @Override
@@ -336,10 +359,8 @@ class InfectedMap{
                 String value2 = o2.getKey();
                 int index1 = regulationOrder.indexOf(value1);
                 int index2 = regulationOrder.indexOf(value2);
-                
                 return index1-index2;
             }
-            
         });
         //对list排序完成后放入LinkedHashMap即可。
         HashMap<String, InfectedArea> map2 = new LinkedHashMap<>();
@@ -347,7 +368,6 @@ class InfectedMap{
             map2.put(entry.getKey(), entry.getValue());
             map = map2;
         }
-
     }
 }
 /**
