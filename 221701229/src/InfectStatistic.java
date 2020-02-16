@@ -36,7 +36,7 @@ class CommandManager {
     private String[] args;  //传入的命令行数组
     private Command cmd;  //当前解析出的命令
     private List<Command> CommandList=new ArrayList<>();  //支持的命令队列
-    private List<List> Arguments=new ArrayList<>();  //命令的各参数及其选项的队列
+    private List<ArrayList<String>> Arguments=new ArrayList<>();  //命令的各参数及其选项的队列
 
     CommandManager(String[] args) {
         this.args=args;
@@ -55,14 +55,11 @@ class CommandManager {
         //match表示开头找到的命令是否存在
         boolean match=false;
         //遍历允许的命令列表
-        Iterator it=CommandList.iterator();
-        while (it.hasNext())
-        {
-            cmd=(Command)it.next();
+        for (Command command : CommandList) {
+            cmd = command;
             //迭代判断输入的命令是否跟支持的命令匹配
-            if(args[0].equals(cmd.getCmdName()))
-            {
-                match=true;
+            if (args[0].equals(cmd.getCmdName())) {
+                match = true;
                 break;
             }
         }
@@ -98,7 +95,7 @@ class CommandManager {
             //找到以'-'开头的命令
             if(args[i].startsWith("-"))
             {
-                List<String> arg=new ArrayList<>();
+                ArrayList<String> arg=new ArrayList<>();
                 //System.out.println("find arg"+args[i]);
                 //把参数加入给每个参数创建的数组
                 arg.add(args[i]);
@@ -117,7 +114,7 @@ class CommandManager {
         }
     }
 
-    public List getArguments()
+    public List<ArrayList<String>> getArguments()
     {
         return Arguments;
     }
@@ -148,7 +145,7 @@ class list implements Command{
     private String log=null;  //日志文件夹路径
     private String out=null;  //输出文件路径
     private ArrayList type=null;  //指定的输出类型
-    private ArrayList province=null;  //指定的省份
+    private ArrayList<String> province=null;  //指定的省份
     private Set<String> allprovinceSet;//日志中出现的省份
     private ArrayList<String> allprovinceList;//日志中出现的省份
     private String date=null;
@@ -177,12 +174,11 @@ class list implements Command{
     {
         CommandManager cm=new CommandManager(args);
         cm.setArguments();
-        List Arguments=cm.getArguments();
+        List<ArrayList<String>> Arguments=cm.getArguments();
         Iterator it=Arguments.iterator();
         //提取两个必需的参数
-        while (it.hasNext())
+        for(ArrayList<String> para:Arguments)
         {
-            ArrayList para=((ArrayList)it.next());
             if(para.get(0).equals("-log"))
             {
                 log=(String)para.get(1);
@@ -207,8 +203,8 @@ class list implements Command{
                 para.remove(0);
                 province=para;
             }
-
         }
+
         if(log==null||out==null)
         {
             /*
@@ -248,7 +244,7 @@ class list implements Command{
                 while ((readbuff=br.readLine())!=null)
                 {
                     //把读出来的日志行交给下面处理
-                    System.out.println(readbuff);
+
                     handler.logHandlerList(readbuff,infected,suspected,cured,died);
                 }
                 //有指定截至日期时读取完文件判断日期
@@ -285,7 +281,7 @@ class list implements Command{
            //筛选有设定的选项
            while (typeit.hasNext())
            {
-               typ=(String)it.next();
+               typ=(String)typeit.next();
                if("ip".equals(typ))
                {
                    ip=true;
@@ -308,25 +304,23 @@ class list implements Command{
                String prov=null;
            if(null!=province)
            {
-               //province.sort(comp); //排序
-               Iterator proiter=province.iterator();
-               while (proiter.hasNext())
-               {
-                   prov=(String) proiter.next();
+               province.sort(comp); //排序
+               for (String value : province) {
+                   prov = value;
                    //数据不存在则设置为0
-                   if(infected.get(prov)==null)i=0;
-                   else i=infected.get(prov);
-                   if(suspected.get(prov)==null)s=0;
-                   else s=suspected.get(prov);
-                   if(cured.get(prov)==null)c=0;
-                   else c=cured.get(prov);
-                   if(died.get(prov)==null)d=0;
-                   else d=died.get(prov);
-                   fw.write(prov+" ");
-                   if(ip)fw.write("感染患者"+i+"人 ");
-                   if(sp)fw.write("疑似患者"+s+"人 ");
-                   if(cure)fw.write("治愈"+c+"人 ");
-                   if(dead)fw.write("死亡"+d+"人");
+                   if (infected.get(prov) == null) i = 0;
+                   else i = infected.get(prov);
+                   if (suspected.get(prov) == null) s = 0;
+                   else s = suspected.get(prov);
+                   if (cured.get(prov) == null) c = 0;
+                   else c = cured.get(prov);
+                   if (died.get(prov) == null) d = 0;
+                   else d = died.get(prov);
+                   fw.write(prov + " ");
+                   if (ip) fw.write("感染患者" + i + "人 ");
+                   if (sp) fw.write("疑似患者" + s + "人 ");
+                   if (cure) fw.write("治愈" + c + "人 ");
+                   if (dead) fw.write("死亡" + d + "人");
                    fw.write('\n');
                }
            }
@@ -339,25 +333,23 @@ class list implements Command{
                allprovinceList=new ArrayList<String>(allprovinceSet);
                //计算全国
                //给所有省份按给定的顺序排序
-               //allprovinceList.sort(comp);
-               Iterator proiter=allprovinceList.iterator();
-               while (proiter.hasNext())
-               {
-                   prov=(String) proiter.next();
+               allprovinceList.sort(comp);
+               for (String value : allprovinceList) {
+                   prov = value;
                    //数据不存在则设置为0
-                   if(infected.get(prov)==null)i=0;
-                   else i=infected.get(prov);
-                   if(suspected.get(prov)==null)s=0;
-                   else s=suspected.get(prov);
-                   if(cured.get(prov)==null)c=0;
-                   else c=cured.get(prov);
-                   if(died.get(prov)==null)d=0;
-                   else d=died.get(prov);
-                   fw.write(prov+" ");
-                   if(ip)fw.write("感染患者"+i+"人 ");
-                   if(sp)fw.write("疑似患者"+s+"人 ");
-                   if(cure)fw.write("治愈"+c+"人 ");
-                   if(dead)fw.write("死亡"+d+"人");
+                   if (infected.get(prov) == null) i = 0;
+                   else i = infected.get(prov);
+                   if (suspected.get(prov) == null) s = 0;
+                   else s = suspected.get(prov);
+                   if (cured.get(prov) == null) c = 0;
+                   else c = cured.get(prov);
+                   if (died.get(prov) == null) d = 0;
+                   else d = died.get(prov);
+                   fw.write(prov + " ");
+                   if (ip) fw.write("感染患者" + i + "人 ");
+                   if (sp) fw.write("疑似患者" + s + "人 ");
+                   if (cure) fw.write("治愈" + c + "人 ");
+                   if (dead) fw.write("死亡" + d + "人");
                    fw.write('\n');
                }
            }
@@ -379,21 +371,19 @@ class list implements Command{
                 if(null!=province)
                 {
 
-                    //province.sort(comp); //排序
-                    Iterator proiter=province.iterator();
-                    while (proiter.hasNext())
-                    {
-                        prov=(String) proiter.next();
+                    province.sort(comp); //排序
+                    for (String value : province) {
+                        prov = value;
                         //数据不存在则设置为0
-                        if(infected.get(prov)==null)i=0;
-                        else i=infected.get(prov);
-                        if(suspected.get(prov)==null)s=0;
-                        else s=suspected.get(prov);
-                        if(cured.get(prov)==null)c=0;
-                        else c=cured.get(prov);
-                        if(died.get(prov)==null)d=0;
-                        else d=died.get(prov);
-                        fw.write(prov+" "+"感染患者"+i+"人 "+"疑似患者"+s+"人 "+"治愈"+c+"人 "+"死亡"+d+"人"+'\n');
+                        if (infected.get(prov) == null) i = 0;
+                        else i = infected.get(prov);
+                        if (suspected.get(prov) == null) s = 0;
+                        else s = suspected.get(prov);
+                        if (cured.get(prov) == null) c = 0;
+                        else c = cured.get(prov);
+                        if (died.get(prov) == null) d = 0;
+                        else d = died.get(prov);
+                        fw.write(prov + " " + "感染患者" + i + "人 " + "疑似患者" + s + "人 " + "治愈" + c + "人 " + "死亡" + d + "人" + '\n');
                     }
                 }
                 else
@@ -406,7 +396,7 @@ class list implements Command{
                    allprovinceList=new ArrayList<String>(allprovinceSet);
                    //计算全国
                    //给所有省份按给定的顺序排序
-                    //allprovinceList.sort(comp);
+                    allprovinceList.sort(comp);
                     for (Object o : allprovinceList) {
                         prov = (String) o;
                         //数据不存在则设置为0
@@ -457,14 +447,11 @@ class LogHandle{
     public void logHandlerList(String line,HashMap<String,Integer> infected,HashMap<String,Integer> suspected,HashMap<String,Integer> cured,HashMap<String,Integer> died)
     {
         MyPatterns mypattern;
-        Iterator it=pat.iterator();
-        while(it.hasNext())
-        {
-            mypattern=(MyPatterns)it.next();
+        for (MyPatterns myPatterns : pat) {
+            mypattern = myPatterns;
             //根据日志行跟哪个类的正则匹配选择类执行统计
-            if(line.matches(mypattern.getReg()))
-            {
-                mypattern.doCount(line,infected,suspected,cured,died);
+            if (line.matches(mypattern.getReg())) {
+                mypattern.doCount(line, infected, suspected, cured, died);
                 break;
             }
         }
