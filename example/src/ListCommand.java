@@ -1,14 +1,21 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 
 //对应于Concentrate
@@ -32,6 +39,7 @@ public class ListCommand implements Command{
 	public List<String> province=new ArrayList<String>();
 	public boolean log_exist=false;
 	public boolean out_exist=false;
+	public boolean province_exist=false;
 	
 	//使用字符串构造ListCommand命令
 	@SuppressWarnings("deprecation")
@@ -45,7 +53,6 @@ public class ListCommand implements Command{
 		for(String s:PATIENTS_TYPE) {
 			type.add(s);
 		}
-		province.add(PROVINCE_STR.get(0));
 		args=argsStr.split("\\s+");
 		int argsLength=args.length;
 		for(int i=0;i<argsLength;i++) {
@@ -68,8 +75,8 @@ public class ListCommand implements Command{
 				}
 			}
 			if(args[i].toLowerCase().equals("-province")) {
+				province_exist=true;
 				int j=i+1;
-				province.clear();
 				while(j<args.length&&!args[j].startsWith("-")) {
 					province.add(args[j]);
 					j++;
@@ -91,7 +98,20 @@ public class ListCommand implements Command{
 	
 	//命令的参数化函数
 	public void list(String logPath, String outPath, String date, List<String> province, List<String> type) {
-		
+		if(isTrueCommand()) {
+			try {
+				readFromLogPath(this.logPath);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			outLogLine(outPath,province,type);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	//
@@ -138,33 +158,55 @@ public class ListCommand implements Command{
 	//处理每行的数据
 	public void eachLine(String line) {
 		if(Pattern.matches("(\\S+) 新增 感染患者 (\\d+)人", line)){
+			if(!province_exist) addProvince(line);
 			handleIp(line);
 		}
 		if(Pattern.matches("(\\S+) 新增 疑似患者 (\\d+)人", line)) {
+			if(!province_exist) addProvince(line);
 			handleSp(line);
 		}
 		
 		if(Pattern.matches("(\\S+) 感染患者 流入 (\\S+) (\\d+)人", line)) {
+			if(!province_exist) addProvince(line);
 			handleIp(line);
 		}
 		if(Pattern.matches("(\\S+) 疑似患者 流入 (\\S+) (\\d+)人", line)) {
+			if(!province_exist) addProvince(line);
 			handleSp(line);
 		}
 		
 		if(Pattern.matches("(\\S+) 治愈 (\\d+)人", line)) {
+			if(!province_exist) addProvince(line);
 			handleCure(line);
 		}
 		
 		if(Pattern.matches("(\\S+) 死亡 (\\d+)人", line)) {
+			if(!province_exist) addProvince(line);
 			handleDead(line);
 		}
 		
 		if(Pattern.matches("(\\S+) 疑似患者 确诊感染 (\\d+)人", line)) {
+			if(!province_exist) addProvince(line);
 			handleSp(line);
 		}
 		if(Pattern.matches("(\\S+) 排除 疑似患者 (\\d+)人", line)) {
+			if(!province_exist) addProvince(line);
 			handleSp(line);
 		}
+	}
+	
+	
+	//-province为空时的
+	public void addProvince(String line) {
+		String[] arr=line.split("\\s+");
+		if(!province.contains(arr[0])) {
+			province.add(arr[0]);
+		}
+	}
+	
+	//获取province在数组中对应位置
+	public int getProvinceIndex(String s) {
+		return PROVINCE_STR.indexOf(s);
 	}
 	
 	public void handleIp(String line) {
@@ -261,9 +303,38 @@ public class ListCommand implements Command{
 		}
 	}
 	
+	//
+	public void outLogLine(String outPath,List<String> province, List<String> type) throws IOException {
+		File file = new File(outPath);
+		//如果文件不存在，则自动生成文件；
+		if(!file.exists()){
+			file.createNewFile();
+		}
+		
+		
+		BufferedWriter out = new BufferedWriter(new FileWriter(file));  
+		if(!province_exist) {
+			Collections.sort(this.province, new Comparator<String>() {  
+				@Override  
+            	public int compare(String o1, String o2) {  
+					Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);  
+					return com.compare(o1, o2);  
+					}  
+			});
+			out.write(PROVINCE_STR.get(0)+" 感染患者"+data[0][0]+"人"+" 疑似患者"+data[0][1]+"人"+" 治愈人数"+data[0][2]+"人"+" 死亡人数"+data[0][3]+"人\r\n");
+			
+		}
+		for(String s:province) {
+			int index=getProvinceIndex(s);
+			out.write(s+" 感染患者"+data[index][0]+"人"+" 疑似患者"+data[index][1]+"人"+" 治愈人数"+data[index][2]+"人"+" 死亡人数"+data[index][3]+"人\r\n"); // \r\n即为换行  
+		}
+        out.flush(); 
+        out.close(); 
+	}
+	
 	//执行命令
 	public void execute() {
-		if(isTrueCommand()) {
+		/*if(isTrueCommand()) {
 		/*System.out.println(date);
 		System.out.println(logPath);
 		System.out.println(outPath);
@@ -273,7 +344,7 @@ public class ListCommand implements Command{
 		for(String s :args) {
 			System.out.println(s);
 		}*/
-		try {
+		/*try {
 			readFromLogPath(logPath);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -283,6 +354,7 @@ public class ListCommand implements Command{
 		
 		System.out.println(data[0][0]+" "+data[0][1]+" "+data[0][2]+" "+data[0][3]);
 		System.out.println(data[4][0]+" "+data[4][1]+" "+data[4][2]+" "+data[4][3]);
-		System.out.println(data[13][0]+" "+data[13][1]+" "+data[13][2]+" "+data[13][3]);
+		System.out.println(data[13][0]+" "+data[13][1]+" "+data[13][2]+" "+data[13][3]);*/
+		list(logPath,outPath,date,province,type);
 	}
 }
