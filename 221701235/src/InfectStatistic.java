@@ -9,7 +9,9 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.regex.Pattern;
 
 public class InfectStatistic {
@@ -312,28 +314,40 @@ public class InfectStatistic {
                         break;
                     }
                 }
-                //测试处理结果，简易输出
-                for (int i = 0; i < totalTable.length; i++) {
-                    if (provinceReade[i] == 1) {
-                        System.out.print(allProvince[i] + " : ");
-                        System.out.print("ip:" + totalTable[i][0] + "人     ");
-                        System.out.print("sp:" + totalTable[i][1] + "人     ");
-                        System.out.print("cure:" + totalTable[i][2] + "人     ");
-                        System.out.print("dead:" + totalTable[i][3] + "人     ");
-                        System.out.println();
-                    }
-                }
-                System.out.println("// 该文档并非真实数据，仅供测试使用");
-                
                 
                 //处理统计完毕后进行写入
-                //先判断provinceCount 是否为 0，为0即未指定省份，需要列出日志中出现的所有省份以及全国
-                //指定省份则输出指定的省份
                 if (provinceCount == 0) {
-                    //遍历provinceReade数组，找到值为1的下标
-                    //向outPath写入对应的totalTable的值
-                    //输出过程中同样对类型type进行分析
-                    
+                    //未指定省份
+                    try {
+                        FileOutputStream fileOutputStream = new FileOutputStream(outPath);
+                        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,"UTF-8");
+                        String fileContent = "";
+                        for (int i = 0; i < totalTable.length; i++) {
+                            if (provinceReade[i] == 1) {
+                                if (typeCount == 0) {
+                                    fileContent += allProvince[i];
+                                    fileContent += " 感染患者" + totalTable[i][0] + "人" ;
+                                    fileContent += " 疑似患者" + totalTable[i][1] + "人" ;
+                                    fileContent += " 治愈" + totalTable[i][2] + "人" ;
+                                    fileContent += " 死亡" + totalTable[i][3] + "人";
+                                } else {
+                                    fileContent += allProvince[i];
+                                    if (typeAppear[0] == 1) fileContent += " 感染患者" + totalTable[i][0] + "人" ;
+                                    if (typeAppear[1] == 1) fileContent += " 疑似患者" + totalTable[i][1] + "人" ;
+                                    if (typeAppear[2] == 1) fileContent += " 治愈" + totalTable[i][2] + "人" ;
+                                    if (typeAppear[3] == 1) fileContent += " 死亡" + totalTable[i][3] + "人";
+                                }
+                                
+                                fileContent += "\n";
+                            }
+                        }
+                        fileContent += "// 该文档并非真实数据，仅供测试使用";
+                        //写入
+                        outputStreamWriter.write(fileContent);
+                        outputStreamWriter.flush();
+                    } catch(Exception e) {
+                        System.exit(0);
+                    }
                 } else {
                     //遍历provinceAppear数组，找到值为1的下标
                     //向outPath写入对应的totalTable的值
