@@ -312,6 +312,7 @@ class HandleLog{
 					fw.append("\n");
 				}
 			}
+			fw.append("// 该文档并非真实数据，仅供测试使用");
 			fw.flush(); // 全部写入缓存中的内容
 		} catch (Exception e) {
 			e.printStackTrace();
