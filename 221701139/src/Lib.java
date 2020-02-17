@@ -129,6 +129,7 @@ class CommandReceiver {
         if (dates==null) {
             File lastFile = files[files.length-1];
             String lastFileName = lastFile.getName();
+            dates = new LinkedList<>();
             dates.add(lastFileName);
         }
         AllInformation prev = new AllInformation();
