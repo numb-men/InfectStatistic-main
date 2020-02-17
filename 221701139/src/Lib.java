@@ -56,6 +56,7 @@ class ArgParser {
                 arguments.put(key,vals);
             }
         }
+        this.printArg();
     }
 
     /**
@@ -128,16 +129,22 @@ class CommandReceiver {
 
         if (dates!=null) {
             // 如果提供了要处理的文件的日期名
-            // 直接按给定的文件名处理
+            // 处理包括给定日期的前面的文件
+            AllInformation prev = new AllInformation();
             for (File file : files) {
+                filePath = path + "/" + file.getName();
+                AllInformation allInformation = new AllInformation();
+                Map<String, Integer[]> info = prev.getInfo();
+                allInformation.setting(info);
+
+                // 之后处理这个文件的信息
+                allInformation.processInfo(filePath);
+                // 写入文件
+                allInformation.writeIntoLog(outFileName, argParser);
+                prev = allInformation;
                 if (file.getName().contains(dates.get(0))) {
-                    filePath = path + "/" + file.getName();
-                    AllInformation allInformation = new AllInformation();
-                    allInformation.processInfo(filePath);
-                    allInformation.writeIntoLog(outFileName,argParser);
-                    allInformation.printInfo();
+                    break;
                 }
-                break;
             }
         }
         else {
