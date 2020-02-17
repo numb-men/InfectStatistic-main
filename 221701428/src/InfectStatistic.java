@@ -242,6 +242,70 @@ class InfectStatistic {
 
     }
 
+    /** description:涉及到Province的一些方法 */
+    static class ProviceStatistic {
+
+        /** description：统计省份数据 */
+        public static void StatisticProvince(String lineString, Hashtable<String, Province> hashtable) {
+            InfectStatistic infectStatistic = new InfectStatistic();
+            String[] afterSplitStrings = lineString.split(" ");
+            int numAfterSplit = afterSplitStrings.length; // 切割后数量
+            int number = OperateLineString.getNumber(afterSplitStrings[numAfterSplit - 1]); // 一行信息中涉及的人数
+            String[] provinceNameStrings = OperateLineString.getProvince(afterSplitStrings);   //需要修改数据的省份名称
+            int operateType = OperateLineString.getOperateType(afterSplitStrings);    // 获得操作类型
+
+            if (provinceNameStrings[1].equals("")) { // 只有一个省
+                if (!hashtable.containsKey(provinceNameStrings[0])) { // 哈希表中没有该省
+                    Province province = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
+                    ProviceStatistic.execOperate(province, province, operateType, number);
+                    hashtable.put(province.getProvinceName(), province);
+                } else {
+                    Province province = hashtable.get(provinceNameStrings[0]);
+                    ProviceStatistic.execOperate(province, province, operateType, number);
+                }
+            } else if (!provinceNameStrings[1].equals("")) { // 有两个省
+                Province province1 = null;
+                Province province2 = null;
+                if (hashtable.containsKey(provinceNameStrings[0])) {
+                    province1 = hashtable.get(provinceNameStrings[0]);
+                    if(hashtable.containsKey(provinceNameStrings[1])){
+                        province2 = hashtable.get(provinceNameStrings[1]);
+                    }else{
+                        province2 = infectStatistic.new Province(provinceNameStrings[1], 0, 0, 0, 0);
+                        hashtable.put(provinceNameStrings[1], province2);
+                    }
+                }else if (!hashtable.containsKey(provinceNameStrings[0])) {
+                    province1 = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
+                    if(hashtable.containsKey(provinceNameStrings[1])){
+                        province2 = hashtable.get(provinceNameStrings[1]);
+                    }else{
+                        province2 = infectStatistic.new Province(provinceNameStrings[1], 0, 0, 0, 0);
+                        hashtable.put(provinceNameStrings[1], province2);
+                    }
+                    hashtable.put(provinceNameStrings[0], province1);
+                }
+                ProviceStatistic.execOperate(province1, province2, operateType, number);
+            }
+
+        }
+        /**  description：统计全国的数据 */
+        public static void StatisticNation(Hashtable<String, Province> hashtable) {
+            InfectStatistic infectStatistic = new InfectStatistic();
+            Province Nation = infectStatistic.new Province("全国", 0, 0, 0, 0);
+            Set set = hashtable.keySet();
+            Iterator iterator = set.iterator();
+            while(iterator.hasNext()) {
+                Object keyObject = iterator.next();
+                Nation.ip += hashtable.get(keyObject).getIp();
+                Nation.sp += hashtable.get(keyObject).getSp();
+                Nation.cure += hashtable.get(keyObject).getCure();
+                Nation.dead += hashtable.get(keyObject).getDead();
+            }
+            hashtable.put("全国", Nation);
+        }
+        //...
+    }
+
     public static void main(String[] args) {
         //...
     }
