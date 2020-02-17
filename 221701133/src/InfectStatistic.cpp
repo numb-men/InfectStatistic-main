@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <io.h>
 
 
 using namespace std;
@@ -25,7 +26,9 @@ const string TYPE="-type";//命令行参数,关于要输出的患者的情况的
 const string OUT="-out";//命令行参数,关于指定输出文件路径和文件名
 const string PROVINCE="-province";//命令行参数,关于指定输出时列出的省
 const string POSIBLEP[]={LOG,DATE,TYPE,OUT,PROVINCE};//可能的命令行参数，用于检测匹配 
-const inr POSIBLEPNUM=sizeof(POSIBLEP) / sizeof(POSIBLEP[0]);//支持的命令行参数数 
+const int POSIBLEPNUM=sizeof(POSIBLEP) / sizeof(POSIBLEP[0]);//支持的命令行参数数 
+
+const string FILEFORMAT="*.log.txt";//要读取的日志文件的后缀格式 
 
 
 
@@ -45,7 +48,7 @@ public:
 	bool suspectPeopleAdd(const int &n);//增加疑似人数
 	bool curePeopleAdd(const int &n);//增加治愈人数
 	bool deathPeopleAdd(const int &n);//增加死亡人数
-	bool selectiveOutput(const string *s);//选择性输出 
+	bool selectiveOutput(const vector<string> &s,const ofstream &out);//选择性输出 
 };
 
 //疫情统计表
@@ -54,8 +57,8 @@ class StatisticList
 	Regions regionsList[REGIONNUM];//地区情况统计表
 public:
 	StatisticList();
-	bool selectiveOutput(const string *ts,const string *rs);//选择性输出 
-	friend bool readLogMessage(StatisticList &slist);//读取日志文件并存储
+	bool selectiveOutput(const vector<string> &ts,const vector &rs,const ofstream &out);//选择性输出 
+	friend bool readLogMessage(StatisticList &slist,const vector<string> &files);//读取日志文件并存储
 };
 
 
@@ -149,7 +152,7 @@ bool Regions::deathPeopleAdd(const int &n)
 
 //选择性输出 
 //将只输出s所指向的字符串数组相关类型信息内容 
-bool Regions::selectiveOutput(const string *s)
+bool Regions::selectiveOutput(const vector<string> &s,const ofstream &out)
 {
 	
 } 
@@ -167,7 +170,8 @@ StatisticList::StatisticList()
 //选择性输出 
 //ts: 将只输出ts所指向的字符串数组相关的各个地区的疫情情况的各类型信息内容 
 //rs: 将只输出rs所指向的字符串数组相关的地区的疫情情况
-bool StatisticList::selectiveOutput(const string *ts,const string *rs)
+bool StatisticList::selectiveOutput(const vector<string> &ts,
+const vector<string> &rs,const ofstream &out)
 {
 	
 	
@@ -198,9 +202,10 @@ bool dealParameters(int ac,const char* arv[])
 {
 	bool noErorOcured=true;//用以返回是否无问题处理命令行参数 
 	int pnum;//用于记录多参数的命令的参数个数
-	vector typeParas,proParas;//记录type和privince的相关参数 
-	string timeP=null;//用于记录截止日期参数  
+	vector<string> typeParas,proParas;//记录type和privince的相关参数 
+	string timeP="null";//用于记录截止日期参数  
 	string fileLocation=null;//记录日志文件所在位置 
+	StatisticList sList;//地区疫情统计列表 
 	ofstream out;//输出重定向
 	 
 	for(int i=2;i<ac;i+=(pnum+2))
@@ -231,7 +236,9 @@ bool dealParameters(int ac,const char* arv[])
 			return erorOcured;//出现问题立即终止
 		}
 	}
-	
+	performOptns(fileLocation,timeP,sList);//读入操作 
+	sList.selectiveOutput(typeParas,proParas,out);//输出操作 
+	out.close();
 	return true;
 }
 
@@ -242,7 +249,8 @@ bool dealParameters(int ac,const char* arv[])
 //arv: 要进行分析的数组
 //paras: 要进行存储参数的数组 
 //forward: 记录前进的步数 
-bool dealMulParameter(int ini,const int &max,const char* arv[],vector &paras,int &forward)
+bool dealMulParameter(int ini,const int &max,const char* arv[],vector<string> &paras,
+int &forward)
 {
 	int num=0;//用于记录循环次数，避免产生死循环 
 	while(1)
@@ -297,28 +305,87 @@ bool dealOutParameters(ofstream &out,string s)
 
 
 //判断日志是否为要读取的
-bool isRightTimeLog(const string &s)
+//s：需要判断正确与否的字符串
+//timeP：需要满足的时间限制  
+//返回：true可行，false不可行 
+bool isRightTimeLog(const string &s,const string &timeP)
 {
-
+	string ss=s.substr(0,10);
+	if(ss<=timeP)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 
 //读取日志文件并存储
-bool readLogMessage(StatisticList &slist)
+//slist: 疫情统计表 
+//files：存储要读取的文件的文件列表路径 
+bool readLogMessage(StatisticList &slist,const vector<string> &files)
 {
-	
+	bool noOcuredEror=true;//用于记录是否有错误出现 
+	for(int i=0;i<files.size();i++)  
+	{  
+    	readOneFile(sList,files[i]);
+	}
+	return noOcuredEror;
+}
+
+
+//读取一份日志文件并存储
+//slist: 疫情统计表 
+//files：存储要读取的文件的文件路径 
+bool readOneFile(StatisticList &slist,const string &file)
+{
 	
 }
 
 
-//开始读取文件并输出
-//vector typeParas,proParas记录type和privince的相关参数 
-//string timeP=null用于记录截止日期参数  
-//string fileLocation=null记录日志文件所在位置 
-//ofstream out输出重定向
-bool PerformOptns(const vector &type)
+//获取指定的文件夹中的所有文件路径名
+//path：为执行程序时提供的命令行参数关于日志文件所在文件夹
+//timeP：提供时间限制 
+//files：存储文件夹中所有可能要读取的文件的文件路径 
+void getFilesName(const string &path,const string &timeP,vector<string> &files)
 {
-	
+    intptr_t hFile=0;   //win10 //文件信息 
+    struct _finddata_t fileinfo;  
+    string p; 
+    
+// "*"是指读取文件夹下的所有类型的文件，若想读取特定类型的文件，以png为例，则用"*.png" 
+    if((hFile=_findfirst((p.assign(path)).append(FILEFORMAT).c_str(),&fileinfo))!=-1)  
+    {  
+		if(isRightTimeLog(fileinfo.name))
+		{
+			files.push_back(path+fileinfo.name); 
+        	while(_findnext(hFile,&fileinfo)==0) 
+       		{
+				if(isRightTimeLog(fileinfo.name))
+				{
+        			files.push_back(path+fileinfo.name); 
+				}
+				else
+				{
+					break;	
+				}
+        	}
+		}
+    }  
+}
+
+
+//开始读取文件
+//timeP 截止日期参数  
+//fLocation 日志文件所在位置 
+//slist 疫情统计表 
+bool performOptns(const string &fLocation,const string &timeP,StatisticList &sList)
+{
+	vector<string> fName;//用于记录文件夹中符合要求查找的文件名
+	getFilesName(fLocation,timeP,fName); 
+	readLogMessage(sList,fName);
 } 
 
 
