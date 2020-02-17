@@ -1,11 +1,3 @@
-/**
- * InfectStatistic
- * TODO
- *
- * @author xxx
- * @version xxx
- * @since xxx
- */
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,8 +10,8 @@ import java.util.regex.*;
 
 
 public class InfectStatistic {
-	public static void main(String args[]) {
-			try {
+	public static void main(String args[]) throws IOException {
+			/*try {
 				@SuppressWarnings("resource")
 				BufferedReader in = new BufferedReader(new FileReader("D:\\log.txt"));
 	            String str=null;
@@ -59,48 +51,22 @@ public class InfectStatistic {
 					System.out.println("finish");
 			    } catch (IOException e) {
 			        e.printStackTrace();
-			    }
+			    }*/
+		 String basepath="D:\\log";
+		 String targetfile="D:\\output.txt";
+		 int conditions [][]=new int [32][4];
+		 fileoperate fo=new fileoperate();
+		 fo.findFile(new File(basepath), conditions);
+		 fo.writetoFile(new File(targetfile), conditions);
+				 
+		
 	}
 }
-class province{
-	String provinces[]= {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南",
-        	"黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东",
-        	"山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
 
-    public int getmark(String province) {
-    int mark=0;
-    for(mark=0;mark<32;mark++) {
-    	if(provinces[mark]==province)
-    	    break;
-    }    
-    return mark;
-    }
-    public static void main(String args[]) {
-		province a=new province();
-		String str="福建";
-		int b=a.getmark(str);
-		System.out.println(b);
-}
-}
 class state{
-	String provinces[]= {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南",
-        	"黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东",
-        	"山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
-
-   /* public int getmark(String province) {
-    int mark=0;
-    for(mark=0;mark<32;mark++) {
-    	if(provinces[mark]==province)
-    	    break;
-    	else
-    		continue;
-    }    
-    return mark;
-    }
-    public  int judgeprovince(String str){		
-		int num=getmark(str);
-		return num;
-	}*/
+	 String provinces[]= {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南",
+                          "黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东",
+        	              "山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
 	 String pattern1= ".*新增 感染患者.*";
 	 String pattern2= ".*新增 疑似患者.*";
 	 String pattern3=".*治愈.*";
@@ -338,26 +304,93 @@ class state{
 		}
 		}
 	}   
-	/*public static void main(String args[]) {
-		state status=new state();
-		
-		int conditions[][]=new int [32][4];
-		status.conditions("福建 新增 感染患者 5人", conditions);
-		status.conditions("湖北 新增 感染患者 5人", conditions);
-		for(int i=0;i<32;i++) {
-			for(int j=0;j<4;j++)
-				System.out.print(conditions[i][j]);
-			System.out.println("\n");
-		}
-			
-		for(int i=0;i<list1.length;i++) 
-			for(int j=0;j<3;j++)
-				list1[i][j]="4人";
-		for(int i=0;i<list1.length;i++) 
-			for(int j=0;j<3;j++)
-				list1[i][j]+="2人";
-		System.out.println(list1[1][1]);
-			
-	}*/
-}
 
+}
+class fileoperate{
+	
+	public void findFile(File dir,int conditions[][]) throws IOException{
+	    File[] dirFiles = dir.listFiles();
+	    state status=new state();
+	    for(File temp : dirFiles){
+	    //查找指定的文件
+	    if(temp.isFile() && temp.getAbsolutePath().endsWith(".txt") ){
+	    System.out.println(temp.isFile() + " " + temp.getAbsolutePath());
+	    BufferedReader in = new BufferedReader(new FileReader(temp));
+        String str=null;
+        int i=0;         
+        while ((str = in.readLine())!=null) {
+        	if(str.startsWith("//"))
+        		break;
+            i++;	                
+            System.out.print("第"+i+"行："+str+"\n");	                  		
+    		status.conditions(str, conditions);   		
+    		}
+        in.close();
+        }
+    }
+}
+	
+	/**
+	　　* @param file　要读取的文件对象
+	　　* @return 返回文件的内容
+	　　* */
+	/*public static void readFileContent(File file,int conditions[][]) throws IOException{
+	    FileReader fr = new FileReader(file);
+	    BufferedReader br = new BufferedReader(fr);
+	    StringBuffer sb = new StringBuffer();
+	    while(br.ready()){
+    	sb.append(br.readLine());
+	    }
+	    System.out.println(sb.toString());
+	    return sb.toString();
+		BufferedReader in = new BufferedReader(new FileReader("D:\\log.txt"));
+        String str=null;
+        int i=0;
+        state status=new state(); 
+        while ((str = in.readLine())!=null) {
+        	if(str.startsWith("//"))
+        		break;
+            i++;	                
+            System.out.print("第"+i+"行："+str+"\n");	                  		
+    		status.conditions(str, conditions);   		
+    		}
+        in.close();
+}*/	
+    public  void writetoFile(File file,int conditions[][]) throws IOException{
+    	state status=new state();
+    	int count=0;
+		if(!file.exists()){
+			file.createNewFile();
+		}
+		FileWriter fileWriter = new FileWriter(file.getAbsoluteFile());
+		BufferedWriter bw = new BufferedWriter(fileWriter);
+		for(int k=0;k<32;k++) {
+			if(k==0) {
+				for(int p=0;p<4;p++) {					
+					for(int q=1;q<32;q++)
+						count+=conditions[q][p];
+					conditions[k][p]=count;
+					count=0;
+				}
+			}
+			String write=status.provinces[k]+" 感染患者"+conditions[k][0]+"人"+
+						         " 疑似患者"+conditions[k][1]+"人"+" 治愈"+conditions[k][2]+"人"+
+						         " 死亡"+conditions[k][3]+"人"+"\n";
+			bw.write(write);
+		}
+		bw.write("//该文档并非真实数据，仅供测试使用");
+		bw.close();
+		System.out.println("finish");
+	}
+	
+   /* public static void main(String[] args) {
+	    try {
+	    	int conditions [][]=new int [32][4];
+            findFile(new File(basePath),conditions);
+            writetoFile(new File(targetfile),conditions);
+	        } catch (IOException e) {	
+              // TODO Auto-generated catch block
+                e.printStackTrace();
+                }
+}*/
+}
