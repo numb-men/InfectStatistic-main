@@ -199,7 +199,7 @@ class CmdAnalysis{
 		int currentIndex = i;
 		if(i<cmdString.length) {
 			for(;currentIndex < cmdString.length  && provinceShow[32] == 0; currentIndex ++) {
-				for(int j = 0;j < province.length - 1;j++) {
+				for(int j = 0;j < province.length;j++) {
 					if(cmdString[currentIndex].equals(province[j]))
 						provinceShow[j] = 0;    //要求输出的省份
 				}
