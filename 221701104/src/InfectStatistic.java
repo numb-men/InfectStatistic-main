@@ -286,7 +286,7 @@ class InfectStatistic {
                 String line;
 
                 while ((line = br.readLine()) != null && !line.startsWith("//")) {
-                    dealLog.execute(line, PROVINCE_LIST);
+                    dealLog.execute(line);
                 }
                 br.close();
             } catch (Exception e) {
@@ -528,7 +528,7 @@ class InfectStatistic {
         /*
         抽象处理类
          */
-        public abstract void handleRequest(String line, ProvinceList provinceList);
+        public abstract void handleRequest(String line);
     }
 
     /*
@@ -536,12 +536,12 @@ class InfectStatistic {
      */
     public class AddExactHandler extends LogHandler {
         @Override
-        public void handleRequest(String line, ProvinceList provinceList) {
+        public void handleRequest(String line) {
             Matcher m1 = ADD_EXACT_PATIENT.matcher(line);
             if (m1.matches()) {
                 dealAddExact(line);
             } else {
-                getSuccessor().handleRequest(line, provinceList);
+                getSuccessor().handleRequest(line);
             }
         }
     }
@@ -551,12 +551,12 @@ class InfectStatistic {
      */
     public class AddDoubtedHandler extends LogHandler {
         @Override
-        public void handleRequest(String line, ProvinceList provinceList) {
+        public void handleRequest(String line) {
             Matcher m1 = ADD_DOUBTED_PATIENT.matcher(line);
             if (m1.matches()) {
                 dealAddDoubted(line);
             } else {
-                getSuccessor().handleRequest(line, provinceList);
+                getSuccessor().handleRequest(line);
             }
         }
     }
@@ -566,12 +566,12 @@ class InfectStatistic {
      */
     public class MoveExactHandler extends LogHandler {
         @Override
-        public void handleRequest(String line, ProvinceList provinceList) {
+        public void handleRequest(String line) {
             Matcher m1 = MOVE_EXACT_PATIENT.matcher(line);
             if (m1.matches()) {
                 dealMoveExact(line);
             } else {
-                getSuccessor().handleRequest(line, provinceList);
+                getSuccessor().handleRequest(line);
             }
         }
     }
@@ -581,12 +581,12 @@ class InfectStatistic {
      */
     public class MoveDoubtedHandler extends LogHandler {
         @Override
-        public void handleRequest(String line, ProvinceList provinceList) {
+        public void handleRequest(String line) {
             Matcher m1 = MOVE_DOUBTED_PATIENT.matcher(line);
             if (m1.matches()) {
                 dealMoveDoubted(line);
             } else {
-                getSuccessor().handleRequest(line, provinceList);
+                getSuccessor().handleRequest(line);
             }
         }
     }
@@ -596,12 +596,12 @@ class InfectStatistic {
      */
     public class CureHandler extends LogHandler {
         @Override
-        public void handleRequest(String line, ProvinceList provinceList) {
+        public void handleRequest(String line) {
             Matcher m1 = CURED_PATIENT.matcher(line);
             if (m1.matches()) {
                 dealCure(line);
             } else {
-                getSuccessor().handleRequest(line, provinceList);
+                getSuccessor().handleRequest(line);
             }
         }
     }
@@ -611,12 +611,12 @@ class InfectStatistic {
      */
     public class DeadHandler extends LogHandler {
         @Override
-        public void handleRequest(String line, ProvinceList provinceList) {
+        public void handleRequest(String line) {
             Matcher m1 = DEAD_PATIENT.matcher(line);
             if (m1.matches()) {
                 dealDead(line);
             } else {
-                getSuccessor().handleRequest(line, provinceList);
+                getSuccessor().handleRequest(line);
             }
         }
     }
@@ -626,12 +626,12 @@ class InfectStatistic {
      */
     public class Doubted2ExactHandler extends LogHandler {
         @Override
-        public void handleRequest(String line, ProvinceList provinceList) {
+        public void handleRequest(String line) {
             Matcher m1 = DOUBTED_TO_EXACT.matcher(line);
             if (m1.matches()) {
                 dealDoubted2Exact(line);
             } else {
-                getSuccessor().handleRequest(line, provinceList);
+                getSuccessor().handleRequest(line);
             }
         }
     }
@@ -641,12 +641,12 @@ class InfectStatistic {
      */
     public class Doubted2NoneHandler extends LogHandler {
         @Override
-        public void handleRequest(String line, ProvinceList provinceList) {
+        public void handleRequest(String line) {
             Matcher m1 = DOUBTED_TO_NONE.matcher(line);
             if (m1.matches()) {
                 dealDoubted2None(line);
             } else {
-                getSuccessor().handleRequest(line, provinceList);
+                getSuccessor().handleRequest(line);
             }
         }
     }
@@ -655,7 +655,7 @@ class InfectStatistic {
     处理文档类，将责任链包括其中。
      */
     public class DealLog {
-        public void execute(String line, ProvinceList provinceList) {
+        public void execute(String line) {
             LogHandler addExactPatient = new AddExactHandler();
             LogHandler addDoubtedPatient = new AddDoubtedHandler();
             LogHandler moveExactPatient = new MoveExactHandler();
@@ -675,7 +675,7 @@ class InfectStatistic {
             doubted2Exact.setSuccessor(doubted2None);
 
             //自动调用责任链
-            addExactPatient.handleRequest(line, provinceList);
+            addExactPatient.handleRequest(line);
         }
     }
 
@@ -694,9 +694,11 @@ class InfectStatistic {
             {
                 //全国感染人数增加
                 PROVINCE_LIST.provinceList[0].addInfected(n);
+                //全国可被展示
                 PROVINCE_LIST.provinceList[0].canBeShown();
                 //当地区感染人数增加
                 PROVINCE_LIST.provinceList[i].addInfected(n);
+                //当地区可被展示
                 PROVINCE_LIST.provinceList[i].canBeShown();
                 break;
             }
