@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 
 /**
  * InfectStatistic
- * TODO
+ * 
  *
  * @author 221701120_hxy
  * @version 1.0
@@ -51,7 +51,7 @@ public class InfectStatistic {
 /**
  * 
  * 用来解析命令行传入的参数
- * TODO
+ * 
  * 
  * @author 221701120_hxy
  * @version 1.0
@@ -115,7 +115,7 @@ class CommandParser{
 /**
  * 
  * 命令执行类
- * TODO
+ * 
  *
  * @author 221701120_hxy
  * @version 1.0
@@ -159,7 +159,7 @@ class CommandRun{
 /**
  * 
  * 文件读取的工具类
- * TODO
+ * 
  *
  * @author 221701120_hxy
  * @version 1.0
@@ -239,7 +239,7 @@ class FileInputUtils{
 /**
  * 
  * 文件输出的工具类
- * TODO
+ * 
  *
  * @author 221701120_hxy
  * @version 1.0
@@ -260,7 +260,11 @@ class FileOutputUtils{
                     InfectedArea province = map.map.get(provinceName);
                     writeAll(provinceName, bufferedWriter, province);
                 }else {
-                    System.out.println(provinceName + "暂无疫情信息");
+                    bufferedWriter.write(provinceName);
+                    bufferedWriter.write(" 暂无信息：感染患者0人");
+                    bufferedWriter.write(" 疑似0人");
+                    bufferedWriter.write(" 治愈0人");
+                    bufferedWriter.write(" 死亡0人\n");
                 }
             }
            
@@ -349,7 +353,7 @@ class FileOutputUtils{
 /**
  * 
  * 存储被感染省份地区的相关信息
- * TODO
+ * 
  *
  * @author 221701120_hxy
  * @version 1.0
@@ -417,7 +421,7 @@ class InfectedMap{
 /**
  * 
  * 对文件信息的处理
- * TODO
+ * 
  *
  * @author 221701120_hxy
  * @version 1.0
