@@ -349,9 +349,37 @@ public class InfectStatistic {
                         System.exit(0);
                     }
                 } else {
-                    //遍历provinceAppear数组，找到值为1的下标
-                    //向outPath写入对应的totalTable的值
-                    //输出过程中同样对类型type进行分析
+                    //指定省份
+                    try {
+                        FileOutputStream fileOutputStream = new FileOutputStream(outPath);
+                        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,"UTF-8");
+                        String fileContent = "";
+                        for (int i = 0; i < totalTable.length; i++) {
+                            if (provinceAppear[i] == 1) {
+                                if (typeCount == 0) {
+                                    fileContent += allProvince[i];
+                                    fileContent += " 感染患者" + totalTable[i][0] + "人" ;
+                                    fileContent += " 疑似患者" + totalTable[i][1] + "人" ;
+                                    fileContent += " 治愈" + totalTable[i][2] + "人" ;
+                                    fileContent += " 死亡" + totalTable[i][3] + "人";
+                                } else {
+                                    fileContent += allProvince[i];
+                                    if (typeAppear[0] == 1) fileContent += " 感染患者" + totalTable[i][0] + "人" ;
+                                    if (typeAppear[1] == 1) fileContent += " 疑似患者" + totalTable[i][1] + "人" ;
+                                    if (typeAppear[2] == 1) fileContent += " 治愈" + totalTable[i][2] + "人" ;
+                                    if (typeAppear[3] == 1) fileContent += " 死亡" + totalTable[i][3] + "人";
+                                }
+                                
+                                fileContent += "\n";
+                            }
+                        }
+                        fileContent += "// 该文档并非真实数据，仅供测试使用";
+                        //写入
+                        outputStreamWriter.write(fileContent);
+                        outputStreamWriter.flush();
+                    } catch(Exception e) {
+                        System.exit(0);
+                    }
                 }
             }
         }
