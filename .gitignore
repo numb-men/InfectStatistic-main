@@ -2,6 +2,7 @@
 ### Example user template template
 ### Example user template
 
+.class
 # IntelliJ project files
 .idea
 *.iml
@@ -9,3 +10,4 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+/bin/
