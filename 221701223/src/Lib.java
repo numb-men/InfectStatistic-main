@@ -310,6 +310,7 @@ class Record {
 
 /**
  * Record container
+ * 记录容器类
  *
  * @author ybn
  */
@@ -321,8 +322,17 @@ class RecordContainer {
     LinkedHashMap<String, Record> mapContainer;
     /**
      * Whole country
+     * 一个独立的Record对象用来存储全国的记录
      */
     Record wholeCountry;
+
+    ArrayList<String> patientTypes;
+    HashSet<String> provinceList;
+
+    public RecordContainer(ArgumentContainer argumentContainer) {
+        patientTypes = argumentContainer.patientTypes;
+        provinceList = argumentContainer.provinceList;
+    }
 
     /**
      * Init
@@ -383,8 +393,7 @@ class RecordContainer {
                     mapContainer.get(province).updateInfected(number);
                     wholeCountry.updateInfected(number);
                 } else {
-                    System.err.println("更新感染患者出错。");
-                    //System.exit(-1);
+                    throw new LogFormatException();
                 }
                 break;
             case Lib.SUSPECTED:
@@ -398,15 +407,11 @@ class RecordContainer {
                         wholeCountry.updateSuspected(-number);
                         break;
                     default:
-                        System.err.println("更新疑似患者出错。");
-                        System.exit(-1);
-                        break;
+                        throw new LogFormatException();
                 }
                 break;
             default:
-                System.err.println("四参数log出错");
-                //System.exit(-1);
-                break;
+                throw new LogFormatException();
         }
     }
 
@@ -436,7 +441,7 @@ class RecordContainer {
 
     /**
      * Parse single line *
-     * 将一行log分割成字符串数组，根据数组元素的个数（3、4、5）分别调用不同的uodateeRcord方法
+     * 将一行log分割成字符串数组，根据数组元素的个数（3、4、5）分别调用不同的updateRecord方法
      *
      * @param line line
      */
@@ -461,8 +466,7 @@ class RecordContainer {
                 updateRecord(log[0], log[1], Lib.extractNumberFromString(log[4]), log[3]);
                 break;
             default:
-                System.err.println("日志格式可能有错。");
-                break;
+                throw new LogFormatException();
         }
     }
 
@@ -470,27 +474,24 @@ class RecordContainer {
      * New output data set array list
      * 返回一个用于输出到文件的ArrayList数组，输出部分交给FileTools类，更好地保持了封装性。
      *
-     * @param argumentContainer argument container
      * @return the array list
      */
-    public ArrayList<String> newOutputDataSet(ArgumentContainer argumentContainer) {
+    public ArrayList<String> newOutputDataSet() {
         mapContainer.put(Lib.PROVINCE_LIST[0], wholeCountry);
 
         return new ArrayList<>() {{
             //带-province参数的情况
-            if (argumentContainer.provinceList != null) {
+            if (provinceList != null) {
                 for (String province : Lib.PROVINCE_LIST) {
                     if (mapContainer.get(province) != null) {
-                        add(province + mapContainer.get(province)
-                            .getStringWithPatientTypeFilter(argumentContainer.patientTypes));
+                        add(province + mapContainer.get(province).getStringWithPatientTypeFilter(patientTypes));
                     }
                 }
             } else {
                 //不带-province参数的情况
                 for (Map.Entry<String, Record> entry : mapContainer.entrySet()) {
                     if (!entry.getValue().empty()) {
-                        add(entry.getKey() + entry.getValue()
-                            .getStringWithPatientTypeFilter(argumentContainer.patientTypes));
+                        add(entry.getKey() + entry.getValue().getStringWithPatientTypeFilter(patientTypes));
                     }
                 }
             }
@@ -758,10 +759,6 @@ class FileTools {
      */
     String outPath;
     /**
-     * Province list
-     */
-    HashSet<String> provinceList;
-    /**
      * File list
      */
     ArrayList<String> fileList;
@@ -775,7 +772,6 @@ class FileTools {
 
         this.logPath = arguments.logPath;
         this.outPath = arguments.outPath;
-        this.provinceList = arguments.provinceList;
 
         if ("null".equals(arguments.date)) {
             initFileList();

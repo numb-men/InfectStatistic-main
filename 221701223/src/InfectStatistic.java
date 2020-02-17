@@ -17,17 +17,20 @@ public class InfectStatistic {
     public static void main(String[] args) {
         try {
             ArgumentContainer argumentContainer = ArgumentHandler.getArgumentContainer(args);
-            RecordContainer recordContainer = new RecordContainer() {{
+            RecordContainer recordContainer = new RecordContainer(argumentContainer) {{
                 init();
             }};
             FileTools fileTools = new FileTools(argumentContainer);
             fileTools.readFile(recordContainer);
-            fileTools.createOutputFile(recordContainer.newOutputDataSet(argumentContainer));
+            fileTools.createOutputFile(recordContainer.newOutputDataSet());
         } catch (ArgumentException ae) {
             ae.printStackTrace();
         }
     }
 
+    /**
+     * Test main
+     */
     @Test
     public void testMain() {
         ArrayList<String[]> argList = new ArrayList<>() {{
