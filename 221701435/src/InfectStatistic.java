@@ -1069,6 +1069,55 @@ public class infectStatistic {
 				
 				return files;
 			}
+			
+			/**
+			 * 
+			 * @description 将通过initlog读完后的数据，根据全国放在第一位的原则再次进行排序
+			 * @param fileName date
+			 * @return List<LogUtil.infectResult>
+			 * @throws IOException
+			 */
+			
+			public static List<LogUtil.InfectResult> sortResultByProvince(String fileName, String date) throws IOException {
+				List<LogUtil.InfectResult> list = initLog(fileName, date);
+				List<LogUtil.InfectResult> sort_list = new ArrayList<LogUtil.InfectResult>();
+				String[] newArray = new String[list.size()];
+				String temp = null;
+				
+				for (int i = 0; i < list.size(); i++) {
+					if (list.get(i).getProvince().equals("全国")) {
+						temp = list.get(i).toString();
+					}
+					newArray[i] = list.get(i).toString();
+				}
+				
+				LogUtil.InfectResult temp_infectResult = new LogUtil.InfectResult();
+				String[] temp_arr = temp.split(" ");
+				
+				temp_infectResult.setProvince(temp_arr[0]);
+				temp_infectResult.setIp(Integer.parseInt(temp_arr[1]));
+				temp_infectResult.setSp(Integer.parseInt(temp_arr[2]));
+				temp_infectResult.setCure(Integer.parseInt(temp_arr[3]));
+				temp_infectResult.setDead(Integer.parseInt(temp_arr[4]));
+				sort_list.add(temp_infectResult);
+				for (String i : newArray) {
+					LogUtil.InfectResult infectResult = new LogUtil.InfectResult();
+					String[] arr = i.split(" ");
+					if (arr.length > 4) {
+						if (arr[0].equals("全国"))
+							continue;
+						infectResult.setProvince(arr[0]);
+						infectResult.setIp(Integer.parseInt(arr[1]));
+						infectResult.setSp(Integer.parseInt(arr[2]));
+						infectResult.setCure(Integer.parseInt(arr[3]));
+						infectResult.setDead(Integer.parseInt(arr[4]));
+						sort_list.add(infectResult);
+						// 这个地方的话把全国再次去掉了，因为我们全国是要放在第一个位置的
+					}
+				}
+				
+				return sort_list;
+			}
 		}
 	
 	public static void main(String[] args) throws IOException {
