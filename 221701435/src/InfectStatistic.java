@@ -632,6 +632,211 @@ public class infectStatistic {
 		}
 	}
 	
+        /**
+         * LogUtil TODO
+         * 
+         * @description 对文件中每行处理后的数据进行一个存储
+         * @author moli
+         * @version m 1.0.0
+         * @since 2020-02-17
+         */
+	
+		static class LogUtil {
+			
+			/**
+			 * InfectResult TODO
+			 * 
+			 * @description 定义一个对象用于存放正则表达式处理后的数据
+			 * @author moli
+			 * @version m 1.0.0
+			 * @since 2020.02.17
+			 */
+			
+			static class InfectResult {
+				String province;
+				int ip;
+				int sp;
+				int cure;
+				int dead;
+
+				public InfectResult() {
+					super();
+				}
+
+				public InfectResult(String province, int ip, int sp, int cure, int dead) {
+					super();
+					this.province = province;
+					this.ip = ip;
+					this.sp = sp;
+					this.cure = cure;
+					this.dead = dead;
+				}
+
+				public String getProvince() {
+					return province;
+				}
+
+				public void setProvince(String province) {
+					this.province = province;
+				}
+
+				public int getIp() {
+					return ip;
+				}
+
+				public void setIp(int ip) {
+					this.ip = ip;
+				}
+
+				public int getSp() {
+					return sp;
+				}
+
+				public void setSp(int sp) {
+					this.sp = sp;
+				}
+
+				public int getCure() {
+					return cure;
+				}
+
+				public void setCure(int cure) {
+					this.cure = cure;
+				}
+
+				public int getDead() {
+					return dead;
+				}
+
+				public void setDead(int dead) {
+					this.dead = dead;
+				}
+
+				public String toResultString() {
+					return province + " " + "感染患者" + ip + "人" + " " + "疑似患者" + sp + "人" + " " + "治愈" + cure + "人" + " "
+							+ "死亡" + dead + "人";
+				}
+
+				public String toString() {
+					return province + " " + ip + " " + sp + " " + cure + " " + dead;
+				}
+			}
+
+			/**
+			 * ResultUtil TODO
+			 * 
+			 * @description 将正则表达式得到的RegexParameter对象转换存储于InfectResult中
+			 * @author moli
+			 * @version m 1.0.0
+			 * @since 2020.02.17
+			 */
+			
+			static class ResultUtil {
+				public static InfectResult getIpResult(String text) {
+					InfectResult infectResult = new InfectResult();
+					RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+					
+					regexParameter = RegexUtil.getAddIp(text);
+					infectResult.setProvince(regexParameter.getPattern1());
+					infectResult.setIp(regexParameter.getPattern3());
+					
+					return infectResult;
+				}
+
+				public static InfectResult getSpResult(String text) {
+					InfectResult infectResult = new InfectResult();
+					RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+					
+					regexParameter = RegexUtil.getAddSp(text);
+					infectResult.setProvince(regexParameter.getPattern1());
+					infectResult.setSp(regexParameter.getPattern3());
+					
+					return infectResult;
+				}
+
+				public static List<InfectResult> getEmptiesIpResult(String text) {
+					List<InfectResult> list = new ArrayList<InfectResult>();
+					RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+					LogUtil.InfectResult infectResult1 = new LogUtil.InfectResult();
+					LogUtil.InfectResult infectResult2 = new LogUtil.InfectResult();
+					
+					regexParameter = RegexUtil.getEmptiesIp(text);
+					infectResult1.setProvince(regexParameter.getPattern1());
+					infectResult1.setIp(-regexParameter.getPattern3());
+					infectResult2.setProvince(regexParameter.getPattern2());
+					infectResult2.setIp(regexParameter.getPattern3());
+					list.add(infectResult1);
+					list.add(infectResult2);
+					
+					return list;
+				}
+
+				public static List<InfectResult> getEmptiesSpResult(String text) {
+					List<InfectResult> list = new ArrayList<InfectResult>();
+					RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+					LogUtil.InfectResult infectResult1 = new LogUtil.InfectResult();
+					LogUtil.InfectResult infectResult2 = new LogUtil.InfectResult();
+					
+					regexParameter = RegexUtil.getEmptiesSp(text);
+					infectResult1.setProvince(regexParameter.getPattern1());
+					infectResult1.setSp(-regexParameter.getPattern3());
+					infectResult2.setProvince(regexParameter.getPattern2());
+					infectResult2.setSp(regexParameter.getPattern3());
+					list.add(infectResult1);
+					list.add(infectResult2);
+					
+					return list;
+				}
+
+				public static InfectResult getDeadResult(String text) {
+					InfectResult infectResult = new InfectResult();
+					RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+					
+					regexParameter = RegexUtil.getDead(text);
+					infectResult.setProvince(regexParameter.getPattern1());
+					infectResult.setIp(-regexParameter.getPattern3());
+					infectResult.setDead(regexParameter.getPattern3());
+					
+					return infectResult;
+				}
+
+				public static InfectResult getCureResult(String text) {
+					InfectResult infectResult = new InfectResult();
+					RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+					
+					regexParameter = RegexUtil.getCure(text);
+					infectResult.setProvince(regexParameter.getPattern1());
+					infectResult.setIp(-regexParameter.getPattern3());
+					infectResult.setCure(regexParameter.getPattern3());
+					
+					return infectResult;
+				}
+
+				public static InfectResult getSpToIpResult(String text) {
+					InfectResult infectResult = new InfectResult();
+					RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+					
+					regexParameter = RegexUtil.getSpToIp(text);
+					infectResult.setProvince(regexParameter.getPattern1());
+					infectResult.setSp(-regexParameter.getPattern3());
+					infectResult.setIp(regexParameter.getPattern3());
+					
+					return infectResult;
+				}
+
+				public static InfectResult getRemoveSpResult(String text) {
+					InfectResult infectResult = new InfectResult();
+					RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+					
+					regexParameter = RegexUtil.getRemoveSp(text);
+					infectResult.setProvince(regexParameter.getPattern1());
+					infectResult.setSp(-regexParameter.getPattern3());
+					
+					return infectResult;
+				}
+			}
+		}
+	
 	public static void main(String[] args) throws IOException {
 		List<String> list = new ArrayList<String>();
 
