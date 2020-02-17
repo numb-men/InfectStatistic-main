@@ -83,9 +83,10 @@ class InfectStatistic {
     List<String> files = new ArrayList<String>();
     File file = new File(path);
     File[] tempList = file.listFiles();
-
+    String rexp1 = "((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29))\\.log\\.txt";
+    
     for (int i = 0; i < tempList.length; i++) {
-    	if (tempList[i].isFile()) {
+    	if (tempList[i].getName().matches(rexp1) == true && tempList[i].isFile()) {
       	if(flg4data == true && tempList[i].getName().compareTo(cmd4data) <= 0) {
           files.add(tempList[i].toString());
           //System.out.println(tempList[i].getName());
