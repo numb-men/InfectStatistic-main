@@ -30,6 +30,30 @@ class InfectStatistic {
     ProvinceList PROVINCE_LIST = new ProvinceList();
 
     /*
+    传递命令类
+     */
+    class CmdPass {
+        CmdArgs cmdArgs;
+        DealLog dealLog;
+        CmdHandler cmdHandler;
+
+        CmdPass(CmdArgs cmdArgs) {
+            this.cmdArgs = cmdArgs;
+            dealLog = new DealLog();
+            cmdHandler = new CmdHandler(cmdArgs, dealLog);
+        }
+
+        public void passCmd() {
+            ListCommand listCommand = new ListCommand(cmdHandler,cmdArgs);
+            if (cmdArgs.getCmd().equals("list")) {
+                listCommand.execute();
+            } else {
+                System.err.println("命令输入错误。");
+            }
+        }
+    }
+
+    /*
     解析命令行类
      */
     class CmdArgs {
@@ -40,7 +64,7 @@ class InfectStatistic {
         }
 
         /*
-        返回取得的命令
+        @return 取得的命令
          */
         public String getCmd() {
             return args[0];
@@ -129,8 +153,10 @@ class InfectStatistic {
         List<String> type, province;
         DealLog dealLog;
 
-        CmdHandler(CmdArgs cmdArgs, DealLog dealLog)
-        {
+        /*
+        初始化所有值构造函数
+         */
+        CmdHandler(CmdArgs cmdArgs, DealLog dealLog) {
             this.dealLog = dealLog;
             //获取文件地址
             logPath = cmdArgs.getVal(cmdArgs.getParam("-log"));
@@ -146,6 +172,7 @@ class InfectStatistic {
             //获取所需类型
             if (cmdArgs.getParam("-type") > 0) {
                 type = cmdArgs.getVals(cmdArgs.getParam("-type"));
+                checkType();
             }
             //获取省份
             if (cmdArgs.getParam("-province") > 0) {
@@ -163,6 +190,10 @@ class InfectStatistic {
                 }
             } else {
                 //如果有date参数
+                if (date.compareTo(fh.newestLogName) >= 0) {
+                    System.err.println("日期超出范围。");
+                    return;
+                }
                 fh.getBeforeDate(date);
                 for (String lp : fh.logPaths) {
                     fh.readLog(lp);
@@ -182,6 +213,21 @@ class InfectStatistic {
             //将内容写到指定文件内
             fh.writeResultLog(outPath);
         }
+
+        /*
+        检查type参数值是否有误
+        @return 正确true 错误false
+         */
+        public boolean checkType() {
+            for (String t : type) {
+                if (!(t.equals("ip") || t.equals("sp") || t.equals("cure") || t.equals("dead"))) {
+                    System.err.println("不存在对应的-type参数值");
+                    return false;
+                }
+            }
+            return true;
+        }
+
     }
 
     /*
@@ -190,6 +236,7 @@ class InfectStatistic {
     class FileHandler {
         File[] fileList;
         String path;
+        String newestLogName;
         //新建文件内日志处理类
         DealLog dealLog;
         List<String> logNames, logPaths;
@@ -210,9 +257,14 @@ class InfectStatistic {
         获取目录下的日志名
          */
         public void initLogName() {
+            String tmp = "2000-01-01.log.txt";
             for (int i = 0;i < fileList.length; i++) {
                 logNames.add(fileList[i].getName());
+                if (fileList[i].getName().compareTo(tmp) >= 0) {
+                    tmp = fileList[i].getName();
+                }
             }
+            newestLogName = tmp;
         }
 
         /*
@@ -307,8 +359,10 @@ class InfectStatistic {
                 e.printStackTrace();
             }
         }
+
         /*
         过滤date
+        @param String:日期
          */
         public void getBeforeDate(String date) {
             logPaths.clear();
@@ -843,13 +897,9 @@ class InfectStatistic {
 
     public static void main(String[] args) {
         InfectStatistic infectStatistic = new InfectStatistic();
-        InfectStatistic.DealLog dealLog = infectStatistic.new DealLog();
         InfectStatistic.CmdArgs cmdArgs = infectStatistic.new CmdArgs(args);
-        InfectStatistic.CmdHandler cmdHandler = infectStatistic.new CmdHandler(cmdArgs, dealLog);
-        InfectStatistic.ListCommand listCommand = infectStatistic.new ListCommand(cmdHandler, cmdArgs);
+        InfectStatistic.CmdPass cmdPass = infectStatistic.new CmdPass(cmdArgs);
 
-        if(cmdArgs.getCmd().equals("list")) {
-            listCommand.execute();
-        }
+        cmdPass.passCmd();
     }
 }
