@@ -8,6 +8,10 @@
  */
 
 
+import java.util.*;
+import java.lang.String;
+
+
 enum PatientType {
 
     INFECTION("¸ÐÈ¾»¼Õß","ip"),
@@ -34,6 +38,29 @@ enum PatientType {
         return null;
     }
 
+}
+
+
+enum Option {
+
+    LOG("-log"), OUT("-out"),
+    DATE("-date"), TYPE("-type"),
+    PROVINCE("-province");
+
+    private String optionString;
+
+    Option(String optionString) { this.optionString = optionString; }
+
+    public String getOptionString() { return optionString; }
+
+    public static Option getOptionByString(String optionString) {
+        for(Option option : Option.values()) {
+            if(optionString.equals(option.getOptionString())) {
+                return option;
+            }
+        }
+        return null;
+    }
 }
 
 
@@ -73,6 +100,118 @@ class Province {
     public void alterLocalNum(PatientType patientType, int changedNum) {
         localNumbers[patientType.ordinal()] += changedNum;
         nationalNumbers[patientType.ordinal()] += changedNum;
+    }
+
+}
+
+
+class CommandArgsProcessor {
+
+    private String[] args;
+    private int[] optionsIndex;
+    private String sourceDirectoryPath;
+    private String outputFilePath;
+    private String dateString;
+    private List<PatientType> patientTypes;
+    private TreeSet<String> provinceSet;
+
+    CommandArgsProcessor(String[] args) {
+        this.args = args;
+        optionsIndex = new int[Option.values().length];
+    }
+
+    public String getSourceDirectoryPath() {
+        return sourceDirectoryPath;
+    }
+
+    public String getOutputFilePath() {
+        return outputFilePath;
+    }
+
+    public String getDateString() {
+        return dateString;
+    }
+
+    public List<PatientType> getPatientTypes() {
+        return patientTypes;
+    }
+
+    public TreeSet<String> getProvinceSet() {
+        return provinceSet;
+    }
+
+    private void getOptionIndex() {
+        Option option;
+        for (int i = 0; i < args.length; i++) {
+            if( (option = Option.getOptionByString(args[i])) != null) {
+                optionsIndex[option.ordinal()] = i;
+            }
+        }
+    }
+
+    private void logOptionProcess() {
+        int index = optionsIndex[Option.LOG.ordinal()];
+        sourceDirectoryPath = args[index + 1];
+    }
+
+    private void outOptionProcess() {
+        int index = optionsIndex[Option.OUT.ordinal()];
+        outputFilePath = args[index + 1];
+    }
+
+    private void dateOptionProcess() {
+        dateString = null;
+        int index = optionsIndex[Option.DATE.ordinal()];
+        if(index != 0) {
+            dateString = args[index + 1];
+        }
+    }
+
+    private void typeOptionProcess() {
+        patientTypes = new LinkedList<>();
+        int index = optionsIndex[Option.TYPE.ordinal()];
+        if(index != 0) {
+            PatientType patientType;
+            for(int i = index + 1; i < args.length; i++) {
+                if((patientType = PatientType.getTypeByAbbr(args[i])) != null) {
+                    patientTypes.add(patientType);
+                }
+                else {
+                    break;
+                }
+            }
+        }
+        else {
+            patientTypes = Arrays.asList(PatientType.values());
+        }
+    }
+
+    private void provinceOptionProcess() {
+
+        provinceSet = new TreeSet<>(new ProvinceComparator());
+        int index = optionsIndex[Option.PROVINCE.ordinal()];
+
+        if(index != 0) {
+            for(int i = index + 1; i < args.length; i++) {
+                if(ProvinceComparator.isExist(args[i])) {
+                    provinceSet.add(args[i]);
+                }
+                else {
+                    break;
+                }
+            }
+        }
+
+    }
+
+    public void processAllOptions() {
+
+        getOptionIndex();
+        logOptionProcess();
+        outOptionProcess();
+        dateOptionProcess();
+        typeOptionProcess();
+        provinceOptionProcess();
     }
 
 }
