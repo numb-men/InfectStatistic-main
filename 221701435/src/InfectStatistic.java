@@ -947,6 +947,129 @@ public class infectStatistic {
 				}
 			}
 		}
+		
+		/**
+		 * LogDao TODO
+		 * 
+		 * @description 文件数据的输入与输出
+		 * @author moli
+		 * @version m 1.0.0
+		 * @since 2020.02.17
+		 */
+		
+		static class LogDao {
+			@SuppressWarnings("unchecked")
+			/**
+			 * 
+			 * @description 读入地址中符合条件的文件
+			 * @param fileName date
+			 * @return List<LogUtil.InfectResult>
+			 */
+			
+			public static List<LogUtil.InfectResult> initLog(String fileName, String date) {
+				RegexUtil regexUtil = new RegexUtil();
+				@SuppressWarnings("unused")
+				RegexUtil.RegexParameter regexParameter = new RegexUtil.RegexParameter();
+				List<LogUtil.InfectResult> list = new ArrayList<LogUtil.InfectResult>();
+				List<LogUtil.InfectResult> last = new ArrayList<LogUtil.InfectResult>();
+				List<LogUtil.InfectResult> merge = new ArrayList<LogUtil.InfectResult>();
+				File file = new File(fileName);
+				
+				if (file.isFile()) {
+					BufferedReader reader = null;
+					try {
+						System.out.println("以行为单位读取文件内容，一次读一整行：");
+						reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+						String tempString = null;
+						while ((tempString = reader.readLine()) != null) {
+							if (tempString.matches(regexUtil.getType1())) {
+								list.add(LogUtil.ResultUtil.getIpResult(tempString));
+							} else if (tempString.matches(regexUtil.getType2())) {
+								list.add(LogUtil.ResultUtil.getSpResult(tempString));
+							} else if (tempString.matches(regexUtil.getType3())) {
+								list.addAll(LogUtil.ResultUtil.getEmptiesIpResult(tempString));
+							} else if (tempString.matches(regexUtil.getType4())) {
+								list.addAll(LogUtil.ResultUtil.getEmptiesSpResult(tempString));
+							} else if (tempString.matches(regexUtil.getType5())) {
+								list.add(LogUtil.ResultUtil.getDeadResult(tempString));
+							} else if (tempString.matches(regexUtil.getType6())) {
+								list.add(LogUtil.ResultUtil.getCureResult(tempString));
+							} else if (tempString.matches(regexUtil.getType7())) {
+								list.add(LogUtil.ResultUtil.getSpToIpResult(tempString));
+							} else if (tempString.matches(regexUtil.getType8())) {
+								list.add(LogUtil.ResultUtil.getRemoveSpResult(tempString));
+							}
+						}
+						reader.close();
+						Collections.sort(list, new LogUtil.ListUtil.comparator());
+						last = LogUtil.ListUtil.mergeList(list, true);
+					} catch (IOException e) {
+						e.printStackTrace();
+					} finally {
+						if (reader != null) {
+							try {
+								reader.close();
+							} catch (IOException e1) {
+
+							}
+						}
+					}
+				} else if (file.isDirectory()) {
+					List<String> paths = getFiles(fileName);
+					for (String file_path : paths) {
+						int firstIndex = -1;
+						int secondIndex = -1;
+						int index = -1;
+						do {
+							firstIndex = index + 1;
+							index = file_path.indexOf("\\", index + 1);
+						} while (index != -1);
+						String result = file_path.substring(firstIndex);
+						do {
+							secondIndex = index;
+							index = result.indexOf(".", index + 1);
+						} while (result.indexOf(".", index + 1) != -1);
+						String reresult = result.substring(0, secondIndex);
+						int res = reresult.compareTo(date);
+
+						if (date.equals("default"))
+							res = 0;
+
+						if (res > 0)
+							continue;
+						merge.addAll(initLog(file_path, null));
+					}
+					Collections.sort(merge, new LogUtil.ListUtil.comparator());
+					last = LogUtil.ListUtil.mergeList(merge, false);
+				}
+				
+				return last;
+			}
+
+			/**
+			 * 
+			 * @description 获得路径目录下的所有文件
+			 * @param path
+			 * @return List<String>
+			 */
+			
+			public static List<String> getFiles(String path) {
+				List<String> files = new ArrayList<String>();
+				File file = new File(path);
+				File[] tempList = file.listFiles();
+				
+				for (int i = 0; i < tempList.length; i++) {
+					if (tempList[i].isFile()) {
+						files.add(tempList[i].toString());
+					}
+					if (tempList[i].isDirectory()) {
+						files.addAll(getFiles(tempList[i].toString()));
+					}
+				}
+				
+				return files;
+			}
+		}
 	
 	public static void main(String[] args) throws IOException {
 		List<String> list = new ArrayList<String>();
