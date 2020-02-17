@@ -873,7 +873,7 @@ class RegularExpression
 	/*正则匹配验证list命令格式是否正确*/
 	public static boolean isListRight(String str) 
 	{
-		String cmdCompile = "list(\\s+-\\w+\\s+\\S*)*\\s+-log\\s+\\S+(\\s+-\\w+\\s+\\S*)*\\s+-out\\s+\\S+(\\s+-\\w+\\s+\\S*)*\\s*";
+		String cmdCompile = "list\\s+.*-log\\s+\\S+.*\\s+-out\\s+\\S+.*";
 		Pattern p = Pattern.compile(cmdCompile);
 		Matcher m = p.matcher(str);
 		boolean isValid = m.matches();
@@ -939,7 +939,7 @@ class RegularExpression
 	}
 }
 
-public class InfectStatistic {
+public class InfectStatistic{
 
 	public static void main(String[] args) {
 		
