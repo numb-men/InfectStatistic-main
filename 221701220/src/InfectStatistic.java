@@ -10,6 +10,7 @@
 
 import java.util.*;
 import java.lang.String;
+import java.util.regex.*;
 
 
 enum PatientType {
@@ -212,6 +213,171 @@ class CommandArgsProcessor {
         dateOptionProcess();
         typeOptionProcess();
         provinceOptionProcess();
+    }
+
+}
+
+
+abstract class AbstractLogLineProcessor {
+
+    public static String INCREASE = "新增.*人";
+    public static String MOVE = "流入.*人";
+    public static String DECREASE = "[死亡|治愈].*人";
+    public static String CHANGE = "[确诊|排除].*人";
+
+    protected static ProvinceTreeMap provinceTreeMap;
+    protected Pattern pattern;
+    protected AbstractLogLineProcessor nextProcessor;
+
+    public static void setProvinceTreeMap(ProvinceTreeMap provinceTreeMap) {
+        AbstractLogLineProcessor.provinceTreeMap = provinceTreeMap;
+    }
+
+    public void setNextProcessor(AbstractLogLineProcessor nextProcessor) {
+        this.nextProcessor = nextProcessor;
+    }
+
+    abstract protected void processLogLine(String logLine);
+
+    public void processorChoose(String logLine) {
+        if(pattern.matcher(logLine).find()) {
+            processLogLine(logLine);
+        }
+        else if(nextProcessor != null) {
+            nextProcessor.processorChoose(logLine);
+        }
+    }
+
+}
+
+
+class IncreaseProcessor extends AbstractLogLineProcessor {
+
+    IncreaseProcessor(String regex) {
+        pattern = Pattern.compile(regex);
+    }
+
+    @Override
+    protected void processLogLine(String logLine) {
+
+        String[] lineStrings = logLine.split(" ");
+        String provinceName = lineStrings[0];
+        PatientType patientType =
+                lineStrings[2].equals(PatientType.INFECTION.getTypeName()) ? PatientType.INFECTION : PatientType.SUSPECTED;
+        int increasedNum = Integer.parseInt( lineStrings[3].replace("人", "") );
+
+        if(!provinceTreeMap.isExistedProvince(provinceName)) {
+            provinceTreeMap.createNewProvince(provinceName);
+        }
+        Province province = provinceTreeMap.getProvinceByName(provinceName);
+        province.alterLocalNum(patientType, increasedNum);
+    }
+
+}
+
+
+class MoveProcessor extends AbstractLogLineProcessor {
+
+    MoveProcessor(String regex) {
+        pattern = Pattern.compile(regex);
+    }
+
+    @Override
+    protected void processLogLine(String logLine) {
+
+        String[] lineStrings = logLine.split(" ");
+        String provinceName1 = lineStrings[0];
+        PatientType patientType =
+                lineStrings[1].equals(PatientType.INFECTION.getTypeName()) ? PatientType.INFECTION : PatientType.SUSPECTED;
+        String provinceName2 = lineStrings[3];
+        int movedNum = Integer.parseInt( lineStrings[4].replace("人", "") );
+
+        if(!provinceTreeMap.isExistedProvince(provinceName2)) {
+            provinceTreeMap.createNewProvince(provinceName2);
+        }
+        Province province1 = provinceTreeMap.getProvinceByName(provinceName1);
+        Province province2 = provinceTreeMap.getProvinceByName(provinceName2);
+        province1.alterLocalNum(patientType, (-1) * movedNum);
+        province2.alterLocalNum(patientType, movedNum);
+    }
+
+}
+
+
+class DecreaseProcessor extends AbstractLogLineProcessor {
+
+    DecreaseProcessor(String regex) {
+        pattern = Pattern.compile(regex);
+    }
+
+    @Override
+    protected void processLogLine(String logLine) {
+
+        String[] lineStrings = logLine.split(" ");
+        String provinceName = lineStrings[0];
+        PatientType patientType =
+                lineStrings[1].equals(PatientType.DEAD.getTypeName()) ? PatientType.DEAD : PatientType.CURE;
+        int decreasedNum = Integer.parseInt( lineStrings[2].replace("人", "") );
+
+        if(!provinceTreeMap.isExistedProvince(provinceName)) {
+            provinceTreeMap.createNewProvince(provinceName);
+        }
+        Province province = provinceTreeMap.getProvinceByName(provinceName);
+        province.alterLocalNum(PatientType.INFECTION, (-1) * decreasedNum);
+        province.alterLocalNum(patientType, decreasedNum);
+    }
+
+}
+
+
+class ChangeProcessor extends AbstractLogLineProcessor {
+
+    ChangeProcessor(String regex) {
+        pattern = Pattern.compile(regex);
+    }
+
+    @Override
+    protected void processLogLine(String logLine) {
+
+        boolean isConfirmed = logLine.contains("确诊");
+        String[] lineStrings = logLine.split(" ");
+        String provinceName = lineStrings[0];
+        int changedNum = Integer.parseInt( lineStrings[3].replace("人", "") );
+
+        if(!provinceTreeMap.isExistedProvince(provinceName)) {
+            provinceTreeMap.createNewProvince(provinceName);
+        }
+        Province province = provinceTreeMap.getProvinceByName(provinceName);
+        province.alterLocalNum(PatientType.SUSPECTED, (-1) * changedNum);
+        if(isConfirmed) {
+            province.alterLocalNum(PatientType.INFECTION, changedNum);
+        }
+    }
+
+}
+
+
+class LogLineProcessor {
+
+    private AbstractLogLineProcessor processorChains;
+
+    LogLineProcessor(ProvinceTreeMap provinceTreeMap) {
+
+        AbstractLogLineProcessor.setProvinceTreeMap(provinceTreeMap);
+        AbstractLogLineProcessor increaseProcessor = new IncreaseProcessor(AbstractLogLineProcessor.INCREASE);
+        AbstractLogLineProcessor moveProcessor = new MoveProcessor(AbstractLogLineProcessor.MOVE);
+        AbstractLogLineProcessor decreaseProcessor = new DecreaseProcessor(AbstractLogLineProcessor.DECREASE);
+        AbstractLogLineProcessor changeProcessor = new ChangeProcessor(AbstractLogLineProcessor.CHANGE);
+
+        increaseProcessor.setNextProcessor(moveProcessor);
+        moveProcessor.setNextProcessor(decreaseProcessor);
+        decreaseProcessor.setNextProcessor(changeProcessor);
+
+        processorChains = increaseProcessor;
+    }
+
+    public void processLogLine(String logLine) {
+        processorChains.processorChoose(logLine);
     }
 
 }
