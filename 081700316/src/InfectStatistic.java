@@ -1,5 +1,8 @@
 import java.io.*;
 import java.util.regex.*;
+import java.io.File;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class InfectStatistic {
 
@@ -19,9 +22,11 @@ public class InfectStatistic {
             "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
 
     /**
-     * 指定患者类型
+     * 类型输出状态
+     * 0：不需要输出
+     * 默认为1：需要输出
      */
-    public static int[] type_num = {1,2,3,4};
+    public static int[] type_num = new int[]{1, 1, 1, 1};
 
     /**
      * 类型列表
@@ -43,21 +48,37 @@ public class InfectStatistic {
             "(\\S+) 死亡 (\\d+)人", "(\\S+) 治愈 (\\d+)人",
             "(\\S+) 疑似患者 确诊感染 (\\d+)人", "(\\S+) 排除 疑似患者 (\\d+)人"};
 
+    public static String in_path;
+    public static String out_path;
+
+    /**
+     * 获取文件
+     */
+    public static void getFile() throws Throwable {
+        File file = new File(in_path);
+        File[] fileList = file.listFiles();
+        String fileName;
+
+        for (int i = 0; i < fileList.length; i++) {
+            fileName = fileList[i].getName();
+            readFile(in_path + fileName);
+        }
+    }
+
     /**
      * 读文件
      */
-    public static void readFile() throws Throwable {
+    public static void readFile(String filePath) throws Throwable {
         try {
             Throwable var1 = null;
             Object var2 = null;
 
             try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("E:\\InfectStatistic-main\\081700316\\log\\2020-01-22.log.txt")));
+                BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
 
                 String line;
                 try {
                     while((line = in.readLine()) != null) {
-                        //System.out.println(line);
                         FileProcessing(line);
                     }
                 } finally {
@@ -325,18 +346,15 @@ public class InfectStatistic {
             Object var1 = null;
 
             try {
-                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("E:\\InfectStatistic-main\\081700316\\result\\ListOut.txt")));
+                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(out_path)), "UTF-8"));
                 try {
                     province_status[0] = 1;
                     for(int i = 0; i < province_str.length; i++) {
                         if(province_status[i] == 1) {
                             bw.write(province_str[i] + " ");
                             for (int j = 0; j < type_num.length; j++) {
-                                for (int k = 0; k < type_num.length; k++) {
-                                    if (type_num[k] == j + 1) {
-                                        bw.write(type_str[k] + people_num[i][k] + "人 ");
-                                        break;
-                                    }
+                                if (type_num[j] == 1) {
+                                    bw.write(type_str[j] + people_num[i][j] + "人 ");
                                 }
                             }
                             bw.newLine();
@@ -364,9 +382,194 @@ public class InfectStatistic {
 
     }
 
+    /**
+     * 解析命令行参数
+     */
+    class CmdArgs{
+        String[] args;
+
+        CmdArgs(String[] args_str){
+            args = args_str;
+        }
+
+        public boolean extractCmd() {
+            if(!args[0].equals("list")) {
+                System.out.println("错误命令：开头非list");
+                return false;
+            }
+            for(int i = 1; i < args.length; i++) {
+                int m;
+                switch (args[i]) {
+                    case "-log":
+                        m = getInPath(i+1);
+                        if (m == -1) {
+                            System.out.println("错误命令：输入路径错误");
+                            return false;
+                        }
+                        i = m;
+                        break;
+                    case "-out":
+                        m = getOutPath(i+1);
+                        if (i == -1) {
+                            System.out.println("错误命令：输出路径错误");
+                            return false;
+
+                        }
+                        i = m;
+                        break;
+                    case "-date":
+                        m = getDate(i+1);
+                        if (i == -1) {
+                            System.out.println("错误命令：日期错误");
+                            return false;
+                        }
+                        i = m;
+                        break;
+                    case "-type":
+                        m = getType(i+1);
+                        if (i == -1) {
+                            System.out.println("错误命令：类型错误");
+                            return false;
+                        }
+                        i = m;
+                        break;
+                    case "-province":
+                        m = getProvince(i+1);
+                        if (i == -1) {
+                            System.out.println("错误命令：省份错误");
+                            return false;
+                        }
+                        i = m;
+                        break;
+                    default:
+                        System.out.println("错误命令！");
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * 获取输入位置
+         */
+        public int getInPath(int i) {
+            if(args[i].matches("^[A-z]:\\\\(.+?\\\\)*$"))
+                in_path = args[i];
+            else
+                return -1;
+            return i;
+        }
+
+        /**
+         * 获取输出位置
+         */
+        public int getOutPath(int i) {
+            if(args[i].matches("^[A-z]:\\\\(\\S+)+(\\.txt)$"))
+                out_path = args[i];
+            else
+                return -1;
+            return i;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate today = LocalDate.now();
+        String date = formatter.format(today);
+        /**
+         * 获取日期
+         */
+        public int getDate(int i) {
+            if(isValidDate(args[i])) {
+                if(date.compareTo(args[i]) >= 0)
+                    date = args[i] + ".log.txt";
+                else
+                    return -1;
+            } else
+                return -1;
+            return i;
+        }
+
+        /**
+         * 判断日期格式是否正确
+         */
+        public boolean isValidDate(String dateStr) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            try {
+                LocalDate date = LocalDate.parse(dateStr, formatter);
+            } catch (Exception e) {
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * 获取类型
+         */
+        public int getType(int i) {
+            int m = i;
+            for(int j = 0; j < 4; j++)
+                type_num[j] = 0;
+            label:
+            while(i<args.length) {
+                switch (args[i]) {
+                    case "ip":
+                        type_num[0] = 1;
+                        i++;
+                        break;
+                    case "sp":
+                        type_num[1] = 1;
+                        i++;
+                        break;
+                    case "cure":
+                        type_num[2] = 1;
+                        i++;
+                        break;
+                    case "dead":
+                        type_num[3] = 1;
+                        i++;
+                        break;
+                    default:
+                        break label;
+                }
+            }
+            if(m == i)
+                return -1;
+            return (i - 1);
+        }
+
+        /**
+         * 获取省份
+         */
+        public int getProvince(int i) {
+            int j, m = i;
+            province_status[0] = 0;
+            while(i<args.length) {
+                for(j = 0; j < province_str.length; j++) {
+                    if(args[i].equals(province_str[j])) {
+                        province_status[j] = 1;
+                        i++;
+                        break;
+                    }
+                }
+            }
+            if(m == i)
+                return -1;
+            return (i - 1);
+        }
+    }
+
 
     public static void main(String[] args) throws Throwable {
-        readFile();
+        if (args.length == 0) {
+            System.out.println("未输入参数!");
+            return;
+        }
+        InfectStatistic infect = new InfectStatistic();
+        InfectStatistic.CmdArgs cmdargs = infect.new CmdArgs(args);
+        boolean b = cmdargs.extractCmd();
+        if(b == false) {
+            return;
+        }
+        getFile();
         writeFile();
     }
 }
