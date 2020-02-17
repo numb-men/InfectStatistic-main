@@ -1118,6 +1118,134 @@ public class infectStatistic {
 				
 				return sort_list;
 			}
+			
+			/**
+			 * 
+			 * @description 按type和province的要求对处理好的文件数据进行输出
+			 * @param fileName out_path province type date
+			 * @throws IOException
+			 */
+			
+			public static void outLog(String fileName, String out_path, List<String> province, List<String> type,
+					String date) throws IOException {
+				List<LogUtil.InfectResult> list = LogDao.sortResultByProvince(fileName, date);
+				List<String> sort_province = LogDao.newSort(province);
+				BufferedWriter out = null;
+				String type_temp = "";
+				
+				try {
+					out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out_path, true)));
+					if (sort_province != null) {
+						for (String s : sort_province) {
+							boolean find = false;
+							for (int j = 0; j < list.size(); j++) {
+								if (s.equals(list.get(j).getProvince())) {
+									find = true;
+									if (type != null) {
+										for (String str : type) {
+											if (str.equals("ip")) {
+												type_temp += " 感染患者" + list.get(j).getIp() + "人";
+											} else if (str.equals("sp")) {
+												type_temp += " 疑似患者" + list.get(j).getSp() + "人";
+											} else if (str.equals("cure")) {
+												type_temp += " 治愈" + list.get(j).getCure() + "人";
+											} else if (str.equals("dead")) {
+												type_temp += " 死亡" + list.get(j).getDead() + "人";
+											}
+										}
+										out.write(list.get(j).getProvince() + type_temp + "\n");
+										type_temp = "";
+										break;
+									} else {
+										out.write(list.get(j).toResultString() + "\n");
+										break;
+									}
+								}
+							}
+							if (find == false) {
+								if (type != null) {
+									for (String str : type) {
+										if (str.equals("ip")) {
+											type_temp += " 感染患者0人";
+										} else if (str.equals("sp")) {
+											type_temp += " 疑似患者0人";
+										} else if (str.equals("cure")) {
+											type_temp += " 治愈患者0人";
+										} else if (str.equals("dead")) {
+											type_temp += " 死亡患者0人";
+										}
+									}
+									out.write(s + type_temp + "\n");
+									type_temp = "";
+								} else {
+									out.write(s + " 感染患者0人 死亡患者0人 治愈患者0人 死亡患者0人" + "\n");
+								}
+							}
+						}
+
+					} else {
+						// 那么我们要做的就是吧这个里面的选项全部都输出，出来，记住这个时候我们里面已经是排好序的了
+						for (int i = 0; i < list.size(); i++) {
+							if (type != null) {
+								for (String str : type) {
+									if (str.equals("ip")) {
+										type_temp += " 感染患者" + list.get(i).getIp() + "人";
+									} else if (str.equals("sp")) {
+										type_temp += " 疑似患者" + list.get(i).getSp() + "人";
+									} else if (str.equals("cure")) {
+										type_temp += " 治愈" + list.get(i).getCure() + "人";
+									} else if (str.equals("dead")) {
+										type_temp += " 死亡" + list.get(i).getDead() + "人";
+									}
+								}
+								out.write(list.get(i).getProvince() + type_temp + "\n");
+								type_temp = "";
+							} else {
+								out.write(list.get(i).toResultString() + "\n");
+							}
+						}
+					}
+				} finally {
+					if (out != null) {
+						try {
+							out.close();
+						} catch (IOException e1) {
+
+						}
+					}
+				}
+			}
+
+			/**
+			 * 
+			 * @description 对传入的province进行一个排序，可以使在文件中没有出现的数据更容易的被处理
+			 * @param province
+			 * @return List<String>
+			 */
+			
+			public static List<String> newSort(List<String> province) {
+				String[] final_province = { "全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江",
+						"湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏",
+						"新疆", "云南", "浙江" };
+				List<String> sort_province = new ArrayList<String>();
+				/*
+				 * if (province == null) { for (String str : final_province) {
+				 * sort_province.add(str); } return sort_province; }
+				 */
+				if (province == null) {
+					return null;
+				}
+				for (String str : final_province) {
+					for (String st : province) {
+						if (str.equals(st)) {
+							sort_province.add(st);
+							break;
+						}
+					}
+				}
+				
+				return sort_province;
+			}
 		}
 	
 	public static void main(String[] args) throws IOException {
