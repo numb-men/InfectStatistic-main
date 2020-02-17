@@ -56,7 +56,6 @@ class ArgParser {
                 arguments.put(key,vals);
             }
         }
-        this.printArg();
     }
 
     /**
@@ -127,48 +126,68 @@ class CommandReceiver {
         File[] files = path.listFiles();
         String filePath = null;
 
-        if (dates!=null) {
-            // 如果提供了要处理的文件的日期名
-            // 处理包括给定日期的前面的文件
-            AllInformation prev = new AllInformation();
-            for (File file : files) {
-                filePath = path + "/" + file.getName();
-                AllInformation allInformation = new AllInformation();
-                Map<String, Integer[]> info = prev.getInfo();
-                allInformation.setting(info);
+        if (dates==null) {
+            File lastFile = files[files.length-1];
+            String lastFileName = lastFile.getName();
+            dates.add(lastFileName);
+        }
+        AllInformation prev = new AllInformation();
+        for (File file : files) {
+            filePath = path + "/" + file.getName();
+            AllInformation allInformation = new AllInformation();
+            Map<String, Integer[]> info = prev.getInfo();
+            allInformation.setting(info);
 
-                // 之后处理这个文件的信息
-                allInformation.processInfo(filePath);
-                // 写入文件
-                allInformation.writeIntoLog(outFileName, argParser);
-                prev = allInformation;
-                if (file.getName().contains(dates.get(0))) {
+            // 之后处理这个文件的信息
+            allInformation.processInfo(filePath);
+            // 写入文件
+            allInformation.writeIntoLog(outFileName, argParser);
+            prev = allInformation;
+            if (file.getName().contains(dates.get(0))) {
                     break;
-                }
             }
         }
-        else {
-            // 如果没有给定日期就处理所有文件
-//                File lastFile = files[files.length-1];
-//                filePath = path+"/"+lastFile.getName();
-            AllInformation prev = new AllInformation();
-            for (File file : files) {
-                filePath = path + "/" + file.getName();
-
-                AllInformation allInformation = new AllInformation();
-                // 获取上一个文件处理的信息,写入这个这次的文件中
-                Map<String, Integer[]> info = prev.getInfo();
-                allInformation.setting(info);
-
-                // 之后处理这个文件的信息
-                allInformation.processInfo(filePath);
-                // 写入文件
-                allInformation.writeIntoLog(outFileName, argParser);
-                prev = allInformation;
-            }
-
-        }
-
+//        if (dates!=null) {
+//            // 如果提供了要处理的文件的日期名
+//            // 处理包括给定日期的前面的文件
+//            AllInformation prev = new AllInformation();
+//            for (File file : files) {
+//                filePath = path + "/" + file.getName();
+//                AllInformation allInformation = new AllInformation();
+//                Map<String, Integer[]> info = prev.getInfo();
+//                allInformation.setting(info);
+//
+//                // 之后处理这个文件的信息
+//                allInformation.processInfo(filePath);
+//                // 写入文件
+//                allInformation.writeIntoLog(outFileName, argParser);
+//                prev = allInformation;
+//                if (file.getName().contains(dates.get(0))) {
+//                    break;
+//                }
+//            }
+//        }
+//        else {
+//            // 如果没有给定日期就处理所有文件
+////                File lastFile = files[files.length-1];
+////                filePath = path+"/"+lastFile.getName();
+//            AllInformation prev = new AllInformation();
+//            for (File file : files) {
+//                filePath = path + "/" + file.getName();
+//
+//                AllInformation allInformation = new AllInformation();
+//                // 获取上一个文件处理的信息,写入这个这次的文件中
+//                Map<String, Integer[]> info = prev.getInfo();
+//                allInformation.setting(info);
+//
+//                // 之后处理这个文件的信息
+//                allInformation.processInfo(filePath);
+//                // 写入文件
+//                allInformation.writeIntoLog(outFileName, argParser);
+//                prev = allInformation;
+//            }
+//
+//        }
     }
     // 下面还可以有其他命令
 
@@ -467,10 +486,8 @@ class AllInformation {
             Integer[] oriInfo = info.get(key);
             if ("福建".equals(key)) {
                 System.out.println("修改完成前");
-                System.out.println(key+" "+oriInfo[0]+" "+oriInfo[1]+" "+oriInfo[2]+" "+oriInfo[3]+" ");
+                System.out.println(key + " " + oriInfo[0] + " " + oriInfo[1] + " " + oriInfo[2] + " " + oriInfo[3] + " ");
             }
-
-
             for (int i = 0;i<newInfo.length;i++) {
                 // 找到不为0的信息修改
                 oriInfo[i] = oriInfo[i]+newInfo[i];
