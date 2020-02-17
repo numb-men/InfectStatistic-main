@@ -8,6 +8,7 @@
  */
 
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.lang.String;
 import java.util.regex.*;
@@ -21,7 +22,7 @@ enum PatientType {
     CURE("治愈","cure"),
     DEAD("死亡", "dead");
 
-	public static final int size = PatientType.values().length;
+    public static final int size = PatientType.values().length;
     private String typeName;
     private String abbr;
 
@@ -106,6 +107,31 @@ class Province {
         nationalNumbers[patientType.ordinal()] += changedNum;
     }
 
+}
+
+class ProvinceTreeMap {
+
+    private TreeMap<String, Province> treeMap;
+
+    ProvinceTreeMap() {
+        treeMap = new TreeMap<>(new ProvinceComparator());
+    }
+
+    public boolean isExistedProvince(String provinceName) {
+        return treeMap.containsKey(provinceName);
+    }
+
+    public void createNewProvince(String provinceName) {
+        treeMap.put(provinceName, new Province());
+    }
+
+    public Province getProvinceByName(String provinceName) {
+        return treeMap.get(provinceName);
+    }
+
+    public Set<String> getKeySet() {
+        return treeMap.keySet();
+    }
 }
 
 
@@ -404,7 +430,8 @@ class FileProcessor {
     private LogLineProcessor logLineProcessor;
 
     private File sourceDirectory;
-    private FileWriter fileWriter;
+    private FileOutputStream fileOutputStream;
+    private BufferedWriter bufferedWriter;
     private String dateString;
     private List<PatientType> patientTypes;
     private Set<String> provinceSet;
@@ -423,7 +450,8 @@ class FileProcessor {
 
         sourceDirectory = new File(processor.getSourceDirectoryPath());
         try {
-            fileWriter = new FileWriter(processor.getOutputFilePath());
+            fileOutputStream = new FileOutputStream(processor.getOutputFilePath());
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream,StandardCharsets.UTF_8));
         }
         catch (IOException exc) {
             System.out.println(Arrays.toString(exc.getStackTrace()));
@@ -465,13 +493,13 @@ class FileProcessor {
         for (File file:fileTreeSet) {
             String logLine;
             try {
-                FileReader fileReader = new FileReader(file.getPath());
-                BufferedReader bufferedReader = new BufferedReader(fileReader);
+                InputStream inputStream  = new FileInputStream(file.getAbsolutePath());
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
                 while ((logLine = bufferedReader.readLine()) != null) {
                     logLineProcessor.processLogLine(logLine);
                 }
                 bufferedReader.close();
-                fileReader.close();
+                inputStream.close();
             }
             catch (IOException exc) {
                 System.out.println(Arrays.toString(exc.getStackTrace()));
@@ -486,12 +514,12 @@ class FileProcessor {
         if(allowNation) {
             provinceSet.remove("全国");
             try {
-                fileWriter.write("全国");
+                bufferedWriter.write("全国");
                 for (PatientType patientType : patientTypes) {
-                    fileWriter.write(" " + patientType.getTypeName());
-                    fileWriter.write(Province.getNationalNumbers()[patientType.ordinal()] + "人");
+                    bufferedWriter.write(" " + patientType.getTypeName());
+                    bufferedWriter.write(Province.getNationalNumbers()[patientType.ordinal()] + "人");
                 }
-                fileWriter.write('\n');
+                bufferedWriter.newLine();
             }
             catch (IOException exc) {
                 System.out.println(Arrays.toString(exc.getStackTrace()));
@@ -513,15 +541,16 @@ class FileProcessor {
                 }
                 Province province = provinceTreeMap.getProvinceByName(provinceName);
 
-                fileWriter.write(provinceName);
+                bufferedWriter.write(provinceName);
                 for (PatientType patientType : patientTypes) {
-                    fileWriter.write(" " + patientType.getTypeName());
-                    fileWriter.write(province.getLocalNumbers()[patientType.ordinal()] + "人");
+                    bufferedWriter.write(" " + patientType.getTypeName());
+                    bufferedWriter.write(province.getLocalNumbers()[patientType.ordinal()] + "人");
                 }
-                fileWriter.write('\n');
+                bufferedWriter.newLine();
             }
-            fileWriter.write("// 该文档并非真实数据，仅供测试使用\n");
-            fileWriter.close();
+            bufferedWriter.write("// 该文档并非真实数据，仅供测试使用\n");
+            bufferedWriter.close();
+            fileOutputStream.close();
         }
         catch (IOException exc) {
             System.out.println(Arrays.toString(exc.getStackTrace()));
