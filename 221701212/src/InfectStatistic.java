@@ -1,8 +1,11 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,6 +22,7 @@ import java.util.Vector;
  */
 class InfectStatistic {
 	int argc;
+	int total_ip, total_sp, total_cure, total_death;
 	int PROVIENCE_NUM = 31;
 	int[] ip;
 	int[] sp;
@@ -58,6 +62,7 @@ class InfectStatistic {
 			flg[i] = false;
 			ip[i] = sp[i] = cure[i] = death[i] = 0;
 		}
+		total_ip = total_sp = total_cure = total_death = 0;
 	}
 	
 	public void initArgument() {
@@ -101,6 +106,7 @@ class InfectStatistic {
 		for(int i = 0; i < listFile4log.size(); i++) {
 			getData(listFile4log.get(i));
 		}
+		calculate_total();
 	}
 	
   public List<String> getPath(String path) {
@@ -264,6 +270,39 @@ class InfectStatistic {
 		}
 	}
 
+	public void calculate_total() {
+		for(int i = 0; i < PROVIENCE_NUM; i++) {
+			total_cure += cure[i];
+			total_death += death[i];
+			total_ip += ip[i];
+			total_sp += sp[i];
+		}
+	}
+
+	public void writeData(String path) {
+		try {
+			FileOutputStream outputStream = new FileOutputStream(path);   
+	    OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream, "utf-8");
+	    BufferedWriter writer = new BufferedWriter(outputWriter);
+	    String out = "全国 感染患者" + total_ip + "人 疑似患者" + total_sp + "人 治愈" + 
+	    							total_cure + "人 死亡" + total_death + "人";
+	    writer.write("out");
+	    for(int i = 0; i < PROVIENCE_NUM; i++) {
+	    	if(flg[i] == true) {
+	    		writer.write("\n");
+	    		out = provience_array[i] + "感染患者" + ip[i] + "人 疑似患者" + sp[i] + 
+	    				"人 治愈" + cure[i] + "人 死亡" + death[i] + "人";
+	    		writer.write("out");
+	    	}
+	    }
+	    writer.write("\n");
+	    writer.write("// 该文档并非真实数据，仅供测试使用");
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+	
 	public static void main(String[] args) {
 		InfectStatistic IS = new InfectStatistic(args.length, args);
 		IS.initArgument();
