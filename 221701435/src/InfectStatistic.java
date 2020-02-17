@@ -7,9 +7,9 @@ import java.util.regex.Pattern;
 /**
  * InfectStatistic TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author moli
+ * @version 1.0.0
+ * @since 2020-02-17
  */
 
 public class infectStatistic {
@@ -20,7 +20,6 @@ public class infectStatistic {
 	 * @description 通过内部Command变量存放list命令，Record变量存放命令后跟着的一些数据
 	 * @author moli
 	 * @version m 1.0.0
-	 * @see Command,Record,toString
 	 * @since 2020-02-17
 	 */
 
@@ -59,7 +58,6 @@ public class infectStatistic {
 		 * @description 定义布尔型变量，判断命令是否为list
 		 * @author moli
 		 * @version m 1.0.0
-		 * @see
 		 * @since 2020-02-17
 		 */
 
@@ -81,7 +79,6 @@ public class infectStatistic {
 		 * @description 定义变量存放log，out,date,type,province数据
 		 * @author moli
 		 * @version m 1.0.0
-		 * @see TypeOption TypeOptionEnum
 		 * @since 2020-02-17
 		 */
 
@@ -190,10 +187,9 @@ public class infectStatistic {
 		/**
 		 * TypeOptionEnum TODO
 		 * 
-		 * @descreption 定义type的四种情况IP,SP,CURE,DEAD
+		 * @description 定义type的四种情况IP,SP,CURE,DEAD
 		 * @author moli
 		 * @version m 1.0.0
-		 * @see
 		 * @since 2020-02-17
 		 */
 
@@ -243,7 +239,6 @@ public class infectStatistic {
 		 * @description 将枚举定义的四种类型封装到类中存储
 		 * @author moli
 		 * @version m 1.0.0
-		 * @see setTypeOptionIp,setTypeOptionSp,setTypeOptionCure,setTypeOptionDead
 		 * @since 2020-02-17
 		 */
 
@@ -330,11 +325,16 @@ public class infectStatistic {
 	 * @description 对由main方法得到的list命令行数据进行解析，并存储在CommandLine中
 	 * @author moli
 	 * @version m 1.0.0
-	 * @see Analytic
 	 * @since 2020-02-17
 	 */
 
 	static class CommandLineAnalytic {
+		
+		/**
+		 * @description 解析数据，并存放在CommandLine中
+		 * @param list
+		 * @return CommandLine
+		 */
 		public CommandLine Analytic(List<String> list) {
 			CommandLine commandline = new CommandLine();
 			CommandLine.Command command = new CommandLine.Command();
@@ -402,6 +402,236 @@ public class infectStatistic {
 		}
 	}
 
+	/**
+	 * RegexUtil TODO
+	 *
+	 * @description 定义8个string对应着8种数据的类型，使用正则表达式，分别得到对应的数据，在存入RegexParameter中
+	 * @author moli
+	 * @version m 1.0.0
+	 * @since 2020-02-17
+	 */
+	
+	public static class RegexUtil {
+		String type1 = "\\W+ 新增 感染患者 \\d+人";
+		String type2 = "\\W+ 新增 疑似患者 \\d+人";
+		String type3 = "\\W+ 感染患者 流入 \\W+ \\d+人";
+		String type4 = "\\W+ 疑似患者 流入 \\W+ \\d+人";
+		String type5 = "\\W+ 死亡 \\d+人";
+		String type6 = "\\W+ 治愈 \\d+人";
+		String type7 = "\\W+ 疑似患者 确诊感染 \\d+人";
+		String type8 = "\\W+ 排除 疑似患者 \\d+人";
+
+		public String getType1() {
+			return type1;
+
+		}
+
+		public void setType1(String type1) {
+			this.type1 = type1;
+		}
+
+		public String getType2() {
+			return type2;
+		}
+
+		public void setType2(String type2) {
+			this.type2 = type2;
+		}
+
+		public String getType3() {
+			return type3;
+		}
+
+		public void setType3(String type3) {
+			this.type3 = type3;
+		}
+
+		public String getType4() {
+			return type4;
+		}
+
+		public void setType4(String type4) {
+			this.type4 = type4;
+		}
+
+		public String getType5() {
+			return type5;
+		}
+
+		public void setType5(String type5) {
+			this.type5 = type5;
+		}
+
+		public String getType6() {
+			return type6;
+		}
+
+		public void setType6(String type6) {
+			this.type6 = type6;
+		}
+
+		public String getType7() {
+			return type7;
+		}
+
+		public void setType7(String type7) {
+			this.type7 = type7;
+		}
+
+		public String getType8() {
+			return type8;
+		}
+
+		public void setType8(String type8) {
+			this.type8 = type8;
+		}
+
+		/**
+		 * RegexParameter TODO
+		 * 
+		 * @description 存放通过正则表达式匹配后得到的数据
+		 * @author moli
+		 * @version m 1.0.0
+		 * @since 2020.02.17
+		 */
+		
+		static class RegexParameter {
+			String pattern1;
+			String pattern2;
+			int pattern3;
+
+			public String getPattern1() {
+				return pattern1;
+			}
+
+			public void setPattern1(String pattern1) {
+				this.pattern1 = pattern1;
+			}
+
+			public String getPattern2() {
+				return pattern2;
+			}
+
+			public void setPattern2(String pattern2) {
+				this.pattern2 = pattern2;
+			}
+
+			public int getPattern3() {
+				return pattern3;
+			}
+
+			public void setPattern3(int pattern3) {
+				this.pattern3 = pattern3;
+			}
+		}
+
+		public static RegexParameter getAddIp(String text) {
+			Pattern pattern1 = Pattern.compile("(.*) 新增");
+			Pattern pattern2 = Pattern.compile("感染患者 (.*)人");
+			
+			return getString(text, pattern1, pattern2);
+		}
+
+		public static RegexParameter getAddSp(String text) {
+			Pattern pattern1 = Pattern.compile("(.*) 新增");
+			Pattern pattern2 = Pattern.compile("疑似患者 (.*)人");
+			
+			return getString(text, pattern1, pattern2);
+		}
+
+		public static RegexParameter getEmptiesIp(String text) {
+			Pattern pattern1 = Pattern.compile("(.*) 感染患者");
+			Pattern pattern2 = Pattern.compile("流入 (.*) \\d+人");
+			Pattern pattern3 = Pattern.compile("\\W+ (.*)人");
+			
+			return getString(text, pattern1, pattern2, pattern3);
+		}
+
+		public static RegexParameter getEmptiesSp(String text) {
+			Pattern pattern1 = Pattern.compile("(.*) 疑似患者");
+			Pattern pattern2 = Pattern.compile("流入 (.*) \\d+人");
+			Pattern pattern3 = Pattern.compile("\\W+ (.*)人");
+			
+			return getString(text, pattern1, pattern2, pattern3);
+		}
+
+		public static RegexParameter getDead(String text) {
+			Pattern pattern1 = Pattern.compile("(.*) 死亡");
+			Pattern pattern2 = Pattern.compile("死亡 (.*)人");
+			
+			return getString(text, pattern1, pattern2);
+		}
+
+		public static RegexParameter getCure(String text) {
+			Pattern pattern1 = Pattern.compile("(.*) 治愈");
+			Pattern pattern2 = Pattern.compile("治愈 (.*)人");
+			
+			return getString(text, pattern1, pattern2);
+		}
+
+		public static RegexParameter getSpToIp(String text) {
+			Pattern pattern1 = Pattern.compile("(.*) 疑似患者");
+			Pattern pattern2 = Pattern.compile("确诊感染 (.*)人");
+			
+			return getString(text, pattern1, pattern2);
+		}
+
+		public static RegexParameter getRemoveSp(String text) {
+			Pattern pattern1 = Pattern.compile("(.*) 排除");
+			Pattern pattern2 = Pattern.compile("疑似患者 (.*)人");
+			
+			return getString(text, pattern1, pattern2);
+		}
+
+		/**
+		 * 
+		 * @description 将正则表达式匹配的语句用matcher处理，然后获得第一个子部分，存入RegexParameter
+		 * @param text pattern1 pattern2
+		 * @return RegexParameter
+		 */
+		
+		private static RegexParameter getString(String text, Pattern pattern1, Pattern pattern2) {
+			RegexParameter regexParameter = new RegexParameter();
+			Matcher matcher1 = pattern1.matcher(text);
+			Matcher matcher2 = pattern2.matcher(text);
+			
+			if (matcher1.find()) {
+				regexParameter.setPattern1(matcher1.group(1));
+			}
+			if (matcher2.find()) {
+				regexParameter.setPattern3(Integer.parseInt(matcher2.group(1)));
+			}
+			
+			return regexParameter;
+		}
+
+		/**
+		 * 
+		 * @description 将正则表达式匹配的语句用matcher处理，然后获得第一个子部分，存入RegexParameter
+		 * @param text pattern1 pattern2 pattern3
+		 * @return RegexParameter
+		 */
+		
+		private static RegexParameter getString(String text, Pattern pattern1, Pattern pattern2, Pattern pattern3) {
+			RegexParameter regexParameter = new RegexParameter();
+			Matcher matcher1 = pattern1.matcher(text);
+			Matcher matcher2 = pattern2.matcher(text);
+			Matcher matcher3 = pattern3.matcher(text);
+		
+			if (matcher1.find()) {
+				regexParameter.setPattern1(matcher1.group(1));
+			}
+			if (matcher2.find()) {
+				regexParameter.setPattern2(matcher2.group(1));
+			}
+			if (matcher3.find()) {
+				regexParameter.setPattern3(Integer.parseInt(matcher3.group(1)));
+			}
+			
+			return regexParameter;
+		}
+	}
+	
 	public static void main(String[] args) throws IOException {
 		List<String> list = new ArrayList<String>();
 
