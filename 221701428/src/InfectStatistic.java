@@ -359,6 +359,72 @@ class InfectStatistic {
         }
     }
 
+    /** description:输出文件的相关方法 */
+    static class OutPutFile {
+
+        /** description:遍历哈希表，打印所有信息 */
+        public static void writeInfoOfHashtale(Hashtable<String, Province> hashtable,OutputStreamWriter outputStreamWriter) {
+            List<Map.Entry<String,Province>> list = OperateHashTable.sortByHead(hashtable);       //排序
+            Province province = null;
+            try {
+                for (Map.Entry entry : list){
+                    province = (Province) entry.getValue();
+
+                    if(paramentersOfType[0].equals("null")) {   //没有指定输出类型
+                        outputStreamWriter.write(province.getDefaultResult() + "\r\n");
+                        outputStreamWriter.flush();
+                    }else {
+                        outputStreamWriter.write(province.getAppointResult(paramentersOfType) + "\r\n");
+                        outputStreamWriter.flush();
+                    }
+                }
+            } catch (Exception e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        }
+        /**  description：写入文件 */
+        public static void writeFile(Hashtable<String, Province> hashtable, FileOutputStream fileOutputStream,
+                                     String[] paramentersOfType, String[] paramentersOfProvince,String[] commandLineStrings) {
+            String endLineString = "// 该文档并非真实数据，仅供测试使用";
+
+            InfectStatistic infectStatistic = new InfectStatistic();
+            try {
+
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,"UTF8");
+
+                if(paramentersOfProvince[0].equals("null")) {   //没有指定省份
+
+                    writeInfoOfHashtale(hashtable, outputStreamWriter);
+
+                    outputStreamWriter.write(endLineString + "\r\n" );
+                    outputStreamWriter.flush();
+                }else { //指定省份
+                    Hashtable<String, Province> requestProvinceHashtable = new Hashtable<String, InfectStatistic.Province>();
+                    Province province = null;
+                    for(int i=0; paramentersOfProvince[i] != null; i++) {
+                        if(!hashtable.containsKey(paramentersOfProvince[i])) {  //哈希表中不存在
+                            province = infectStatistic.new Province(paramentersOfProvince[i], 0, 0, 0, 0);
+                            requestProvinceHashtable.put(paramentersOfProvince[i], province);
+                        }else { //哈希表中存在
+                            province = hashtable.get(paramentersOfProvince[i]);
+                            requestProvinceHashtable.put(paramentersOfProvince[i], province);
+                        }
+                    }
+
+                    writeInfoOfHashtale(requestProvinceHashtable, outputStreamWriter);
+
+                    outputStreamWriter.write(endLineString + "\r\n" );
+                    outputStreamWriter.flush();
+                }
+
+            } catch (Exception e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static void main(String[] args) {
         //...
     }
