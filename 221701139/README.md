@@ -3,7 +3,7 @@
 该项目只需一条简单的命令即可统计疫情信息,
 # 运行方法
 命令行（win+r cmd）cd到项目src下，之后输入命令：
-``` java InfectStatistic list -date 2020-01-22 -log D:/log/ -out D:/output.txt ```
+``` java InfectStatistic list -date 2020-01-22 -log 221701139/log/ -out D:/output.txt ```
 目前支持的命令为list
 其相关参数为:
 * `-log` 指定日志目录的位置，该项必会附带，请直接使用传入的路径，而不是自己设置路径
@@ -14,9 +14,11 @@
 # 功能简介
 该程序可以根据疫情信息,以文本形式给出统计信息,之后将统计的信息输出到文件上
 <br>
-
+1. 根据参数条件输出内容
 # 作业连接
 [17级软件工程寒假第二次作业](https://edu.cnblogs.com/campus/fzu/2020SpringW/homework/10281)
 # 博客链接
+[寒假作业（2/2）——疫情统计](https://www.cnblogs.com/cybersa/p/12323482.html)
+
 
 
