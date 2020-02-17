@@ -595,6 +595,7 @@ class AllInformation {
         types.add("死亡");
         // 需要输出的省份名
         List<String> outProvinces = argParser.getVals("-province");
+
         try {
             FileOutputStream fos = new FileOutputStream(logPath);
             // 键为省份信息,第一个为全国,其他为按照拼音顺序
@@ -604,20 +605,29 @@ class AllInformation {
                 StringBuilder line = new StringBuilder(province);
 
                 // 如果要输出的省份中不包含就跳过
-                // 这里有错
-                if (outProvinces!=null && !outProvinces.contains(province)) { continue; }
 
-                if (populations[0]!=0 || populations[1]!=0 || populations[2]!=0 || populations[3]!=0) {
-                    for (Integer index:indexTypes) {
-                        line.append(" ").append(types.get(index)).append(populations[index]).append("人");
-                    }
-                    line.append("\n");
-                    // line = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
-                    // province,populations[0],populations[1],populations[2],populations[3]);
-                    // 写入信息
-                    fos.write(line.toString().getBytes());
+//                if (outProvinces!=null && !outProvinces.contains(province)) { continue; }
+                if (outProvinces!=null) {
+                    if (outProvinces!=null && outProvinces.contains(province)) {
+                        for (Integer index:indexTypes) {
+                            line.append(" ").append(types.get(index)).append(populations[index]).append("人");
+                        }
+                        line.append("\n");
+                        fos.write(line.toString().getBytes());
+                    };
                 }
-
+                else {
+                    if (populations[0]!=0 || populations[1]!=0 || populations[2]!=0 || populations[3]!=0) {
+                        for (Integer index:indexTypes) {
+                            line.append(" ").append(types.get(index)).append(populations[index]).append("人");
+                        }
+                        line.append("\n");
+                        // line = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n",
+                        // province,populations[0],populations[1],populations[2],populations[3]);
+                        // 写入信息
+                        fos.write(line.toString().getBytes());
+                    }
+                }
             }
             String endLine = "// 该文档并非真实数据，仅供测试使用\n";
             fos.write(endLine.getBytes());
