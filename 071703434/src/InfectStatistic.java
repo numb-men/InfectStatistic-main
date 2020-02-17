@@ -1,13 +1,14 @@
 package src;
 
+
 import java.io.*;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -22,6 +23,7 @@ class InfectStatistic {
 
     public static void main(String[] args) throws Exception {
 
+    	
     	String[] string= {
     			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "D:/output.txt",
         	};
@@ -34,7 +36,7 @@ class InfectStatistic {
 }
 
 /**
- * 命令行
+ *	命令行
  * 
  * @author ZhangYuhui
  * @version 1.0
@@ -243,16 +245,13 @@ class CommandLineParser{
 	
 	
 	public CommandLineParser(String commandName,String[] parameters) {
-		
-//		System.out.println(commandName);//TODO
-//		System.out.println(parameters);//TODO
 		if(commandName=="list") {
 			parseListCommand(parameters);
 		}
 	}
 	
 	public void parseListCommand(String[] parameters) {
-		//System.out.println(123);
+
 		ListParameters listParameters=new ListParameters(parameters);
 		listParameters.formatParameters();
 //		listParameters.judgeParameters();
@@ -268,7 +267,6 @@ class CommandLineParser{
 	public void excuteListCommand() throws Exception {
 		
 		String logAddress=(String) parameterMap.get("-log").value;
-		
 		LogFileReader logFileReader=new LogFileReader(logAddress);
 		
 		String content=logFileReader.defaultContent();
@@ -277,11 +275,14 @@ class CommandLineParser{
 		contentParaser.paraseLogContent(content);
 		Map<String,DailyInfectItem> resultMap=contentParaser.resultMap;
 		
-		for(Map.Entry<String, DailyInfectItem> entry:resultMap.entrySet()) {
-			System.out.println(entry.getKey()+entry.getValue());
-		}
-		//String outputAddress=(String) ParameterMap.get("-out").value;
-		//ResultOutputter outputter=new ResultOutputter(outputAddress);
+		
+//		for(Map.Entry<String, DailyInfectItem> entry:resultMap.entrySet()) {
+//			System.out.println(entry.getKey()+entry.getValue().getAllResult());
+//		}
+//		
+		
+//		String outputAddress=(String) ParameterMap.get("-out").value;
+//		ResultOutputter outputter=new ResultOutputter(outputAddress);
 	}
 }
 
@@ -583,29 +584,24 @@ class LogContentParaser{
 	 * @throws Exception 
 	 */
 	public void paraseLogContent(String content) throws Exception {
-		
-//		RegExpTextParser parser=new RegExpTextParser();
-//		String date;
-//		String[] lines;
-//		DailyInfectItem item=null;
-//		for(Map.Entry<String, String> entry:dailyInfectMap.entrySet()) {
-//			item=new DailyInfectItem(0, 0, 0, 0);
-//			date=entry.getKey();
-//			lines=entry.getValue().split("\n");
-//			for(String line:lines) {
-//				// TODO:匹配正则表达式
-//				parser.extractType(line);
-//			}
-//		}
-//		resultMap=parser.getInfectMap();
-		
+			
 		RegExpTextParser contentParser=new RegExpTextParser();
 		String[] lines=content.split("\n");
 		for(int i=0;i<lines.length;i++) {
 			contentParser.extractType(lines[i]);
 		}
 		
-		resultMap=contentParser.getInfectMap();
+		resultMap=contentParser.getInfectMap();//TODO
+		
+		int totalIp=0,totalSp=0,totalCure=0,totalDead=0;
+		for(Map.Entry<String, DailyInfectItem> entry:resultMap.entrySet()) {
+			totalIp+=entry.getValue().getIp();
+			totalSp+=entry.getValue().getSp();
+			totalCure+=entry.getValue().getCure();
+			totalDead+=entry.getValue().getDead();
+		}
+		
+		resultMap.put("全国", new DailyInfectItem(totalIp, totalSp, totalCure, totalDead));
 		
 	}
 }
@@ -637,14 +633,28 @@ class ResultOutputter{
 	}
 	
 	
-	public String outputResult(Map<String,DailyInfectItem> resultMap) {
+	public void outputResult(Map<String,DailyInfectItem> resultMap) {
 		
 		
+		Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);   
+		resultMap.put("冲庆", resultMap.remove("重庆"));
+		List<Map.Entry<String, DailyInfectItem>> list=new ArrayList<Map.Entry<String,DailyInfectItem>>(resultMap.entrySet());
+		Collections.sort(list,new Comparator<Map.Entry<String, DailyInfectItem>>() {
+			 public int compare(Map.Entry<String, DailyInfectItem> o1, Map.Entry<String, DailyInfectItem> o2) {
+				 return cmp.compare(o1.getKey(), o2.getKey());
+			 }
+		});
 		
+		//resultMap.put("重庆", resultMap.remove("冲庆"));
+		for(int i=0;i<list.size();i++) {
+			if(list.get(i).getKey()!="冲庆") {
+				System.out.println(list.get(i).getKey()+list.get(i).getValue().getAllResult());
+			}else{
+				System.out.println("重庆"+list.get(i).getValue().getAllResult());
+			}
+			
+		}
 		
-		
-		
-		return null;
 	}
 	
 }
@@ -793,7 +803,7 @@ class RegExpTextParser{
 				throw new Exception();
 			}
 			infectMap.get(m.group(1)).setIp(orignalNum1-flowNum);
-			infectMap.get(m.group(1)).setIp(orignalNum2+flowNum);
+			infectMap.get(m.group(2)).setIp(orignalNum2+flowNum);
     	}
     	
     }
@@ -824,7 +834,7 @@ class RegExpTextParser{
 				throw new Exception();
 			}
 			infectMap.get(m.group(1)).setSp(orignalNum1-flowNum);
-			infectMap.get(m.group(1)).setSp(orignalNum2+flowNum);
+			infectMap.get(m.group(2)).setSp(orignalNum2+flowNum);
     	}
     }
     
@@ -878,7 +888,7 @@ class RegExpTextParser{
     				throw new Exception();
     			}
     			infectMap.get(m.group(1)).setIp(originIp-cureNum);
-    			infectMap.get(m.group(1)).setDead(originCure+cureNum);
+    			infectMap.get(m.group(1)).setCure(originCure+cureNum);
     		}
     	}
     }
@@ -936,15 +946,6 @@ class RegExpTextParser{
     		}
     	}
     }
-}
-
-class MapKeyComparator implements Comparator<String>{
-	@Override
-	public int compare(String o1, String o2) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	
 }
 
 
