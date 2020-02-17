@@ -1,6 +1,9 @@
-
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.*;
 import java.text.SimpleDateFormat;
+
 
 /**
  * InfectStatistic
@@ -15,17 +18,23 @@ import java.text.SimpleDateFormat;
 class InfectStatistic {
     public static void main(String[] args) {
         
-        // String[] ProvinceList=
-        // {
-        //     "全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江",
-        //     "湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海",
-        //     "四川","天津","西藏","新疆","云南","浙江"
-        // };
+        String[] ProvinceNameList=
+        {
+            "全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州",
+            "海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西",
+            "辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川",
+            "天津","西藏","新疆","云南","浙江"
+        };
+        int len=ProvinceNameList.length;
+        Province[] ProvinceList=new Province[len];
+        int i=0;
+        for(i=0;i<len;i++)
+        {
+            ProvinceList[i]=new Province(ProvinceNameList[i]);
+        }
+        //未完成
+        Command command=new Command();
 
-
-
-
-        System.out.println("test");
     }
 }
 
@@ -54,19 +63,6 @@ class Province
         this.cure=0;
         this.dead=0;
     }
-
-    //各类人数的增减操作
-    public void Add_ip(int num){ip+=num;}
-    public void Sub_ip(int num){ip+=num;}
-
-    public void Add_sp(int num){sp+=num;}
-    public void Sub_sp(int num){sp+=num;}
-
-    public void Add_cure(int num){cure+=num;}
-    public void Sub_cure(int num){cure+=num;}
-
-    public void Add_dead(int num){ip+=num;}
-    public void Sub_dead(int num){ip+=num;}
 
     //各类人数数量的返回
     public int Get_ip(){return ip;}
@@ -228,11 +224,11 @@ class Command
 class OpenReadFile
 {
     String path;
-    String date;
+    //String date;
     String OutProvince;//流出省份
     String InProvince;//流入省份
     int num;
-    String[] content=
+    String[] filelist=
     {
         "(\\W+) 新增 感染患者 (\\d+)人",
         "(\\W+) 新增 疑似患者 (\\d+)人",
@@ -244,13 +240,27 @@ class OpenReadFile
 		"(\\W+) 排除 疑似患者 (\\d+)人"
     };
 
-    public OpenReadFile(String path,String date)
+    public OpenReadFile(String path)
     {
         this.path=path;
-        this.date=date;
+        //this.date=date;
         this.OutProvince="";
         this.InProvince="";
         this.num=0;
+    }
+
+    public void ReadFile()
+    {
+        FileInputStream fls=null;
+        FileOutputStream fos=null;
+        try{
+            fls=new FileInputStream(path);
+            //未完成
+
+
+        }catch(Exception e){
+            System.out.println(e.toString());
+        }
     }
 
 }
@@ -282,9 +292,10 @@ class WriteNewFile
         }
 
     }
+
     public void Write()
     {
-        
+        //未完成
 
     }
 
