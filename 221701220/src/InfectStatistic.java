@@ -11,6 +11,7 @@
 import java.util.*;
 import java.lang.String;
 import java.util.regex.*;
+import java.io.*;
 
 
 enum PatientType {
@@ -383,8 +384,163 @@ class LogLineProcessor {
 }
 
 
+class FileComparator implements Comparator<File> {
+
+    @Override
+    public int compare(File file1, File file2) {
+        return file1.getName().compareTo(file2.getName());
+    }
+
+}
+
+
+class FileProcessor {
+
+    private static final String SUFFIX = ".log.txt";
+    private TreeSet<File> fileTreeSet;
+    private ProvinceTreeMap provinceTreeMap;
+    private LogLineProcessor logLineProcessor;
+
+    private File sourceDirectory;
+    private FileWriter fileWriter;
+    private String dateString;
+    private List<PatientType> patientTypes;
+    private Set<String> provinceSet;
+    private boolean allowNation;
+
+    public FileProcessor(ProvinceTreeMap provinceTreeMap, CommandArgsProcessor commandArgsProcessor) {
+
+        fileTreeSet = new TreeSet<>(new FileComparator());
+        this.provinceTreeMap = provinceTreeMap;
+        logLineProcessor = new LogLineProcessor(provinceTreeMap);
+        patientTypes = new LinkedList<>();
+        argsUse(commandArgsProcessor);
+    }
+
+    private void argsUse(CommandArgsProcessor processor) {
+
+        sourceDirectory = new File(processor.getSourceDirectoryPath());
+        try {
+            fileWriter = new FileWriter(processor.getOutputFilePath());
+        }
+        catch (IOException exc) {
+            System.out.println(Arrays.toString(exc.getStackTrace()));
+            System.exit(1);
+        }
+        this.dateString = processor.getDateString();
+
+        TreeSet<String> provinceSet = processor.getProvinceSet();
+        allowNation = ( provinceSet.isEmpty() || provinceSet.contains("全国") );
+        this.provinceSet = provinceSet.isEmpty() ? provinceTreeMap.getKeySet() : provinceSet;
+
+        patientTypes = processor.getPatientTypes();
+
+    }
+
+    private void setProcessedFiles() {
+
+        if(dateString == null) {
+            fileTreeSet.addAll(Arrays.asList(sourceDirectory.listFiles()));
+        }
+        else {
+            for(File file : sourceDirectory.listFiles()) {
+                if(file.getName().compareTo(dateString + SUFFIX) <= 0)
+                    fileTreeSet.add(file);
+            }
+            if(fileTreeSet.size() == sourceDirectory.listFiles().length &&
+                    fileTreeSet.last().getName().compareTo(dateString + SUFFIX) < 0) {
+                System.out.println("日期超出范围");
+                System.exit(1);
+            }
+        }
+
+    }
+
+    public void processFiles() {
+
+        setProcessedFiles();
+
+        for (File file:fileTreeSet) {
+            String logLine;
+            try {
+                FileReader fileReader = new FileReader(file.getPath());
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+                while ((logLine = bufferedReader.readLine()) != null) {
+                    logLineProcessor.processLogLine(logLine);
+                }
+                bufferedReader.close();
+                fileReader.close();
+            }
+            catch (IOException exc) {
+                System.out.println(Arrays.toString(exc.getStackTrace()));
+                System.exit(1);
+            }
+        }
+
+    }
+
+    private void outputNationData() {
+
+        if(allowNation) {
+            provinceSet.remove("全国");
+            try {
+                fileWriter.write("全国");
+                for (PatientType patientType : patientTypes) {
+                    fileWriter.write(" " + patientType.getTypeName());
+                    fileWriter.write(Province.getNationalNumbers()[patientType.ordinal()] + "人");
+                }
+                fileWriter.write('\n');
+            }
+            catch (IOException exc) {
+                System.out.println(Arrays.toString(exc.getStackTrace()));
+                System.exit(1);
+            }
+        }
+    }
+
+    public void outputResult() {
+
+        outputNationData();
+
+        Iterator<String> iterator = provinceSet.iterator();
+        try {
+            while (iterator.hasNext()) {
+                String provinceName = iterator.next();
+                if (!provinceTreeMap.isExistedProvince(provinceName)) {
+                    provinceTreeMap.createNewProvince(provinceName);
+                }
+                Province province = provinceTreeMap.getProvinceByName(provinceName);
+
+                fileWriter.write(provinceName);
+                for (PatientType patientType : patientTypes) {
+                    fileWriter.write(" " + patientType.getTypeName());
+                    fileWriter.write(province.getLocalNumbers()[patientType.ordinal()] + "人");
+                }
+                fileWriter.write('\n');
+            }
+            fileWriter.write("// 该文档并非真实数据，仅供测试使用\n");
+            fileWriter.close();
+        }
+        catch (IOException exc) {
+            System.out.println(Arrays.toString(exc.getStackTrace()));
+            System.exit(1);
+        }
+
+    }
+
+}
+
+
 class InfectStatistic {
     public static void main(String[] args) {
         
+		Province.setNationalNumbers(new int[PatientType.values().length]);
+        CommandArgsProcessor commandArgsProcessor = new CommandArgsProcessor(args);
+        commandArgsProcessor.processAllOptions();
+        ProvinceTreeMap provinceTreeMap = new ProvinceTreeMap();
+        FileProcessor fileProcessor = new FileProcessor(provinceTreeMap, commandArgsProcessor);
+        fileProcessor.processFiles();
+        fileProcessor.outputResult();
+
     }
 }
