@@ -118,21 +118,33 @@ public class InfectStatistic {
             File file = new File(logPath);
             if (file.isDirectory()) {
                 String names [] = file.list();
+                String nameOfFirst = names[0];
                 String nameOfLast = names[names.length-1];
                 if (dateCount == 0) {
                     //未指定日期,获取最后一个文件名，即最新日志文件
                     dateInput = nameOfLast;
                 } else {
-                    
                     dateInput = dateInput + ".log.txt";
+                }
+                //首先与最早日志日期比较
+                int firstRes = dateInput.compareTo(nameOfFirst);
+                if (firstRes < 0) {
+                    System.out.print("指定日期"+dateInput+"未出现疫情");
+                    System.exit(0);
+                }
+                //其次与最晚日志日期比较
+                int lastRes = dateInput.compareTo(nameOfLast);
+                if (lastRes > 0) {
+                    System.out.print("日期超出范围");
+                    System.exit(0);
                 }
                 for (String name : names) {
                     int res = dateInput.compareTo(name);
                     if (res < 0) {
-                        //指定日期比日志文件的日期晚
+                        //指定日期比日志文件的日期早
                         break;
                     } else {
-                        //当前name的日期比指定日期（未指定则认为指定日志最后一个日期即最新）早或同一天
+                        //当前日志文件的日期比指定日期（未指定则认为指定日志最后一个日期即最新）早或同一天
                         //读取 String filePath = logPath + "/" + name 文件
                         String filePath = logPath + "/" +name;
                         //处理，统计
