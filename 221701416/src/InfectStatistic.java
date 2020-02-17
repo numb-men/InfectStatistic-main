@@ -5,6 +5,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 /**
  * InfectStatistic
  *
@@ -16,9 +18,12 @@ class InfectStatistic {
 	public static String log=new String();
 	public static String out=new String();
 	public static String date=new String("0000-00-00");
+	static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
+	static String tttString=df.format(new Date());
 	public static String []type= new String[4];
 	public static String []province=new String[31];
     public static void main(String[] args) throws IOException {
+    	System.out.print(tttString);
     	CoronavirusDetail CD=new CoronavirusDetail();
     	CD.Init();
     	AnalysisCommand(args);
