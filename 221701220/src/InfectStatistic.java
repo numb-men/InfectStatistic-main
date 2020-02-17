@@ -16,11 +16,12 @@ import java.io.*;
 
 enum PatientType {
 
-    INFECTION("¸ĞÈ¾»¼Õß","ip"),
-    SUSPECTED("ÒÉËÆ»¼Õß","sp"),
-    CURE("ÖÎÓú","cure"),
-    DEAD("ËÀÍö", "dead");
+    INFECTION("æ„ŸæŸ“æ‚£è€…","ip"),
+    SUSPECTED("ç–‘ä¼¼æ‚£è€…","sp"),
+    CURE("æ²»æ„ˆ","cure"),
+    DEAD("æ­»äº¡", "dead");
 
+	public static final int size = PatientType.values().length;
     private String typeName;
     private String abbr;
 
@@ -49,6 +50,7 @@ enum Option {
     DATE("-date"), TYPE("-type"),
     PROVINCE("-province");
 
+	public static final int size = Option.values().length;
     private String optionString;
 
     Option(String optionString) { this.optionString = optionString; }
@@ -68,9 +70,9 @@ enum Option {
 
 class ProvinceComparator implements Comparator<String> {
 
-    private static final String PROVINCE_STRING = "È«¹ú °²»Õ ±±¾© ÖØÇì ¸£½¨ "
-            + "¸ÊËà ¹ã¶« ¹ãÎ÷ ¹óÖİ º£ÄÏ ºÓ±± ºÓÄÏ ºÚÁú½­ ºş±± ºşÄÏ ¼ªÁÖ ½­ËÕ ½­Î÷ "
-            + "ÁÉÄş ÄÚÃÉ¹Å ÄşÏÄ Çàº£ É½¶« É½Î÷ ÉÂÎ÷ ÉÏº£ ËÄ´¨ Ìì½ò Î÷²Ø ĞÂ½® ÔÆÄÏ Õã½­";
+    private static final String PROVINCE_STRING = "å…¨å›½ å®‰å¾½ åŒ—äº¬ é‡åº† ç¦å»º "
+            + "ç”˜è‚ƒ å¹¿ä¸œ å¹¿è¥¿ è´µå· æµ·å— æ²³åŒ— æ²³å— é»‘é¾™æ±Ÿ æ¹–åŒ— æ¹–å— å‰æ— æ±Ÿè‹ æ±Ÿè¥¿ "
+            + "è¾½å® å†…è’™å¤ å®å¤ é’æµ· å±±ä¸œ å±±è¥¿ é™•è¥¿ ä¸Šæµ· å››å· å¤©æ´¥ è¥¿è— æ–°ç–† äº‘å— æµ™æ±Ÿ";
 
     @Override
     public int compare(String s1, String s2) {
@@ -89,7 +91,7 @@ class Province {
     private static int[] nationalNumbers;
     private int[] localNumbers;
 
-    Province() { localNumbers = new int[PatientType.values().length]; }
+    Province() { localNumbers = new int[PatientType.size]; }
 
     public static int[] getNationalNumbers() { return nationalNumbers; }
 
@@ -119,7 +121,7 @@ class CommandArgsProcessor {
 
     CommandArgsProcessor(String[] args) {
         this.args = args;
-        optionsIndex = new int[Option.values().length];
+        optionsIndex = new int[Option.size];
     }
 
     public String getSourceDirectoryPath() {
@@ -221,10 +223,10 @@ class CommandArgsProcessor {
 
 abstract class AbstractLogLineProcessor {
 
-    public static String INCREASE = "ĞÂÔö.*ÈË";
-    public static String MOVE = "Á÷Èë.*ÈË";
-    public static String DECREASE = "[ËÀÍö|ÖÎÓú].*ÈË";
-    public static String CHANGE = "[È·Õï|ÅÅ³ı].*ÈË";
+    public static String INCREASE = "æ–°å¢.*äºº";
+    public static String MOVE = "æµå…¥.*äºº";
+    public static String DECREASE = "[æ­»äº¡|æ²»æ„ˆ].*äºº";
+    public static String CHANGE = "[ç¡®è¯Š|æ’é™¤].*äºº";
 
     protected static ProvinceTreeMap provinceTreeMap;
     protected Pattern pattern;
@@ -265,7 +267,7 @@ class IncreaseProcessor extends AbstractLogLineProcessor {
         String provinceName = lineStrings[0];
         PatientType patientType =
                 lineStrings[2].equals(PatientType.INFECTION.getTypeName()) ? PatientType.INFECTION : PatientType.SUSPECTED;
-        int increasedNum = Integer.parseInt( lineStrings[3].replace("ÈË", "") );
+        int increasedNum = Integer.parseInt( lineStrings[3].replace("äºº", "") );
 
         if(!provinceTreeMap.isExistedProvince(provinceName)) {
             provinceTreeMap.createNewProvince(provinceName);
@@ -291,7 +293,7 @@ class MoveProcessor extends AbstractLogLineProcessor {
         PatientType patientType =
                 lineStrings[1].equals(PatientType.INFECTION.getTypeName()) ? PatientType.INFECTION : PatientType.SUSPECTED;
         String provinceName2 = lineStrings[3];
-        int movedNum = Integer.parseInt( lineStrings[4].replace("ÈË", "") );
+        int movedNum = Integer.parseInt( lineStrings[4].replace("äºº", "") );
 
         if(!provinceTreeMap.isExistedProvince(provinceName2)) {
             provinceTreeMap.createNewProvince(provinceName2);
@@ -318,7 +320,7 @@ class DecreaseProcessor extends AbstractLogLineProcessor {
         String provinceName = lineStrings[0];
         PatientType patientType =
                 lineStrings[1].equals(PatientType.DEAD.getTypeName()) ? PatientType.DEAD : PatientType.CURE;
-        int decreasedNum = Integer.parseInt( lineStrings[2].replace("ÈË", "") );
+        int decreasedNum = Integer.parseInt( lineStrings[2].replace("äºº", "") );
 
         if(!provinceTreeMap.isExistedProvince(provinceName)) {
             provinceTreeMap.createNewProvince(provinceName);
@@ -340,10 +342,10 @@ class ChangeProcessor extends AbstractLogLineProcessor {
     @Override
     protected void processLogLine(String logLine) {
 
-        boolean isConfirmed = logLine.contains("È·Õï");
+        boolean isConfirmed = logLine.contains("ç¡®è¯Š");
         String[] lineStrings = logLine.split(" ");
         String provinceName = lineStrings[0];
-        int changedNum = Integer.parseInt( lineStrings[3].replace("ÈË", "") );
+        int changedNum = Integer.parseInt( lineStrings[3].replace("äºº", "") );
 
         if(!provinceTreeMap.isExistedProvince(provinceName)) {
             provinceTreeMap.createNewProvince(provinceName);
@@ -430,7 +432,7 @@ class FileProcessor {
         this.dateString = processor.getDateString();
 
         TreeSet<String> provinceSet = processor.getProvinceSet();
-        allowNation = ( provinceSet.isEmpty() || provinceSet.contains("È«¹ú") );
+        allowNation = ( provinceSet.isEmpty() || provinceSet.contains("å…¨å›½") );
         this.provinceSet = provinceSet.isEmpty() ? provinceTreeMap.getKeySet() : provinceSet;
 
         patientTypes = processor.getPatientTypes();
@@ -449,7 +451,7 @@ class FileProcessor {
             }
             if(fileTreeSet.size() == sourceDirectory.listFiles().length &&
                     fileTreeSet.last().getName().compareTo(dateString + SUFFIX) < 0) {
-                System.out.println("ÈÕÆÚ³¬³ö·¶Î§");
+                System.out.println("æ—¥æœŸè¶…å‡ºèŒƒå›´");
                 System.exit(1);
             }
         }
@@ -482,12 +484,12 @@ class FileProcessor {
     private void outputNationData() {
 
         if(allowNation) {
-            provinceSet.remove("È«¹ú");
+            provinceSet.remove("å…¨å›½");
             try {
-                fileWriter.write("È«¹ú");
+                fileWriter.write("å…¨å›½");
                 for (PatientType patientType : patientTypes) {
                     fileWriter.write(" " + patientType.getTypeName());
-                    fileWriter.write(Province.getNationalNumbers()[patientType.ordinal()] + "ÈË");
+                    fileWriter.write(Province.getNationalNumbers()[patientType.ordinal()] + "äºº");
                 }
                 fileWriter.write('\n');
             }
@@ -514,11 +516,11 @@ class FileProcessor {
                 fileWriter.write(provinceName);
                 for (PatientType patientType : patientTypes) {
                     fileWriter.write(" " + patientType.getTypeName());
-                    fileWriter.write(province.getLocalNumbers()[patientType.ordinal()] + "ÈË");
+                    fileWriter.write(province.getLocalNumbers()[patientType.ordinal()] + "äºº");
                 }
                 fileWriter.write('\n');
             }
-            fileWriter.write("// ¸ÃÎÄµµ²¢·ÇÕæÊµÊı¾İ£¬½ö¹©²âÊÔÊ¹ÓÃ\n");
+            fileWriter.write("// è¯¥æ–‡æ¡£å¹¶éçœŸå®æ•°æ®ï¼Œä»…ä¾›æµ‹è¯•ä½¿ç”¨\n");
             fileWriter.close();
         }
         catch (IOException exc) {
@@ -533,8 +535,8 @@ class FileProcessor {
 
 class InfectStatistic {
     public static void main(String[] args) {
-        
-		Province.setNationalNumbers(new int[PatientType.values().length]);
+
+		Province.setNationalNumbers(new int[PatientType.size]);
         CommandArgsProcessor commandArgsProcessor = new CommandArgsProcessor(args);
         commandArgsProcessor.processAllOptions();
         ProvinceTreeMap provinceTreeMap = new ProvinceTreeMap();
