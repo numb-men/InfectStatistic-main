@@ -11,20 +11,22 @@ class InfectStatistic
 {
     public static void main(String[] args)
     {
-    	//½¨Á¢Ê¡·İÃûÊı×é£¨°üÀ¨È«¹ú£©
-    	String province[]={"È«¹ú","°²»Õ","±±¾©","ÖØÇì","¸£½¨","¸ÊËà","¹ã¶«","¹ãÎ÷",
-    			"¹óÖİ","º£ÄÏ","ºÓ±±","ºÓÄÏ","ºÚÁú½­","ºş±±","ºşÄÏ","¼ªÁÖ","½­ËÕ",
-    			"½­Î÷","ÁÉÄş","ÄÚÃÉ¹Å","ÄşÏÄ","Çàº£","É½¶«","É½Î÷","ÉÂÎ÷","ÉÏº£",
-    			"ËÄ´¨","Ìì½ò","Î÷²Ø","ĞÂ½®","ÔÆÄÏ","Õã½­"};
-    	//¼ÇÂ¼¸÷Ê¡£¨°üÀ¨È«¹ú£©¸÷ÖÖÀàĞÍµÄÈËµÄÊıÁ¿
+    	//å»ºç«‹çœä»½åæ•°ç»„ï¼ˆåŒ…æ‹¬å…¨å›½ï¼‰
+    	String province[]={"å…¨å›½","å®‰å¾½","åŒ—äº¬","é‡åº†","ç¦å»º","ç”˜è‚ƒ","å¹¿ä¸œ","å¹¿è¥¿",
+    			"è´µå·","æµ·å—","æ²³åŒ—","æ²³å—","é»‘é¾™æ±Ÿ","æ¹–åŒ—","æ¹–å—","å‰æ—","æ±Ÿè‹",
+    			"æ±Ÿè¥¿","è¾½å®","å†…è’™å¤","å®å¤","é’æµ·","å±±ä¸œ","å±±è¥¿","é™•è¥¿","ä¸Šæµ·",
+    			"å››å·","å¤©æ´¥","è¥¿è—","æ–°ç–†","äº‘å—","æµ™æ±Ÿ"};
+    	String type[]={"ip","sp","cure","dead"};
+    	//è®°å½•å„çœï¼ˆåŒ…æ‹¬å…¨å›½ï¼‰å„ç§ç±»å‹çš„äººçš„æ•°é‡
     	int[][] number=new int[32][4];
-    	//½¨Á¢´æ·Å¸÷ÀàĞÍÃüÁîĞĞ²ÎÊıµÄArrayList
-    	ArrayList<String> logList=new ArrayList<String>();
-		ArrayList<String> outList=new ArrayList<String>();
-		ArrayList<String> dateList=new ArrayList<String>();
+    	//å»ºç«‹å­˜æ”¾å„ç±»å‹å‘½ä»¤è¡Œå‚æ•°çš„ArrayList
+    	String logList=new String();
+		String outList=new String();
+		String dateList=new String();
 		ArrayList<String> typeList=new ArrayList<String>();
 		ArrayList<String> provinceList=new ArrayList<String>();
-		//³õÊ¼»¯¶şÎ¬Êı×énumber
+		
+		//åˆå§‹åŒ–äºŒç»´æ•°ç»„number
     	for (int i=0;i<32;i++)
     	{
     		for (int j=0;j<4;j++)
@@ -32,50 +34,17 @@ class InfectStatistic
     			number[i][j]=0;
     		}
     	}
-    	//µÃµ½´æ·Å¸÷ÀàĞÍÃüÁîĞĞ²ÎÊıµÄArrayList¾ßÌåÖµ
+    	//å¾—åˆ°å­˜æ”¾å„ç±»å‹å‘½ä»¤è¡Œå‚æ•°çš„ArrayListå…·ä½“å€¼
     	for (int i=0;i<args.length;i++)
     	{
     		if (args[i].equals("-log")) {
-    			for (int j=i+1;j<args.length;j++) {
-    				if (!args[j].equals("-out")&&!args[j].equals("-date")&&
-    					!args[j].equals("-type")&&!args[j].equals("-province"))
-    				{
-    					logList.add(args[j]);
-    				}
-    				else 
-    				{
-    					i=j-1;
-    					break;
-    				}
-    			}
+    			logList=args[++i];
     		}
     		else if (args[i].equals("-out")) {
-    			for (int j=i+1;j<args.length;j++) {
-    				if (!args[j].equals("-log")&&!args[j].equals("-date")&&
-        				!args[j].equals("-type")&&!args[j].equals("-province"))
-    				{
-    					outList.add(args[j]);
-    				}
-    				else 
-    				{
-    					i=j-1;
-    					break;
-    				}
-    			}
+    			outList=args[++i];
     		}
     		else if (args[i].equals("-date")) {
-    			for (int j=i+1;j<args.length;j++) {
-    				if (!args[j].equals("-out")&&!args[j].equals("-log")&&
-    					!args[j].equals("-type")&&!args[j].equals("-province"))
-    				{
-    					dateList.add(args[j]);
-    				}
-    				else 
-    				{
-    					i=j-1;
-    					break;
-    				}
-    			}
+    			dateList=args[++i];
     		}
     		else if (args[i].equals("-type")) {
     			for (int j=i+1;j<args.length;j++) {
@@ -105,24 +74,18 @@ class InfectStatistic
     				}
     			}
     		}
-		}//»ñÈ¡ArrayListÑ­»·½áÊø
+		}//è·å–ArrayListå¾ªç¯ç»“æŸ
     	
     	//test
-    	for (int i=0;i<logList.size();i++)
-    		System.out.print(logList.get(i));
-    	System.out.println();
-    	for (int i=0;i<outList.size();i++)
-    		System.out.print(outList.get(i));
-    	System.out.println();
-    	for (int i=0;i<dateList.size();i++)
-    		System.out.print(dateList.get(i));
-    	System.out.println();
+    	System.out.println(logList);
+    	System.out.println(outList);
+    	System.out.println(dateList);
     	for (int i=0;i<typeList.size();i++)
     		System.out.print(typeList.get(i));
     	System.out.println();
     	for (int i=0;i<provinceList.size();i++)
     		System.out.print(provinceList.get(i));
     	System.out.println();
-    	//list -date 2020-01-22 -log D:/log/ -out D:/output.txt -province jingsu fujian  -type a b c -date 123 234 345
+    	//list -date 2020-01-22 -province jingsu fujian -log D:/log/ -out D:/output.txt -type a b c
     }
 }
