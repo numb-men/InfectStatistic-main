@@ -29,6 +29,7 @@ class InfectStatistic {
         	};
     	
    
+    
     	
     	//ListParameters lp=new ListParameters(string);
     	//lp.formatParameters();
@@ -328,6 +329,13 @@ class DailyInfectItem{
 	public void setDead(int dead) {
 		this.dead = dead;
 	}
+	
+	public void setAll(int ip, int sp, int cure, int dead) {
+		this.ip = ip;
+		this.sp = sp;
+		this.cure = cure;
+		this.dead = dead;
+	}
 
 	
 	public String getAllResult() {
@@ -604,26 +612,26 @@ class RegExp{
 	
 	public RegExp() {
 		for(int i=0;i<provinces.length;i++) {
-			provinceMap.put(provinces[i], null);
+			provinceMap.put(provinces[i], new DailyInfectItem(-1, -1, -1, -1));
 		}
 	}
 	
 	//用于匹配类型的字符串
     final String IP_ADD_PATTERN = "(.*) 新增 感染患者 (\\d*)人";
     final String SP_ADD_PATTERN = "(.*) 新增 疑似患者 (\\d*)人";
-    final String IP_FLOWIN_PATTERN = "(.*) 感染患者 流入 (.*) (\\d*)人";
-    final String SP_FLOWIN_PATTERN = "(.*) 疑似患者 流入 (.*) (\\d*)人";
+    final String IP_FLOW_PATTERN = "(.*) 感染患者 流入 (.*) (\\d*)人";
+    final String SP_FLOW_PATTERN = "(.*) 疑似患者 流入 (.*) (\\d*)人";
     final String DEAD_PATTERN = "(.*) 死亡 (\\d*)人";
     final String CURE_PATTERN = "(.*) 治愈 (\\d*)人";
     final String SP_CONFIRM_PATTERN = "(.*) 疑似患者 确诊感染 (\\d*)人";
     final String SP_EXCLUDE_PATTERN = "(.*) 排除 疑似患者 (\\d*)人";
     
     
-    public void extractType(String line) {
+    public void extractType(String line) throws Exception {
     	Pattern p1 = Pattern.compile(IP_ADD_PATTERN);
         Pattern p2 = Pattern.compile(SP_ADD_PATTERN);
-        Pattern p3 = Pattern.compile(IP_FLOWIN_PATTERN);
-        Pattern p4 = Pattern.compile(SP_FLOWIN_PATTERN);
+        Pattern p3 = Pattern.compile(IP_FLOW_PATTERN);
+        Pattern p4 = Pattern.compile(SP_FLOW_PATTERN);
         Pattern p5 = Pattern.compile(DEAD_PATTERN);
         Pattern p6 = Pattern.compile(CURE_PATTERN);
         Pattern p7 = Pattern.compile(SP_CONFIRM_PATTERN);
@@ -631,8 +639,8 @@ class RegExp{
         
         matchIpAdd(p1,line);
         matchSpAdd(p2,line);
-        matchIpFlowin(p3,line);
-        matchSpFlowin(p4, line);
+        matchIpFlow(p3,line);
+        matchSpFlow(p4, line);
         matchDead(p5, line);
         matchCure(p6, line);
         matchSpConfirm(p7, line);
@@ -647,12 +655,16 @@ class RegExp{
      * @param line
      */
     public void matchIpAdd(Pattern p,String line) {
-    	Matcher m1=p.matcher(line);
-    	while(m1.find()) {
-    		
-    		
+    	Matcher m=p.matcher(line);
+    	while(m.find()) {
+    		int addNum=Integer.valueOf(m.group(2));
+    		if(provinceMap.get(m.group(1))==null) {//省份不存在,则创建一个感染项
+    			provinceMap.get(m.group(1)).setAll(addNum, 0, 0, 0);
+    		}else {//省份存在，修改感染项
+    			int ip=provinceMap.get(m.group(1)).getIp();
+    			provinceMap.get(m.group(1)).setIp(ip+addNum);
+    		}
     	}
-    	
     }
     
     /**
@@ -662,67 +674,176 @@ class RegExp{
      * @param line
      */
     public void matchSpAdd(Pattern p,String line) {
+    	Matcher m=p.matcher(line);
+    	while(m.find()) {
+    		int addNum=Integer.valueOf(m.group(2));
+    		if(provinceMap.get(m.group(1)).getIp()<0) {//省份不存在,则创建一个感染项
+    			provinceMap.get(m.group(1)).setAll(0, addNum, 0, 0);
+    		}else {//省份存在，修改感染项
+    			int sp=provinceMap.get(m.group(1)).getSp();
+    			provinceMap.get(m.group(1)).setSp(sp+addNum);
+    		}
+    	}
+    }
+    
+    /**
+     * 	感染患者流动
+     * 
+     * @param p
+     * @param line
+     * @throws Exception //流出省不存在
+     */
+    public void matchIpFlow(Pattern p,String line) throws Exception {
+    	Matcher m=p.matcher(line);
+    	while(m.find()) {
+    		if(provinceMap.get(m.group(1)).getIp()<0) {//流出省不存在
+    			// TODO:报错
+    			throw new Exception();
+    		}
+    		if(provinceMap.get(m.group(2)).getIp()<0) {//流入省不存在
+    			provinceMap.get(m.group(2)).setAll(0, 0, 0, 0);
+    		}
+    		
+    		int flowNum=Integer.valueOf(m.group(3));
+			int orignalNum1=provinceMap.get(m.group(1)).getIp();
+			int orignalNum2=provinceMap.get(m.group(2)).getIp();
+			if(orignalNum1-flowNum<0) {
+				// TODO:当流出数目大于省份原有数目则报错
+				throw new Exception();
+			}
+			provinceMap.get(m.group(1)).setIp(orignalNum1-flowNum);
+			provinceMap.get(m.group(1)).setIp(orignalNum2+flowNum);
+    	}
     	
     }
     
     /**
-     * 	新增感染患者
+     * 	疑似患者流动
      * 
      * @param p
      * @param line
+     * @throws Exception 
      */
-    public void matchIpFlowin(Pattern p,String line) {
-    	
+    public void matchSpFlow(Pattern p,String line) throws Exception {
+    	Matcher m=p.matcher(line);
+    	while(m.find()) {
+    		if(provinceMap.get(m.group(1)).getIp()<0) {//流出省不存在
+    			// TODO:报错
+    			throw new Exception();
+    		}
+    		if(provinceMap.get(m.group(2)).getIp()<0) {//流入省不存在
+    			provinceMap.get(m.group(2)).setAll(0, 0, 0, 0);
+    		}
+    		
+    		int flowNum=Integer.valueOf(m.group(3));
+			int orignalNum1=provinceMap.get(m.group(1)).getSp();
+			int orignalNum2=provinceMap.get(m.group(2)).getSp();
+			if(orignalNum1-flowNum<0) {
+				// TODO:当流出数目大于省份原有数目则报错
+				throw new Exception();
+			}
+			provinceMap.get(m.group(1)).setSp(orignalNum1-flowNum);
+			provinceMap.get(m.group(1)).setSp(orignalNum2+flowNum);
+    	}
     }
     
     /**
-     * 	新增感染患者
+     * 	患者死亡
      * 
      * @param p
      * @param line
+     * @throws Exception 对应省份以前没有患者记录
      */
-    public void matchSpFlowin(Pattern p,String line) {
-    	
+    public void matchDead(Pattern p,String line) throws Exception {
+    	Matcher m=p.matcher(line);
+    	if(provinceMap.get(m.group(1)).getIp()<0) {//省份不存在
+			// TODO:报错
+			throw new Exception();
+		}else {
+			int deadNum=Integer.valueOf(m.group(2));
+			int originDead=provinceMap.get(m.group(1)).getDead();
+			int originIp=provinceMap.get(m.group(1)).getIp();
+			if(originIp-deadNum<0) {
+				// TODO：如果死亡人数大于原本感染患者人数则抛出异常
+				throw new Exception();
+			}
+			provinceMap.get(m.group(1)).setIp(originIp-deadNum);
+			provinceMap.get(m.group(1)).setDead(originDead+deadNum);
+		}
     }
     
     /**
-     * 	新增感染患者
+     * 	患者治愈
      * 
      * @param p
      * @param line
      */
-    public void matchDead(Pattern p,String line) {
-    	
+    public void matchCure(Pattern p,String line) throws Exception {
+    	Matcher m=p.matcher(line);
+    	if(provinceMap.get(m.group(1)).getIp()<0) {//省份不存在
+			// TODO:报错
+			throw new Exception();
+		}else {
+			int cureNum=Integer.valueOf(m.group(2));
+			int originCure=provinceMap.get(m.group(1)).getCure();
+			int originIp=provinceMap.get(m.group(1)).getIp();
+			if(originIp-cureNum<0) {
+				// TODO：如果治愈人数大于原本感染患者人数则抛出异常
+				throw new Exception();
+			}
+			provinceMap.get(m.group(1)).setIp(originIp-cureNum);
+			provinceMap.get(m.group(1)).setDead(originCure+cureNum);
+		}
     }
     
     /**
-     * 	新增感染患者
+     * 	疑似患者确认感染
      * 
      * @param p
      * @param line
+     * @throws Exception 
      */
-    public void matchCure(Pattern p,String line) {
-    	
+    public void matchSpConfirm(Pattern p,String line) throws Exception {
+    	Matcher m=p.matcher(line);
+    	if(provinceMap.get(m.group(1)).getIp()<0) {//省份不存在
+			// TODO:报错
+			throw new Exception();
+		}else {
+			
+			int confirmNum=Integer.valueOf(m.group(2));
+			int originIp=provinceMap.get(m.group(1)).getIp();
+			int originSp=provinceMap.get(m.group(1)).getSp();
+			if(originSp-confirmNum<0) {
+				// TODO：如果确诊患者人数大于原本疑似患者人数则抛出异常
+				throw new Exception();
+			}
+			provinceMap.get(m.group(1)).setIp(originIp+confirmNum);
+			provinceMap.get(m.group(1)).setSp(originSp-confirmNum);
+		}
     }
     
     /**
-     * 	新增感染患者
+     * 	排除疑似患者
      * 
      * @param p
      * @param line
+     * @throws Exception 
      */
-    public void matchSpConfirm(Pattern p,String line) {
-    	
-    }
-    
-    /**
-     * 	新增感染患者
-     * 
-     * @param p
-     * @param line
-     */
-    public void matchSpExclude(Pattern p,String line) {
-    	
+    public void matchSpExclude(Pattern p,String line) throws Exception {
+    	Matcher m=p.matcher(line);
+    	if(provinceMap.get(m.group(1)).getIp()<0) {//省份不存在
+			// TODO:报错
+			throw new Exception();
+		}else {
+			
+			int  excludeNum=Integer.valueOf(m.group(2));
+			int originSp=provinceMap.get(m.group(1)).getSp();
+			if(originSp-excludeNum<0) {
+				// TODO：如果排除疑似患者人数大于原本疑似患者人数则抛出异常
+				throw new Exception();
+			}
+			provinceMap.get(m.group(1)).setSp(originSp-excludeNum);
+		}
     }
     
     

@@ -10,3 +10,5 @@ gen
 .idea/
 InfectStatistic-example.iml
 /bin/
+.classpath
+.project
