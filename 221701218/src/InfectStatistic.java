@@ -1,9 +1,12 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -30,7 +33,8 @@ class InfectStatistic{
             HandleLog handleObject = new HandleLog(cmdObject.getLogLocation(),cmdObject.getOutLocation(),cmdObject.getLogDate(),
             		cmdObject.getTypeOrder(),cmdObject.getProvinceShow());
             handleObject.readLog();
-            handleObject.showAll();   
+            handleObject.writeLog();
+            //handleObject.showAll();   
             
         }
         
@@ -48,7 +52,7 @@ class CmdAnalysis{
 	private String logDate;    //输出至此日期
 	private int[] typeOrder = {0,1,2,3};	//默认全输出顺序,-1不必输出
 	static String[] typeString = {"ip","sp","cure","dead"};    //四种类型
-	private int[] provinceShow = new int[32];	//默认全输出顺序,-1不必输出,0需要输出
+	private int[] provinceShow = new int[33];	//0~31表示若带-province参数的要求输出省份，-1不必输出，0要求输出，而32标记是否含有-province参数-1不包含，0包含
 	static String[] province = {"全国", "安徽","北京", "重庆","福建","甘肃",    //各省份排序，便于对比
 			"广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
 			"江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海",
@@ -59,7 +63,7 @@ class CmdAnalysis{
 	    //设置默认指定日期为一个接近无穷大的日期，这样方便比较，设置默认为全部统计
 	    logDate = "9999-12-31";
 	    for(int i = 0;i < provinceShow.length;i++)
-	    	provinceShow[i] = 0;    //默认0全输出，-1则该省份不输出显示
+	    	provinceShow[i] = -1;    //起始全默认为-1，不必输出，且初始不含参数-province
 	}
 	/*
      *判断命令行参数是否正确，若正确则赋值保存
@@ -95,6 +99,7 @@ class CmdAnalysis{
 				}
 			}
 			else if(cmdString[i].equals("-province")) {
+				provinceShow[32] = 0;
 				if(!isProvince(++i)) {
 					System.out.println("指定省份不合法");
 					return false;
@@ -151,14 +156,14 @@ class CmdAnalysis{
 	private boolean isType(int i) {
 
 		for(int a = 0;a < typeOrder.length;a++)
-			typeOrder[a] = -1;	
+			typeOrder[a] = -1;    //-1不输出
 		int currentIndex = i;
 		if(i<cmdString.length) {
 			int t = 0;
 			for(;currentIndex < cmdString.length; currentIndex ++) {
 				if(cmdString[currentIndex].equals(typeString[0])) {
 					if(t < typeOrder.length)
-						typeOrder[t] = 0;
+						typeOrder[t] = 0;    
 					t++;
 				}	
 				else if(cmdString[currentIndex].equals(typeString[1])) {
@@ -191,14 +196,12 @@ class CmdAnalysis{
 	  * 判断指定省份是否正确
 	 */
 	private boolean isProvince(int i) {
-		for(int k = 0;k < provinceShow.length;k++)
-	    	provinceShow[k] = -1;
 		int currentIndex = i;
 		if(i<cmdString.length) {
-			for(;currentIndex < cmdString.length; currentIndex ++) {
-				for(int j = 0;j < province.length;j++) {
+			for(;currentIndex < cmdString.length  && provinceShow[32] == 0; currentIndex ++) {
+				for(int j = 0;j < province.length - 1;j++) {
 					if(cmdString[currentIndex].equals(province[j]))
-						provinceShow[j] = 0;
+						provinceShow[j] = 0;    //要求输出的省份
 				}
 			}
 			return true;
@@ -226,9 +229,9 @@ class CmdAnalysis{
 	 * 用于测试输入
 	 */
 	public void showAll() {
-		for(int i = 0;i < cmdString.length;i++) {
+		/*for(int i = 0;i < cmdString.length;i++) {
 			System.out.println(cmdString[i]);
-		}
+		}*/
 		System.out.println(logLocation);
 		System.out.println(outLocation);
 		System.out.println(logDate);
@@ -238,7 +241,7 @@ class CmdAnalysis{
 			}
 			
 		}
-		for(int i = 0;i < provinceShow.length;i++) {
+		for(int i = 0;i < provinceShow.length - 1;i++) {
 			if(provinceShow[i] != -1) {
 				System.out.println(province[i]);
 			}
@@ -255,9 +258,10 @@ class HandleLog{
 	private String outLocation;
 	private String logDate;
 	private int[] typeOrder;
-	private int[] provinceShow = new int[32];
+	private int[] provinceShow = new int[33];
 	//统计各省 各类型患者 数目
 	private int[][] sum = new int[32][4];    //32行表示全国~浙江 4列表示ip,sp,cure,dead	初始为0
+	static String[] typeString = {"感染患者","疑似患者","治愈","死亡"};    //输出类型的名称
 	
 	public HandleLog(String logLocation,String outLocation,String logDate,int[] typeOrder,int[] provinceShow) {
 		this.logLocation = logLocation;
@@ -265,6 +269,9 @@ class HandleLog{
 		this.logDate = logDate;
 		this.typeOrder = (int[])typeOrder.clone();
 		this.provinceShow = (int[])provinceShow.clone();
+		if(this.provinceShow[32] == -1) {
+			this.provinceShow[0] = 0;
+		}
 		
 		for(int i = 0;i < sum.length;i++)
 			Arrays.fill(sum[i], 0);    //各省各类型起始数目起始化为0 
@@ -287,6 +294,36 @@ class HandleLog{
 			}
 		}
 	}
+	public void writeLog() {
+		BufferedWriter fw = null;
+		try {
+			File file = new File(outLocation);	
+			fw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, false), "UTF-8")); // 指定编码格式，以免写时中文字符异常
+			for(int i = 0;i < provinceShow.length-1;i++) {
+				if(provinceShow[i] != -1) {
+					fw.append(CmdAnalysis.province[i]+" ");
+					for(int j = 0;j<typeOrder.length;j++) {
+						if(typeOrder[j] != -1) {
+							fw.append(typeString[typeOrder[j]]+""+sum[i][typeOrder[j]]+"人 ");
+						}
+					}
+					fw.append("\n");
+				}
+			}
+			fw.flush(); // 全部写入缓存中的内容
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (fw != null) {
+				try {
+					fw.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	/*
 	 * 分类别统计：0新增 感染，1新增 疑似，2感染 流入，3疑似 流入，4死亡，5治愈，6疑似确诊感染，7排除
 	 */
@@ -352,6 +389,9 @@ class HandleLog{
 		for(int i = 0;i < CmdAnalysis.province.length;i++) {
 			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省感染人数增加
 				sum[i][0] += num;
+				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
+					provinceShow[i] = 0;
+				}
 			}
 		}
 	}
@@ -364,6 +404,9 @@ class HandleLog{
 		for(int i = 0;i < CmdAnalysis.province.length;i++) {
 			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省感染人数增加
 				sum[i][1] += num;
+				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
+					provinceShow[i] = 0;
+				}
 			}
 		}
 	}
@@ -376,9 +419,15 @@ class HandleLog{
 		for(int i = 0;i < CmdAnalysis.province.length;i++) {
 			if(strArray[0].equals(CmdAnalysis.province[i])) {   //流出省感染人数减少
 				sum[i][0] -= num;
+				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
+					provinceShow[i] = 0;
+				}
 			}
 			else if(strArray[3].equals(CmdAnalysis.province[i])) {   //流入感染人数增加
 				sum[i][0] += num;
+				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
+					provinceShow[i] = 0;
+				}
 			}
 		}
 	}
@@ -391,9 +440,15 @@ class HandleLog{
 		for(int i = 0;i < CmdAnalysis.province.length;i++) {
 			if(strArray[0].equals(CmdAnalysis.province[i])) {   //流出省疑似人数减少
 				sum[i][1] -= num;
+				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
+					provinceShow[i] = 0;
+				}
 			}
 			else if(strArray[3].equals(CmdAnalysis.province[i])) {   //流入疑似人数增加
 				sum[i][1] += num;
+				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
+					provinceShow[i] = 0;
+				}
 			}
 		}
 	}
@@ -408,6 +463,9 @@ class HandleLog{
 			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省感染人数减少
 				sum[i][0] -= num;
 				sum[i][3] += num;
+				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
+					provinceShow[i] = 0;
+				}
 			}
 		}
 	}
@@ -422,6 +480,9 @@ class HandleLog{
 			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省感染人数减少
 				sum[i][0] -= num;
 				sum[i][2] += num; 
+				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
+					provinceShow[i] = 0;
+				}
 			}
 		}
 	}
@@ -436,6 +497,9 @@ class HandleLog{
 			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省疑似人数减少，感染人数增多
 				sum[i][0] += num;
 				sum[i][1] -= num;
+				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
+					provinceShow[i] = 0;
+				}
 			}
 		}
 	}
@@ -448,6 +512,9 @@ class HandleLog{
 		for(int i = 0;i < CmdAnalysis.province.length;i++) {
 			if(strArray[0].equals(CmdAnalysis.province[i])) {   //具体到某个省疑似人数减少
 				sum[i][1] -= num;
+				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
+					provinceShow[i] = 0;
+				}
 			}
 		}
 	}
@@ -470,13 +537,24 @@ class HandleLog{
 				System.out.println(CmdAnalysis.province[i]);
 			}
 			
-		}*/
+		}
 		for(int i = 0;i < sum.length;i++) {
 			System.out.print(CmdAnalysis.province[i]+" ");
 			for(int j = 0;j < sum[i].length;j++) {
 				System.out.print(CmdAnalysis.typeString[j]+sum[i][j]+"人 ");
 			}
 			System.out.println();
+		}*/
+		for(int i = 0;i < provinceShow.length-1;i++) {
+			if(provinceShow[i] != -1) {
+				System.out.print(CmdAnalysis.province[i]+" ");
+				for(int j = 0;j<typeOrder.length;j++) {
+					if(typeOrder[j] != -1) {
+						System.out.print(typeString[typeOrder[j]]+""+sum[i][typeOrder[j]]+" ");
+					}
+				}
+				System.out.print("\n");
+			}
 		}
 	}
 	
