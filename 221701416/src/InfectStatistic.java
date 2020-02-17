@@ -107,12 +107,12 @@ class CoronavirusDetail{
 	Map ProvinceMap= new HashMap();	
 	Map TypeMap=new HashMap();
 	String[] ProvinceStr= {
-			"安徽"  ,"北京"  ,"重庆"  ,"福建"  ,"甘肃"  ,
+			"全国"  ,"安徽"  ,"北京"  ,"重庆"  ,"福建"  ,"甘肃"  ,
 			"广东"  ,"广西"  ,"贵州"  ,"海南"  ,"河北"  ,
 			"河南"  ,"黑龙江","湖北"  ,"湖南"  ,"吉林"  ,
 			"江苏"  ,"江西"  ,"辽宁"  ,"内蒙古","宁夏"  ,
 			"青海"  ,"山东"  ,"山西"  ,"陕西"  ,"上海"  ,
-			"四川"  ,"天津"  ,"西藏"  ,"新疆"  ,"云南"  ,"浙江" ,"全国"
+			"四川"  ,"天津"  ,"西藏"  ,"新疆"  ,"云南"  ,"浙江" 
 	};
 	String[] TypeStr={
 		"ip" , "sp", "curu", "dead"
@@ -138,17 +138,26 @@ class CoronavirusDetail{
 		for(int i=0;i<provincenum;i++)
 			for(int j=0;j<detailnum;j++) detail[i][j]=0;
 	}
+	
 	//输出所需信息
     public void Printdetail(String log,String out,String date,String [] type,String [] province) {
-    	for(int i=0;i<province.length;i++) if(!province[i].equals($nothing)){
-    		System.out.print(province[i]+" ");
-    		Integer pronum=(Integer) ProvinceMap.get(province[i]);
-    		//System.out.print(pronum);
-    		for(int j=0;j<TypeStr.length;j++) {
-    			
-    			System.out.print(TypeStrCn[j]+detail[pronum][(Integer) TypeMap.get(TypeStr[j])]+" ");
-    		}
-    		System.out.println();
+    	for(int i=1;i<32;i++) 
+    		for(int j=0;j<4;j++) detail[0][j]+=detail[i][j];
+    	for(int i=0;i<ProvinceStr.length;i++) {
+        	for(int j=0;j<province.length;j++) if(ProvinceStr[i].equals(province[j])){
+        		System.out.print(ProvinceStr[i]+" ");
+        		Integer pronum=(Integer) ProvinceMap.get(ProvinceStr[i]);
+        		//System.out.print(pronum);
+        		int typecnt=0;
+        		for(int k=0;k<type.length;k++) {
+        			if(type[k].equals($nothing)) typecnt++;
+        		}
+        		for(int k=0;k<4;k++) if((typecnt==4)||(!type[k].equals($nothing))){
+        			//System.out.println((Integer) TypeMap.get(type[j]));
+        			System.out.print(TypeStrCn[(Integer) TypeMap.get(type[k])]+detail[pronum][(Integer) TypeMap.get(type[k])]+" ");
+        		}
+        		System.out.println();
+        	}
     	}
     }
     
@@ -158,7 +167,8 @@ class CoronavirusDetail{
 		ArrayList<String> beforefiles = new ArrayList<String>();
 	    File file = new File(path);
 	    File[] tempList = file.listFiles();
-
+	    
+	    
 	    for (int i = 0; i < tempList.length; i++) {
 	        if (tempList[i].isFile()) {
 //	              System.out.println("文 件：" + tempList[i]);
