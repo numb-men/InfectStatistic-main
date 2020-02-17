@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,6 +17,10 @@ import java.util.Vector;
  */
 class InfectStatistic {
 	int argc;
+	int[] ip;
+	int[] sp;
+	int[] cure;
+	int[] death;
 	String[] argv;
 	String dir4log = null;
 	String dir4out = null;
@@ -32,6 +38,10 @@ class InfectStatistic {
 	public InfectStatistic(int argc, String[] argv) {
 		this.argc = argc;
 		this.argv = argv;
+		ip = new int[32];
+		sp = new int[32];
+		cure = new int[32];
+		death = new int[32];
 		cmd4type = new Vector<String>();
 		cmd4provience = new Vector<String>();
 	}
@@ -75,7 +85,7 @@ class InfectStatistic {
 		listFile4log = getPath(dir4log);
 		Collections.sort(listFile4log);
 		for(int i = 0; i < listFile4log.size(); i++) {
-			//System.out.println(listFile4log.get(i));
+			getData(listFile4log.get(i));
 		}
 	}
 	
@@ -99,6 +109,51 @@ class InfectStatistic {
     return files;
 }
 	
+  public void getData(String path) {
+  	try {
+  		BufferedReader br = new BufferedReader(new FileReader(path));
+  		String dataLine = br.readLine();
+  		
+  		while(dataLine != null) {
+  			if(!dataLine.startsWith("//")) {
+  				headleData(dataLine);
+  			}
+  			dataLine = br.readLine();
+  		}
+  	} catch(Exception e) {
+  		e.printStackTrace();
+  	}
+  }
+  
+	public void headleData(String dataLine) {
+		String status1 = "(\\S+) 新增 感染患者 (\\d+)人";
+		String status2 = "(\\S+) 新增 疑似患者 (\\d+)人";
+    String status3 = "(\\S+) 治愈 (\\d+)人";
+    String status4 = "(\\S+) 死亡 (\\d+)人";
+    String status5 = "(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
+    String status6 = "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
+    String status7 = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
+    String status8 = "(\\S+) 排除 疑似患者 (\\d+)人";
+    
+    if(dataLine.matches(status1)) {
+    	
+    } else if(dataLine.matches(status2)) {
+    	
+    } else if(dataLine.matches(status3)) {
+    	
+    } else if(dataLine.matches(status4)) {
+    	
+    } else if(dataLine.matches(status5)) {
+    	
+    } else if(dataLine.matches(status6)) {
+    	
+    } else if(dataLine.matches(status7)) {
+    	
+    } else if(dataLine.matches(status8)) {
+    	
+    }
+	}
+
 	public static void main(String[] args) {
 		InfectStatistic IS = new InfectStatistic(args.length, args);
 		IS.initArgument();
