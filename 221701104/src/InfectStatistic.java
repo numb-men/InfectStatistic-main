@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -26,6 +23,7 @@ class InfectStatistic {
     static Pattern DOUBTED_TO_EXACT = Pattern.compile("(\\S+) 疑似患者 确诊感染 (\\d+)人");
     static Pattern DOUBTED_TO_NONE = Pattern.compile("(\\S+) 排除 疑似患者 (\\d+)人");
     static int PROVINCE_NUM = 35;
+    static int TYPE_NUM = 4;
     static String[] PROVINCE = {"全国", "安徽", "澳门" ,"北京", "重庆", "福建","甘肃",
             "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
             "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海",
@@ -52,7 +50,7 @@ class InfectStatistic {
         /*
         判断是否有特定的参数
         @param 特定参数名如-log -province
-        @return 返回特定参数的索引值
+        @return 返回特定参数的索引值，没有则返回0
          */
         public int getParam(String param) {
             for(int i = 0; i < args.length; i++) {
@@ -152,18 +150,38 @@ class InfectStatistic {
             }
             //获取省份
             if(cmdArgs.getParam("-province") > 0) {
-                type = cmdArgs.getVals((cmdArgs.getParam("-province")));
+                province = cmdArgs.getVals((cmdArgs.getParam("-province")));
             }
         }
 
         public void listHandler(CmdArgs cmdArgs) {
-            //读取文件
-            FileHandler fh = new FileHandler(logPath, dealLog, PROVINCE_LIST);
-            for(String logPath : fh.logPaths) {
-                fh.readLog(logPath);
+            //读取并处理文件
+            FileHandler fh = new FileHandler(logPath, dealLog);
+            //如果没有date参数
+            if(cmdArgs.getParam("-date") == 0) {
+                for (String lp : fh.logPaths) {
+                    fh.readLog(lp);
+                }
+            } else {
+                //如果有date参数
+                fh.getBeforeDate(date);
+                for (String lp : fh.logPaths) {
+                    fh.readLog(lp);
+                }
             }
-            PROVINCE_LIST.showData();
-
+            //如果有-province参数
+            if(cmdArgs.getParam("-province") > 0) {
+                //初始化所有可见参数
+                PROVINCE_LIST.initShowStat();
+                PROVINCE_LIST.setBeShown(province);
+            }
+            //如果有-type参数
+            if(cmdArgs.getParam("-type") > 0) {
+                fh.writeResultLog(outPath, type);
+                return ;
+            }
+            //将内容写到指定文件内
+            fh.writeResultLog(outPath);
         }
     }
 
@@ -177,8 +195,7 @@ class InfectStatistic {
         DealLog dealLog;
         List<String> logNames, logPaths;
 
-        FileHandler (String path, DealLog dealLog, ProvinceList provinceList)
-        {
+        FileHandler (String path, DealLog dealLog) {
             File f = new File(path);
 
             this.path = path;
@@ -200,7 +217,7 @@ class InfectStatistic {
         }
 
         /*
-        获取日志地址
+        获取日志地址，无日期
          */
         public void initLogPath() {
             for(String logName : logNames) {
@@ -208,6 +225,9 @@ class InfectStatistic {
             }
         }
 
+        /*
+        读取日志并且进行处理
+         */
         public void readLog(String logPath) {
             try {
                 BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream
@@ -220,6 +240,83 @@ class InfectStatistic {
                 br.close();
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        }
+
+        /*
+        将PROVINCE_LIST内的结果写出到指定文件
+         */
+        public void writeResultLog(String resultPath) {
+            try {
+                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream
+                        (new File(resultPath)),"UTF-8"));
+                for(int i = 0; i < PROVINCE_NUM; i++) {
+                    if(PROVINCE_LIST.provinceList[i].showStat) {
+                        bw.write(PROVINCE_LIST.provinceList[i].name
+                                + " 感染患者" + PROVINCE_LIST.provinceList[i].getInfected() + "人"
+                                + " 疑似患者" + PROVINCE_LIST.provinceList[i].getDoubted() + "人"
+                                + " 治愈" + PROVINCE_LIST.provinceList[i].getCured() + "人"
+                                + " 死亡" + PROVINCE_LIST.provinceList[i].getDead() + "人");
+                        bw.write('\n');
+                    }
+                }
+                bw.write("// 该文档并非真实数据，仅供测试使用");
+                bw.close();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        /*
+        将PROVINCE_LIST内特定类型的结果写出到指定文件
+         */
+        public void writeResultLog(String resultPath, List<String> type) {
+            try {
+                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream
+                        (new File(resultPath)),"UTF-8"));
+                for(int i = 0; i < PROVINCE_NUM; i++) {
+                    if(PROVINCE_LIST.provinceList[i].showStat) {
+                        bw.write(PROVINCE_LIST.provinceList[i].name + " ");
+                        for(String t : type) {
+                            switch (t) {
+                                case "ip" :
+                                    bw.write(" 感染患者" +PROVINCE_LIST.provinceList[i].getInfected() + "人");
+                                    break;
+                                case "sp" :
+                                    bw.write(" 疑似患者" + PROVINCE_LIST.provinceList[i].getDoubted() + "人");
+                                    break;
+                                case "cure" :
+                                    bw.write(" 治愈" + PROVINCE_LIST.provinceList[i].getCured() + "人");
+                                case "dead" :
+                                    bw.write(" 死亡" + PROVINCE_LIST.provinceList[i].getDead() + "人");
+                            }
+                        }
+                        bw.write('\n');
+                    }
+                }
+                bw.write("// 该文档并非真实数据，仅供测试使用");
+                bw.close();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        /*
+        过滤date
+         */
+        public void getBeforeDate(String date) {
+            logPaths.clear();
+            for(String logName : logNames) {
+                if(logName.compareTo(date + ".log.txt") <= 0) {
+                    logPaths.add(path + logName);
+                }
             }
         }
     }
@@ -237,98 +334,89 @@ class InfectStatistic {
         ProvinceStat(String name)
         {
             this.name = name;
-            showStat = false;
+            //0表示显示全部，其余下标分别对应感染、疑似、治愈、死亡
             infected = 0;
             doubted = 0;
             cured = 0;
             dead = 0;
+            showStat = false;
+
         }
 
         /*
         改变是否显示
          */
-        public void canBeShown()
-        {
+        public void canBeShown() {
             showStat = true;
         }
 
         /*
         用以获取受感染人数
          */
-        public int getInfected()
-        {
+        public int getInfected() {
             return infected;
         }
 
         /*
         用以获得疑似感染人数
          */
-        public int getDoublted()
-        {
+        public int getDoubted() {
             return doubted;
         }
 
         /*
         用以获得治愈人数
          */
-        public int getCured()
-        {
+        public int getCured() {
             return cured;
         }
 
         /*
         用以获得死亡人数
          */
-        public int getDead()
-        {
+        public int getDead() {
             return dead;
         }
 
         /*
         用以增加感染人数
          */
-        public void addInfected(int n)
-        {
+        public void addInfected(int n) {
             infected += n;
         }
 
         /*
         用以减少感染人数
          */
-        public void decreaseInfected(int n)
-        {
+        public void decreaseInfected(int n) {
             infected -= n;
         }
 
         /*
         用以增加疑似感染人数
          */
-        public void addDoubted(int n)
-        {
+        public void addDoubted(int n) {
             doubted += n;
         }
 
         /*
         用以减少疑似感染人数
          */
-        public void decreaseDoubted(int n)
-        {
+        public void decreaseDoubted(int n) {
             doubted -=n;
         }
 
         /*
         用以增加治愈人数
          */
-        public void addCured(int n)
-        {
+        public void addCured(int n) {
             cured += n;
         }
 
         /*
         用以增加死亡人数
          */
-        public void addDead(int n)
-        {
+        public void addDead(int n) {
             dead += n;
         }
     }
@@ -346,13 +434,26 @@ class InfectStatistic {
             }
         }
 
-        public void showData() {
-            for(int i = 0; i < PROVINCE_NUM; i++) {
-                if(provinceList[i].showStat) {
-                    System.out.println(provinceList[i].name + "感染患者" + provinceList[i].getInfected() + "人 "
-                            + "疑似患者" + provinceList[i].getDoublted() + "人 "
-                            + "治愈" + provinceList[i].getCured() + "人 "
-                            + "死亡" + provinceList[i].getDead() + "人");
+        /*
+        初始化所有省份的可见状态
+         */
+        void initShowStat() {
+            for(int i =0; i < PROVINCE_NUM; i++) {
+                provinceList[i].showStat = false;
+            }
+        }
+
+        /*
+        使指定省份可见
+        @param List<String> 省份列表
+         */
+        void setBeShown(List<String> p) {
+            for(String name : p) {
+                for(int i = 0; i < PROVINCE_NUM; i++) {
+                    if(provinceList[i].name.equals(name)) {
+                        provinceList[i].canBeShown();
+                        break;
+                    }
                 }
             }
         }
