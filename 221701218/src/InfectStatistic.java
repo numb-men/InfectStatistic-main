@@ -20,24 +20,18 @@ import java.util.Date;
  * @since 2020-2-12
  */
 class InfectStatistic{
-    public static void main(String[] args) {
-        System.out.println("It's testing!");       
-        if(args.length!=0) {
+    public static void main(String[] args) {   
+        if(args.length!=0) {    //无命令行参数出错，不能进行处理
         	CmdAnalysis cmdObject = new CmdAnalysis(args);
             if(cmdObject.isCmdString()) {
-                System.out.println("正确命令");
                 //cmdObject.showAll();
-            }else {
-            	System.out.println("错误命令");
+                HandleLog handleObject = new HandleLog(cmdObject.getLogLocation(),cmdObject.getOutLocation(),cmdObject.getLogDate(),
+                		cmdObject.getTypeOrder(),cmdObject.getProvinceShow());
+                handleObject.readLog();
+                handleObject.writeLog();
+                //handleObject.showAll();  
             }
-            HandleLog handleObject = new HandleLog(cmdObject.getLogLocation(),cmdObject.getOutLocation(),cmdObject.getLogDate(),
-            		cmdObject.getTypeOrder(),cmdObject.getProvinceShow());
-            handleObject.readLog();
-            handleObject.writeLog();
-            //handleObject.showAll();   
-            
         }
-        
     }
     
 }
@@ -50,13 +44,13 @@ class CmdAnalysis{
 	private String logLocation;    //日志文件位置
 	private String outLocation;    //输出位置
 	private String logDate;    //输出至此日期
-	private int[] typeOrder = {0,1,2,3};	//默认全输出顺序,-1不必输出
+	private int[] typeOrder = {0,1,2,3};	//记录输出类型的下标顺序，默认0123ip、sp、cure、dead,-1不必输出
 	static String[] typeString = {"ip","sp","cure","dead"};    //四种类型
 	private int[] provinceShow = new int[33];	//0~31表示若带-province参数的要求输出省份，-1不必输出，0要求输出，而32标记是否含有-province参数-1不包含，0包含
-	static String[] province = {"全国", "安徽","北京", "重庆","福建","甘肃",    //各省份排序，便于对比
+	static String[] province = {"全国", "安徽","北京", "重庆","福建","甘肃",    //各省份拼音排序，便于对比
 			"广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
 			"江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海",
-			"四川", "天津", "西藏", "新疆", "云南", "浙江"};    //省份名称
+			"四川", "天津", "西藏", "新疆", "云南", "浙江"};    
 	
 	public CmdAnalysis(String []args) {    //构造函数并含相关变量的初始化
 	    cmdString = args;
@@ -66,11 +60,11 @@ class CmdAnalysis{
 	    	provinceShow[i] = -1;    //起始全默认为-1，不必输出，且初始不含参数-province
 	}
 	/*
-     *判断命令行参数是否正确，若正确则赋值保存
+         *判断命令行参数是否正确，若正确则赋值保存
 	 */
 	public boolean isCmdString() {
 		
-		boolean mustLog = false;
+		boolean mustLog = false;    //标记两个必选项-log -out 是否有输入
 		boolean mustOut = false;
 		if(!cmdString[0].equals("list")) {
 			System.out.println("命令行参数缺少list");
@@ -93,13 +87,14 @@ class CmdAnalysis{
 				}
 			}
 			else if(cmdString[i].equals("-type")) {
+				//检测输入类型合法性（ip\sp\cure\dead)
 				if(!isType(++i)) {
 					System.out.println("指定类型不合法");
 					return false;
 				}
 			}
 			else if(cmdString[i].equals("-province")) {
-				provinceShow[32] = 0;
+				provinceShow[32] = 0;    //标识含-province参数，应依据输入输出，否则含默认方式（日志中涉及省份）展示
 				if(!isProvince(++i)) {
 					System.out.println("指定省份不合法");
 					return false;
@@ -208,7 +203,9 @@ class CmdAnalysis{
 		}else
 			return false;
 	}
-	
+	/*
+	  * 获得私有变量的值（类似属性）便于后续处理和按要求输出
+	 */
 	public String getLogLocation() {
 		return logLocation;
 	}
@@ -226,7 +223,7 @@ class CmdAnalysis{
 	}
 	
 	/**
-	 * 用于测试输入
+	 * 用于测试验证，可忽略
 	 */
 	public void showAll() {
 		/*for(int i = 0;i < cmdString.length;i++) {
@@ -254,15 +251,17 @@ class CmdAnalysis{
  *读取并统计日志文件
  */
 class HandleLog{
-	private String logLocation;
-	private String outLocation;
-	private String logDate;
-	private int[] typeOrder;
-	private int[] provinceShow = new int[33];
+	private String logLocation;   //日志位置
+	private String outLocation;    //输出位置
+	private String logDate;    //指定日期
+	private int[] typeOrder;    //类型输出顺序
+	private int[] provinceShow = new int[33];    //应该展示的省份值为0不展示为-1，32为标识是否含命令参数-province，以便分类处理省份输出
 	//统计各省 各类型患者 数目
 	private int[][] sum = new int[32][4];    //32行表示全国~浙江 4列表示ip,sp,cure,dead	初始为0
 	static String[] typeString = {"感染患者","疑似患者","治愈","死亡"};    //输出类型的名称
-	
+	/*
+	 * 构造函数，利用相关参数才能进行相应处理
+	 */
 	public HandleLog(String logLocation,String outLocation,String logDate,int[] typeOrder,int[] provinceShow) {
 		this.logLocation = logLocation;
 		this.outLocation = outLocation;
@@ -294,6 +293,9 @@ class HandleLog{
 			}
 		}
 	}
+	/*
+	 * 处理符合条件的日志文件并输出
+	 */
 	public void writeLog() {
 		BufferedWriter fw = null;
 		try {
@@ -380,7 +382,9 @@ class HandleLog{
 			}
 		}
 	}
-	
+	/*
+	 * 新增感染，全国、感染省份 感染人数增加num人
+	 */
 	private void increaseIp(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
 		String numIp = strArray[3].substring(0, strArray[3].length()-1);    //感染人数
@@ -395,7 +399,9 @@ class HandleLog{
 			}
 		}
 	}
-	
+	/*
+	 * 新增疑似 全国 疑似省份 疑似人数增加num人
+	 */
 	private void increaseSp(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
 		String numSp = strArray[3].substring(0, strArray[3].length()-1);    //疑似人数
@@ -410,7 +416,9 @@ class HandleLog{
 			}
 		}
 	}
-	
+	/*
+	 * 感染流入 全国不变 流出省感染人数减少num 流入省感染人数增加num
+	 */
 	private void ipTransfer(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
 		String numIp = strArray[4].substring(0, strArray[4].length()-1);    //感染流动人数
@@ -431,7 +439,9 @@ class HandleLog{
 			}
 		}
 	}
-	
+	/*
+	 * 疑似流入 全国不变 流出省疑似人数减少num 流入省疑似人数增加num
+	 */
 	private void spTransfer(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
 		String numSp = strArray[4].substring(0, strArray[4].length()-1);    //疑似流动人数
@@ -452,7 +462,9 @@ class HandleLog{
 			}
 		}
 	}
-	
+	/*
+	 * 死亡 全国 死亡省 死亡人数增加num 感染人数减少num
+	 */
 	private void dead(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
 		String numDead = strArray[2].substring(0, strArray[2].length()-1);    //死亡或者治愈人数
@@ -469,7 +481,9 @@ class HandleLog{
 			}
 		}
 	}
-	
+	/*
+	 * 治愈 全国、治愈省 治愈数目增加num 感染数目减少num
+	 */
 	private void cure(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
 		String numDead = strArray[2].substring(0, strArray[2].length()-1);    //死亡或者治愈人数
@@ -486,7 +500,9 @@ class HandleLog{
 			}
 		}
 	}
-	
+	/*
+	 * 疑似确诊 全国、确诊省 感染人数增加num 疑似人数减少num
+	 */
 	private void spDiagnose(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
 		String numDiagnose = strArray[3].substring(0, strArray[3].length()-1);    //疑似确诊感染人数
@@ -503,7 +519,9 @@ class HandleLog{
 			}
 		}
 	}
-	
+	/*
+	 * 疑似排查 全国、排查省 疑似人数减少 num
+	 */
 	private void spExclude(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
 		String numDead = strArray[3].substring(0, strArray[3].length()-1);    //疑似排除人数
@@ -520,7 +538,7 @@ class HandleLog{
 	}
 	
 	/**
-	 * 用于测试输入
+	 * 用于测试输入 可忽略
 	 */
 	public void showAll() {
 		/*System.out.println(logLocation);
