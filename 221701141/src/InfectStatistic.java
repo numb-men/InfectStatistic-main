@@ -24,7 +24,9 @@ class InfectStatistic
 		String outList=new String();
 		String dateList=new String();
 		ArrayList<String> typeList=new ArrayList<String>();
+		ArrayList<Integer> typeInt=new ArrayList<Integer>();
 		ArrayList<String> provinceList=new ArrayList<String>();
+		ArrayList<Integer> provinceInt=new ArrayList<Integer>();
 		
 		//初始化二维数组number
     	for (int i=0;i<32;i++)
@@ -76,16 +78,36 @@ class InfectStatistic
     		}
 		}//获取ArrayList循环结束
     	
+    	for (int i=0;i<typeList.size();i++)
+    	{
+    		for (int j=0;j<type.length;j++)
+    		{
+    			if (typeList.get(i).equals(type[j])) 
+    			{
+    				typeInt.add(j);
+    			}
+    		}
+    	}
+    	for (int i=0;i<provinceList.size();i++)
+    	{
+    		for (int j=0;j<province.length;j++)
+    		{
+    			if (provinceList.get(i).equals(province[j])) 
+    			{
+    				provinceInt.add(j);
+    			}
+    		}
+    	}
     	//test
     	System.out.println(logList);
     	System.out.println(outList);
     	System.out.println(dateList);
-    	for (int i=0;i<typeList.size();i++)
-    		System.out.print(typeList.get(i));
+    	for (int i=0;i<typeInt.size();i++)
+    		System.out.print(typeInt.get(i));
     	System.out.println();
-    	for (int i=0;i<provinceList.size();i++)
-    		System.out.print(provinceList.get(i));
+    	for (int i=0;i<provinceInt.size();i++)
+    		System.out.print(provinceInt.get(i));
     	System.out.println();
-    	//list -date 2020-01-22 -province jingsu fujian -log D:/log/ -out D:/output.txt -type a b c
+    	//list -date 2020-01-22 -province 江苏 福建 -log D:/log/ -out D:/output.txt -type ip sp cure
     }
 }
