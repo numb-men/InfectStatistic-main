@@ -179,6 +179,69 @@ class InfectStatistic {
         }
     }
 
+    /** description:获取输入文件的相关方法 */
+    static class GetFile {
+
+        /** description：取得所有log中最大的日期 */
+        public static Date getMaxDate(String[] nameStrings) {
+            SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String maxDateString = "2020-01-01";
+            Date maxDate = null;
+            try {
+                maxDate = dFormat.parse(maxDateString);
+                Date tmpDate = new Date();  //性能优化点1
+                for(int i=0, len=nameStrings.length; i<len; i++) {
+                    tmpDate = dFormat.parse(nameStrings[i]);
+                    if(tmpDate.getTime() >= maxDate.getTime()) {
+                        maxDate = tmpDate;
+                    }
+                }
+            } catch (Exception e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+            return maxDate;
+        }
+        /** description：获取文件夹下指定日期前的所有文件文件名 */
+        public static void getBeforeDateFileName(String path, String date, ArrayList<String> fileName) {
+            SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd");
+            File file = new File(path);
+            String[] nameStrings = file.list(); //取得所有文件名称
+            Date maxDate = getMaxDate(nameStrings); //得到所有文件名称的最大日期
+            if (nameStrings != null) {
+                try {
+                    String dateOfFileNameString = "";
+                    Date dateOfFileNameDate = new Date();
+                    Date limitDate = dFormat.parse(date);   //指定日期--统计到哪一天
+                    for (int i = 0, len=nameStrings.length; i < len; i++) {
+                        dateOfFileNameString = nameStrings[i].substring(0, nameStrings[i].indexOf('.')); //取得文件名中的日期****-**-**
+                        dateOfFileNameDate = dFormat.parse(dateOfFileNameString);  //将string日期转为date格式
+                        limitDate = dFormat.parse(date);   //指定日期--统计到哪一天
+                        if(limitDate.getTime() > maxDate.getTime()) {
+                            System.out.println("日期超出范围");
+                        }else {
+                            if (dateOfFileNameDate.getTime() <= limitDate.getTime()) {
+                                fileName.add(nameStrings[i]);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    // TODO: handle exception
+                    e.printStackTrace();
+                }
+            }
+        }
+        /** description：取得指定目录中最大的日期 */
+        public static String getMaxDateInputDir(String inputDir) {
+            SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd");
+            File file = new File(inputDir);
+            String[] nameStrings = file.list();
+            Date maxDate = getMaxDate(nameStrings);
+            return (dFormat.format(maxDate));
+        }
+
+    }
+
     public static void main(String[] args) {
         //...
     }
