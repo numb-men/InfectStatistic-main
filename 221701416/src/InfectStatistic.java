@@ -1,6 +1,10 @@
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 /**
  * InfectStatistic
  *
@@ -13,7 +17,7 @@ class InfectStatistic {
 	public static String out=new String();
 	public static String date=new String("0000-00-00");
 	public static String []type= new String[4];
-	public static String []province=new String[40];
+	public static String []province=new String[31];
     public static void main(String[] args) throws IOException {
     	CoronavirusDetail CD=new CoronavirusDetail();
     	CD.Init();
@@ -32,7 +36,7 @@ class InfectStatistic {
     	String $nothing=new String("nothing");
     	//初始化type和province
     	for(int i=0;i<4;i++) type[i]=$nothing;
-    	for(int i=0;i<40;i++) province[i]=$nothing;
+    	for(int i=0;i<31;i++) province[i]=$nothing;
     	
     	//list检查
 		if(!(command[0].equals($list))) {
@@ -99,8 +103,9 @@ class InfectStatistic {
  */
 class CoronavirusDetail{
 	Map ProvinceMap= new HashMap();	
+	//初始化省份信息
 	public void Init() {
-		//填入省份信息
+		//填入省份信息31个
 		String[] ProvinceStr= {
 				"安徽"  ,"北京"  ,"重庆"  ,"福建"  ,"甘肃"  ,
 				"广东"  ,"广西"  ,"贵州"  ,"海南"  ,"河北"  ,
@@ -114,42 +119,82 @@ class CoronavirusDetail{
 			ProvinceMap.put(ProvinceStr[i], Integer.valueOf(i));
 		}
 	}
-	public static ArrayList<String> getFiles(String path,String date){
+	
+	//获取指定日期之前的文件名
+	public static ArrayList<String> getFilesName(String path,String date){
 		ArrayList<String> files = new ArrayList<String>();
+		ArrayList<String> beforefiles = new ArrayList<String>();
 	    File file = new File(path);
 	    File[] tempList = file.listFiles();
 
 	    for (int i = 0; i < tempList.length; i++) {
 	        if (tempList[i].isFile()) {
-//	              System.out.println("文     件：" + tempList[i]);
+//	              System.out.println("文 件：" + tempList[i]);
 	            files.add(tempList[i].toString());
-	        }
-	        if (tempList[i].isDirectory()) {
-//	              System.out.println("文件夹：" + tempList[i]);
 	        }
 	        //得到当前日期之前的文件名
 	        File tempFile=new File(files.get(i).trim());
 	        String fileName=tempFile.getName().substring(0,10);
-	        if(date.compareTo(fileName)>=0){
-		        System.out.println(fileName);
+	        if(date.compareTo(fileName)==0){
+	        	beforefiles.add(files.get(i));
 	        }
 	    }
-	    return files;
-	}
-	public void ReadAll(String log,String out,String date,String [] type,String [] province) throws IOException{
-		System.out.println(log);
-		System.out.println(out);
-		System.out.println(date);
-		for(int i=0;i<4;i++) {
-			System.out.println(type[i]);
-		}
-		for(int i=0;i<40;i++) {
-			System.out.println(province[i]);
-		}
-		ArrayList<String> teArrayList=getFiles(log,date);
-		for(int i=0;i<teArrayList.size();i++) {
-			System.out.println(teArrayList.get(i));
-		}
+	    return beforefiles;
 	}
 	
+	//读取所有指定日期之前的文件
+	public void ReadAll(String log,String out,String date,String [] type,String [] province) throws IOException{
+		//System.out.println(log);
+		//System.out.println(out);
+		//System.out.println(date);
+		//设定正则表达式规则
+		String txtString="福建 感染患者 流入 湖北 5人";
+		String matString_1="(\\S+) 新增 感染患者 (\\d+)人";
+		String splitString_1=" 新增 感染患者 |人";
+		String matString_2="(\\S+) 新增 感染患者 (\\d+)人";
+		String splitString_2=" 新增 感染患者  |人";
+		String matString_3="(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
+		String splitString_3=" 感染患者 流入 | |人";
+		String matString_4="(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
+		String splitString_4=" 疑似患者 流入 | |人";
+		String matString_5="(\\S+) 死亡  (\\d+)人";
+		String splitString_5=" 死亡  |人";
+		String matString_6="(\\S+) 治愈  (\\d+)人";
+		String splitString_6=" 治愈  |人";
+		String matString_7="(\\S+) 疑似患者 确诊感染 (\\d+)人";
+		String splitString_7=" 疑似患者 确诊感染  |人";
+		String matString_8="(\\S+) 排除 疑似患者 (\\d+)人";
+		String splitString_8=" 排除 疑似患者  |人";
+		
+		System.out.println(txtString.matches(matString_3));
+		String [] reStrings=txtString.split(splitString_3);
+		for(int i=0;i<reStrings.length;i++) {
+			System.out.println(reStrings[i]);
+		}
+		
+		for(int i=0;i<4;i++) {
+			//System.out.println(type[i]);
+		}
+		for(int i=0;i<31;i++) {
+			//System.out.println(province[i]);
+		}
+		
+		//得到需要的文件路径并将其读入
+		ArrayList<String> teArrayList=getFilesName(log,date);
+		for(int i=0;i<teArrayList.size();i++) {
+			System.out.println(teArrayList.get(i));
+			BufferedReader inBufferedReader=new BufferedReader(new InputStreamReader(new FileInputStream(teArrayList.get(i)), "UTF-8"));
+			String nowString;
+			while((nowString=inBufferedReader.readLine())!=null) {
+				
+				String eachstring[]=nowString.split(" ");
+				for(String one:eachstring) {
+				//	System.out.println(one);
+				}
+				//System.out.println("+++++");
+			}
+			//System.out.println(nowString);
+			//System.out.println("       ");
+		}
+	}
 }
