@@ -77,8 +77,37 @@ class ListCommand {
 		readDirectory();
 		readFileList();
 		writeFile();
+		print();
+		Clean();
+		
 	}
 	
+	/**
+	 * 清空
+	 */
+	private void Clean() {
+		hasLog = false;
+		hasOut = false;
+		hasDate = false;
+		hasType = false;
+		hasProvince = false;
+		log = null;
+		out = null;
+		date = null;
+		type.clear();
+		province.clear();
+		dateList.clear();
+		provinceMap.clear();
+	}
+
+	private void print() {
+		System.out.println(log);
+		System.out.println(out);
+		System.out.println(date);
+		System.out.println(type);
+		System.out.println(province);
+	}
+
 	/**
 	 * 解析命令行参数
 	 * 
