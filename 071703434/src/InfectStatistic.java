@@ -12,34 +12,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-
-
 /**
- * 疫情统计
+ * 	疫情统计
  * 
  * @author ZhangYuhui
  * @version 1.0
  */
 class InfectStatistic {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
     	String[] string= {
-    			"-province","浙江","福建","-type","sp","dead","-log", "D:/log/","-date","2020-01-22", "-out", "D:/output.txt",
+    			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "D:/output.txt",
         	};
-    	
    
+    	CommandLine cmd=new CommandLine(string);
+    	CommandLineParser parser=new CommandLineParser(cmd.getCommandName(), cmd.getParameters());
+    	parser.excuteListCommand();
     
-    	
-    	//ListParameters lp=new ListParameters(string);
-    	//lp.formatParameters();
-    	
-    	//LogFileReader lfr=new LogFileReader("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log");
-//    	File f=new File("C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log\\2020-01-22.log.txt");
-//    	
-//    	LogFileReader.formatFileContent(f);
-    	
-//    	List<String> betweenDate = lfr.getBetweenDate();
     }
 }
 
@@ -55,12 +45,12 @@ class CommandLine{
 	private String[] parameters;
 	
 	public CommandLine(String[] args) {
-		parameters=new String[args.length];
+		parameters=new String[args.length-1];
 		commandName=args[0];
+		//System.out.println(commandName);
 		for(int i=1;i<args.length;i++) {
 			parameters[i-1]=args[i];
 		}
-		new CommandLineParser(commandName,parameters);
 	}
 
 	public String getCommandName() {
@@ -77,6 +67,10 @@ class CommandLine{
 
 	public void setParameters(String[] parameters) {
 		this.parameters = parameters;
+	}
+	
+	public void excuteCmd() {
+		
 	}
 
 }
@@ -181,7 +175,7 @@ class ListParameters implements Parameters{
 		
 		for(int i=0;i<parameters.length;) {
 			String parameter=parameters[i];
-			System.out.println(parameter);
+			//System.out.println(parameter);
 			if(listParameterMap.containsKey(parameter)) {//该项为参数
 				if(listParameterMap.get(parameter).multiValue) {//参数可多值
 					List<String> value=new LinkedList<String>();
@@ -197,7 +191,7 @@ class ListParameters implements Parameters{
 				}else {//该项单值
 					if(++i<parameters.length&&(!listParameterMap.containsKey(parameters[i]))){
 						listParameterMap.get(parameter).value=parameters[i];
-						i++;
+						i++;		
 					}else {
 						//	TODO:参数项未提供参数值，抛出异常
 					}
@@ -206,7 +200,7 @@ class ListParameters implements Parameters{
 				continue;
 			}
 		}
-		System.out.println(this.toString());
+		//System.out.println(this.toString());
 		
 	}
 	
@@ -245,49 +239,64 @@ class ListParameters implements Parameters{
  */
 class CommandLineParser{
 	
-	private Map<String,ParameterValue> ParameterMap=new HashMap<>();
+	private Map<String,ParameterValue> parameterMap=new HashMap<>();
 	
 	
 	public CommandLineParser(String commandName,String[] parameters) {
+		
+//		System.out.println(commandName);//TODO
+//		System.out.println(parameters);//TODO
 		if(commandName=="list") {
 			parseListCommand(parameters);
 		}
 	}
 	
 	public void parseListCommand(String[] parameters) {
+		//System.out.println(123);
 		ListParameters listParameters=new ListParameters(parameters);
 		listParameters.formatParameters();
 //		listParameters.judgeParameters();
-		ParameterMap=listParameters.getParametersMap();
+		parameterMap=listParameters.getParametersMap();
+		//System.out.println(parameterMap);
 	}
 	
-	
-	public void excuteListCommand() {
+	/**
+	 * 	执行list命令
+	 * @throws Exception 
+	 * 
+	 */
+	public void excuteListCommand() throws Exception {
 		
-		String logAddress=(String) ParameterMap.get("-log").value;
+		String logAddress=(String) parameterMap.get("-log").value;
+		
 		LogFileReader logFileReader=new LogFileReader(logAddress);
 		
+		String content=logFileReader.defaultContent();
+	//	System.out.println(content);
+		LogContentParaser contentParaser=new LogContentParaser();
+		contentParaser.paraseLogContent(content);
+		Map<String,DailyInfectItem> resultMap=contentParaser.resultMap;
 		
-		
-		
+		for(Map.Entry<String, DailyInfectItem> entry:resultMap.entrySet()) {
+			System.out.println(entry.getKey()+entry.getValue());
+		}
+		//String outputAddress=(String) ParameterMap.get("-out").value;
+		//ResultOutputter outputter=new ResultOutputter(outputAddress);
 	}
-	
-	
-	
 }
 
 /**
- * 某日某省的感染状况
+ * 	某日某省的感染状况
  * 
  * @author ZhangYuhui
  * @version 1.0
  */
 class DailyInfectItem{
 	
-	int ip;
-	int sp;
-	int cure;
-	int dead;
+	private int ip;
+	private int sp;
+	private int cure;
+	private int dead;
 	
 	public DailyInfectItem(int ip, int sp, int cure, int dead) {
 		super();
@@ -375,13 +384,14 @@ class LogFileReader{
 	String logDirectory;
 	private LocalDate endDate;
 	private LocalDate startDate;
-	private LocalDate parameterDate;
+//	private LocalDate parameterDate;	TODO
 	final DateFormat formatter=new SimpleDateFormat("yyyy-MM-dd");
 	
 	public LogFileReader(String logDirectory) {
 		this.startDate=this.endDate=null;
-		getBetweenDate();
-		generateDailyMap();
+		this.logDirectory=logDirectory;
+		//getBetweenDate();
+		//generateDailyMap();
 	}
 	
 	public Map<String, String> getDailyInfectMap() {
@@ -443,7 +453,7 @@ class LogFileReader{
 	/**
 	 * 	获取两个日期间隔的所有日期
 	 * 
-	 * @return
+	 * @return	List<String> dateList 两个日期之间的所有日期列表
 	 */
 	public  List<String> getBetweenDate(){
 			
@@ -471,7 +481,6 @@ class LogFileReader{
 	public void generateDailyMap() {
 		List<String> dateList=getBetweenDate();
 		
-		
 		for(int i=0;i<dateList.size();i++) {
 			dailyInfectMap.put(dateList.get(i), null);
 		}
@@ -490,7 +499,7 @@ class LogFileReader{
 			}
 		}
 		//TODO
-		System.out.println(dailyInfectMap.toString());
+		//System.out.println(dailyInfectMap.toString());
 	}
 	
 	/**
@@ -522,20 +531,31 @@ class LogFileReader{
 			while((s=br.readLine())!=null&&!s.startsWith("//")) {
 				sb.append(s+"\n");
 			}
-			
 			br.close();
 		}catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
 		
-		System.out.println(sb.toString());
+		//System.out.println(sb.toString());
 		return sb.toString();
 	}
 	
-	public void paraseContent(String logContent) {
-		String[] lines=logContent.split("\n");
+	
+	public String defaultContent() {
+		File logDir=new File(logDirectory);
+		String content="";
+		if(logDir.exists()&&logDir.isDirectory()) {
+			File[] logList=logDir.listFiles();
+			for(int i=0;i<logList.length;i++) {
+				content+=getFileContent(logList[i]);
+			}
+		}else {
+			//	TODO:处理日志所在文件目录异常
 		
+		}
+		//System.out.println(content);
+		return content;
 	}
 
 	
@@ -550,30 +570,44 @@ class LogFileReader{
 
 class LogContentParaser{
 	
-	Map<String,DailyInfectItem[]> dailyInfectItemMap=new HashMap<String, DailyInfectItem[]>();
+	Map<String,DailyInfectItem> resultMap=new HashMap<String, DailyInfectItem>();
+	
+	public LogContentParaser() {
+
+	}
 	
 	/**
 	 * 	将字符串形式的感染状况转化为结构体形式的每日感染状况
 	 * 
 	 * @param dailyInfectMap
+	 * @throws Exception 
 	 */
-	public void paraseLogContent(Map<String,String> dailyInfectMap) {
-		DailyInfectItem item=null;
-		String date=null;
-		String[] lines;
-		for(Map.Entry<String, String> entry:dailyInfectMap.entrySet()) {
-			item=new DailyInfectItem(0, 0, 0, 0);
-			date=entry.getKey();
-			lines=entry.getValue().split("\n");
-			for(String line:lines) {
-				// TODO:匹配正则表达式
-				
-				
-			}
+	public void paraseLogContent(String content) throws Exception {
+		
+//		RegExpTextParser parser=new RegExpTextParser();
+//		String date;
+//		String[] lines;
+//		DailyInfectItem item=null;
+//		for(Map.Entry<String, String> entry:dailyInfectMap.entrySet()) {
+//			item=new DailyInfectItem(0, 0, 0, 0);
+//			date=entry.getKey();
+//			lines=entry.getValue().split("\n");
+//			for(String line:lines) {
+//				// TODO:匹配正则表达式
+//				parser.extractType(line);
+//			}
+//		}
+//		resultMap=parser.getInfectMap();
+		
+		RegExpTextParser contentParser=new RegExpTextParser();
+		String[] lines=content.split("\n");
+		for(int i=0;i<lines.length;i++) {
+			contentParser.extractType(lines[i]);
 		}
+		
+		resultMap=contentParser.getInfectMap();
+		
 	}
-	
-	
 }
 
 /**
@@ -585,34 +619,57 @@ class LogContentParaser{
 class ResultOutputter{
 	String logDirectory;
 	
-	public ResultOutputter(String logDirectory) {
+	
+	/**
+	 * 	结果按照省份拼音顺序排序
+	 * 
+	 */
+	public void sortProvince() {
 		
 	}
 	
+	
+	
+	public ResultOutputter(String logDirectory) {
+		
+		
+		
+	}
+	
+	
+	public String outputResult(Map<String,DailyInfectItem> resultMap) {
+		
+		
+		
+		
+		
+		
+		return null;
+	}
 	
 }
 
 
 /**
- * 	正则表达式
+ * 	正则表达式解析文本类
  * 
  * @author ZhangYuhui
  * @version 1.0
  */
-class RegExp{
+class RegExpTextParser{
 	
 	//每日省份感染列表
-	DailyInfectItem item=new DailyInfectItem(0, 0, 0, 0);
-	Map<String,DailyInfectItem> provinceMap=new HashMap<String, DailyInfectItem>()
-;	ArrayList<Entry<String,DailyInfectItem>> provinceList=new ArrayList<>();
+//	DailyInfectItem item=new DailyInfectItem(0, 0, 0, 0);
+	private Map<String,DailyInfectItem> infectMap=new HashMap<String, DailyInfectItem>();
+	//ArrayList<Entry<String,DailyInfectItem>> provinceList=new ArrayList<>();
 	String[] provinces= {
 			"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林",
 			"江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江",
 	};
 	
-	public RegExp() {
+	public RegExpTextParser() {
 		for(int i=0;i<provinces.length;i++) {
-			provinceMap.put(provinces[i], new DailyInfectItem(-1, -1, -1, -1));
+			infectMap.put(provinces[i], new DailyInfectItem(-1, -1, -1, -1));
 		}
 	}
 	
@@ -626,8 +683,15 @@ class RegExp{
     final String SP_CONFIRM_PATTERN = "(.*) 疑似患者 确诊感染 (\\d*)人";
     final String SP_EXCLUDE_PATTERN = "(.*) 排除 疑似患者 (\\d*)人";
     
-    
+    /**
+     * 	从文本行中提取四种类型的数目，并存储到map中
+     * 
+     * @param lastDateMap
+     * @param line
+     * @throws Exception
+     */
     public void extractType(String line) throws Exception {
+    	
     	Pattern p1 = Pattern.compile(IP_ADD_PATTERN);
         Pattern p2 = Pattern.compile(SP_ADD_PATTERN);
         Pattern p3 = Pattern.compile(IP_FLOW_PATTERN);
@@ -637,6 +701,7 @@ class RegExp{
         Pattern p7 = Pattern.compile(SP_CONFIRM_PATTERN);
         Pattern p8 = Pattern.compile(SP_EXCLUDE_PATTERN);
         
+        
         matchIpAdd(p1,line);
         matchSpAdd(p2,line);
         matchIpFlow(p3,line);
@@ -645,7 +710,19 @@ class RegExp{
         matchCure(p6, line);
         matchSpConfirm(p7, line);
         matchSpExclude(p8, line);
-
+        
+        for(int i=0;i<provinces.length;i++) {
+        	if(infectMap.get(provinces[i]).getIp()<0) {
+        		infectMap.get(provinces[i]).setAll(0, 0, 0, 0);
+        	}
+			
+		}
+        
+    }
+    
+    
+    public Map<String,DailyInfectItem> getInfectMap() {
+    	return infectMap;
     }
     
     /**
@@ -655,15 +732,19 @@ class RegExp{
      * @param line
      */
     public void matchIpAdd(Pattern p,String line) {
+    	//p = Pattern.compile(IP_ADD_PATTERN);
     	Matcher m=p.matcher(line);
     	while(m.find()) {
+    		//System.out.println(m.group(1)+thisDateMap.get(m.group(1)).getIp());
     		int addNum=Integer.valueOf(m.group(2));
-    		if(provinceMap.get(m.group(1))==null) {//省份不存在,则创建一个感染项
-    			provinceMap.get(m.group(1)).setAll(addNum, 0, 0, 0);
+    		if(infectMap.get(m.group(1)).getIp()<0) {//省份不存在,则创建一个感染项
+    			infectMap.get(m.group(1)).setAll(addNum, 0, 0, 0);
     		}else {//省份存在，修改感染项
-    			int ip=provinceMap.get(m.group(1)).getIp();
-    			provinceMap.get(m.group(1)).setIp(ip+addNum);
+    			int ip=infectMap.get(m.group(1)).getIp();
+    			infectMap.get(m.group(1)).setIp(ip+addNum);
     		}
+    		
+    		//System.out.println(m.group(1)+thisDateMap.get(m.group(1)).getIp());
     	}
     }
     
@@ -677,11 +758,11 @@ class RegExp{
     	Matcher m=p.matcher(line);
     	while(m.find()) {
     		int addNum=Integer.valueOf(m.group(2));
-    		if(provinceMap.get(m.group(1)).getIp()<0) {//省份不存在,则创建一个感染项
-    			provinceMap.get(m.group(1)).setAll(0, addNum, 0, 0);
+    		if(infectMap.get(m.group(1)).getIp()<0) {//省份不存在,则创建一个感染项
+    			infectMap.get(m.group(1)).setAll(0, addNum, 0, 0);
     		}else {//省份存在，修改感染项
-    			int sp=provinceMap.get(m.group(1)).getSp();
-    			provinceMap.get(m.group(1)).setSp(sp+addNum);
+    			int sp=infectMap.get(m.group(1)).getSp();
+    			infectMap.get(m.group(1)).setSp(sp+addNum);
     		}
     	}
     }
@@ -696,23 +777,23 @@ class RegExp{
     public void matchIpFlow(Pattern p,String line) throws Exception {
     	Matcher m=p.matcher(line);
     	while(m.find()) {
-    		if(provinceMap.get(m.group(1)).getIp()<0) {//流出省不存在
+    		if(infectMap.get(m.group(1)).getIp()<0) {//流出省不存在
     			// TODO:报错
     			throw new Exception();
     		}
-    		if(provinceMap.get(m.group(2)).getIp()<0) {//流入省不存在
-    			provinceMap.get(m.group(2)).setAll(0, 0, 0, 0);
+    		if(infectMap.get(m.group(2)).getIp()<0) {//流入省不存在
+    			infectMap.get(m.group(2)).setAll(0, 0, 0, 0);
     		}
     		
     		int flowNum=Integer.valueOf(m.group(3));
-			int orignalNum1=provinceMap.get(m.group(1)).getIp();
-			int orignalNum2=provinceMap.get(m.group(2)).getIp();
+			int orignalNum1=infectMap.get(m.group(1)).getIp();
+			int orignalNum2=infectMap.get(m.group(2)).getIp();
 			if(orignalNum1-flowNum<0) {
 				// TODO:当流出数目大于省份原有数目则报错
 				throw new Exception();
 			}
-			provinceMap.get(m.group(1)).setIp(orignalNum1-flowNum);
-			provinceMap.get(m.group(1)).setIp(orignalNum2+flowNum);
+			infectMap.get(m.group(1)).setIp(orignalNum1-flowNum);
+			infectMap.get(m.group(1)).setIp(orignalNum2+flowNum);
     	}
     	
     }
@@ -727,23 +808,23 @@ class RegExp{
     public void matchSpFlow(Pattern p,String line) throws Exception {
     	Matcher m=p.matcher(line);
     	while(m.find()) {
-    		if(provinceMap.get(m.group(1)).getIp()<0) {//流出省不存在
+    		if(infectMap.get(m.group(1)).getIp()<0) {//流出省不存在
     			// TODO:报错
     			throw new Exception();
     		}
-    		if(provinceMap.get(m.group(2)).getIp()<0) {//流入省不存在
-    			provinceMap.get(m.group(2)).setAll(0, 0, 0, 0);
+    		if(infectMap.get(m.group(2)).getIp()<0) {//流入省不存在
+    			infectMap.get(m.group(2)).setAll(0, 0, 0, 0);
     		}
     		
     		int flowNum=Integer.valueOf(m.group(3));
-			int orignalNum1=provinceMap.get(m.group(1)).getSp();
-			int orignalNum2=provinceMap.get(m.group(2)).getSp();
+			int orignalNum1=infectMap.get(m.group(1)).getSp();
+			int orignalNum2=infectMap.get(m.group(2)).getSp();
 			if(orignalNum1-flowNum<0) {
 				// TODO:当流出数目大于省份原有数目则报错
 				throw new Exception();
 			}
-			provinceMap.get(m.group(1)).setSp(orignalNum1-flowNum);
-			provinceMap.get(m.group(1)).setSp(orignalNum2+flowNum);
+			infectMap.get(m.group(1)).setSp(orignalNum1-flowNum);
+			infectMap.get(m.group(1)).setSp(orignalNum2+flowNum);
     	}
     }
     
@@ -756,20 +837,24 @@ class RegExp{
      */
     public void matchDead(Pattern p,String line) throws Exception {
     	Matcher m=p.matcher(line);
-    	if(provinceMap.get(m.group(1)).getIp()<0) {//省份不存在
-			// TODO:报错
-			throw new Exception();
-		}else {
-			int deadNum=Integer.valueOf(m.group(2));
-			int originDead=provinceMap.get(m.group(1)).getDead();
-			int originIp=provinceMap.get(m.group(1)).getIp();
-			if(originIp-deadNum<0) {
-				// TODO：如果死亡人数大于原本感染患者人数则抛出异常
-				throw new Exception();
-			}
-			provinceMap.get(m.group(1)).setIp(originIp-deadNum);
-			provinceMap.get(m.group(1)).setDead(originDead+deadNum);
-		}
+    	while(m.find()) {
+    		if(infectMap.get(m.group(1)).getIp()<0) {//省份不存在
+    			// TODO:报错
+    			throw new Exception();
+    		}else {
+    			int deadNum=Integer.valueOf(m.group(2));
+    			int originDead=infectMap.get(m.group(1)).getDead();
+    			int originIp=infectMap.get(m.group(1)).getIp();
+    			if(originIp-deadNum<0) {
+    				// TODO：如果死亡人数大于原本感染患者人数则抛出异常
+    				throw new Exception();
+    			}
+    			infectMap.get(m.group(1)).setIp(originIp-deadNum);
+    			infectMap.get(m.group(1)).setDead(originDead+deadNum);
+    		}
+    		
+    	}
+    	
     }
     
     /**
@@ -780,20 +865,22 @@ class RegExp{
      */
     public void matchCure(Pattern p,String line) throws Exception {
     	Matcher m=p.matcher(line);
-    	if(provinceMap.get(m.group(1)).getIp()<0) {//省份不存在
-			// TODO:报错
-			throw new Exception();
-		}else {
-			int cureNum=Integer.valueOf(m.group(2));
-			int originCure=provinceMap.get(m.group(1)).getCure();
-			int originIp=provinceMap.get(m.group(1)).getIp();
-			if(originIp-cureNum<0) {
-				// TODO：如果治愈人数大于原本感染患者人数则抛出异常
-				throw new Exception();
-			}
-			provinceMap.get(m.group(1)).setIp(originIp-cureNum);
-			provinceMap.get(m.group(1)).setDead(originCure+cureNum);
-		}
+    	while(m.find()) {
+    		if(infectMap.get(m.group(1)).getIp()<0) {//省份不存在
+    			// TODO:报错
+    			throw new Exception();
+    		}else {
+    			int cureNum=Integer.valueOf(m.group(2));
+    			int originCure=infectMap.get(m.group(1)).getCure();
+    			int originIp=infectMap.get(m.group(1)).getIp();
+    			if(originIp-cureNum<0) {
+    				// TODO：如果治愈人数大于原本感染患者人数则抛出异常
+    				throw new Exception();
+    			}
+    			infectMap.get(m.group(1)).setIp(originIp-cureNum);
+    			infectMap.get(m.group(1)).setDead(originCure+cureNum);
+    		}
+    	}
     }
     
     /**
@@ -805,21 +892,23 @@ class RegExp{
      */
     public void matchSpConfirm(Pattern p,String line) throws Exception {
     	Matcher m=p.matcher(line);
-    	if(provinceMap.get(m.group(1)).getIp()<0) {//省份不存在
-			// TODO:报错
-			throw new Exception();
-		}else {
-			
-			int confirmNum=Integer.valueOf(m.group(2));
-			int originIp=provinceMap.get(m.group(1)).getIp();
-			int originSp=provinceMap.get(m.group(1)).getSp();
-			if(originSp-confirmNum<0) {
-				// TODO：如果确诊患者人数大于原本疑似患者人数则抛出异常
-				throw new Exception();
-			}
-			provinceMap.get(m.group(1)).setIp(originIp+confirmNum);
-			provinceMap.get(m.group(1)).setSp(originSp-confirmNum);
-		}
+    	while(m.find()) {
+    		if(infectMap.get(m.group(1)).getIp()<0) {//省份不存在
+    			// TODO:报错
+    			throw new Exception();
+    		}else {
+    			
+    			int confirmNum=Integer.valueOf(m.group(2));
+    			int originIp=infectMap.get(m.group(1)).getIp();
+    			int originSp=infectMap.get(m.group(1)).getSp();
+    			if(originSp-confirmNum<0) {
+    				// TODO：如果确诊患者人数大于原本疑似患者人数则抛出异常
+    				throw new Exception();
+    			}
+    			infectMap.get(m.group(1)).setIp(originIp+confirmNum);
+    			infectMap.get(m.group(1)).setSp(originSp-confirmNum);
+    		}
+    	}
     }
     
     /**
@@ -831,24 +920,32 @@ class RegExp{
      */
     public void matchSpExclude(Pattern p,String line) throws Exception {
     	Matcher m=p.matcher(line);
-    	if(provinceMap.get(m.group(1)).getIp()<0) {//省份不存在
-			// TODO:报错
-			throw new Exception();
-		}else {
-			
-			int  excludeNum=Integer.valueOf(m.group(2));
-			int originSp=provinceMap.get(m.group(1)).getSp();
-			if(originSp-excludeNum<0) {
-				// TODO：如果排除疑似患者人数大于原本疑似患者人数则抛出异常
-				throw new Exception();
-			}
-			provinceMap.get(m.group(1)).setSp(originSp-excludeNum);
-		}
+    	while(m.find()) {
+    		if(infectMap.get(m.group(1)).getIp()<0) {//省份不存在
+    			// TODO:报错
+    			throw new Exception();
+    		}else {
+    			
+    			int  excludeNum=Integer.valueOf(m.group(2));
+    			int originSp=infectMap.get(m.group(1)).getSp();
+    			if(originSp-excludeNum<0) {
+    				// TODO：如果排除疑似患者人数大于原本疑似患者人数则抛出异常
+    				throw new Exception();
+    			}
+    			infectMap.get(m.group(1)).setSp(originSp-excludeNum);
+    		}
+    	}
     }
-    
-    
 }
 
+class MapKeyComparator implements Comparator<String>{
+	@Override
+	public int compare(String o1, String o2) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+}
 
 
 
