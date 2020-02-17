@@ -425,6 +425,80 @@ class InfectStatistic {
         }
     }
 
+    /** description:有关哈希表的一些操作 */
+    static class OperateHashTable {
+
+        /** description：HashMap根据value获取key */
+        public static int getKey(HashMap<Integer, String> map, String value) {
+            int res = -1;
+            for(int getKey:map.keySet()) {
+                if(map.get(getKey).equals(value)) {
+                    res = getKey;
+                }
+            }
+            return res;
+        }
+        /** description：按城市首字母排序，“全国”置顶 */
+        public static List<Map.Entry<String,Province>> sortByHead(Hashtable<String, Province> hashtable) {
+            Hashtable<String, String> alphabetOfProvince = new Hashtable<String, String>(35);
+            alphabetOfProvince.put("全国", "AAAQG");
+            alphabetOfProvince.put("北京", "BJ");
+            alphabetOfProvince.put("天津", "TJ");
+            alphabetOfProvince.put("上海", "SH");
+            alphabetOfProvince.put("重庆", "CQ");
+            alphabetOfProvince.put("河北", "HB");
+            alphabetOfProvince.put("山西", "SXA");
+            alphabetOfProvince.put("辽宁", "LN");
+            alphabetOfProvince.put("吉林", "JL");
+            alphabetOfProvince.put("黑龙江", "HLJ");
+            alphabetOfProvince.put("江苏", "JS");
+            alphabetOfProvince.put("浙江", "ZJ");
+            alphabetOfProvince.put("安徽", "AH");
+            alphabetOfProvince.put("福建", "FJ");
+            alphabetOfProvince.put("江西", "JX");
+            alphabetOfProvince.put("山东", "SD");
+            alphabetOfProvince.put("河南", "HN");
+            alphabetOfProvince.put("湖北", "HB");
+            alphabetOfProvince.put("湖南", "HN");
+            alphabetOfProvince.put("广东", "GD");
+            alphabetOfProvince.put("海南", "HN");
+            alphabetOfProvince.put("四川", "SC");
+            alphabetOfProvince.put("贵州", "GZ");
+            alphabetOfProvince.put("云南", "YN");
+            alphabetOfProvince.put("陕西", "SXB");
+            alphabetOfProvince.put("甘肃", "GS");
+            alphabetOfProvince.put("青海", "QH");
+            alphabetOfProvince.put("台湾", "TW");
+            alphabetOfProvince.put("内蒙古", "NMG");
+            alphabetOfProvince.put("广西", "GX");
+            alphabetOfProvince.put("西藏", "XZ");
+            alphabetOfProvince.put("宁夏", "NX");
+            alphabetOfProvince.put("新疆", "XZ");
+            alphabetOfProvince.put("香港", "XG");
+            alphabetOfProvince.put("澳门", "AM");
+
+            List<Map.Entry<String,Province>> list = new ArrayList<>(hashtable.entrySet());
+            Collections.sort(list, new Comparator<Map.Entry<String, Province>>() {
+                @Override
+                public int compare(Map.Entry<String, Province> o1, Map.Entry<String, Province> o2) {
+                    return alphabetOfProvince.get(o1.getKey()).compareTo(alphabetOfProvince.get(o2.getKey()));
+                }
+            });
+            return list;
+        }
+        /** description：初始化参数名哈希表 */
+        public static HashMap<Integer, String> initParamentHashMap() {
+            HashMap<Integer, String> paramenterHashMap = new HashMap<Integer, String>(5);
+            paramenterHashMap.put(1, "-log");
+            paramenterHashMap.put(2, "-out");
+            paramenterHashMap.put(3, "-date");
+            paramenterHashMap.put(4, "-type");
+            paramenterHashMap.put(5, "-province");
+
+            return paramenterHashMap;
+        }
+    }
+
     public static void main(String[] args) {
         //...
     }
