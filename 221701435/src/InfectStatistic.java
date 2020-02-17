@@ -835,6 +835,117 @@ public class infectStatistic {
 					return infectResult;
 				}
 			}
+			
+			/**
+			 *ListUtil TODO
+			 *
+			 * @description 将得到的InfectResult数组，相同省事的合为一个InfectResult,并重写compareTor接口，使其按照省会拼音进行排序
+			 * @author ASUS
+			 * @version m 1.0.0
+			 * @since 2020-02-17
+			 */
+			
+			static class ListUtil {
+				
+				/**
+				 * 
+				 * @description 将得到的InfectResult数组，相同省事的进行一个合并，运用flag来处理目录与文件之间合并的不同。
+				 * @param a flag
+				 * @return List<InfectResult>
+				 */
+				
+				public static List<InfectResult> mergeList(List<InfectResult> a, boolean flag) {
+					List<InfectResult> list = new ArrayList<InfectResult>();
+					InfectResult r1 = new InfectResult();
+					InfectResult r2 = new InfectResult();
+					InfectResult r3 = new InfectResult();
+					
+					r3.setProvince("全国");
+					if (a.size() > 0) {
+						r1 = a.get(0);
+						for (InfectResult aa : a) {
+							r3.setIp(r3.getIp() + aa.getIp());
+							r3.setSp(r3.getSp() + aa.getSp());
+							r3.setCure(r3.getCure() + aa.getCure());
+							r3.setDead(r3.getDead() + aa.getDead());
+							if (compare(aa, r1)) {
+								if (r2.getProvince() != null) {
+									r2.setIp(r2.getIp() + aa.getIp());
+									r2.setSp(r2.getSp() + aa.getSp());
+									r2.setCure(r2.getCure() + aa.getCure());
+									r2.setDead(r2.getDead() + aa.getDead());
+								} else {
+									r2 = r1;
+								}
+							} else {
+								list.add(r2);
+								r1 = aa;
+								r2 = r1;
+							}
+						}
+						if (!list.contains(r2)) {
+							list.add(r2);
+						}
+						if (flag != true) {
+							r3.setIp(r3.getIp() / 2);
+							r3.setSp(r3.getSp() / 2);
+							r3.setDead(r3.getDead() / 2);
+							r3.setCure(r3.getCure() / 2);
+						}
+						list.add(r3);
+					} else {
+						r3.setIp(0);
+						r3.setSp(0);
+						r3.setCure(0);
+						r3.setDead(0);
+						list.add(r3);
+					}
+					
+					return list;
+				}
+
+				public static boolean compare(Object o1, Object o2) {
+					InfectResult a = (InfectResult) o1;
+					InfectResult a2 = (InfectResult) o2;
+					
+					if (a.getProvince().equals(a2.getProvince())) {
+						return true;
+					}
+					
+					return false;
+				}
+
+				public static enum EnumTest {
+					全国(1), 安徽(2), 北京(3), 重庆(4), 福建(5), 甘肃(6), 广东(7), 广西(8), 贵州(9), 海南(10), 河北(11), 河南(12), 黑龙江(13), 湖北(14),
+					湖南(15), 吉林(16), 江苏(17), 江西(18), 辽宁(19), 内蒙古(20), 宁夏(21), 青海(22), 山东(23), 山西(24), 陕西(25), 上海(26), 四川(27),
+					天津(28), 西藏(29), 新疆(30), 云南(31), 浙江(32);
+					
+					private int value;
+
+					private EnumTest(int value) {
+						this.value = value;
+					}
+
+					public int getValue() {
+						return value;
+					}
+
+					public void setValue(int value) {
+						this.value = value;
+					}
+				}
+
+				@SuppressWarnings("rawtypes")
+				static class comparator implements Comparator {
+					public int compare(Object object, Object object2) {
+						InfectResult a = (InfectResult) object;
+						InfectResult a2 = (InfectResult) object2;
+						
+						return ((Integer) EnumTest.valueOf(a.getProvince()).getValue())
+								.compareTo(EnumTest.valueOf(a2.getProvince()).getValue());
+					}
+				}
+			}
 		}
 	
 	public static void main(String[] args) throws IOException {
