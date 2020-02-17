@@ -47,15 +47,16 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 	public  int[][] peopleNumber = new int [35][4];  //记录全国以及每个省份每个类型的人数，初始默认为0，按照上面类型和省份顺序排列
 	
 	
+	
 	public static  void main(String[] args) {  //主函数入口
 		
 		InfectStatistic infectStatistic = new InfectStatistic();
     	InfectStatistic.CmdArgsParse CmdArgs = infectStatistic.new CmdArgsParse();
     	 CmdArgs.isCurrentCmdArgs(args);
     	
-    	InfectStatistic.FileDispose filehandle = infectStatistic.new FileDispose();
-    	filehandle.readFileList();
-    	filehandle.writeOutTxt();
+    	 	InfectStatistic.FileDispose filehandle = infectStatistic.new FileDispose();
+        	filehandle.readFileList();
+        	filehandle.writeOutTxt();
 		
 	}
 		
@@ -77,7 +78,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			if(args[i].equals("-log")) {  //-log部分的解析
 				i++;  //将命令行参数移动到准备解析的部分
 				isLogExist = true ;  //-log存在的判断
-				i = getLogPath(i, args);
+								i = getLogPath(i, args);
 				if(i == -1) {  //获得日志文件所在地址存在错误
 					System.out.println("命令行有误");
 					return false;
@@ -213,19 +214,14 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 		FileDispose(){};  //空构造函数
 		
 		public void readFileList() {  //读取指定路径下的文件名
-			for (int i = 0; i < 35; i++)
-				for (int j = 0; j<4; j++)
-					peopleNumber[i][j] = 0;  //记录省份类型人数置0
 			date = date + ".log.txt";  //把date加上后缀
 			File file = new File(logPath);
-			String[] files = file.list();  //list()方法是返回某个目录下的所有文件和目录的文件名，返回的是String数组
-			
-			for(int j = 0; j < files.length; j++) {  
+			  String[] files = file.list();  //list()方法是返回某个目录下的所有文件和目录的文件名，返回的是String数组
+			 for(int j = 0; j < files.length; j++){
 				if(files[j].compareTo(date) <= 0) {  //判断该文件时间是否小于指定时间
 					readLogTxt(logPath + files[j]);  //开始读取日志文件内容
 				}
 			}
-			
 		}
 		
 		public void readLogTxt(String filePath){ //读取日志文件内容
