@@ -6,5 +6,9 @@
  * @version xxx
  * @since xxx
  */
-//public class Lib {
-//}
+package src;
+
+class Lib {
+
+}
+
