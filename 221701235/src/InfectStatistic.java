@@ -118,15 +118,20 @@ public class InfectStatistic {
             File file = new File(logPath);
             if (file.isDirectory()) {
                 String names [] = file.list();
+                String nameOfLast = names[names.length-1];
                 if (dateCount == 0) {
                     //未指定日期,获取最后一个文件名，即最新日志文件
-                    dateInput = names[names.length-1];
+                    dateInput = nameOfLast;
                 } else {
+                    
                     dateInput = dateInput + ".log.txt";
                 }
                 for (String name : names) {
                     int res = dateInput.compareTo(name);
-                    if (res >= 0) {
+                    if (res < 0) {
+                        //指定日期比日志文件的日期晚
+                        break;
+                    } else {
                         //当前name的日期比指定日期（未指定则认为指定日志最后一个日期即最新）早或同一天
                         //读取 String filePath = logPath + "/" + name 文件
                         String filePath = logPath + "/" +name;
@@ -168,47 +173,147 @@ public class InfectStatistic {
                                 boolean isMatch8 = Pattern.matches(textType8, line);
                                 boolean isMatch9 = Pattern.matches(textType9, line);
                                 
-                                //测试输出
-                                if (isMatch1){
+                                //开始处理
+                                String lineSplit[] = line.split(" ");
+                                if (isMatch1) {
                                     //是注释类型
-                                    System.out.println(line+ " | 是类型1");
                                     continue;
                                 }
-                                if (isMatch2){
-                                    //某地新增感染人数
-                                    System.out.println(line+ " | 是类型2");
-                                }
-                                if (isMatch3){
-                                    System.out.println(line+ " | 是类型3");
-                                }
-                                if (isMatch4){
-                                    System.out.println(line+ " | 是类型4");
-                                }
-                                if (isMatch5){
-                                    System.out.println(line+ " | 是类型5");
-                                }
-                                if (isMatch6){
-                                    System.out.println(line+ " | 是类型6");
-                                }
-                                if (isMatch7){
-                                    System.out.println(line+ " | 是类型7");
-                                }
-                                if (isMatch8){
-                                    System.out.println(line+ " | 是类型8");
-                                }
-                                if (isMatch9){
-                                    System.out.println(line+ " | 是类型9");
+                                
+                                if (isMatch2) {
+                                    //<省> 新增 感染患者 n人,ip
+                                    String s = getProvinceOne(lineSplit);
+                                    int k = getIndex(allProvince,s);
+                                    //表示该省在日志文件中出现过
+                                    provinceReade[k] = 1;
+                                    int numOfChange = getNumOfPeople(lineSplit);
+                                    
+                                    //记录
+                                    totalTable[k][0] += numOfChange;
+                                    totalTable[0][0] += numOfChange;
+                                    
                                 }
                                 
+                                if (isMatch3) {
+                                    //<省> 新增 疑似患者 n人,sp
+                                    String s = getProvinceOne(lineSplit);
+                                    int k = getIndex(allProvince,s);
+                                    provinceReade[k] = 1;
+                                    int numOfChange = getNumOfPeople(lineSplit);
+                                    
+                                    //记录
+                                    totalTable[k][1] += numOfChange;
+                                    totalTable[0][1] += numOfChange;
+                                    
+                                }
+                                
+                                if (isMatch4) {
+                                    //<省1> 感染患者 流入 <省2> n人,ip
+                                    String s1 = getProvinceOne(lineSplit);
+                                    String s2 = getProvinceTwo(lineSplit);
+                                    int k1 = getIndex(allProvince,s1);
+                                    int k2 = getIndex(allProvince,s2);
+                                    provinceReade[k1] = 1;
+                                    provinceReade[k2] = 1;
+                                    int numOfChange = getNumOfPeople(lineSplit);
+                                    
+                                    //记录,省1减少,省2增加,全国不变
+                                    totalTable[k1][0] -= numOfChange;
+                                    totalTable[k2][0] += numOfChange;
+                                }
+                                
+                                if (isMatch5) {
+                                    //<省1> 疑似患者 流入 <省2> n人,sp
+                                    String s1 = getProvinceOne(lineSplit);
+                                    String s2 = getProvinceTwo(lineSplit);
+                                    int k1 = getIndex(allProvince,s1);
+                                    int k2 = getIndex(allProvince,s2);
+                                    provinceReade[k1] = 1;
+                                    provinceReade[k2] = 1;
+                                    int numOfChange = getNumOfPeople(lineSplit);
+                                    
+                                    //记录,省1减少,省2增加,全国不变
+                                    totalTable[k1][1] -= numOfChange;
+                                    totalTable[k2][1] += numOfChange;
+                                }
+                                
+                                if (isMatch6) {
+                                    //<省> 死亡 n人,dead
+                                    String s = getProvinceOne(lineSplit);
+                                    int k = getIndex(allProvince,s);
+                                    int numOfChange = getNumOfPeople(lineSplit);
+                                    
+                                    //记录,感染人数减少,死亡人数增加
+                                    totalTable[k][3] += numOfChange;
+                                    totalTable[k][0] -= numOfChange;
+                                    totalTable[0][3] += numOfChange;
+                                    totalTable[0][0] -= numOfChange;
+                                }
+                                
+                                if (isMatch7) {
+                                    //<省> 治愈 n人,cure
+                                    String s = getProvinceOne(lineSplit);
+                                    int k = getIndex(allProvince,s);
+                                    int numOfChange = getNumOfPeople(lineSplit);
+                                    
+                                    //记录,感染人数减少,治愈人数增加
+                                    totalTable[k][2] += numOfChange;
+                                    totalTable[k][0] -= numOfChange;
+                                    totalTable[0][2] += numOfChange;
+                                    totalTable[0][0] -= numOfChange;
+                                    
+                                }
+                                
+                                if (isMatch8) {
+                                    //<省> 疑似患者 确诊感染 n人
+                                    String s = getProvinceOne(lineSplit);
+                                    int k = getIndex(allProvince,s);
+                                    int numOfChange = getNumOfPeople(lineSplit);
+                                    
+                                    //记录,疑似人数减少,确诊人数增加,sp-,ip+
+                                    totalTable[k][1] -= numOfChange;
+                                    totalTable[k][0] += numOfChange;
+                                    totalTable[0][1] -= numOfChange;
+                                    totalTable[0][0] += numOfChange;
+                                }
+                                
+                                if (isMatch9) {
+                                    //<省> 排除 疑似患者 n人
+                                    String s = getProvinceOne(lineSplit);
+                                    int k = getIndex(allProvince,s);
+                                    int numOfChange = getNumOfPeople(lineSplit);
+                                    
+                                    //记录,疑似人数减少
+                                    totalTable[k][1] -= numOfChange;
+                                    totalTable[0][1] -= numOfChange;
+                                }
                             }
                         } catch (Exception e) {
-                            
+                            System.exit(0);
                         }
-                    } else {
-                        //指定日期比name的日期晚
+                        
+                    }
+                }
+                for (int i = 0; i < provinceReade.length; i++) {
+                    if (provinceReade[i] == 1) {
+                        provinceReade[0] = 1;
                         break;
                     }
                 }
+                //测试处理结果，简易输出
+                for (int i = 0; i < totalTable.length; i++) {
+                    if (provinceReade[i] == 1) {
+                        System.out.print(allProvince[i] + " : ");
+                        System.out.print("ip:" + totalTable[i][0] + "人     ");
+                        System.out.print("sp:" + totalTable[i][1] + "人     ");
+                        System.out.print("cure:" + totalTable[i][2] + "人     ");
+                        System.out.print("dead:" + totalTable[i][3] + "人     ");
+                        System.out.println();
+                    }
+                }
+                System.out.println("// 该文档并非真实数据，仅供测试使用");
+                
+                
                 //处理统计完毕后进行写入
                 //先判断provinceCount 是否为 0，为0即未指定省份，需要列出日志中出现的所有省份以及全国
                 //指定省份则输出指定的省份
@@ -226,7 +331,8 @@ public class InfectStatistic {
         }
       
     }
-    //
+    
+    //获取字符串在字符串数组中的位置
     public static int getIndex(String str [],String value) {
         for (int i = 0; i < str.length; i++) {
             if (str[i].equals(value)) {
@@ -235,5 +341,30 @@ public class InfectStatistic {
         }
         return -1;
     }
-    //
+    
+    //获取人数
+    public static int getNumOfPeople(String lineSplit []) {
+        //n人
+        String last = lineSplit[lineSplit.length-1];
+        String num ="";
+        for (int i = 0; i < last.length(); i++) {
+            if (last.charAt(i) != '人') {
+                num += last.charAt(i);
+            }
+        }
+        
+        return Integer.parseInt(num);
+    }
+    
+    //获取省份1
+    public static String getProvinceOne(String lineSplit []) {
+        return lineSplit[0];
+    }
+    
+    //获取省份2
+    public static String getProvinceTwo(String lineSplit []) {
+        return lineSplit[3];
+    }
+    
+    
 }
