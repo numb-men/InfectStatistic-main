@@ -1,10 +1,11 @@
-/**
+/*
  * Lib
  * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author WeiNan Zhao
+ * @version 1.0
+ * @since 2020.02.15
  */
 public class Lib {
+
 }
