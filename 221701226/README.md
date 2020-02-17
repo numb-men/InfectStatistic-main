@@ -22,4 +22,4 @@ list命令 支持以下命令行参数：
 
 **作业链接**：[寒假作业（2/2）——疫情统计](https://edu.cnblogs.com/campus/fzu/2020SpringW/homework/10281)  
 
-**博客链接：**[寒假作业（2/2） ——疫情统计](https://www.cnblogs.com/cy221701116/p/12291665.html)
+**博客链接：**[寒假作业（2/2） ——疫情统计]https:////www.cnblogs.com/hyh990511/p/12322842.html
