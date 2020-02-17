@@ -1,0 +1,19 @@
+@startuml
+InfectStatistic.main -> ArgumentHandler:调用静态方法
+create ArgumentContainer
+ArgumentHandler -> ArgumentContainer:getArgumentContainer
+activate ArgumentContainer
+InfectStatistic.main -> RecordContainer:new
+activate RecordContainer
+RecordContainer -> RecordContainer:init
+ArgumentContainer -> RecordContainer:provinceList, patientType
+activate FileTools
+ArgumentContainer -> FileTools:logPath, outPath, date
+deactivate ArgumentContainer
+FileTools -> RecordContainer:readFile()
+RecordContainer -> RecordContainer:parseSingleLine() updateRecord()
+RecordContainer -> FileTools:newOutputDataSet()
+deactivate RecordContainer
+FileTools -> out.txt
+deactivate FileTools
+@enduml

@@ -1,5 +1,3 @@
-import org.jetbrains.annotations.NotNull;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -8,8 +6,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -71,6 +67,9 @@ public class Lib {
      */
     public final static String REMOVED = "排除";
 
+    private final static String DATE_REGEX = "(19|20)[0-9][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])";
+
+
     /**
      * Validate format of date string boolean
      *
@@ -78,14 +77,15 @@ public class Lib {
      * @return the boolean
      */
     public static boolean validateFormatOfDateString(String dateString) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            format.setLenient(false);
-            format.parse(dateString);
-        } catch (ParseException parseException) {
-            return false;
-        }
-        return true;
+//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+//        try {
+//            format.setLenient(false);
+//            format.parse(dateString);
+//        } catch (ParseException parseException) {
+//            return false;
+//        }
+//        return true;
+        return dateString.matches(DATE_REGEX);
     }
 
     /**
@@ -111,7 +111,7 @@ public class Lib {
      * @return the int
      */
     public static int extractNumberFromString(String string) {
-        return Integer.parseInt(string.replaceAll(CHINESE_CHARACTER, "").trim());
+        return Integer.parseInt(string.replaceAll(CHINESE_CHARACTER, ""));
     }
 }
 
@@ -446,7 +446,6 @@ class RecordContainer {
      * @param line line
      */
     void parseSingleLine(String line) throws LogFormatException {
-
         //将一行log用空格分隔成字符串数组
         String[] log = line.split(" ");
 
@@ -483,7 +482,7 @@ class RecordContainer {
             //带-province参数的情况
             if (provinceList != null) {
                 for (String province : Lib.PROVINCE_LIST) {
-                    if (mapContainer.get(province) != null) {
+                    if (provinceList.contains(province)) {
                         add(province + mapContainer.get(province).getStringWithPatientTypeFilter(patientTypes));
                     }
                 }
@@ -524,7 +523,6 @@ class RecordContainer {
 //            System.out.println(mapContainer.get(province).getStringWithPatientTypeFilter(argumentContainer.patientTypes));
 //        }
 //    }
-
 }
 
 /**
@@ -554,20 +552,41 @@ class ArgumentHandler {
      * @return the argument container
      */
     public static ArgumentContainer getArgumentContainer(String[] originalArguments) throws ArgumentException {
+        //处理list命令的异常
         if (!"list".equals(originalArguments[0])) {
             throw new ArgumentException("缺少主命令\"list\"");
         }
-        String date = getDate(originalArguments);
-        String logPath = originalArguments[getIndexOfCommand(originalArguments, "-log") + 1];
-        //补上一个"/"防止后续读取文件时出错
-        if (!logPath.endsWith("/")) {
-            logPath += "/";
-        }
-        String outPah = originalArguments[getIndexOfCommand(originalArguments, "-out") + 1];
-        ArrayList<String> patientType = getPatientType(originalArguments);
-        ArrayList<String> provinceList = getProvinces(originalArguments);
 
-        return new ArgumentContainer(logPath, outPah, date, patientType, provinceList);
+        String date = getDate(originalArguments);
+        String logPath;
+
+        //处理-log命令的异常
+        try {
+            logPath = originalArguments[getIndexOfCommand(originalArguments, "-log") + 1];
+            if (!Files.exists(Paths.get(logPath))) {
+                throw new ArgumentException("-log:路径错误");
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            //这是未输入-log命令的情况
+            throw new ArgumentException("-log:命令必须包含");
+        }
+
+        Path outPath;
+        //处理-out命令的异常
+        try {
+            outPath = Paths.get(originalArguments[getIndexOfCommand(originalArguments, "-out") + 1]);
+            if (!outPath.isAbsolute()) {
+                throw new ArgumentException("-out:路径错误");
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            //这是未输入-out命令的情况
+            throw new ArgumentException("-out:命令必须包含");
+        }
+
+        ArrayList<String> patientType = getPatientType(originalArguments);
+        HashSet<String> provinceList = getProvinces(originalArguments);
+
+        return new ArgumentContainer(logPath, outPath.toString(), date, patientType, provinceList);
     }
 
     /**
@@ -610,7 +629,6 @@ class ArgumentHandler {
      * @param originalArguments original arguments
      * @return the patient type
      */
-    @NotNull
     private static ArrayList<String> getPatientType(String[] originalArguments) throws ArgumentException {
 
         int index = getIndexOfCommand(originalArguments, "-type");
@@ -867,8 +885,9 @@ class FileTools {
                 writer.write(line + "\n");
                 writer.flush();
             }
+            writer.write("// 该文档并非真实数据，仅供测试使用\n");
             writer.close();
-            System.out.println("输出文件保存于：" + outPath);
+            //System.out.println("输出文件保存于：" + outPath);
         } catch (IOException e) {
             e.printStackTrace();
         }

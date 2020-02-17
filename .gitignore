@@ -11,4 +11,5 @@ gen
 *Test.java
 221701223/src/test
 .idea/
+*.puml
 InfectStatistic-example.iml
