@@ -19,7 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-class InfectStatistic {
+class InfectStatistic {	
     //logPath:存放日志路径，outPath:存放输出文件路径
     public String logPath;
     public String outPath;
@@ -28,29 +28,29 @@ class InfectStatistic {
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
     String dateString = formatter.format(new Date());
     
-    //用于转换文件
-    public String date;
+    //用于存放log文件的文件名
+    public String logName;
     
     //依次对应：ip：infection patients 感染患者，sp：suspected patients 疑似患者，cure：治愈 ，dead：死亡是否出现
     public int[] type = {0,0,0,0};
-    public String[] type_name= {"感染患者","疑似患者","治愈","死亡"};
+    public String[] typeName = {"感染患者","疑似患者","治愈","死亡"};
     //类型参数个数
-    public int type_num;
-    public String[] type_order=new String[4];
+    public int typeNum;
+    public String[] typeOrder = new String[4];
 
     //依次对应各个省份是否出现，第一个为全国
-    int total=32;
+    int total = 32;
     public int[] province = new int[total];
-    public String[] province_name = {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏"		
+    public String[] provinceName = {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏"		
     	,"江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
     //依次对应各个省份各个情况的人数，第一个为全国
     public int[][] numOfPeople = new int [total][4];
     //每个省份所有有情况的人数，第一个为全国
-    public int[] totalNum=new int [total];
+    public int[] totalNum = new int [total];
     
     //记录是否有type、province参数
-    public boolean typeFlag=false;
-    public boolean provinceFlag=false;
+    public boolean typeFlag = false;
+    public boolean provinceFlag = false;
     
     /**
     * 解析命令行参数
@@ -60,8 +60,8 @@ class InfectStatistic {
          *读取命令行
          */
         String[] args;
-        CmdArgs(String[] args_cmd) {
-            args=args_cmd;
+        CmdArgs(String[] Args) {
+            args = Args;
         }
         
         /**
@@ -73,20 +73,20 @@ class InfectStatistic {
             	System.out.println("未输入list，命令行格式错误");
                 return false;
             }
-            int i,flag=0;
-            for(i=1;i<args.length;i++) {
+            int flag = 0;
+            for(int i = 1;i < args.length;i++) {
                 //检查log参数
                 if(args[i].equals("-log")) {
-                    flag=GetLog(++i);
-                    if(flag==0) {
+                    flag = GetLog(++i);
+                    if(flag == 0) {
                     	System.out.println("日志路径有误");
                         return false;
                     }
                 }
                 //检查out参数
                 else if(args[i].equals("-out")) {
-                    flag=GetOut(++i);
-                    if(flag==0) {
+                    flag = GetOut(++i);
+                    if(flag == 0) {
                     	System.out.println("输出路径有误");
                     	return false;        
                     }
@@ -94,18 +94,16 @@ class InfectStatistic {
                 }
                 //检查date参数
                 else if(args[i].equals("-date")) {
-                	flag=GetDate(++i);
-                    if(flag==0) {
-                    	System.out.println("输入日期有误");
-                        return false;                        
-                    }
+                	flag = GetDate(++i);
+                    if(flag == 0)
+                        return false;
                 }
                 //检查type参数
                 else if(args[i].equals("-type")) {
-                	flag=GetType(++i);
-                	i = i+flag-1;
-                	typeFlag=true;
-                	if(flag==0) {
+                	flag = GetType(++i);
+                	i = i + flag - 1;
+                	typeFlag = true;
+                	if(flag == 0) {
                 		System.out.println("患者类型输入有误");
                 		return false;
                 	}
@@ -113,10 +111,10 @@ class InfectStatistic {
                 }
                 //检查province参数
                 else if(args[i].equals("-province")) {
-                	flag=GetProvince(++i);
-                	i = i+flag-1;
+                	flag = GetProvince(++i);
+                	i = i + flag - 1;
                 	provinceFlag=true;
-                	if(flag==0) {
+                	if(flag == 0) {
                 		System.out.println("地区输入有误");
                 		return false;
                 	}
@@ -132,11 +130,12 @@ class InfectStatistic {
         /**
          *获取log参数
          *返回1表示参数合格，返回0表示参数不合格
+         *所有前提都是下标不超出
          */
         public int GetLog(int i) {
-            if(i<args.length) {
+            if(i < args.length) {
                 if(args[i].matches("^[A-z]:\\\\(.+?\\\\)*$")) {
-                    logPath=args[i];
+                    logPath = args[i];
                     return 1;
                 }
                 else
@@ -151,9 +150,9 @@ class InfectStatistic {
          *返回1表示参数合格，返回0表示参数不合格
          */
         public int GetOut(int i) {
-            if(i<args.length) {
+            if(i < args.length) {
                 if(args[i].matches("^[A-z]:\\\\(\\S+)+(\\.txt)$")) {
-                    outPath=args[i];
+                    outPath = args[i];
                     return 1;
                 }
                 else
@@ -168,13 +167,19 @@ class InfectStatistic {
          *返回1表示参数合格，返回0表示参数不合格
          */
         public int GetDate(int i) {
-            if(i<args.length) {
-            	if(IsValid(args[i])==true && timeCompare(args[i],dateString)<0) {
-            		date = args[i] + ".log.txt";
+            if(i < args.length) {
+            	if(IsValid(args[i]) == true && timeCompare(args[i],dateString) < 0) {
+            		logName = args[i] + ".log.txt";
             		return 1;
             	}
-            	else
+            	else if(timeCompare(args[i],dateString) >= 0) {
+            		System.out.println("日期超出范围");
             		return 0;
+            	}
+            	else {
+            		System.out.println("该日期不合法");
+            		return 0;
+            	}
             }
             else
             	return 0;
@@ -216,89 +221,92 @@ class InfectStatistic {
         
         /**
          *获取Type参数
-         *返回类型参数个数
+         *返回类型参数个数typeNum
          */
         public int GetType(int i) {
-        	type_num = 0;
-            if(i<args.length) {
-                for(int j=i;j<args.length;j++) {
+        	typeNum = 0;
+            if(i < args.length) {
+                for(int j = i;j < args.length;j++) {
                 	if(args[j].equals("ip")) {
-                		type[0]=1;
-                		type_order[type_num]=type_name[0];
-                		type_num++;
+                		type[0] = 1;
+                		typeOrder[typeNum] = typeName[0];
+                		typeNum++;
                 	}
                 	else if(args[j].equals("sp")) {
-                		type[1]=1;
-                		type_order[type_num]=type_name[1];
-                		type_num++;
+                		type[1] = 1;
+                		typeOrder[typeNum] = typeName[1];
+                		typeNum++;
                 	}
                 	else if(args[j].equals("cure")) {
-                		type[2]=1;
-                		type_order[type_num]=type_name[2];
-                		type_num++;
+                		type[2] = 1;
+                		typeOrder[typeNum] = typeName[2];
+                		typeNum++;
                 	}
                 	else if(args[j].equals("dead")) {
-                		type[3]=1;
-                		type_order[type_num]=type_name[3];
-                		type_num++;
+                		type[3] = 1;
+                		typeOrder[typeNum] = typeName[3];
+                		typeNum++;
                 	}
                 }
             }
             else
                 return 0;
-            return type_num;
+            return typeNum;
         }
         
         /**
          *获取Province参数
-         *返回省份参数个数
+         *返回省份参数个数provinceNum
          */
         public int GetProvince(int i) {
-        	int province_num = 0;
-        	for(int k=0;k<total;k++)
-        		province[k]=0;
+        	int provinceNum = 0;
+        	for(int k = 0;k < total;k++)
+        		province[k] = 0;
             if(i<args.length) {
-                for(int j=0;j<args.length;j++) {
-                	for(int m=0;m<total;m++) {
-                		if(args[j].equals(province_name[m])) {
-                    		province[m]=1;
-                    		province_num++;
+                for(int j = 0;j < args.length;j++) {
+                	for(int m = 0;m < total;m++) {
+                		if(args[j].equals(provinceName[m])) {
+                    		province[m] = 1;
+                    		provinceNum++;
                     	}
                 	}
                 }
             }
             else
                 return 0;
-            return province_num;
+            return provinceNum;
         }
     }
     
+    /**
+     * 读写日志文件
+     */
     class HandleFile {
     	HandleFile(){}
     	
-    	//该日志中出现以下几种情况:
-    	public String condition1="(\\S+) 新增 感染患者 (\\d+)人";
-    	public String condition2="(\\S+) 新增 疑似患者 (\\d+)人";
-    	public String condition3="(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
-    	public String condition4="(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
-    	public String condition5="(\\S+) 死亡 (\\d+)人";
-    	public String condition6="(\\S+) 治愈 (\\d+)人";
-    	public String condition7="(\\S+) 疑似患者 确诊感染 (\\d+)人";
-    	public String condition8="(\\S+) 排除 疑似患者 (\\d+)人";
+    	//该日志中出现以下8种情况:
+    	public String condition1 = "\\S+ 新增 感染患者 \\d+人";
+    	public String condition2 = "\\S+ 新增 疑似患者 \\d+人";
+    	public String condition3 = "\\S+ 感染患者 流入 \\S+ \\d+人";
+    	public String condition4 = "\\S+ 疑似患者 流入 \\S+ \\d+人";
+    	public String condition5 = "\\S+ 死亡 \\d+人";
+    	public String condition6 = "\\S+ 治愈 \\d+人";
+    	public String condition7 = "\\S+ 疑似患者 确诊感染 \\d+人";
+    	public String condition8 = "\\S+ 排除 疑似患者 \\d+人";
     	
     	/**
     	 *读取比date参数小的日期的所有文件
     	 */
     	public void LogFile() {
     		//初始化各省份病状人数
-    		for(int i=0;i<total;i++)
-        		for(int j=0;j<4;j++)
-        			numOfPeople[i][j]=0;
+    		for(int i = 0;i < total;i++)
+        		for(int j = 0;j < 4;j++)
+        			numOfPeople[i][j] = 0;
     		File file = new File(logPath);
     		File[] files = file.listFiles();
     		for (int i = 0; i < files.length; i++) {
     			File img = files[i];
-    			if(img.getName().compareTo(date) <= 0) {
+    			if(img.getName().compareTo(logName) < 0) {
     				ReadFile(img.getName());
     			}
 			}
@@ -313,7 +321,7 @@ class InfectStatistic {
     			isr = new InputStreamReader(new FileInputStream(logPath+dateFile),"utf-8");
     			BufferedReader read = new BufferedReader(isr);
     			String s = null;
-    			while((s=read.readLine())!=null)
+    			while((s = read.readLine()) != null)
     			{
     				if(s.matches(condition1))
     					DoCondition1(s);
@@ -347,7 +355,7 @@ class InfectStatistic {
     		String [] arr = str.split("\\s+");
     		int n = Integer.parseInt(arr[3].substring(0, arr[3].indexOf("人")));
     		for(int i = 0;i < total;i++) {
-    			if(arr[0].equals(province_name[i])) {
+    			if(arr[0].equals(provinceName[i])) {
     				numOfPeople[i][0] += n;
     				numOfPeople[0][0] += n;
     			}
@@ -360,7 +368,7 @@ class InfectStatistic {
     		String [] arr = str.split("\\s+");
     		int n = Integer.parseInt(arr[3].substring(0, arr[3].indexOf("人")));
     		for(int i = 0;i < total;i++) {
-    			if(arr[0].equals(province_name[i])) {
+    			if(arr[0].equals(provinceName[i])) {
     				numOfPeople[i][1] += n;
     				numOfPeople[0][1] += n;
     			}
@@ -373,9 +381,9 @@ class InfectStatistic {
     		String [] arr = str.split("\\s+");
     		int n = Integer.parseInt(arr[4].substring(0, arr[4].indexOf("人")));
     		for(int i = 0;i < total;i++) {
-    			if(arr[0].equals(province_name[i]))
+    			if(arr[0].equals(provinceName[i]))
     				numOfPeople[i][0] -= n;
-    			if(arr[3].equals(province_name[i]))
+    			if(arr[3].equals(provinceName[i]))
     				numOfPeople[i][0] += n;
     		}
     	}
@@ -386,9 +394,9 @@ class InfectStatistic {
     		String [] arr = str.split("\\s+");
     		int n = Integer.parseInt(arr[4].substring(0, arr[4].indexOf("人")));
     		for(int i = 0;i < total;i++) {
-    			if(arr[0].equals(province_name[i]))
+    			if(arr[0].equals(provinceName[i]))
     				numOfPeople[i][1] -= n;
-    			if(arr[3].equals(province_name[i]))
+    			if(arr[3].equals(provinceName[i]))
     				numOfPeople[i][1] += n;
     		}
     	}
@@ -399,7 +407,7 @@ class InfectStatistic {
     		String [] arr = str.split("\\s+");
     		int n = Integer.parseInt(arr[2].substring(0, arr[2].indexOf("人")));
     		for(int i = 0;i < total;i++) {
-    			if(arr[0].equals(province_name[i])) {
+    			if(arr[0].equals(provinceName[i])) {
     				numOfPeople[i][3] += n;
     				numOfPeople[i][0] -= n;
     				numOfPeople[0][3] += n;
@@ -414,7 +422,7 @@ class InfectStatistic {
     		String [] arr = str.split("\\s+");
     		int n = Integer.parseInt(arr[2].substring(0, arr[2].indexOf("人")));
     		for(int i = 0;i < total;i++) {
-    			if(arr[0].equals(province_name[i])) {
+    			if(arr[0].equals(provinceName[i])) {
     				numOfPeople[i][2] += n;
     				numOfPeople[i][0] -= n;
     				numOfPeople[0][2] += n;
@@ -429,7 +437,7 @@ class InfectStatistic {
     		String [] arr = str.split("\\s+");
     		int n = Integer.parseInt(arr[3].substring(0, arr[3].indexOf("人")));
     		for(int i = 0;i < total;i++) {
-    			if(arr[0].equals(province_name[i])) {
+    			if(arr[0].equals(provinceName[i])) {
     				numOfPeople[i][0] += n;
     				numOfPeople[i][1] -= n;
     				numOfPeople[0][0] += n;
@@ -444,7 +452,7 @@ class InfectStatistic {
     		String [] arr = str.split("\\s+");
     		int n = Integer.parseInt(arr[3].substring(0, arr[3].indexOf("人")));
     		for(int i = 0;i < total;i++) {
-    			if(arr[0].equals(province_name[i])) {
+    			if(arr[0].equals(provinceName[i])) {
     				numOfPeople[i][1] -= n;
     				numOfPeople[0][1] -= n;
     			}
@@ -463,17 +471,20 @@ class InfectStatistic {
     			for(int n=0;n<4;n++)
     				totalNum[m] += numOfPeople[m][n];
     		}
+    		
+    		PrintWriter pw;
     		//检查放置文件的文件是否存在，不存在则创建
     		try {
-    			FileOutputStream fos=new FileOutputStream(outPath,true);//true表明会追加内容
-    			PrintWriter pw=new PrintWriter(fos);
+    			//true表明会追加内容
+    			FileOutputStream fos=new FileOutputStream(outPath,true);
+    			pw=new PrintWriter(fos);
     			//情况一：没有指明type与province
     			if(typeFlag == false && provinceFlag == false) {
     				for(int i = 0;i < total;i++) {
     					if(totalNum[i]>0) {
-    						pw.write(province_name[i]+" ");
+    						pw.write(provinceName[i]+" ");
     						for(int j = 0;j < 4;j++)
-    							pw.write(type_name[j]+numOfPeople[i][j]+"人"+" ");
+    							pw.write(typeName[j]+numOfPeople[i][j]+"人"+" ");
     						pw.write("\n");
     					}
     				}
@@ -482,9 +493,9 @@ class InfectStatistic {
     			else if(typeFlag==false && provinceFlag==true) {
     				for(int i=0;i<total;i++) {
     					if(province[i]>0) {
-    						pw.write(province_name[i]+" ");
+    						pw.write(provinceName[i]+" ");
     						for(int j = 0;j < 4;j++)
-    							pw.write(type_name[j]+numOfPeople[i][j]+"人"+" ");
+    							pw.write(typeName[j]+numOfPeople[i][j]+"人"+" ");
     						pw.write("\n");
     					}
     				}
@@ -493,11 +504,11 @@ class InfectStatistic {
     			else if(typeFlag==true && provinceFlag==false) {
     				for(int i=0;i<total;i++) {
     					if(totalNum[i]>0) {
-    						pw.write(province_name[i]+" ");
-    						for(int p = 0;p < type_num;p++) {
-    							pw.write(type_order[p]);
+    						pw.write(provinceName[i]+" ");
+    						for(int p = 0;p < typeNum;p++) {
+    							pw.write(typeOrder[p]);
     							for(int q=0;q<4;q++) {
-    								if(type_name[q].equals(type_order[p]))
+    								if(typeName[q].equals(typeOrder[p]))
     									pw.write(numOfPeople[i][q]+"人"+" ");
     							}
     						}
@@ -509,11 +520,11 @@ class InfectStatistic {
     			else if(typeFlag==true && provinceFlag==true) {
     				for(int i=0;i<total;i++) {
     					if(province[i]>0) {
-    						pw.write(province_name[i]+" ");
-    						for(int p = 0;p < type_num;p++) {
-    							pw.write(type_order[p]);
+    						pw.write(provinceName[i]+" ");
+    						for(int p = 0;p < typeNum;p++) {
+    							pw.write(typeOrder[p]);
     							for(int q=0;q<4;q++) {
-    								if(type_name[q].equals(type_order[p]))
+    								if(typeName[q].equals(typeOrder[p]))
     									pw.write(numOfPeople[i][q]+"人"+" ");
     							}
     						}
@@ -530,13 +541,20 @@ class InfectStatistic {
     }
 
     public static void main(String[] args) {
+    	//命令行无数据
+    	if(args.length == 0)
+            System.out.println("命令行无命令");
+    	
+    	//解析命令行
         InfectStatistic cmd = new InfectStatistic();
-        InfectStatistic.CmdArgs cmdargs = cmd.new CmdArgs(args);
-        boolean check = cmdargs.CmdArgCheck();     
-        if(args.length==0)
-            System.out.println("命令行参数为空");
-        if(check==false)
+        InfectStatistic.CmdArgs ca = cmd.new CmdArgs(args);
+        boolean check = ca.CmdArgCheck();
+        
+        //命令行参数有误
+        if(check == false)
             return;
+        
+        //读写文件
         InfectStatistic.HandleFile hf = cmd.new HandleFile();
         hf.LogFile();
         hf.WriteFile();
