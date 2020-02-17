@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -108,7 +109,7 @@ interface Parameters{
 }
 
 /**
- * 命令的参数的值
+ *	 命令的参数的值
  * 
  * @author ZhangYuhui
  * @version 1.0
@@ -133,6 +134,32 @@ class ParameterValue{
 	
 }
 
+
+/**
+ *	 命令的参数的值
+ * 
+ * @author ZhangYuhui
+ * @version 1.0
+ */
+class ParameterValue{
+//	boolean valueRequired;
+	boolean multiValue;
+	Object value;
+	
+	public ParameterValue( boolean multiValue, Object value) {
+		super();
+//		this.valueRequired = valueRequired;
+		this.multiValue = multiValue;
+		this.value = value;
+	}
+
+	@Override
+	public String toString() {
+		return "	[multiValue=" + multiValue + ", value=" + value+ "]\n";
+	}
+	
+	
+}
 
 /**
  * List命令行参数列表类
@@ -168,7 +195,7 @@ class ListParameters implements Parameters{
 	
 
 	/**
-	 * 格式化List命令的参数，将字符串数组的参数列表转化为map中的值
+	 * 	格式化List命令的参数，将字符串数组的参数列表转化为map中的值
 	 * 
 	 * @param parameters 
 	 */
@@ -208,7 +235,7 @@ class ListParameters implements Parameters{
 	
 
 	/**
-	 * 判断格式化后的命令参数列表是否符合需求
+	 * 	判断格式化后的命令参数列表是否符合需求
 	 * 
 	 * 
 	 */
@@ -234,7 +261,7 @@ class ListParameters implements Parameters{
 
 
 /**
- * 命令行解析器
+ * 	命令行解析器
  * 
  * @author ZhangYuhui
  * @version 1.0
@@ -541,7 +568,11 @@ class LogFileReader{
 		return sb.toString();
 	}
 	
-	
+	/**
+	 * 
+	 * 
+	 * @return 内容字符串
+	 */
 	public String defaultContent() {
 		File logDir=new File(logDirectory);
 		String content="";
@@ -557,8 +588,6 @@ class LogFileReader{
 		//System.out.println(content);
 		return content;
 	}
-
-	
 }
 
 /**
@@ -597,7 +626,6 @@ class LogContentParaser{
     final String SP_CONFIRM_PATTERN = "(.*) 疑似患者 确诊感染 (\\d*)人";
     final String SP_EXCLUDE_PATTERN = "(.*) 排除 疑似患者 (\\d*)人";
     
-    
     /**
 	 * 	将字符串形式的感染状况转化为每日感染状况的结构
 	 * 
@@ -613,9 +641,7 @@ class LogContentParaser{
 		}
 		
 		return infectMap;
-		
 
-		
 	}
     
     /**
@@ -654,10 +680,8 @@ class LogContentParaser{
 		}
         
     }
-    
-    
-    
-    /**
+	
+	 /**
      * 	新增感染患者
      * 
      * @param p
@@ -868,10 +892,11 @@ class LogContentParaser{
     		}
     	}
     }
-	
-	
+    
 	
 }
+
+
 
 /**
  * 	命令结果输出器
@@ -881,32 +906,79 @@ class LogContentParaser{
  */
 class ResultOutputter{
 	
-	public ResultOutputter(String outPath,Map<String,DailyInfectItem> resultMap) {
+	Map<String,DailyInfectItem> resultMap=new HashMap<String, DailyInfectItem>();
+	Map<String,ParameterValue> listParameterMap=new HashMap<String, ParameterValue>();
+	String outPath;
+	
+	public ResultOutputter(String outPath,Map<String,DailyInfectItem> resultMap,Map<String,ParameterValue> listParameterMap) {
+		this.resultMap=resultMap;
+		this.listParameterMap=listParameterMap;
+		this.outPath=outPath;
+	}
+	
+	public String getFinalResult() {
 		
-		Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);   
-		resultMap.put("冲庆", resultMap.remove("重庆"));
+		getTotal();
+		getProvinceResult();
+		
+		StringBuilder sb=new StringBuilder();
+		//解决重庆排序与拼音不符问题
+		if(resultMap.containsKey("重庆")) {
+			resultMap.put("冲庆", resultMap.remove("重庆"));
+		}
 		List<Map.Entry<String, DailyInfectItem>> list=new ArrayList<Map.Entry<String,DailyInfectItem>>(resultMap.entrySet());
+		Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);   
+		
+		
 		Collections.sort(list,new Comparator<Map.Entry<String, DailyInfectItem>>() {
 			 public int compare(Map.Entry<String, DailyInfectItem> o1, Map.Entry<String, DailyInfectItem> o2) {
 				 return cmp.compare(o1.getKey(), o2.getKey());
 			 }
 		});
-		resultMap.put("重庆", resultMap.remove("冲庆"));
 		
+		//resultMap.put("重庆", resultMap.remove("冲庆"));
+		if(resultMap.containsKey("全国")) {
+			sb.append("全国");
+			if(listParameterMap.get("-type").value!=null) {
+				LinkedList<String> typeList=(LinkedList<String>)listParameterMap.get("-type").value;
+				for(int i=0;i<typeList.size();i++) {
+					switch(typeList.get(i)) {
+						case "ip":
+							sb.append(resultMap.get("全国").getIpResult());break;
+						case "sp":
+							sb.append(resultMap.get("全国").getSpResult());break;
+						case "cure":
+							sb.append(resultMap.get("全国").getIpResult());break;
+						case "dead":
+							sb.append(resultMap.get("全国").getSpResult());break;	
+						default:break;
+					}
+				}
+			}else {
+				
+			}
+		}
+		
+		for(int i=0;i<list.size();i++) {
+			for(int j=0;j<TYPES.length;j++) {
+				sb.append(list.get(i).getKey())
+			}
+		}
+		
+		
+		return sb.toString();
+	}
+	
+	/**
+	 * 	将结果字符串输入到指定路径的文件中
+	 * 
+	 * @param s
+	 */
+	public void output(String s) {
 		try {
 			FileOutputStream out = new FileOutputStream(new File(outPath));
 			BufferedOutputStream Buff = new BufferedOutputStream(out);
-			String s;
-			
-			for(int i=0;i<list.size();i++) {
-				
-				if(list.get(i).getKey()!="冲庆") {
-					s=list.get(i).getKey()+list.get(i).getValue().getAllResult()+"\n";
-				}else{
-					s="重庆"+list.get(i).getValue().getAllResult()+"\n";
-				}
-				Buff.write(s.getBytes());
-			}
+			Buff.write(s.getBytes());
 			Buff.flush();
             Buff.close();
 		} catch (IOException e) {
@@ -916,8 +988,15 @@ class ResultOutputter{
 	}
 	
 	
-	public String getTotal(Map<String,DailyInfectItem> resultMap) {
+	/**
+	 * 
+	 * 	获得全国的情况并且将它加入到resultMap中
+	 * 
+	 * @param resultMap
+	 */
+	public void getTotal() {
 		
+		StringBuilder sb=new StringBuilder();
 		int totalIp=0,totalSp=0,totalCure=0,totalDead=0;
 		for(Map.Entry<String, DailyInfectItem> entry:resultMap.entrySet()) {
 			totalIp+=entry.getValue().getIp();
@@ -928,8 +1007,22 @@ class ResultOutputter{
 		
 		resultMap.put("全国", new DailyInfectItem(totalIp, totalSp, totalCure, totalDead));
 		
+	
+
 	}
 	
+	/**
+	 * 	根据province参数获得相应的结果
+	 */
+	public void getProvinceResult() {
+		
+		StringBuilder sb=new StringBuilder();
+		if(listParameterMap.get("-province").value!=null) {
+			LinkedList<String> provinces=(LinkedList<String>) listParameterMap.get("-province").value;
+			resultMap.entrySet().removeIf(m->(!provinces.contains(m.getKey())));
+		}
+	
+	}
 	
 }
 
