@@ -77,13 +77,11 @@ class ListCommand {
 		readDirectory();
 		readFileList();
 		writeFile();
-		print();
 		Clean();
-		
 	}
 	
 	/**
-	 * 清空
+	 * 清空存储的值，便于测试
 	 */
 	private void Clean() {
 		hasLog = false;
@@ -98,14 +96,6 @@ class ListCommand {
 		province.clear();
 		dateList.clear();
 		provinceMap.clear();
-	}
-
-	private void print() {
-		System.out.println(log);
-		System.out.println(out);
-		System.out.println(date);
-		System.out.println(type);
-		System.out.println(province);
 	}
 
 	/**
