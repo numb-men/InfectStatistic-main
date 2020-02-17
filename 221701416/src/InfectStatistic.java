@@ -23,6 +23,7 @@ class InfectStatistic {
     	CD.Init();
     	AnalysisCommand(args);
     	CD.ReadAll(log,out,date,type,province);
+    	CD.Printdetail(log,out,date,type,province);
     }
     //对输入的命令进行处理分解
     public static void AnalysisCommand(String[] command) {
@@ -102,15 +103,26 @@ class InfectStatistic {
  * @since xxx
  */
 class CoronavirusDetail{
+	String $nothing=new String("nothing");
 	Map ProvinceMap= new HashMap();	
+	Map TypeMap=new HashMap();
 	String[] ProvinceStr= {
 			"安徽"  ,"北京"  ,"重庆"  ,"福建"  ,"甘肃"  ,
 			"广东"  ,"广西"  ,"贵州"  ,"海南"  ,"河北"  ,
 			"河南"  ,"黑龙江","湖北"  ,"湖南"  ,"吉林"  ,
 			"江苏"  ,"江西"  ,"辽宁"  ,"内蒙古","宁夏"  ,
 			"青海"  ,"山东"  ,"山西"  ,"陕西"  ,"上海"  ,
-			"四川"  ,"天津"  ,"西藏"  ,"新疆"  ,"云南"  ,"浙江"  
+			"四川"  ,"天津"  ,"西藏"  ,"新疆"  ,"云南"  ,"浙江" ,"全国"
 	};
+	String[] TypeStr={
+		"ip" , "sp", "curu", "dead"
+	};
+	String[] TypeStrCn={
+			"感染患者" , "疑似患者", "治愈", "死亡"
+		};
+	int provincenum=32;
+	int detailnum=4;
+	public int [][] detail=new int[provincenum][detailnum];
 	//初始化省份信息
 	public void Init() {
 		//填入省份信息31个
@@ -118,8 +130,28 @@ class CoronavirusDetail{
 		for(int i=0;i<ProvinceStr.length;i++) {
 			ProvinceMap.put(ProvinceStr[i], Integer.valueOf(i));
 		}
+		
+		for(int i=0;i<TypeStr.length;i++) {
+			TypeMap.put(TypeStr[i],Integer.valueOf(i));
+		}
+		
+		for(int i=0;i<provincenum;i++)
+			for(int j=0;j<detailnum;j++) detail[i][j]=0;
 	}
-	
+	//输出所需信息
+    public void Printdetail(String log,String out,String date,String [] type,String [] province) {
+    	for(int i=0;i<province.length;i++) if(!province[i].equals($nothing)){
+    		System.out.print(province[i]+" ");
+    		Integer pronum=(Integer) ProvinceMap.get(province[i]);
+    		//System.out.print(pronum);
+    		for(int j=0;j<TypeStr.length;j++) {
+    			
+    			System.out.print(TypeStrCn[j]+detail[pronum][(Integer) TypeMap.get(TypeStr[j])]+" ");
+    		}
+    		System.out.println();
+    	}
+    }
+    
 	//获取指定日期之前的文件名
 	public static ArrayList<String> getFilesName(String path,String date){
 		ArrayList<String> files = new ArrayList<String>();
@@ -135,7 +167,7 @@ class CoronavirusDetail{
 	        //得到当前日期之前的文件名
 	        File tempFile=new File(files.get(i).trim());
 	        String fileName=tempFile.getName().substring(0,10);
-	        if(date.compareTo(fileName)==0){
+	        if(date.compareTo(fileName)>=0){
 	        	beforefiles.add(files.get(i));
 	        }
 	    }
@@ -195,54 +227,50 @@ class CoronavirusDetail{
 			while((nowString=inBufferedReader.readLine())!=null) {
 				System.out.print(nowString);
 				System.out.println("???");
+				//<省> 新增 感染患者 n人
 				if(nowString.matches(matString_1)) {
 					String [] Strings_1=nowString.split(splitString_1);
-					for(int j=0;j<Strings_1.length;j++) {
-						System.out.println(Strings_1[j]);
-					}
+					detail[(Integer) ProvinceMap.get(Strings_1[0])][0]+=Integer.parseInt(Strings_1[1]);
 				}
+				//<省> 新增 疑似患者 n人
 				else if(nowString.matches(matString_2)) {
 					String [] Strings_2=nowString.split(splitString_2);
-					for(int j=0;j<Strings_2.length;j++) {
-						System.out.println(Strings_2[j]);
-					}
-					System.out.println("2222");
+					detail[(Integer) ProvinceMap.get(Strings_2[0])][1]+=Integer.parseInt(Strings_2[1]);
 				}
+				//<省1> 感染患者 流入 <省2> n人
 				else if(nowString.matches(matString_3)) {
 					String [] Strings_3=nowString.split(splitString_3);
-					for(int j=0;j<Strings_3.length;j++) {
-						System.out.println(Strings_3[j]);
-					}
+					detail[(Integer) ProvinceMap.get(Strings_3[0])][0]-=Integer.parseInt(Strings_3[2]);
+					detail[(Integer) ProvinceMap.get(Strings_3[1])][0]+=Integer.parseInt(Strings_3[2]);
 				}
+				//<省1> 疑似患者 流入 <省2> n人
 				else if(nowString.matches(matString_4)) {
 					String [] Strings_4=nowString.split(splitString_4);
-					for(int j=0;j<Strings_4.length;j++) {
-						System.out.println(Strings_4[j]);
-					}
+					detail[(Integer) ProvinceMap.get(Strings_4[0])][1]-=Integer.parseInt(Strings_4[2]);
+					detail[(Integer) ProvinceMap.get(Strings_4[1])][1]+=Integer.parseInt(Strings_4[2]);
 				}
+				//<省> 死亡 n人
 				else if(nowString.matches(matString_5)) {
 					String [] Strings_5=nowString.split(splitString_5);
-					for(int j=0;j<Strings_5.length;j++) {
-						System.out.println(Strings_5[j]);
-					}
+					detail[(Integer) ProvinceMap.get(Strings_5[0])][3]+=Integer.parseInt(Strings_5[1]);
+					detail[(Integer) ProvinceMap.get(Strings_5[0])][0]-=Integer.parseInt(Strings_5[1]);
 				}
+				//<省> 治愈 n人
 				else if(nowString.matches(matString_6)) {
 					String [] Strings_6=nowString.split(splitString_6);
-					for(int j=0;j<Strings_6.length;j++) {
-						System.out.println(Strings_6[j]);
-					}
+					detail[(Integer) ProvinceMap.get(Strings_6[0])][2]+=Integer.parseInt(Strings_6[1]);
+					detail[(Integer) ProvinceMap.get(Strings_6[0])][0]-=Integer.parseInt(Strings_6[1]);
 				}
+				//<省> 疑似患者 确诊感染 n人
 				else if(nowString.matches(matString_7)) {
 					String [] Strings_7=nowString.split(splitString_7);
-					for(int j=0;j<Strings_7.length;j++) {
-						System.out.println(Strings_7[j]);
-					}
+					detail[(Integer) ProvinceMap.get(Strings_7[0])][0]+=Integer.parseInt(Strings_7[1]);
+					detail[(Integer) ProvinceMap.get(Strings_7[0])][1]-=Integer.parseInt(Strings_7[1]);
 				}
+				//<省> 排除 疑似患者 n人
 				else if(nowString.matches(matString_8)) {
 					String [] Strings_8=nowString.split(splitString_8);
-					for(int j=0;j<Strings_8.length;j++) {
-						System.out.println(Strings_8[j]);
-					}
+					detail[(Integer) ProvinceMap.get(Strings_8[0])][1]-=Integer.parseInt(Strings_8[1]);
 				}
 				System.out.println("+++++");
 			}
