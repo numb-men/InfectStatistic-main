@@ -25,10 +25,13 @@ public class InfectStatistic {
 	            String str=null;
 	            int i=0;
 	            int conditions[][]=new int [32][4];
-	            while ((str = in.readLine())!= null) {
+	            state status=new state(); 
+	            while ((str = in.readLine())!=null) {
+	            	if(str.startsWith("//"))
+	            		break;
 	                i++;	                
 	                System.out.print("第"+i+"行："+str+"\n");	 
-	                state status=new state();        		
+	                       		
 	        		status.conditions(str, conditions);
 	        		
 	        		}
@@ -38,14 +41,20 @@ public class InfectStatistic {
         			System.out.println("\n");     
 	               
 	            }                 			    			            		            	     
-					String content = "a dog will be write in file";
-					File file = new File("D:\\result.txt");
+					
+					File file = new File("D:\\output.txt");
 					if(!file.exists()){
 						file.createNewFile();
 					}
 					FileWriter fileWriter = new FileWriter(file.getAbsoluteFile());
 					BufferedWriter bw = new BufferedWriter(fileWriter);
-					bw.write(content);
+					for(int k=0;k<32;k++) {
+	        				String write=status.provinces[k]+" 感染患者"+conditions[k][0]+"人"+
+	        						         " 疑似患者"+conditions[k][1]+"人"+" 治愈"+conditions[k][2]+"人"+
+	        						         " 死亡"+conditions[k][3]+"人"+"\n";
+	        			    bw.write(write);
+					}
+					bw.write("//该文档并非真实数据，仅供测试使用");
 					bw.close();
 					System.out.println("finish");
 			    } catch (IOException e) {
