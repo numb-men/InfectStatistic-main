@@ -558,10 +558,63 @@ class InfectStatistic {
                 }
             }
         }
-        //...
+        /** description:执行统计并写入文件 */
+        public static void execCMD(String[] args) {
+            InfectStatistic infectStatistic = new InfectStatistic();
+            ArrayList<String> listFileNameArrayList = new ArrayList<String>();      //用来保存一个文件夹下的文件夹名的数组
+            GetFile.getBeforeDateFileName(inputDir, toDateString, listFileNameArrayList);    //初始化listFileNameArrayList
+
+            try {
+                File file = null;
+                File outputFile = new File(outputFileNameString);
+                String outputDirString = outputFileNameString.substring(0,outputFileNameString.lastIndexOf("/"));
+                File outputDir = new File(outputDirString);
+                FileOutputStream fileOutputStream = null;
+                InputStreamReader reader = null;
+                String filePathString = "";
+                for (int cnt=0, len=listFileNameArrayList.size(); cnt < len; cnt++) {
+                    filePathString = inputDir + "/" + listFileNameArrayList.get(cnt);  //输入文件路径
+                    file = new File(filePathString);
+
+                    if(!outputDir.exists()) {
+                        outputDir.mkdir();
+                    }
+                    if (!outputFile.exists()) {
+                        outputFile.createNewFile();
+                    }
+                    if (file.isFile() && file.exists()) {
+                        reader = new InputStreamReader(new FileInputStream(file), "UTF8");
+                        BufferedReader bufferedReader = new BufferedReader(reader);
+                        fileOutputStream = new FileOutputStream(outputFileNameString);
+
+                        String lineString = null;
+                        while ((lineString = bufferedReader.readLine()) != null) {
+                            if (!OperateLineString.isNotes(lineString)) { // 不是注释行
+                                ProviceStatistic.StatisticProvince(lineString, hashtable); // 进行统计
+                            } else { // 是注释行，不执行任何操作
+                                ;
+                            }
+                        }
+                    }else {
+                        System.out.println("输入文件路径："+filePathString);
+                        System.out.println("找不到输入文件");
+                    }
+                }
+
+                ProviceStatistic.StatisticNation(hashtable);
+                OutPutFile.writeFile(hashtable, fileOutputStream, paramentersOfType, paramentersOfProvince, args);
+                reader.close();
+            } catch (Exception e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+        }
     }
 
     public static void main(String[] args) {
-        //...
+        StartCMD.separateCMD(args);
+        StartCMD.init();
+        StartCMD.execCMD(args);
     }
 }
+
