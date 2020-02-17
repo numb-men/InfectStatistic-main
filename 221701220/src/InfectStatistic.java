@@ -406,7 +406,9 @@ class LogLineProcessor {
     }
 
     public void processLogLine(String logLine) {
-        processorChains.processorChoose(logLine);
+        if(!logLine.startsWith("//")) {
+            processorChains.processorChoose(logLine);
+        }
     }
 
 }
