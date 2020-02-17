@@ -11,10 +11,10 @@ import java.io.File;
  * @version 1.0
  * @since 2020.2.8
  */
-class InfectStatistic {
+public class InfectStatistic {
 	public static final int PROVINCE_CONSTANT = 31;
-	boolean[] valid; // 默认false +1全国
-	int[][] c;// 整体数据结构 +1全国
+	private boolean[] valid; // 默认false +1全国
+	private byte[][] c;// 整体数据结构 +1全国
 	private String c1;
 	private String c2;
 	private String c3;
@@ -22,10 +22,9 @@ class InfectStatistic {
 	private String[] c5;
 	private int cindex_4;
 	private int cindex_5;
-
 	InfectStatistic() {
 		valid = new boolean[PROVINCE_CONSTANT + 1];// 默认false +1全国
-		c = new int[PROVINCE_CONSTANT + 1][4];// 整体数据结构 +1全国
+		c = new byte[PROVINCE_CONSTANT + 1][4];// 整体数据结构 +1全国
 		c1 = null;
 		c2 = null;
 		c3 = null;
@@ -58,25 +57,25 @@ class InfectStatistic {
 		}
 	}
 
-	private void analysisCommand(String[] args) {
+	void analysisCommand(String[] args) {
 		// TODO Auto-generated method stub
-		int c = 0;
+		int test = 0;
 		for (int i = 1; i < args.length; i++) {
 			if (isCommand(args[i])) {
-				c = 0;
+				test = 0;
 				if (isLog(args[i])) {
-					c = 1;
+					test = 1;
 				} else if (isOut(args[i])) {
-					c = 2;
+					test = 2;
 				} else if (isDate(args[i])) {
-					c = 3;
+					test = 3;
 				} else if (isType(args[i])) {
-					c = 4;
+					test = 4;
 				} else if (isProvince(args[i])) {
-					c = 5;
+					test = 5;
 				}
 			} else {
-				if (c == 1) {
+				if (test == 1) {
 					File file = new File(args[i]);
 					if (!file.exists()) {
 						System.out.println("-log文件名错误，'" + args[i] + "'文件不存在");
@@ -93,7 +92,7 @@ class InfectStatistic {
 					if (!c1.substring(c1.length() - 1).equals("/")) {
 						c1 = c1.concat("/");
 					}
-				} else if (c == 2) {
+				} else if (test == 2) {
 					File file = new File(args[i]);
 					if (!file.exists()) {
 						try {
@@ -106,9 +105,9 @@ class InfectStatistic {
 						}
 					}
 					c2 = args[i];
-				} else if (c == 3) {
+				} else if (test == 3) {
 					c3 = args[i];
-				} else if (c == 4) {
+				} else if (test == 4) {
 					if (args[i].equals("cure") || args[i].equals("dead")
 						|| args[i].equals("ip") || args[i].equals("sp")) {
 						c4[cindex_4++] = args[i];
@@ -117,7 +116,7 @@ class InfectStatistic {
 							"输入的-type类型错误，-type不具有'" + args[i] + "'类型");
 						System.exit(0);
 					}
-				} else if (c == 5) {
+				} else if (test == 5) {
 					try {
 						valid[Province.valueOf(args[i]).ordinal()] = true;
 					} catch (IllegalArgumentException e) {
@@ -128,6 +127,14 @@ class InfectStatistic {
 					c5[cindex_5++] = args[i];
 				}
 			}
+		}
+		if(c1==null) {
+			System.out.println("-log命令内容不为空");
+			System.exit(0);
+		}
+		if(c2==null) {
+			System.out.println("-log命令内容不为空");
+			System.exit(0);
 		}
 	}
 
@@ -291,9 +298,22 @@ class InfectStatistic {
 				// 确认为日志文件
 				String logfilename = filename.substring(0,
 					filename.indexOf("."));
-				// 处理时间早于date的文件
-				if (date.compareTo(logfilename) >= 0) {
-					dir_have_before_file = true;
+				if (date != null) {
+					// 处理时间早于date的文件
+					if (date.compareTo(logfilename) >= 0) {
+						dir_have_before_file = true;
+						// 文件名转为绝对地址
+						String result = c1.concat(filename);
+						// 对于日志文件的处理
+						try {
+							readFile(result);// 打开一个文件并处理相关数据
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							System.out.println("can't find " + result);
+						}
+					}
+				} else {
 					// 文件名转为绝对地址
 					String result = c1.concat(filename);
 					// 对于日志文件的处理
@@ -307,7 +327,7 @@ class InfectStatistic {
 				}
 			}
 		}
-		if (!dir_have_before_file) {
+		if ((!dir_have_before_file) && (date != null)) {
 			System.out.println("'" + c1 + "'" + "目录下没有时间早于'" + date + "'的日志文件");
 			System.exit(0);
 		}
@@ -373,8 +393,8 @@ class InfectStatistic {
 						}
 					} else {
 						// 没有给定类型，默认输出方式
-						System.out.print(" " + "感染患者" + c[e.ordinal()][0]
-							+ "人" + " " + "疑似患者" + c[e.ordinal()][1] + "人" + " "
+						System.out.print(" " + "感染患者" + c[e.ordinal()][0] + "人"
+							+ " " + "疑似患者" + c[e.ordinal()][1] + "人" + " "
 							+ "治愈" + c[e.ordinal()][2] + "人" + " " + "死亡"
 							+ c[e.ordinal()][3] + "人");
 					}
@@ -408,8 +428,8 @@ class InfectStatistic {
 						}
 					} else {
 						// 没有给定类型，默认输出方式
-						System.out.print(" " + "感染患者" + c[e.ordinal()][0]
-							+ "人" + " " + "疑似患者" + c[e.ordinal()][1] + "人" + " "
+						System.out.print(" " + "感染患者" + c[e.ordinal()][0] + "人"
+							+ " " + "疑似患者" + c[e.ordinal()][1] + "人" + " "
 							+ "治愈" + c[e.ordinal()][2] + "人" + " " + "死亡"
 							+ c[e.ordinal()][3] + "人");
 					}
