@@ -1,5 +1,6 @@
 
 import java.awt.RenderingHints.Key;
+import java.awt.print.Printable;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 /**
  * InfectStatistic
  * 
@@ -39,12 +41,9 @@ import java.util.regex.Pattern;
  */
 public class InfectStatistic {
     public static void main(String[] args){
-        
         CommandParser cmParser = new CommandParser(args);
         CommandRun commandRun = new CommandRun(cmParser);
         commandRun.runCommand();
-
-
     }
 }
 
@@ -146,11 +145,9 @@ class CommandRun{
         FileOutputUtils writer = new FileOutputUtils();
         
         try {
-            
             reader.parseFile(parser.srcPath, map, hasDate, parser.dateString);
             map.sortByProvince();
             writer.writeFile(parser.dstPath, map, hasType, parser.typeList, hasProvince, parser.provinceList);
-            
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -189,18 +186,17 @@ class FileInputUtils{
         for (int i = 0; i < filesList.size() ;i++) {
                 filesName.add(filesList.get(i).toString());
             }
-        
         String srcPath = "";
-        
         //改成绝对路径
         String absolutePath = "";
         if (hasDate) {
             absolutePath = dirPath + dateString + ".log.txt";
 
         }
-        
         String lastFile = filesName.get(filesName.size() - 1);
-        if (lastFile.compareTo(absolutePath) < 0) {
+        int len = lastFile.length();
+        String lastDateString = lastFile.substring(len - 18, len -8 );
+        if (lastDateString.compareTo(dateString) < 0) {
             System.out.println("！错误：输入date参数比最新log文件更新！");
         }
         for (int i = 0; i<filesName.size(); i++) {
@@ -213,7 +209,6 @@ class FileInputUtils{
             }
             inputFile(srcPath, map);
         }
-        
     }
     
     /*
@@ -318,7 +313,6 @@ class FileOutputUtils{
                }
         }
         
-            
         bufferedWriter.write("//该数据并非真实数据，仅供测试程序使用\n"); 
         bufferedWriter.close();
         outStream.close();
@@ -398,9 +392,7 @@ class InfectedMap{
             Entry<String,InfectedArea> entry = it.next();
             list.add(entry);
         }
-        
         Collections.sort(list, new Comparator<Entry<String,InfectedArea>>() {
- 
             @Override
             public int compare(Entry<String, InfectedArea> o1, Entry<String, InfectedArea> o2) {
                 String value1 = o1.getKey();
