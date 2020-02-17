@@ -16,17 +16,6 @@ class InfectStatistic
 {
     public static void main(String[] args)
     {
-//        args=new String [10];
-//        args[0]="list";
-//        args[1]="-date";
-//        args[2]="2020-1-22";
-//        args[3]="-log";
-//        args[4]="F:\\GitHub\\InfectStatistic-main\\log\\";
-//        args[5]="-type";
-//        args[6]="sp";
-//        args[7]="-province";
-//        args[8]="全国";
-//        args[9]="福建";
         try
         {
             if (args.length == 0)
@@ -89,7 +78,7 @@ class Parameter
                     break;
                 }
             }
-            if(is_exist != true)
+            if(is_exist != true && !name.equals("-date"))
                 throw new MyException("必须有参数" + name);
             if(i == args.length && param.equals("") && is_exist == true)
                 throw new MyException("log,out和date后必须含有参数");
@@ -445,12 +434,13 @@ class Command
         DateFormat date_format = new SimpleDateFormat("yyyy-MM-dd");
         try
         {
-            date_param = date_format.parse(date);
             Date date_now = date_format.parse(date_format.format(new Date()).toString());
-            if(date_param.compareTo(date_now) > 0)
-                throw new MyException("输入时间大于系统当前时间");
             if(!exist)
                 date_param = date_now;
+            else
+                date_param = date_format.parse(date);
+            if(date_param.compareTo(date_now) > 0)
+                throw new MyException("输入时间大于系统当前时间");
             for(File file : file_list)
             {
                 String data_row;
