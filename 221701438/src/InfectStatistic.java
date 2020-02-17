@@ -391,9 +391,6 @@ class InfectStatistic {
         //用来存放-type后的语句段
         String temp = null;
         RegularMatch regularMatch = null;
-        if(commandLine.isEmpty()){
-            return;
-        }
         if (commandLine.containsKey("-log") && commandLine.get("-log").length == 1){
             if (commandLine.containsKey("-date") && commandLine.get("-date").length == 1){
                 String date = commandLine.get("-date")[0];
@@ -402,9 +399,7 @@ class InfectStatistic {
                     return;
                 }
                 String[] path = commandLine.get("-log");
-                //读取文件夹下的文件
                 String[] allContent = readFile(path[0],date);
-                //对内容分析返回结果
                 list = regularMatch.match(allContent);
             }
             else if(commandLine.containsKey("-log") && commandLine.get("-date").length > 1){
@@ -416,8 +411,8 @@ class InfectStatistic {
                 Date currentTime = new Date();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 String currentDate = simpleDateFormat.format(currentTime);
-                String[] allContent = readFile(path[0],currentDate);//读取文件夹下的文件
-                list = regularMatch.match(allContent);//对内容分析返回结果
+                String[] allContent = readFile(path[0],currentDate);
+                list = regularMatch.match(allContent);
             }
             list = sortProvince(list);
         }
@@ -483,8 +478,8 @@ class InfectStatistic {
                             }
                         }
                     }
-                    System.out.println("有type:");
-                    writeStringToFile(filePath[0], temp);//输出temp拼接成的语句
+                    //System.out.println("有type:");
+                    writeStringToFile(filePath[0], temp);
                 }
             }
             else if(commandLine.containsKey("-type") && commandLine.get("-type").length < 1){
@@ -492,28 +487,28 @@ class InfectStatistic {
             }
             else{
                 for (InfectStatistic.statement st : list1) {
-                    System.out.println("没有type:\n");
+                    //System.out.println("没有type:\n");
                     writeStringToFile(filePath[0], st.printStatement());//没有-type则输出完整语句
                 }
             }
-            System.out.println("仅供测试使用:\n");
+            //System.out.println("仅供测试使用:\n");
             writeStringToFile(filePath[0],"// 该文档并非真实数据，仅供测试使用");
             String args1 = "";
             for (String arg : args) {
                 args1 += " " + arg;
             }
-            System.out.println("写入文件：\n");
+            //System.out.println("写入文件：\n");
             writeStringToFile(filePath[0], "//"+args1);
             System.out.println("写入文件"+filePath[0]+"成功！");
         }
         else {
-            System.out.println("out参数格式错误！");
+            //System.out.println("out参数格式错误！");
             return;
         }
     }
     /**
      * TODO
-     * 清空文件内容,func
+     * 清空文件内容,参考博客的
      * @author hmx1
      */
     public static void clearInfoForFile(String fileName) {
@@ -537,34 +532,25 @@ class InfectStatistic {
      * @version 1.0.0
      */
     public static void writeStringToFile(String fileName, String str) {
-        System.out.println(str);
+        FileWriter fwriter = null;
         try {
-            File file = new File(fileName);
-            PrintStream ps = new PrintStream(new FileOutputStream(file));
-            ps.println(str);
-            ps.append("\n");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            // true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
+            fwriter = new FileWriter(fileName, true);
+            fwriter.write(str);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                fwriter.flush();
+                fwriter.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
-//        FileWriter fwriter = null;
-//        try {
-//            // true表示不覆盖原来的内容，而是加到文件的后面。若要覆盖原来的内容，直接省略这个参数就好
-//            fwriter = new FileWriter(fileName, true);
-//            fwriter.write(str);
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//        } finally {
-//            try {
-//                fwriter.flush();
-//                fwriter.close();
-//            } catch (IOException ex) {
-//                ex.printStackTrace();
-//            }
-//        }
     }
     /**
      * TODO
-     * 读取目录下的所有日志
+     * 读取目录下的所有日志内容
      * @author hmx1
      * @version 1.0.0
      */
