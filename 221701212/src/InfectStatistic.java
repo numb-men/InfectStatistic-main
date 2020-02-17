@@ -1,6 +1,7 @@
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -31,8 +32,6 @@ class InfectStatistic {
 	public InfectStatistic(int argc, String[] argv) {
 		this.argc = argc;
 		this.argv = argv;
-		//listFile4log = new List<String>();
-		//listFile4out = new List<String>();
 		cmd4type = new Vector<String>();
 		cmd4provience = new Vector<String>();
 	}
@@ -52,7 +51,8 @@ class InfectStatistic {
 				dir4out = argv[i];
 			} else if(argv[i].equals("-data")) {
 				i++;
-				cmd4data = argv[i];
+				cmd4data = argv[i] + ".log.txt";
+				flg4data = true;
 			} else if(argv[i].equals("-type")) {
 				i++;
 				cmd4type.add(argv[i]);
@@ -73,25 +73,27 @@ class InfectStatistic {
 	
 	private void statistic() {
 		listFile4log = getPath(dir4log);
+		Collections.sort(listFile4log);
 		for(int i = 0; i < listFile4log.size(); i++) {
-			System.out.println(listFile4log.get(i));
+			//System.out.println(listFile4log.get(i));
 		}
 	}
 	
-  public static List<String> getPath(String path) {
+  public List<String> getPath(String path) {
     List<String> files = new ArrayList<String>();
     File file = new File(path);
     File[] tempList = file.listFiles();
 
     for (int i = 0; i < tempList.length; i++) {
-        if (tempList[i].isFile()) {
-            files.add(tempList[i].toString());
-            //文件名，不包含路径
-            //String fileName = tempList[i].getName();
-        }
-        if (tempList[i].isDirectory()) {
-            //这里就不递归了，
-        }
+    	if (tempList[i].isFile()) {
+      	if(flg4data == true && tempList[i].getName().compareTo(cmd4data) <= 0) {
+          files.add(tempList[i].toString());
+          //System.out.println(tempList[i].getName());
+      	} else if(flg4data == false) {
+          files.add(tempList[i].toString());
+          //System.out.println(tempList[i].getName());
+      	}
+      }
     }
     return files;
 }
@@ -100,6 +102,5 @@ class InfectStatistic {
 		InfectStatistic IS = new InfectStatistic(args.length, args);
 		IS.initArgument();
 		IS.statistic();
-		//System.out.println("helloworld");
 	}
 }
