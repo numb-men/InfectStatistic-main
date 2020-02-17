@@ -5,8 +5,10 @@
 # IntelliJ project files
 .idea
 *.iml
-/out
+out
 /lib
 gen
+*Test.java
+221701223/src/test
 .idea/
 InfectStatistic-example.iml

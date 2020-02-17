@@ -101,7 +101,7 @@ public class Lib {
                 return i;
             }
         }
-        return -1;
+        return -10;
     }
 
     /**
@@ -115,8 +115,34 @@ public class Lib {
     }
 }
 
+class ArgumentException extends Exception {
+    ArgumentException(String message) {
+        super(message);
+    }
+
+    /**
+     * Returns the detail message string of this throwable.
+     *
+     * @return the detail message string of this {@code Throwable} instance
+     * (which may be {@code null}).
+     */
+    @Override
+    public String getMessage() {
+        return super.getMessage();
+    }
+}
+
+class LogFormatException extends Exception {
+    LogFormatException() {
+        super();
+    }
+}
+
 /**
  * Record
+ * 单条记录类
+ *
+ * @author ybn
  */
 class Record {
     /**
@@ -217,40 +243,40 @@ class Record {
         return (infected == 0 && suspected == 0 && cured == 0 && dead == 0);
     }
 
-    /**
-     * Print all
-     */
-    void printAll() {
-        System.out.printf("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", infected, suspected, cured, dead);
-    }
+//    /**
+//     * Print all
+//     */
+//    void printAll() {
+//        System.out.printf("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", infected, suspected, cured, dead);
+//    }
 
-    /**
-     * Print with patient type filter *
-     *
-     * @param filter filter
-     */
-    void printWithPatientTypeFilter(ArrayList<String> filter) {
-        for (String type : filter) {
-            System.out.print(" ");
-            switch (type) {
-                case Lib.INFECTED:
-                    System.out.print(getStringOfInfected());
-                    break;
-                case Lib.SUSPECTED:
-                    System.out.print(getStringOfSuspected());
-                    break;
-                case Lib.CURED:
-                    System.out.print(getStringOfCured());
-                    break;
-                case Lib.DEAD:
-                    System.out.print(getStringOfDead());
-                    break;
-                default:
-                    break;
-            }
-        }
-        System.out.println();
-    }
+//    /**
+//     * Print with patient type filter *
+//     * @deprecated
+//     * @param filter filter
+//     */
+//    void printWithPatientTypeFilter(ArrayList<String> filter) {
+//        for (String type : filter) {
+//            System.out.print(" ");
+//            switch (type) {
+//                case Lib.INFECTED:
+//                    System.out.print(getStringOfInfected());
+//                    break;
+//                case Lib.SUSPECTED:
+//                    System.out.print(getStringOfSuspected());
+//                    break;
+//                case Lib.CURED:
+//                    System.out.print(getStringOfCured());
+//                    break;
+//                case Lib.DEAD:
+//                    System.out.print(getStringOfDead());
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
+//        System.out.println();
+//    }
 
     /**
      * Gets string with patient type filter *
@@ -284,6 +310,8 @@ class Record {
 
 /**
  * Record container
+ *
+ * @author ybn
  */
 class RecordContainer {
 
@@ -298,6 +326,7 @@ class RecordContainer {
 
     /**
      * Init
+     * 因为不能在构造方法中包含业务逻辑，故使用init方法来初始化容器
      */
     public void init() {
         mapContainer = new LinkedHashMap<>() {{
@@ -310,12 +339,13 @@ class RecordContainer {
 
     /**
      * Update record *
+     * <省> 治愈/死亡 n人
      *
      * @param province    province
      * @param patientType patient type
      * @param number      number
      */
-    private void updateRecord(String province, String patientType, int number) {
+    private void updateRecord(String province, String patientType, int number) throws LogFormatException {
         switch (patientType) {
             case Lib.CURED:
                 mapContainer.get(province).updateCured(number);
@@ -332,22 +362,21 @@ class RecordContainer {
                 wholeCountry.updateSuspected(-number);
                 break;
             default:
-                System.err.println("3参数log错误，可能含有非法字符。");
-                System.exit(-2);
-                break;
+                throw new LogFormatException();
         }
-
     }
 
     /**
      * Update record *
+     * <省> 新增 感染患者/疑似患者 n人
+     * <省> 排除 疑似患者 n人
      *
      * @param province    province
      * @param operation   operation
      * @param patientType patient type
      * @param number      number
      */
-    private void updateRecord(String province, String operation, String patientType, int number) {
+    private void updateRecord(String province, String operation, String patientType, int number) throws LogFormatException {
         switch (patientType) {
             case Lib.INFECTED:
                 if (Lib.INCREASED.equals(operation.trim())) {
@@ -355,7 +384,7 @@ class RecordContainer {
                     wholeCountry.updateInfected(number);
                 } else {
                     System.err.println("更新感染患者出错。");
-                    System.exit(-1);
+                    //System.exit(-1);
                 }
                 break;
             case Lib.SUSPECTED:
@@ -376,20 +405,21 @@ class RecordContainer {
                 break;
             default:
                 System.err.println("四参数log出错");
-                System.exit(-1);
+                //System.exit(-1);
                 break;
         }
     }
 
     /**
      * Update record *
+     * <省1> 感染患者/疑似患者 流入 <省2> n人
      *
      * @param provinceOut province out
      * @param patientType patient type
      * @param number      number
      * @param provinceIn  province in
      */
-    private void updateRecord(String provinceOut, String patientType, int number, String provinceIn) {
+    private void updateRecord(String provinceOut, String patientType, int number, String provinceIn) throws LogFormatException {
         switch (patientType) {
             case Lib.INFECTED:
                 mapContainer.get(provinceOut).updateInfected(-number);
@@ -400,17 +430,18 @@ class RecordContainer {
                 mapContainer.get(provinceIn).updateSuspected(number);
                 break;
             default:
-                System.err.println("5参数log出错");
-                break;
+                throw new LogFormatException();
         }
     }
 
     /**
      * Parse single line *
+     * 将一行log分割成字符串数组，根据数组元素的个数（3、4、5）分别调用不同的uodateeRcord方法
      *
      * @param line line
      */
-    void parseSingleLine(String line) {
+    void parseSingleLine(String line) throws LogFormatException {
+
         //将一行log用空格分隔成字符串数组
         String[] log = line.split(" ");
 
@@ -435,34 +466,71 @@ class RecordContainer {
         }
     }
 
-    private boolean exists(String province) {
-        return container.get(province) != null;
-    }
-
-    public void printRecords() {
-        for (Map.Entry<String, Record> entry : container.entrySet()) {
-            if (!entry.getValue().isEmpty()) {
-                System.out.print(entry.getKey() + " ");
-                entry.getValue().printAll();
-            }
-        }
-    }
-
     /**
-     * Print records filter by arguments *
+     * New output data set array list
+     * 返回一个用于输出到文件的ArrayList数组，输出部分交给FileTools类，更好地保持了封装性。
      *
      * @param argumentContainer argument container
+     * @return the array list
      */
-    public void printRecordsFilterByArguments(ArgumentContainer argumentContainer) {
-        for (String province : argumentContainer.provinceList) {
-            System.out.print(province);
-            container.get(province).printWithPatientTypeFilter(command.patientTypes);
-        }
+    public ArrayList<String> newOutputDataSet(ArgumentContainer argumentContainer) {
+        mapContainer.put(Lib.PROVINCE_LIST[0], wholeCountry);
+
+        return new ArrayList<>() {{
+            //带-province参数的情况
+            if (argumentContainer.provinceList != null) {
+                for (String province : Lib.PROVINCE_LIST) {
+                    if (mapContainer.get(province) != null) {
+                        add(province + mapContainer.get(province)
+                            .getStringWithPatientTypeFilter(argumentContainer.patientTypes));
+                    }
+                }
+            } else {
+                //不带-province参数的情况
+                for (Map.Entry<String, Record> entry : mapContainer.entrySet()) {
+                    if (!entry.getValue().empty()) {
+                        add(entry.getKey() + entry.getValue()
+                            .getStringWithPatientTypeFilter(argumentContainer.patientTypes));
+                    }
+                }
+            }
+        }};
     }
+
+    //    /**
+//     * Print records
+//     *
+//     * @deprecated
+//     */
+//    public void printRecords() {
+//        for (Map.Entry<String, Record> entry : mapContainer.entrySet()) {
+//            if (entry.getValue().empty()) {
+//                System.out.print(entry.getKey() + " ");
+//                entry.getValue().printAll();
+//            }
+//        }
+//    }
+
+//    /**
+//     * Print records filter by arguments *
+//     *
+//     * @param argumentContainer argument container
+//     * @deprecated
+//     */
+//    public void printRecordsFilterByArguments(ArgumentContainer argumentContainer) {
+//        for (String province : argumentContainer.provinceList) {
+//            System.out.print(province);
+//            System.out.println(mapContainer.get(province).getStringWithPatientTypeFilter(argumentContainer.patientTypes));
+//        }
+//    }
+
 }
 
 /**
  * Argument handler
+ * 处理命令行参数的类
+ *
+ * @author ybn
  */
 class ArgumentHandler {
 
@@ -479,11 +547,15 @@ class ArgumentHandler {
 
     /**
      * Gets argument container *
+     * 获得解析完成的参数容器
      *
      * @param originalArguments original arguments
      * @return the argument container
      */
-    public static ArgumentContainer getArgumentContainer(String[] originalArguments) {
+    public static ArgumentContainer getArgumentContainer(String[] originalArguments) throws ArgumentException {
+        if (!"list".equals(originalArguments[0])) {
+            throw new ArgumentException("缺少主命令\"list\"");
+        }
         String date = getDate(originalArguments);
         String logPath = originalArguments[getIndexOfCommand(originalArguments, "-log") + 1];
         //补上一个"/"防止后续读取文件时出错
@@ -510,11 +582,12 @@ class ArgumentHandler {
 
     /**
      * Gets date *
+     * 解析-date命令
      *
      * @param originalArguments original arguments
      * @return the date
      */
-    private static String getDate(String[] originalArguments) {
+    private static String getDate(String[] originalArguments) throws ArgumentException {
 
         int index = getIndexOfCommand(originalArguments, "-date");
 
@@ -525,19 +598,19 @@ class ArgumentHandler {
         if (Lib.validateFormatOfDateString(originalArguments[index + 1])) {
             return originalArguments[index + 1];
         } else {
-            System.err.println("-date:参数错误，无效的日期格式。");
-            return "null";
+            throw new ArgumentException("-date:参数错误，无效的日期格式。");
         }
     }
 
     /**
      * Gets patient type *
+     * 解析-type命令
      *
      * @param originalArguments original arguments
      * @return the patient type
      */
     @NotNull
-    private static ArrayList<String> getPatientType(String[] originalArguments) {
+    private static ArrayList<String> getPatientType(String[] originalArguments) throws ArgumentException {
 
         int index = getIndexOfCommand(originalArguments, "-type");
         //index<0表明命令行参数中不含-type命令，将所有类型都写入
@@ -551,8 +624,7 @@ class ArgumentHandler {
         }
         //如果args中-type的下一个元素也是一条命令选项，则表明-type命令没有参数，报错
         if (COMMAND_LIST.contains(originalArguments[index + 1])) {
-            System.err.println("-type:参数不能为空！");
-            System.exit(-1);
+            throw new ArgumentException("-type:参数不能为空！");
         }
 
         HashMap<String, String> patientTypeMap = new HashMap<>(4) {{
@@ -585,8 +657,7 @@ class ArgumentHandler {
         }
         //如果args中-type的下一个元素也是一条命令选项，则表明-type命令没有参数，报错
         if (COMMAND_LIST.contains(originalArguments[index + 1])) {
-            System.err.println("-province:参数不能为空！");
-            System.exit(-1);
+            throw new ArgumentException("-province:参数不能为空！");
         }
 
         ArrayList<String> provinceList = new ArrayList<>();
@@ -607,6 +678,8 @@ class ArgumentHandler {
 
 /**
  * Argument container
+ *
+ * @author ybn
  */
 class ArgumentContainer {
 
@@ -666,6 +739,8 @@ class ArgumentContainer {
 
 /**
  * File tools
+ *
+ * @author ybn
  */
 class FileTools {
 
@@ -696,7 +771,7 @@ class FileTools {
      *
      * @param arguments arguments
      */
-    public FileTools(ArgumentContainer arguments) {
+    public FileTools(ArgumentContainer arguments) throws ArgumentException {
 
         this.logPath = arguments.logPath;
         this.outPath = arguments.outPath;
@@ -731,7 +806,7 @@ class FileTools {
      *
      * @param newestFileName newest file name
      */
-    private void initFileListWithDateLimit(String newestFileName) {
+    private void initFileListWithDateLimit(String newestFileName) throws ArgumentException {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(logPath))) {
             fileList = new ArrayList<>() {{
                 boolean dateOutOfBound = true;
@@ -745,8 +820,7 @@ class FileTools {
                     }
                 }
                 if (dateOutOfBound) {
-                    System.err.println("指定的日期不存在。");
-                    System.exit(-1);
+                    throw new ArgumentException("-date:指定的日期不存在。");
                 }
             }};
 
@@ -764,15 +838,21 @@ class FileTools {
         try {
             //makeRecordContainer
             for (String fileName : fileList) {
-                BufferedReader reader = Files.newBufferedReader(Paths.get(logPath + fileName));
-                String read;
-                while ((read = reader.readLine()) != null) {
-                    if (read.startsWith("//")) {
-                        continue;
+                int lineNumber = 0;
+                try {
+                    BufferedReader reader = Files.newBufferedReader(Paths.get(logPath + fileName));
+                    String read;
+                    while ((read = reader.readLine()) != null) {
+                        lineNumber++;
+                        if (read.startsWith("//")) {
+                            continue;
+                        }
+                        container.parseSingleLine(read);
                     }
-                    container.parseSingleLine(read);
+                    reader.close();
+                } catch (LogFormatException e) {
+                    System.err.printf("检测到格式异常，文件：%s，行号：%d\n", fileName, lineNumber);
                 }
-                reader.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
