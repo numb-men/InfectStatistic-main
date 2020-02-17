@@ -12,14 +12,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 
 class InfectStatistic {
-	//ÃüÁî½Ó¿Ú
+	
+	//å‘½ä»¤æ¥å£
     public interface Command{
-        public void excute();
+        public int excute();
     }
 
-    //¾ßÏó»¯ÃüÁî
+    //å‘½ä»¤å…·è±¡åŒ–
     public static class CmdCommand implements Command{
     	private final String s;
     	
@@ -27,33 +35,114 @@ class InfectStatistic {
     		this.s = s;
     	}
     	@Override
-    	public void excute() {
-    		//·ÖÎöÃüÁîº¯Êı
-    		//Ö´ĞĞÃüÁîº¯Êı
+    	public int excute() {
+    		return Analyze(s);
     	}
     }
     
+    //åˆ†æå‘½ä»¤
+    public static int Analyze(String s) {
+    	int x = 0;
+    	if(s.equals("-log")) x = 1;
+    	else if(s.equals("-out")) x = 2;
+    	else if(s.equals("-date")) x =3;
+    	else if(s.equals("-type")) x = 4;
+    	else if(s.equals("-province")) x = 5;
+    	return x;
+    }  
     
-    
-    //Ö´ĞĞÆ÷
+    //Ö´è¿è¡Œå™¨
     public static class Runner{
     	private Command command;
     	
     	public Runner(Command command) {
     		this.command = command;
     	}
-    	public void Run() {
-    		command.excute();
+    	public int Run() {
+    		return command.excute();
     	}
     }
     
+    //è¯»å–æ–‡ä»¶å†…å®¹
+    public static ArrayList<String> ReadTxt(File file) {
+    	ArrayList<String> as = new ArrayList<String>();
+    	StringBuilder result = new StringBuilder();
+    	try {
+    		BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
+    		String s = null;
+    		while ((s = br.readLine()) != null) {
+    			as.add(s);
+    		}
+    		br.close();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	return as;
+    }
+    
     public static void main(String[] args) {
-        for(String s : args){
-            System.out.println(s+"\n");
-            Command command = new CmdCommand(s);
+    	String cm[] = new String[] {"1","2","3","4","5","6","7","8"};
+    	int x = 0;
+    	//å­˜å–å‚æ•°
+        for(int i=0;i<args.length;i++){
+            Command command = new CmdCommand(args[i]);
             Runner runner = new Runner(command);
-            runner.Run();
+            x = runner.Run();
+            //log
+            if(x == 1) {
+            	cm[0] = args[i+1];
+            }
+            //out
+            else if(x == 2) {
+            	cm[1] = args[i+1];
+            }
+            //date
+            else if(x == 3) {
+            	cm[2] = args[i+1];
+            }
+            //type
+            else if(x == 4) {
+            	for(int a = i+1;;a++) {
+            		if(args[a].equals("ip"))
+            			cm[3] = args[a];
+            		else if(args[a].equals("sp"))
+            			cm[4] = args[a];
+            		else if(args[a].equals("cure"))
+            			cm[5] = args[a];
+            		else if(args[a].equals("dead"))
+            			cm[6] = args[a];
+            		else break;
+            	}
+            }
+            else if(x == 5) {
+            	int c = 7;
+            	for(int a = i+1;args[a].isEmpty();a++) {
+            		cm[c] = args[a];
+            		c++;
+            	}
+            }
         }
-        System.out.println('1');
+        //Ö´å¼€å§‹è¯»å†™
+        ArrayList<String> ls = new ArrayList<String>();
+        ArrayList<String> lt = new ArrayList<String>();
+        String path = cm[0];
+        File file1 = new File(path);
+        File templist[] = file1.listFiles();
+        
+        for(int i = 0 ; i < templist.length;i++){
+			if(templist[i].isFile()) {
+				ls.add(templist[i].toString());
+			}
+        }
+        /*for(int j = 0 ; j < ls.size();j++){
+			System.out.print(ls.get(j)+"\n");
+		}*/
+        for(String s : ls) {
+        	File file2 = new File(s);
+        	lt=ReadTxt(file2);
+        	for(int j = 0 ; j < lt.size();j++){
+    			System.out.print(lt.get(j)+"\n");
+    		}
+        }
     }
 }
