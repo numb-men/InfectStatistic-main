@@ -73,6 +73,7 @@ class ListCommand {
 	
 	public ListCommand(String[] args) {
 		parseArguments(args); 
+		checkArgs();
 		readDirectory();
 		readFileList();
 		writeFile();
@@ -120,15 +121,26 @@ class ListCommand {
 									i++;
 								} 
 								else {
-									System.out.println(args[i] + "是无效命令值！");
+									System.out.println("-type有无效命令值！");
 									System.exit(0);
 								}
 							}
 							break;
 						case "-province":
 							while(i + 1 < length && isValue(args[i + 1])) {
+								boolean valid = false;
+								for(EnumProvince e : EnumProvince.values()) {
+									if(args[i + 1].equals(e.value)) {
+										valid = true;
+									}
+								}
+								if(valid == false) {
+									System.out.println("-province有无效命令值！");
+									System.exit(0);
+								}
 								province.add(args[i + 1]);
 								hasProvince = true;
+								valid = false;
 								i++;
 							}
 							break;
@@ -143,7 +155,6 @@ class ListCommand {
 			System.out.println("请输入命令行参数！");
 			System.exit(0);
 		}
-		checkArgs();
 	}
 
 	/**
