@@ -564,16 +564,39 @@ class FileProcessor {
 }
 
 
-class InfectStatistic {
-    public static void main(String[] args) {
+class StatisticProcessor {
 
-		Province.setNationalNumbers(new int[PatientType.size]);
+    private String[] args;
+    private FileProcessor fileProcessor;
+
+    StatisticProcessor(String[] args) { this.args = args; }
+
+    public void initialize() {
+        Province.setNationalNumbers(new int[PatientType.size]);
         CommandArgsProcessor commandArgsProcessor = new CommandArgsProcessor(args);
         commandArgsProcessor.processAllOptions();
         ProvinceTreeMap provinceTreeMap = new ProvinceTreeMap();
-        FileProcessor fileProcessor = new FileProcessor(provinceTreeMap, commandArgsProcessor);
+        fileProcessor = new FileProcessor(provinceTreeMap, commandArgsProcessor);
+    }
+
+    public void process() {
         fileProcessor.processFiles();
+    }
+
+    public void output() {
         fileProcessor.outputResult();
+    }
+}
+
+
+class InfectStatistic {
+    public static void main(String[] args) {
+
+        StatisticProcessor statisticProcessor = new StatisticProcessor(args);
+
+        statisticProcessor.initialize();
+        statisticProcessor.process();
+        statisticProcessor.output();
 
     }
 }
