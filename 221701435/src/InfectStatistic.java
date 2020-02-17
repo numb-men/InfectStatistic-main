@@ -1247,6 +1247,57 @@ public class infectStatistic {
 				return sort_province;
 			}
 		}
+		
+		/**
+		 * CommandLineApplication TODO
+		 * 
+		 * @description ¥¶¿Ì÷∏¡Ó
+		 * @author moli
+		 * @version m 1.0.0
+		 * @since 2020.02.17
+		 */
+		
+		static class CommandLineApplication {
+			public void Application(List<String> list) throws IOException {
+				CommandLine commandLine = new CommandLine();
+				CommandLineAnalytic commandLineAnalytic = new CommandLineAnalytic();
+				commandLine = commandLineAnalytic.Analytic(list);
+				String in_path = null;
+				String out_path = null;
+				String date = null;
+				List<String> province = new ArrayList<String>();
+				List<String> type = new ArrayList<String>();
+
+				if (commandLine.getCommand().isList()) {
+					if (commandLine.getRecord().isLog()) {
+						if (commandLine.getRecord().isDate()) {
+							if (commandLine.getRecord().getDate_content() != null) {
+								in_path = commandLine.getRecord().getLog_content();
+								date = commandLine.getRecord().getDate_content();
+							}
+						} else {
+							in_path = commandLine.getRecord().getLog_content();
+						}
+					}
+					if (commandLine.getRecord().isOut()) {
+						out_path = commandLine.getRecord().getOut_content();
+					}
+					if (commandLine.getRecord().isType()) {
+						for (int i = 0; i < commandLine.getRecord().getType_content().size(); i++) {
+							type.add(commandLine.getRecord().getType_content().get(i).name);
+						}
+					} else {
+						type = null;
+					}
+					if (commandLine.getRecord().isProvince()) {
+						province.addAll(commandLine.getRecord().getProvince_content());
+					} else {
+						province = null;
+					}
+				}
+				LogDao.outLog(in_path, out_path, province, type, date);
+			}
+		}
 	
 	public static void main(String[] args) throws IOException {
 		List<String> list = new ArrayList<String>();
@@ -1267,5 +1318,7 @@ public class infectStatistic {
 				}
 			}
 		}
+		CommandLineApplication commandLineApplication = new CommandLineApplication();
+		commandLineApplication.Application(list);
 	}
 }
