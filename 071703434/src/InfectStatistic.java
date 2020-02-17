@@ -25,7 +25,7 @@ class InfectStatistic {
 
     	
     	String[] string= {
-    			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "D:/output.txt",
+    			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\output.txt",
         	};
    
     	CommandLine cmd=new CommandLine(string);
@@ -251,7 +251,6 @@ class CommandLineParser{
 	}
 	
 	public void parseListCommand(String[] parameters) {
-
 		ListParameters listParameters=new ListParameters(parameters);
 		listParameters.formatParameters();
 //		listParameters.judgeParameters();
@@ -272,8 +271,7 @@ class CommandLineParser{
 		String content=logFileReader.defaultContent();
 	//	System.out.println(content);
 		LogContentParaser contentParaser=new LogContentParaser();
-		contentParaser.paraseLogContent(content);
-		Map<String,DailyInfectItem> resultMap=contentParaser.resultMap;
+		Map<String,DailyInfectItem> resultMap=contentParaser.paraseLogContent(content);
 		
 		
 //		for(Map.Entry<String, DailyInfectItem> entry:resultMap.entrySet()) {
@@ -281,8 +279,9 @@ class CommandLineParser{
 //		}
 //		
 		
-//		String outputAddress=(String) ParameterMap.get("-out").value;
-//		ResultOutputter outputter=new ResultOutputter(outputAddress);
+		String outputAddress=(String)parameterMap.get("-out").value;
+		ResultOutputter outputter=new ResultOutputter(outputAddress,resultMap);
+		//outputter.outputResult(resultMap);
 	}
 }
 
@@ -563,7 +562,7 @@ class LogFileReader{
 }
 
 /**
- * 	对日志进行解析
+ * 	对日志
  * 
  * @author ZhangYuhui
  * @version 1.0
@@ -571,117 +570,22 @@ class LogFileReader{
 
 class LogContentParaser{
 	
-	Map<String,DailyInfectItem> resultMap=new HashMap<String, DailyInfectItem>();
+	//Map<String,DailyInfectItem> resultMap=new HashMap<String, DailyInfectItem>();
 	
 	public LogContentParaser() {
-
-	}
-	
-	/**
-	 * 	将字符串形式的感染状况转化为结构体形式的每日感染状况
-	 * 
-	 * @param dailyInfectMap
-	 * @throws Exception 
-	 */
-	public void paraseLogContent(String content) throws Exception {
-			
-		RegExpTextParser contentParser=new RegExpTextParser();
-		String[] lines=content.split("\n");
-		for(int i=0;i<lines.length;i++) {
-			contentParser.extractType(lines[i]);
-		}
-		
-		resultMap=contentParser.getInfectMap();//TODO
-		
-		int totalIp=0,totalSp=0,totalCure=0,totalDead=0;
-		for(Map.Entry<String, DailyInfectItem> entry:resultMap.entrySet()) {
-			totalIp+=entry.getValue().getIp();
-			totalSp+=entry.getValue().getSp();
-			totalCure+=entry.getValue().getCure();
-			totalDead+=entry.getValue().getDead();
-		}
-		
-		resultMap.put("全国", new DailyInfectItem(totalIp, totalSp, totalCure, totalDead));
-		
-	}
-}
-
-/**
- * 	命令结果输出器
- * 
- * @author ZhangYuhui
- * @version 1.0
- */
-class ResultOutputter{
-	String logDirectory;
-	
-	
-	/**
-	 * 	结果按照省份拼音顺序排序
-	 * 
-	 */
-	public void sortProvince() {
-		
-	}
-	
-	
-	
-	public ResultOutputter(String logDirectory) {
-		
-		
-		
-	}
-	
-	
-	public void outputResult(Map<String,DailyInfectItem> resultMap) {
-		
-		
-		Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);   
-		resultMap.put("冲庆", resultMap.remove("重庆"));
-		List<Map.Entry<String, DailyInfectItem>> list=new ArrayList<Map.Entry<String,DailyInfectItem>>(resultMap.entrySet());
-		Collections.sort(list,new Comparator<Map.Entry<String, DailyInfectItem>>() {
-			 public int compare(Map.Entry<String, DailyInfectItem> o1, Map.Entry<String, DailyInfectItem> o2) {
-				 return cmp.compare(o1.getKey(), o2.getKey());
-			 }
-		});
-		
-		//resultMap.put("重庆", resultMap.remove("冲庆"));
-		for(int i=0;i<list.size();i++) {
-			if(list.get(i).getKey()!="冲庆") {
-				System.out.println(list.get(i).getKey()+list.get(i).getValue().getAllResult());
-			}else{
-				System.out.println("重庆"+list.get(i).getValue().getAllResult());
-			}
-			
-		}
-		
-	}
-	
-}
-
-
-/**
- * 	正则表达式解析文本类
- * 
- * @author ZhangYuhui
- * @version 1.0
- */
-class RegExpTextParser{
-	
-	//每日省份感染列表
-//	DailyInfectItem item=new DailyInfectItem(0, 0, 0, 0);
-	private Map<String,DailyInfectItem> infectMap=new HashMap<String, DailyInfectItem>();
-	//ArrayList<Entry<String,DailyInfectItem>> provinceList=new ArrayList<>();
-	String[] provinces= {
-			"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林",
-			"江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江",
-	};
-	
-	public RegExpTextParser() {
 		for(int i=0;i<provinces.length;i++) {
 			infectMap.put(provinces[i], new DailyInfectItem(-1, -1, -1, -1));
 		}
 	}
+	
+	
+	private Map<String,DailyInfectItem> infectMap=new HashMap<String, DailyInfectItem>();
+
+	String[] provinces= {
+			"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林",
+			"江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江",
+	};
+
 	
 	//用于匹配类型的字符串
     final String IP_ADD_PATTERN = "(.*) 新增 感染患者 (\\d*)人";
@@ -692,6 +596,27 @@ class RegExpTextParser{
     final String CURE_PATTERN = "(.*) 治愈 (\\d*)人";
     final String SP_CONFIRM_PATTERN = "(.*) 疑似患者 确诊感染 (\\d*)人";
     final String SP_EXCLUDE_PATTERN = "(.*) 排除 疑似患者 (\\d*)人";
+    
+    
+    /**
+	 * 	将字符串形式的感染状况转化为每日感染状况的结构
+	 * 
+	 * @param dailyInfectMap
+	 * @throws Exception 
+	 */
+	public Map<String,DailyInfectItem> paraseLogContent(String content) throws Exception {
+			
+		//RegExpTextParser contentParser=new RegExpTextParser();
+		String[] lines=content.split("\n");
+		for(int i=0;i<lines.length;i++) {
+			extractType(lines[i]);
+		}
+		
+		return infectMap;
+		
+
+		
+	}
     
     /**
      * 	从文本行中提取四种类型的数目，并存储到map中
@@ -731,9 +656,6 @@ class RegExpTextParser{
     }
     
     
-    public Map<String,DailyInfectItem> getInfectMap() {
-    	return infectMap;
-    }
     
     /**
      * 	新增感染患者
@@ -946,7 +868,69 @@ class RegExpTextParser{
     		}
     	}
     }
+	
+	
+	
 }
 
+/**
+ * 	命令结果输出器
+ * 
+ * @author ZhangYuhui
+ * @version 1.0
+ */
+class ResultOutputter{
+	
+	public ResultOutputter(String outPath,Map<String,DailyInfectItem> resultMap) {
+		
+		Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);   
+		resultMap.put("冲庆", resultMap.remove("重庆"));
+		List<Map.Entry<String, DailyInfectItem>> list=new ArrayList<Map.Entry<String,DailyInfectItem>>(resultMap.entrySet());
+		Collections.sort(list,new Comparator<Map.Entry<String, DailyInfectItem>>() {
+			 public int compare(Map.Entry<String, DailyInfectItem> o1, Map.Entry<String, DailyInfectItem> o2) {
+				 return cmp.compare(o1.getKey(), o2.getKey());
+			 }
+		});
+		resultMap.put("重庆", resultMap.remove("冲庆"));
+		
+		try {
+			FileOutputStream out = new FileOutputStream(new File(outPath));
+			BufferedOutputStream Buff = new BufferedOutputStream(out);
+			String s;
+			
+			for(int i=0;i<list.size();i++) {
+				
+				if(list.get(i).getKey()!="冲庆") {
+					s=list.get(i).getKey()+list.get(i).getValue().getAllResult()+"\n";
+				}else{
+					s="重庆"+list.get(i).getValue().getAllResult()+"\n";
+				}
+				Buff.write(s.getBytes());
+			}
+			Buff.flush();
+            Buff.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public String getTotal(Map<String,DailyInfectItem> resultMap) {
+		
+		int totalIp=0,totalSp=0,totalCure=0,totalDead=0;
+		for(Map.Entry<String, DailyInfectItem> entry:resultMap.entrySet()) {
+			totalIp+=entry.getValue().getIp();
+			totalSp+=entry.getValue().getSp();
+			totalCure+=entry.getValue().getCure();
+			totalDead+=entry.getValue().getDead();
+		}
+		
+		resultMap.put("全国", new DailyInfectItem(totalIp, totalSp, totalCure, totalDead));
+		
+	}
+	
+	
+}
 
 
