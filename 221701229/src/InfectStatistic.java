@@ -24,7 +24,7 @@ class InfectStatistic {
  */
 interface Command{
 
-     void execute(String[] args);
+     void execute(List<ArrayList<String>> arguments);
 
      String getCmdName();
 }
@@ -34,57 +34,28 @@ interface Command{
  */
 class CommandManager {
     private String[] args;  //传入的命令行数组
-    private Command cmd;  //当前解析出的命令
+    private String cmdname;  //当前解析出的命令
     private List<Command> CommandList=new ArrayList<>();  //支持的命令队列
     private List<ArrayList<String>> Arguments=new ArrayList<>();  //命令的各参数及其选项的队列
 
     CommandManager(String[] args) {
         this.args=args;
         CommandList.add(new list());
+        cmdname=args[0];
     }
 
-    //添加新的命令
-    public void addCommand(Command cmd)
+    public String getCmdName()
     {
-        CommandList.add(cmd);
+        return cmdname;
     }
 
-    //获取命令
-    public void setCommand()
+
+    public List<Command> getCommandList()
     {
-        //match表示开头找到的命令是否存在
-        boolean match=false;
-        //遍历允许的命令列表
-        for (Command command : CommandList) {
-            cmd = command;
-            //迭代判断输入的命令是否跟支持的命令匹配
-            if (args[0].equals(cmd.getCmdName())) {
-                match = true;
-                break;
-            }
-        }
-        if(match)
-        {
-            //执行命令
-            System.out.println("执行命令"+cmd.getCmdName());
-            cmd.execute(args);
-        }
-        else
-        {
-            /*
-            *
-            *找不到命令错误输出
-            *
-            */
-            System.out.println("没有对应的命令！");
-            System.exit(1);
-        }
+        return CommandList;
     }
 
-    public Command getCommand()
-    {
-        return cmd;
-    }
+
 
     //解析出参数和对应的选项
     public void setArguments()
@@ -126,11 +97,46 @@ class CommandManager {
  * */
 
 class CommandInvoker{
-        CommandInvoker(String[] arg)
-        {
-            CommandManager cm=new CommandManager(arg);
-            cm.setCommand();
+    private List<Command> CommandList=new ArrayList<>();  //支持的命令队列
+    CommandInvoker(String[] arg)
+    {
+        CommandList.add(new list());
+        CommandManager cm=new CommandManager(arg);
+        //match表示开头找到的命令是否存在
+        boolean match=false;
+        Command cmd=new list();//
+        //遍历允许的命令列表
+        for (Command command : CommandList) {
+            //迭代判断输入的命令是否跟支持的命令匹配
+            if (arg[0].equals(command.getCmdName())) {
+                cmd=command;
+                match = true;
+                break;
+            }
         }
+        if(match)
+        {
+            //执行命令
+            System.out.println("执行命令:"+cmd.getCmdName());
+            cmd.execute(cm.getArguments());
+        }
+        else
+        {
+            /*
+             *
+             *找不到命令错误输出
+             *
+             */
+            System.out.println("没有对应的命令！");
+            System.exit(1);
+        }
+    }
+    public void addCommand(Command cmd)
+    {
+        CommandList.add(cmd);
+    }
+
+
 
 }
 
@@ -138,7 +144,7 @@ class CommandInvoker{
  list 命令的实现
  * */
 class list implements Command{
-    final String cmdname="list";
+    private String cmdname;
     final List<String> provinceorder=Arrays.asList("安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东",
             "山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江");
     private Comparator<String> comp;   //省份比较器
@@ -157,6 +163,7 @@ class list implements Command{
     private LogHandle handler;
     list()
     {
+        cmdname="list";
         handler=new LogHandle();
         infected=new HashMap<>();
         suspected=new HashMap<>();
@@ -170,14 +177,12 @@ class list implements Command{
         };
     }
 
-    public void execute(String[] args)
+
+    //传入参数数组
+    public void execute(List<ArrayList<String>> arguments)
     {
-        CommandManager cm=new CommandManager(args);
-        cm.setArguments();
-        List<ArrayList<String>> Arguments=cm.getArguments();
-        Iterator it=Arguments.iterator();
         //提取两个必需的参数
-        for(ArrayList<String> para:Arguments)
+        for(ArrayList<String> para:arguments)
         {
             if(para.get(0).equals("-log"))
             {
@@ -265,7 +270,6 @@ class list implements Command{
                 System.exit(1);
             }
         }
-
         //处理文件遍历完的结果，按选项输出到指定文件
         // /type ip sp cure dead /province /out
 
