@@ -5,15 +5,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * InfectStatistic
- * TODO
+ * InfectStatistic TODO
  *
  * @author xxx
  * @version xxx
  * @since xxx
  */
+
 public class infectStatistic {
-	
+
 	/**
 	 * CommandLine TODO
 	 * 
@@ -23,10 +23,11 @@ public class infectStatistic {
 	 * @see Command,Record,toString
 	 * @since 2020-02-17
 	 */
-	
+
 	static class CommandLine {
-		
+
 		private Command command;
+		
 		private Record record;
 
 		public Command getCommand() {
@@ -61,7 +62,7 @@ public class infectStatistic {
 		 * @see
 		 * @since 2020-02-17
 		 */
-		
+
 		static class Command {
 			private boolean list;
 
@@ -83,7 +84,7 @@ public class infectStatistic {
 		 * @see TypeOption TypeOptionEnum
 		 * @since 2020-02-17
 		 */
-		
+
 		static class Record {
 			private boolean log;
 
@@ -192,10 +193,10 @@ public class infectStatistic {
 		 * @descreption 定义type的四种情况IP,SP,CURE,DEAD
 		 * @author moli
 		 * @version m 1.0.0
-		 * @see 
+		 * @see
 		 * @since 2020-02-17
 		 */
-		
+
 		enum TypeOptionEnum {
 			IP("ip", 1, false), SP("sp", 2, false), CURE("cure", 3, false), DEAD("dead", 4, false);
 
@@ -245,7 +246,7 @@ public class infectStatistic {
 		 * @see setTypeOptionIp,setTypeOptionSp,setTypeOptionCure,setTypeOptionDead
 		 * @since 2020-02-17
 		 */
-		
+
 		static class TypeOption {
 			private String name;
 
@@ -279,52 +280,131 @@ public class infectStatistic {
 
 			public TypeOption setTypeOptionIp() {
 				CommandLine.TypeOption typeoption = new CommandLine.TypeOption();
-				
+
 				typeoption.setName(TypeOptionEnum.IP.getName());
 				typeoption.setIndex(TypeOptionEnum.IP.getIndex());
 				TypeOptionEnum.IP.setStatus(true);
 				typeoption.setStatus(TypeOptionEnum.IP.isStatus());
-				
+
 				return typeoption;
 			}
 
 			public TypeOption setTypeOptionSp() {
 				CommandLine.TypeOption typeoption = new CommandLine.TypeOption();
-				
+
 				typeoption.setName(TypeOptionEnum.SP.getName());
 				typeoption.setIndex(TypeOptionEnum.SP.getIndex());
 				TypeOptionEnum.SP.setStatus(true);
 				typeoption.setStatus(TypeOptionEnum.SP.isStatus());
-				
+
 				return typeoption;
 			}
 
 			public TypeOption setTypeOptionCure() {
 				CommandLine.TypeOption typeoption = new CommandLine.TypeOption();
-				
+
 				typeoption.setName(TypeOptionEnum.CURE.getName());
 				typeoption.setIndex(TypeOptionEnum.CURE.getIndex());
 				TypeOptionEnum.CURE.setStatus(true);
 				typeoption.setStatus(TypeOptionEnum.CURE.isStatus());
-				
+
 				return typeoption;
 			}
 
 			public TypeOption setTypeOptionDead() {
 				CommandLine.TypeOption typeoption = new CommandLine.TypeOption();
-				
+
 				typeoption.setName(TypeOptionEnum.DEAD.getName());
 				typeoption.setIndex(TypeOptionEnum.DEAD.getIndex());
 				TypeOptionEnum.DEAD.setStatus(true);
 				typeoption.setStatus(TypeOptionEnum.DEAD.isStatus());
-				
+
 				return typeoption;
 			}
 		}
 	}
+
+	/**
+	 * CommandLineAnalytic TODO
+	 * 
+	 * @description 对由main方法得到的list命令行数据进行解析，并存储在CommandLine中
+	 * @author moli
+	 * @version m 1.0.0
+	 * @see Analytic
+	 * @since 2020-02-17
+	 */
+
+	static class CommandLineAnalytic {
+		public CommandLine Analytic(List<String> list) {
+			CommandLine commandline = new CommandLine();
+			CommandLine.Command command = new CommandLine.Command();
+			CommandLine.Record record = new CommandLine.Record();
+
+			for (int i = 0; i < list.size(); i++) {
+				String temp = list.get(i);
+				switch (temp) {
+				case "list":
+					command.setList(true);
+					break;
+				case "-log":
+					record.setLog(true);
+					record.setLog_content(list.get(i + 1));
+					break;
+				case "-out":
+					record.setOut(true);
+					record.setOut_content(list.get(i + 1));
+					break;
+				case "-date":
+					record.setDate(true);
+					record.setDate_content(list.get(i + 1));
+					break;
+				case "-type":
+					record.setType(true);
+					ArrayList<CommandLine.TypeOption> arraylist = new ArrayList<CommandLine.TypeOption>();
+					for (int j = i + 1; j < list.size(); j++) {
+						if (!list.get(j).substring(0, 1).equals("-")) {
+							if (list.get(j).equals("ip")) {
+								CommandLine.TypeOption typeoption = new CommandLine.TypeOption();
+								arraylist.add(typeoption.setTypeOptionIp());
+							}
+							if (list.get(j).equals("sp")) {
+								CommandLine.TypeOption typeoption = new CommandLine.TypeOption();
+								arraylist.add(typeoption.setTypeOptionSp());
+							}
+							if (list.get(j).equals("cure")) {
+								CommandLine.TypeOption typeoption = new CommandLine.TypeOption();
+								arraylist.add(typeoption.setTypeOptionCure());
+							}
+							if (list.get(j).equals("dead")) {
+								CommandLine.TypeOption typeoption = new CommandLine.TypeOption();
+								arraylist.add(typeoption.setTypeOptionDead());
+							}
+						}
+					}
+					record.setType_content(arraylist);
+					break;
+				case "-province":
+					record.setProvince(true);
+					ArrayList<String> list1 = new ArrayList<String>();
+					for (int j = i + 1; j < list.size(); j++) {
+						if (!list.get(j).substring(0, 1).equals("-")) {
+							list1.add(list.get(j));
+						}
+					}
+					record.setProvince_content(list1);
+					break;
+				}
+			}
+			commandline.setCommand(command);
+			commandline.setRecord(record);
+
+			return commandline;
+		}
+	}
+
 	public static void main(String[] args) throws IOException {
 		List<String> list = new ArrayList<String>();
-		
+
 		for (String temp : args) {
 			list.add(temp);
 		}
@@ -343,4 +423,3 @@ public class infectStatistic {
 		}
 	}
 }
-
