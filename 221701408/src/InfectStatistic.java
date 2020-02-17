@@ -161,7 +161,7 @@ class FileHandle {
                         new FileInputStream(SingleFile), "UTF-8"));
                 String line = "";
                 while ((line = br.readLine()) != null) {
-                    if (!line.startsWith("/"))
+                    if (!line.startsWith("//"))
                         FileContent.add(line);//指定日期前所有日志全输入filecontent
                 }
             }
@@ -170,6 +170,45 @@ class FileHandle {
         }
         //GetStatistic(FileContent);
         return 1;
+    }
+    /*
+     * 文本处理
+     *
+     */
+    public void textProcessing(String string) {
+        String pattern1 = "(\\S+) 新增 感染患者 (\\d+)人";
+        String pattern2 = "(\\S+) 新增 疑似患者 (\\d+)人";
+        String pattern3 = "(\\S+) 治愈 (\\d+)人";
+        String pattern4 = "(\\S+) 死亡 (\\d+)人";
+        String pattern5 = "(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
+        String pattern6 = "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
+        String pattern7 = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
+        String pattern8 = "(\\S+) 排除 疑似患者 (\\d+)人";
+        boolean isMatch1 = Pattern.matches(pattern1, string);
+        boolean isMatch2 = Pattern.matches(pattern2, string);
+        boolean isMatch3 = Pattern.matches(pattern3, string);
+        boolean isMatch4 = Pattern.matches(pattern4, string);
+        boolean isMatch5 = Pattern.matches(pattern5, string);
+        boolean isMatch6 = Pattern.matches(pattern6, string);
+        boolean isMatch7 = Pattern.matches(pattern7, string);
+        boolean isMatch8 = Pattern.matches(pattern8, string);
+
+        if(isMatch1) //新增 感染患者处理
+            //addIP(string);
+        else if(isMatch2) //新增 疑似患者处理
+            //addSP(string) ;
+        else if(isMatch3) //新增 治愈患者处理
+            //addCure(string);
+        else if(isMatch4) //新增 死亡患者处理
+            //addDead(string);
+        else if(isMatch5) //感染患者 流入处理
+            //flowIP(string);
+        else if(isMatch6) //疑似患者 流入处理
+            //flowSP(string);
+        else if(isMatch7) //疑似患者 确诊感染处理
+            //diagnosisSP(string);
+        else if(isMatch8) //排除 疑似患者处理
+            //removeSP(string);
     }
 
 }
