@@ -32,6 +32,6 @@
 ![image](https://images.cnblogs.com/cnblogs_com/hylog/1647349/o_200214075638a.png)
 
 ### 其它关于项目的链接：
-- 项目链接: https://github.com/Just-hy/InfectStatistic-main
-- 博客链接：waiting
-- 作业链接：waiting
+- 项目链接: [模拟疫情统计]https://github.com/Just-hy/InfectStatistic-main
+- 博客链接：[软件工程实践寒假作业（2/2）](https://www.cnblogs.com/hylog/p/12321795.html)
+- 作业链接：[寒假作业（2/2）——疫情统计 ](https://edu.cnblogs.com/campus/fzu/2020SpringW/homework/10281)
