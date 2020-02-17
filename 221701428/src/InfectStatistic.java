@@ -1,3 +1,21 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * InfectStatistic
  * TODO
@@ -303,7 +321,42 @@ class InfectStatistic {
             }
             hashtable.put("全国", Nation);
         }
-        //...
+        /** description：根据省份和操作类型ID执行相应的操作 */
+        public static void execOperate(Province province1, Province province2, int operateType, int number) {
+            switch (operateType) {
+                case 1:
+                    province1.increaseDead(number);
+                    province1.decreaseIp(number);
+                    break;
+                case 2:
+                    province1.increaseCure(number);
+                    province1.decreaseIp(number);
+                    break;
+                case 3:
+                    province1.increaseIp(number);
+                    break;
+                case 4:
+                    province1.increaseSp(number);
+                    break;
+                case 5:
+                    province1.decreaseSp(number);
+                    break;
+                case 6:
+                    province1.decreaseSp(number);
+                    province1.increaseIp(number);
+                    break;
+                case 7:
+                    province1.decreaseIp(number);
+                    province2.increaseIp(number);
+                    break;
+                case 8:
+                    province1.decreaseSp(number);
+                    province2.increaseSp(number);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     public static void main(String[] args) {
