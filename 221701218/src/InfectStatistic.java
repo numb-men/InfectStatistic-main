@@ -36,7 +36,7 @@ class InfectStatistic{
     
 }
 /**
- *解析命令行参数
+  *解析命令行参数
  */
 class CmdAnalysis{
 	
@@ -61,6 +61,7 @@ class CmdAnalysis{
 	}
 	/*
          *判断命令行参数是否正确，若正确则赋值保存
+     *@return boolean 符合要求的命令行参数 true 否则 false
 	 */
 	public boolean isCmdString() {
 		
@@ -111,6 +112,8 @@ class CmdAnalysis{
 	}
 	/*
 	  *判断指定日期是否正确
+	 *@param 命令行位置（下标）
+	 *@return boolean 日期符合格式 true 否则 false
 	 */
 	private boolean isCorrectDate(int i) {
 		
@@ -125,6 +128,8 @@ class CmdAnalysis{
 	}
 	/*
 	  *判断指定日期格式是否满足yyyy-MM-dd 字符串是否为数字
+	 *@param String
+	 *@return boole if String 满足格式 true 不满足false
 	 */
 	private boolean isValidDate(String strDate) {
 		
@@ -147,6 +152,8 @@ class CmdAnalysis{
 	}
 	/*
 	  *判断指定类型是否正确，正确则记录输出类型的种类及顺序
+	 *@param int 在命令行的位置
+	 *@return boolean 满足类型true 不满足false
 	 */
 	private boolean isType(int i) {
 
@@ -189,6 +196,8 @@ class CmdAnalysis{
 	}
 	/*
 	  * 判断指定省份是否正确
+	 * @param int 在命令行的位置
+	 * @return boolean 满足省份格式 true 不满足false
 	 */
 	private boolean isProvince(int i) {
 		int currentIndex = i;
@@ -329,6 +338,7 @@ class HandleLog{
 	
 	/*
 	 * 分类别统计：0新增 感染，1新增 疑似，2感染 流入，3疑似 流入，4死亡，5治愈，6疑似确诊感染，7排除
+	 * @param String 目录路径
 	 */
 	private void statistics(String filePath) {
 		//[\\u4E00-\\u9FA5]+ 匹配多个中文字符
@@ -384,7 +394,8 @@ class HandleLog{
 		}
 	}
 	/*
-	 * 新增感染，全国、感染省份 感染人数增加num人
+	 * 对日志文件逐行处理，新增感染，全国、感染省份 感染人数增加num人
+	 * @param 日志中的每一行
 	 */
 	private void increaseIp(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
@@ -402,6 +413,7 @@ class HandleLog{
 	}
 	/*
 	 * 新增疑似 全国 疑似省份 疑似人数增加num人
+	 * @param 日志中的每一行
 	 */
 	private void increaseSp(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
@@ -419,6 +431,7 @@ class HandleLog{
 	}
 	/*
 	 * 感染流入 全国不变 流出省感染人数减少num 流入省感染人数增加num
+	 * @param 日志中的每一行
 	 */
 	private void ipTransfer(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
@@ -442,6 +455,7 @@ class HandleLog{
 	}
 	/*
 	 * 疑似流入 全国不变 流出省疑似人数减少num 流入省疑似人数增加num
+	 * @param 日志中的每一行
 	 */
 	private void spTransfer(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
@@ -465,6 +479,7 @@ class HandleLog{
 	}
 	/*
 	 * 死亡 全国 死亡省 死亡人数增加num 感染人数减少num
+	 * @param 日志中的每一行
 	 */
 	private void dead(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
@@ -484,6 +499,7 @@ class HandleLog{
 	}
 	/*
 	 * 治愈 全国、治愈省 治愈数目增加num 感染数目减少num
+	 * @param 日志中的每一行
 	 */
 	private void cure(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
@@ -503,6 +519,7 @@ class HandleLog{
 	}
 	/*
 	 * 疑似确诊 全国、确诊省 感染人数增加num 疑似人数减少num
+	 * @param 日志中的每一行
 	 */
 	private void spDiagnose(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
@@ -522,6 +539,7 @@ class HandleLog{
 	}
 	/*
 	 * 疑似排查 全国、排查省 疑似人数减少 num
+	 * @param 日志中的每一行
 	 */
 	private void spExclude(String str) {
 		String[] strArray = str.split(" ");	//以空格将一行输入分为一组字符串，便于统计
