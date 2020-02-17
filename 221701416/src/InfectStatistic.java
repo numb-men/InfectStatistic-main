@@ -103,17 +103,17 @@ class InfectStatistic {
  */
 class CoronavirusDetail{
 	Map ProvinceMap= new HashMap();	
+	String[] ProvinceStr= {
+			"安徽"  ,"北京"  ,"重庆"  ,"福建"  ,"甘肃"  ,
+			"广东"  ,"广西"  ,"贵州"  ,"海南"  ,"河北"  ,
+			"河南"  ,"黑龙江","湖北"  ,"湖南"  ,"吉林"  ,
+			"江苏"  ,"江西"  ,"辽宁"  ,"内蒙古","宁夏"  ,
+			"青海"  ,"山东"  ,"山西"  ,"陕西"  ,"上海"  ,
+			"四川"  ,"天津"  ,"西藏"  ,"新疆"  ,"云南"  ,"浙江"  
+	};
 	//初始化省份信息
 	public void Init() {
 		//填入省份信息31个
-		String[] ProvinceStr= {
-				"安徽"  ,"北京"  ,"重庆"  ,"福建"  ,"甘肃"  ,
-				"广东"  ,"广西"  ,"贵州"  ,"海南"  ,"河北"  ,
-				"河南"  ,"黑龙江","湖北"  ,"湖南"  ,"吉林"  ,
-				"江苏"  ,"江西"  ,"辽宁"  ,"内蒙古","宁夏"  ,
-				"青海"  ,"山东"  ,"山西"  ,"陕西"  ,"上海"  ,
-				"四川"  ,"天津"  ,"西藏"  ,"新疆"  ,"云南"  ,"浙江"  
-		};
 		//将省份注入Map中方便后面使用
 		for(int i=0;i<ProvinceStr.length;i++) {
 			ProvinceMap.put(ProvinceStr[i], Integer.valueOf(i));
@@ -148,29 +148,35 @@ class CoronavirusDetail{
 		//System.out.println(out);
 		//System.out.println(date);
 		//设定正则表达式规则
-		String txtString="福建 感染患者 流入 湖北 5人";
 		String matString_1="(\\S+) 新增 感染患者 (\\d+)人";
 		String splitString_1=" 新增 感染患者 |人";
-		String matString_2="(\\S+) 新增 感染患者 (\\d+)人";
-		String splitString_2=" 新增 感染患者  |人";
+		
+		String matString_2="(\\S+) 新增 疑似患者 (\\d+)人";
+		String splitString_2=" 新增 疑似患者 |人";
+		
 		String matString_3="(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
 		String splitString_3=" 感染患者 流入 | |人";
+		
 		String matString_4="(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
 		String splitString_4=" 疑似患者 流入 | |人";
-		String matString_5="(\\S+) 死亡  (\\d+)人";
-		String splitString_5=" 死亡  |人";
-		String matString_6="(\\S+) 治愈  (\\d+)人";
-		String splitString_6=" 治愈  |人";
-		String matString_7="(\\S+) 疑似患者 确诊感染 (\\d+)人";
-		String splitString_7=" 疑似患者 确诊感染  |人";
-		String matString_8="(\\S+) 排除 疑似患者 (\\d+)人";
-		String splitString_8=" 排除 疑似患者  |人";
 		
-		System.out.println(txtString.matches(matString_3));
-		String [] reStrings=txtString.split(splitString_3);
-		for(int i=0;i<reStrings.length;i++) {
-			System.out.println(reStrings[i]);
-		}
+		String matString_5="(\\S+) 死亡 (\\d+)人";
+		String splitString_5=" 死亡 |人";
+		
+		String matString_6="(\\S+) 治愈 (\\d+)人";
+		String splitString_6=" 治愈 |人";
+		
+		String matString_7="(\\S+) 疑似患者 确诊感染 (\\d+)人";
+		String splitString_7=" 疑似患者 确诊感染 |人";
+		
+		String matString_8="(\\S+) 排除 疑似患者 (\\d+)人";
+		String splitString_8=" 排除 疑似患者 |人";
+		
+//		System.out.println(txtString.matches(matString_3));
+//		String [] reStrings=txtString.split(splitString_3);
+//		for(int i=0;i<reStrings.length;i++) {
+//			System.out.println(reStrings[i]);
+//		}
 		
 		for(int i=0;i<4;i++) {
 			//System.out.println(type[i]);
@@ -183,18 +189,63 @@ class CoronavirusDetail{
 		ArrayList<String> teArrayList=getFilesName(log,date);
 		for(int i=0;i<teArrayList.size();i++) {
 			System.out.println(teArrayList.get(i));
+
 			BufferedReader inBufferedReader=new BufferedReader(new InputStreamReader(new FileInputStream(teArrayList.get(i)), "UTF-8"));
 			String nowString;
 			while((nowString=inBufferedReader.readLine())!=null) {
-				
-				String eachstring[]=nowString.split(" ");
-				for(String one:eachstring) {
-				//	System.out.println(one);
+				System.out.print(nowString);
+				System.out.println("???");
+				if(nowString.matches(matString_1)) {
+					String [] Strings_1=nowString.split(splitString_1);
+					for(int j=0;j<Strings_1.length;j++) {
+						System.out.println(Strings_1[j]);
+					}
 				}
-				//System.out.println("+++++");
+				else if(nowString.matches(matString_2)) {
+					String [] Strings_2=nowString.split(splitString_2);
+					for(int j=0;j<Strings_2.length;j++) {
+						System.out.println(Strings_2[j]);
+					}
+					System.out.println("2222");
+				}
+				else if(nowString.matches(matString_3)) {
+					String [] Strings_3=nowString.split(splitString_3);
+					for(int j=0;j<Strings_3.length;j++) {
+						System.out.println(Strings_3[j]);
+					}
+				}
+				else if(nowString.matches(matString_4)) {
+					String [] Strings_4=nowString.split(splitString_4);
+					for(int j=0;j<Strings_4.length;j++) {
+						System.out.println(Strings_4[j]);
+					}
+				}
+				else if(nowString.matches(matString_5)) {
+					String [] Strings_5=nowString.split(splitString_5);
+					for(int j=0;j<Strings_5.length;j++) {
+						System.out.println(Strings_5[j]);
+					}
+				}
+				else if(nowString.matches(matString_6)) {
+					String [] Strings_6=nowString.split(splitString_6);
+					for(int j=0;j<Strings_6.length;j++) {
+						System.out.println(Strings_6[j]);
+					}
+				}
+				else if(nowString.matches(matString_7)) {
+					String [] Strings_7=nowString.split(splitString_7);
+					for(int j=0;j<Strings_7.length;j++) {
+						System.out.println(Strings_7[j]);
+					}
+				}
+				else if(nowString.matches(matString_8)) {
+					String [] Strings_8=nowString.split(splitString_8);
+					for(int j=0;j<Strings_8.length;j++) {
+						System.out.println(Strings_8[j]);
+					}
+				}
+				System.out.println("+++++");
 			}
-			//System.out.println(nowString);
-			//System.out.println("       ");
 		}
 	}
 }
