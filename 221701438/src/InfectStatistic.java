@@ -17,6 +17,108 @@ import java.util.List;
 class InfectStatistic {
     /**
      * TODO
+     * 日志中每一行statement的拆分,provinceName,ip,sp,cure,dead
+     * @author hmx1
+     * @version 1.0.0
+     */
+    static class statement{
+        private String provinceName;
+        private int ip;//感染
+        private int sp;//疑似
+        private int cure;//治愈
+        private int dead;//死亡
+        statement(String provinceName, int ip, int sp, int cure, int dead){
+            this.provinceName = provinceName;
+            this.ip = ip;
+            this.sp = sp;
+            this.cure = cure;
+            this.dead = dead;
+        }
+        public static statement init(){//初始化province类
+            return new statement(null,0,0,0,0);
+        }
+
+        public String getprovinceName(){
+            return provinceName;
+        }
+        public void setprovinceName(String infestorName) {
+            this.provinceName = infestorName;
+        }
+        public int getIp(){
+            return ip;
+        }
+        public void setIp(int ip) {
+            this.ip = ip;
+        }
+        public int getSp(){
+            return sp;
+        }
+        public void setSp(int sp) {
+            this.sp = sp;
+        }
+        public int getCure(){
+            return cure;
+        }
+        public void setCure(int cure) {
+            this.cure = cure;
+        }
+        public int getDead() {
+            return dead;
+        }
+        public void setDead(int dead) {
+            this.dead = dead;
+        }
+        public String printStatement(){
+            return provinceName+" 感染患者" + ip + "人" + " 疑似患者" + sp + "人" + " 治愈" + cure + "人" + " 死亡" + dead + "人";
+        }
+        public String printIp() {
+            return " 感染患者" + ip + "人";
+        }
+        public String printSp() {
+            return " 疑似患者" + sp + "人";
+        }
+        public String printCure(){
+            return " 治愈" + cure + "人";
+        }
+        public String printDead(){
+            return " 死亡" + dead + "人";
+        }
+    }
+    /**
+     * TODO
+     * 建立Hashmap，将命令行的参数与参数值分开
+     * @author hmx1
+     * @version 1.0.0
+     */
+    public static HashMap<String, String[]> commandLine(String[] args) {
+        HashMap<String, String[]> arguments = new HashMap<String, String[]>();
+        ArrayList<String> ParsingValue = new ArrayList<>();
+        String str = null;
+        for (int i = 1; i<args.length; i++) {
+            String arg = args[i];
+            if (arg.startsWith("-")){
+                if (str != null){
+                    String[] arr = new String[ParsingValue.size()];
+                    ParsingValue.toArray(arr);
+                    arguments.put(str,arr);
+                    ParsingValue.clear();
+                }
+                str = arg;
+            }
+            else {
+                ParsingValue.add(arg);
+            }
+        }
+        if(str != null){
+            String[] argsValue = new String[ParsingValue.size()];
+            ParsingValue.toArray(argsValue);
+            arguments.put(str,argsValue);
+            ParsingValue.clear();
+        }
+        return arguments;
+    }
+    /**
+     * TODO
      * 正則匹配工具类
      * @author hmx1
      * @version 1.0.0
@@ -209,7 +311,8 @@ class InfectStatistic {
             ArrayList<statement> list = new ArrayList<>();
             try{
                 for(int i = 0; i<allContent.length; i++){
-                    BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(allContent[i].getBytes())));
+                    BufferedReader br = new BufferedReader(new InputStreamReader
+                            (new ByteArrayInputStream(allContent[i].getBytes())));
                     String s;
                     while((s = br.readLine()) != null){
                         Matcher m1 = regularMatch.p1.matcher(s);
@@ -272,124 +375,12 @@ class InfectStatistic {
     }
     /**
      * TODO
-     * 日志中每一行statement的拆分,provinceName,ip,sp,cure,dead
+     * -log命令参数的解析
      * @author hmx1
      * @version 1.0.0
      */
-    static class statement{
-        private String provinceName;
-        private int ip;//感染
-        private int sp;//疑似
-        private int cure;//治愈
-        private int dead;//死亡
-        statement(String provinceName, int ip, int sp, int cure, int dead){
-            this.provinceName = provinceName;
-            this.ip = ip;
-            this.sp = sp;
-            this.cure = cure;
-            this.dead = dead;
-        }
-        public static statement init(){//初始化province类
-            return new statement(null,0,0,0,0);
-        }
-
-        public String getprovinceName(){
-            return provinceName;
-        }
-        public void setprovinceName(String infestorName) {
-            this.provinceName = infestorName;
-        }
-        public int getIp(){
-            return ip;
-        }
-        public void setIp(int ip) {
-            this.ip = ip;
-        }
-        public int getSp(){
-            return sp;
-        }
-        public void setSp(int sp) {
-            this.sp = sp;
-        }
-        public int getCure(){
-            return cure;
-        }
-        public void setCure(int cure) {
-            this.cure = cure;
-        }
-        public int getDead() {
-            return dead;
-        }
-        public void setDead(int dead) {
-            this.dead = dead;
-        }
-        public String printStatement(){
-            return provinceName+" 感染患者" + ip + "人" + " 疑似患者" + sp + "人" + " 治愈" + cure + "人" + " 死亡" + dead + "人";
-        }
-        public String printIp() {
-            return " 感染患者" + ip + "人";
-        }
-        public String printSp() {
-            return " 疑似患者" + sp + "人";
-        }
-        public String printCure(){
-            return " 治愈" + cure + "人";
-        }
-        public String printDead(){
-            return " 死亡" + dead + "人";
-        }
-    }
-    /**
-     * TODO
-     * 建立Hashmap，将命令行的参数与参数值分开
-     * @author hmx1
-     * @version 1.0.0
-     */
-    public static HashMap<String, String[]> commandLine(String[] args) {
-        HashMap<String, String[]> arguments = new HashMap<String, String[]>();
-        ArrayList<String> ParsingValue = new ArrayList<>();
-        String str = null;
-        //如果命令不是list，那么报错
-        if ((args.length == 0) || (!args[0].equals("list"))) {
-            System.out.println("请输入正确的命令list！");
-            return arguments;
-        }
-        for (int i = 1; i<args.length; i++) {
-            String arg = args[i];
-            if (arg.startsWith("-")){
-                if (str != null){
-                    String[] arr = new String[ParsingValue.size()];
-                    ParsingValue.toArray(arr);
-                    arguments.put(str,arr);
-                    ParsingValue.clear();
-                }
-                str = arg;
-            }
-            else {
-                ParsingValue.add(arg);
-            }
-        }
-        if(str != null){
-            String[] argsValue = new String[ParsingValue.size()];
-            ParsingValue.toArray(argsValue);
-            arguments.put(str,argsValue);
-            ParsingValue.clear();
-        }
-        return arguments;
-    }
-    /**
-     * TODO
-     * 命令行解析后功能实现
-     * @author hmx1
-     * @version 1.0.0
-     */
-    public static void commandLineParsing(HashMap<String, String[]> commandLine,String[] args) throws ParseException, IOException {
-        //完整的省份列表
-        ArrayList<statement> list = new ArrayList<>();
-        //筛选后的列表
-        ArrayList<statement> list1 = new ArrayList<>();
-        //用来存放-type后的语句段
-        String temp = null;
+    public static void logParsing (HashMap<String, String[]> commandLine,
+                                   ArrayList<statement> list) throws IOException, ParseException {
         RegularMatch regularMatch = null;
         if (commandLine.containsKey("-log") && commandLine.get("-log").length == 1){
             if (commandLine.containsKey("-date") && commandLine.get("-date").length == 1){
@@ -420,16 +411,25 @@ class InfectStatistic {
             System.out.println("log参数格式错误！");
             return;
         }
+    }
+    /**
+     * TODO
+     * -province命令参数的解析
+     * @author hmx1
+     * @version 1.0.0
+     */
+    public static void provinceParsing (HashMap<String, String[]> commandLine,
+                                        ArrayList<statement> list, ArrayList<statement> list1){
         if (commandLine.containsKey("-province")){
             String[] provinces = commandLine.get("-province");
             for (String province : provinces) {
                 int j;
                 for (j = 0; j < list.size(); j++) {
-                    if (province.equals(list.get(j).getprovinceName())) {//从list中找到和-province参数值相同的省份
-                        list1.add(list.get(j));//把选定的省份加入筛选过后的列表里
+                    if (province.equals(list.get(j).getprovinceName())) {
+                        list1.add(list.get(j));
                         break;
                     }
-                    if (j == list.size() - 1) {//list中不存在该省份时新建
+                    if (j == list.size() - 1) {
                         statement st = new statement(province, 0, 0, 0, 0);
                         list1.add(st);
                     }
@@ -439,13 +439,24 @@ class InfectStatistic {
         else{
             list1 = list;
         }
+    }
+    /**
+     * TODO
+     * -out和-type命令参数的解析
+     * @author hmx1
+     * @version 1.0.0
+     */
+    public static void outTypeParsing (HashMap<String, String[]> commandLine,
+                                       ArrayList<statement> list1, String[] args){
+        String temp;
         if (commandLine.containsKey("-out") && commandLine.get("-out").length == 1){
             String[] filePath = commandLine.get("-out");
             clearInfoForFile(filePath[0]);
             if (commandLine.containsKey("-type") && commandLine.get("-type").length >= 1){
                 String[] type = commandLine.get("-type");
                 for(int i = 0; i < type.length; i++){//判断非法参数值
-                    if(!type[i].equals("ip") && !type[i].equals("sp") && !type[i].equals("cure") && !type[i].equals("dead")){
+                    if(!type[i].equals("ip") && !type[i].equals("sp")
+                            && !type[i].equals("cure") && !type[i].equals("dead")){
                         System.out.println("输入的参数值非法！");
                         return;
                     }
@@ -456,29 +467,28 @@ class InfectStatistic {
                         }
                     }
                 }
-                for (InfectStatistic.statement province : list1) {
-                    temp = province.getprovinceName();
+                for (InfectStatistic.statement st : list1) {
+                    temp = st.getprovinceName();
                     for (String s : type) {
                         switch (s) {
                             case "ip":{
-                                temp += province.printIp();
+                                temp += st.printIp();
                                 break;
                             }
                             case "sp": {
-                                temp += province.printSp();
+                                temp += st.printSp();
                                 break;
                             }
                             case "cure":{
-                                temp += province.printCure();
+                                temp += st.printCure();
                                 break;
                             }
                             case "dead": {
-                                temp += province.printDead();
+                                temp += st.printDead();
                                 break;
                             }
                         }
                     }
-                    //System.out.println("有type:");
                     writeStringToFile(filePath[0], temp);
                 }
             }
@@ -487,24 +497,37 @@ class InfectStatistic {
             }
             else{
                 for (InfectStatistic.statement st : list1) {
-                    //System.out.println("没有type:\n");
                     writeStringToFile(filePath[0], st.printStatement());//没有-type则输出完整语句
                 }
             }
-            //System.out.println("仅供测试使用:\n");
             writeStringToFile(filePath[0],"// 该文档并非真实数据，仅供测试使用");
             String args1 = "";
             for (String arg : args) {
                 args1 += " " + arg;
             }
-            //System.out.println("写入文件：\n");
             writeStringToFile(filePath[0], "//"+args1);
             System.out.println("写入文件"+filePath[0]+"成功！");
         }
         else {
-            //System.out.println("out参数格式错误！");
             return;
         }
+    }
+    /**
+     * TODO
+     * 命令行解析后功能实现
+     * @author hmx1
+     * @version 1.0.0
+     */
+    public static void commandLineParsing(HashMap<String, String[]> commandLine,
+                                          String[] args) throws ParseException, IOException {
+        //完整的省份列表
+        ArrayList<statement> list = new ArrayList<>();
+        //筛选后的列表
+        ArrayList<statement> list1 = new ArrayList<>();
+        //用来存放-type后的语句段
+        logParsing(commandLine, list);
+        provinceParsing(commandLine, list, list1);
+        outTypeParsing(commandLine, list1, args);
     }
     /**
      * TODO
@@ -678,5 +701,6 @@ class InfectStatistic {
         HashMap<String, String[]> commandLine = commandLine(args);
         commandLineParsing(commandLine,args);
     }
-
 }
+
+
