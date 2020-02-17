@@ -27,11 +27,11 @@
 **PS：** 对于windows下的DOS界面与eclipse自带的javaIDE的不同，会有运行结果不同的问题。针对上述问题，其实是DOS界面下使用java命令对于处理文件时采用默认的GBK编码，而我的eclipse使用UTF-8编码进行文件处理。
 话不多说，解决方案如下：
 1. 配置环境变量JAVA_TOOL_OPTIONS：
-![image](https://images.cnblogs.com/cnblogs_com/hylog/1647349/o_200214075649b.png)
+```-Dfile.encoding=UTF-8```
 2. 在DOS窗口下运行命令（写了两次，可以但是没必要）：
-![image](https://images.cnblogs.com/cnblogs_com/hylog/1647349/o_200214075638a.png)
+```java -Dfile -classpath "D:\workspace\InfectStatistic-main\bin" InfectStatistic ...```
 
 ### 其它关于项目的链接：
-- 项目链接: [模拟疫情统计]https://github.com/Just-hy/InfectStatistic-main
+- 项目链接: [模拟疫情统计](https://github.com/Just-hy/InfectStatistic-main)
 - 博客链接：[软件工程实践寒假作业（2/2）](https://www.cnblogs.com/hylog/p/12321795.html)
 - 作业链接：[寒假作业（2/2）——疫情统计 ](https://edu.cnblogs.com/campus/fzu/2020SpringW/homework/10281)
