@@ -495,7 +495,7 @@ class InfectedPatients extends  MyPatterns{
         }
         else
         {
-            infected.put(str[0],0);
+
             sum=0;
         }
         //把日志行的新增人数加入总数
@@ -523,7 +523,6 @@ class SuspectedPatients extends MyPatterns{
         }
         else
         {
-            suspected.put(str[0],0);
             sum=0;
         }
         //把日志行的新增人数加入总数
@@ -544,7 +543,7 @@ class InfectedGo extends MyPatterns{
     public void doCount(String line,HashMap<String,Integer> infected,HashMap<String,Integer> suspected,HashMap<String,Integer> cured,HashMap<String,Integer> died)
     {
         String[] str=line.split("\\s+");
-        int change=infected.get(str[0])-Integer.parseInt(str[4].substring(0,str[4].indexOf("人")));//流动人数
+        int change=Integer.parseInt(str[4].substring(0,str[4].indexOf("人")));//流动人数
         //流出省份感染人数相应减少
         infected.put(str[0],infected.get(str[0])-change);
         //流入省份感染人数相应增加
@@ -571,7 +570,7 @@ class SuspectedGo extends MyPatterns{
     public void doCount(String line,HashMap<String,Integer> infected,HashMap<String,Integer> suspected,HashMap<String,Integer> cured,HashMap<String,Integer> died)
     {
         String[] str=line.split("\\s+");
-        int change=suspected.get(str[0])-Integer.parseInt(str[4].substring(0,str[4].indexOf("人")));//流动人数
+        int change=Integer.parseInt(str[4].substring(0,str[4].indexOf("人")));//流动人数
         //流出省份疑似人数相应减少
         suspected.put(str[0],suspected.get(str[0])-change);
         //流入省份疑似人数相应增加
@@ -599,6 +598,7 @@ class PatientsDie extends MyPatterns{
     {
         String[] str=line.split("\\s+");
         int change=Integer.parseInt(str[2].substring(0,str[2].indexOf("人")));//死亡人数
+        infected.put(str[0],infected.get(str[0])-change); //感染人数相应减少
         if(died.containsKey(str[0]))
         {
             died.put(str[0],died.get(str[0])+change);
@@ -625,6 +625,7 @@ class PatientsCure extends MyPatterns{
     {
         String[] str=line.split("\\s+");
         int change=Integer.parseInt(str[2].substring(0,str[2].indexOf("人")));//治愈人数
+        infected.put(str[0],infected.get(str[0])-change); //感染人数相应减少
         if(cured.containsKey(str[0]))
         {
             cured.put(str[0],cured.get(str[0])+change);
@@ -677,6 +678,7 @@ class SuspectedExclude extends MyPatterns{
         String[] str=line.split("\\s+");
         int change=Integer.parseInt(str[3].substring(0,str[3].indexOf("人")));
         suspected.put(str[0],suspected.get(str[0])-change);
+        System.out.println(str[0]+"排除疑似"+change);
     }
 
     public String getReg()
