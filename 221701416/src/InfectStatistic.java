@@ -1,6 +1,6 @@
 import java.io.IOException;
 import java.util.*;
-
+import java.io.File;
 /**
  * InfectStatistic
  *
@@ -114,6 +114,28 @@ class CoronavirusDetail{
 			ProvinceMap.put(ProvinceStr[i], Integer.valueOf(i));
 		}
 	}
+	public static ArrayList<String> getFiles(String path,String date){
+		ArrayList<String> files = new ArrayList<String>();
+	    File file = new File(path);
+	    File[] tempList = file.listFiles();
+
+	    for (int i = 0; i < tempList.length; i++) {
+	        if (tempList[i].isFile()) {
+//	              System.out.println("文     件：" + tempList[i]);
+	            files.add(tempList[i].toString());
+	        }
+	        if (tempList[i].isDirectory()) {
+//	              System.out.println("文件夹：" + tempList[i]);
+	        }
+	        //得到当前日期之前的文件名
+	        File tempFile=new File(files.get(i).trim());
+	        String fileName=tempFile.getName().substring(0,10);
+	        if(date.compareTo(fileName)>=0){
+		        System.out.println(fileName);
+	        }
+	    }
+	    return files;
+	}
 	public void ReadAll(String log,String out,String date,String [] type,String [] province) throws IOException{
 		System.out.println(log);
 		System.out.println(out);
@@ -124,5 +146,10 @@ class CoronavirusDetail{
 		for(int i=0;i<40;i++) {
 			System.out.println(province[i]);
 		}
+		ArrayList<String> teArrayList=getFiles(log,date);
+		for(int i=0;i<teArrayList.size();i++) {
+			System.out.println(teArrayList.get(i));
+		}
 	}
+	
 }
