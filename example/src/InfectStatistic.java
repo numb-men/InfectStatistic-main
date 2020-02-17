@@ -1,5 +1,7 @@
 import java.util.Scanner;
 
+
+
 /**
  * InfectStatistic
  * TODO
@@ -16,9 +18,11 @@ class InfectStatistic {
     public void run() {
     	Scanner fin=new Scanner(System.in);
     	String argsStr=fin.nextLine();
-    	ListCommand list=new ListCommand(argsStr);
+    	Lib.Invoker invoker=new Lib.Invoker();
     	
-    	Invoker invoker=new Invoker();
+    	Lib.ListCommand list=new Lib.ListCommand(argsStr);
+    	
+    	//Invoker invoker=new Invoker();
     	invoker.takeCommand(list);
     	
     }
