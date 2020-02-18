@@ -11,14 +11,24 @@ import java.util.Iterator;
 
 class InfectStatistic {
     public static void main(String[] args) {
+        argparse arg=new argparse(args);
+
+    }
+}
+
+class argparse{
+    public String command=null;
+    public String logpath=null,outpath=null,enddate=null;
+    public HashSet types=new HashSet();
+    public HashSet provinces=new HashSet();
+    argparse(String[] args){
         if (args.length==0){
             System.out.println("至少要输入一个命令");
             System.exit(0);
         }
-        String logpath=null,outpath=null,enddate=null;
         HashSet types=new HashSet();
         HashSet provinces=new HashSet();
-        System.out.println(args.length);
+
         if(args[0].equals("list")){
             for(int i=1;i<args.length;i++){
                 switch (args[i]){
@@ -41,24 +51,6 @@ class InfectStatistic {
                         }
                 }
             }
-        }
-
-        System.out.println("输入路径"+logpath);
-        System.out.println("输出路径"+outpath);
-        System.out.println("日期"+enddate);
-        System.out.println("类别");
-        Iterator it=types.iterator();
-        while(it.hasNext())
-        {
-            Object o=it.next();
-            System.out.println(o);
-        }
-        System.out.println("省份");
-        it=provinces.iterator();
-        while(it.hasNext())
-        {
-            Object o=it.next();
-            System.out.println(o);
         }
     }
 }
