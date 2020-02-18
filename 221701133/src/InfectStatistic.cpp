@@ -9,6 +9,7 @@
 #include <vector>
 #include <io.h>
 #include <regex>
+#include <sstream>
 
 
 using namespace std;
@@ -44,13 +45,18 @@ const string typeMatch[TMNUM]={
 "(.*) 排除 疑似患者 (.*)人"
 };
 
+//地区类
+class Regions;
+//疫情统计表
+class StatisticList;
+
 
 //判断使用的命令是否合理 
-bool isSuportComand(string c);
+bool isSuportComand(const string &c);
 //处理传入的命令行参数
-bool dealParameters(int ac,const char* arv[]);
+bool dealParameters(int ac,char* arv[]);
 //处理可能携带多参数的命令行参数 
-bool dealMulParameter(int ini,const int &max,const char* arv[],vector<string> &paras,
+bool dealMulParameter(int ini,const int &max,char* arv[],vector<string> &paras,
 int &forward);
 //处理out的参数
 bool dealOutParameters(ofstream &out,string s);
@@ -66,9 +72,10 @@ bool doStringSmatch(const string &target,int &tyNum,vector<string> &strSon);
 void getFilesName(const string &path,const string &timeP,vector<string> &files);
 //开始读取文件
 bool performOptns(const string &fLocation,const string &timeP,StatisticList &sList);
-//将获取到的信息放入疫情地区列表中
-bool setMessage(StatisticList &slist,vector<string> strMesg);
-
+//看与哪个地区名匹配 
+int matchRegion(const string &s);
+//将int类型转换为字符串
+string itos(int num); 
 
 
 //地区类
@@ -87,7 +94,7 @@ public:
 	bool suspectPeopleAdd(const int &n);//增加疑似人数
 	bool curePeopleAdd(const int &n);//增加治愈人数
 	bool deathPeopleAdd(const int &n);//增加死亡人数
-	bool selectiveOutput(const vector<string> &s,const ofstream &out);//选择性输出 
+	bool selectiveOutput(const vector<string> &s,ofstream &out);//选择性输出 
 };
 
 //疫情统计表
@@ -96,8 +103,9 @@ class StatisticList
 	Regions regionsList[REGIONNUM];//地区情况统计表
 public:
 	StatisticList();
-	bool selectiveOutput(const vector<string> &ts,const vector &rs,const ofstream &out);//选择性输出
-	 
+	bool selectiveOutput(const vector<string> &ts,const vector<string> &rs,ofstream &out);//选择性输出
+	//将获取到的信息放入疫情地区列表中
+	friend bool setMessage(StatisticList &slist,vector<string> strMesg,const int &tyNum);
 };
 
 
@@ -191,9 +199,49 @@ bool Regions::deathPeopleAdd(const int &n)
 
 //选择性输出 
 //将只输出s所指向的字符串数组相关类型信息内容 
-bool Regions::selectiveOutput(const vector<string> &s,const ofstream &out)
+/*
+int confirmed;//确诊人数
+int suspect;//疑似人数
+int cure;//治愈人数
+int death;//死亡人数
+*/
+//句式举例 "全国 感染患者22人 疑似患者25人 治愈10人 死亡2人"
+bool Regions::selectiveOutput(const vector<string> &s,ofstream &out)
 {
+	string cp,sp,cup,dp;//用于整理句式 
+	string isM;//用于存储int转变成string的内容 
+	string outputPatern=name;//最后输出的句式 
 	
+	for(int i=0;i<4;i++)
+	{
+		isM=itos(confirmed);
+		cp=" 感染患者"+isM+"人";
+		isM=itos(suspect);
+		sp=" 疑似患者"+isM+"人";
+		isM=itos(cure);
+		cup=" 治愈"+isM+"人";
+		isM=itos(death);
+		dp=" 死亡"+isM+"人";
+	}
+	if(s.size()==0)//默认输出为输出全部信息 
+	{
+		outputPatern=outputPatern+cp+sp+cup+dp;
+	}
+	else
+	{
+		for(int i=0;i<s.size();i++)
+		{
+			if(s[i]=="ip"){outputPatern+=cp;}
+			else if(s[i]=="sp"){outputPatern+=sp;}
+			else if(s[i]=="cure"){outputPatern+=cup;}
+			else if(s[i]=="dead"){outputPatern+=dp;}
+			else{
+				cout<<"地区内容信息输出error!\n";
+				break;
+			}
+		}
+	}
+	out<<outputPatern<<"\n";
 } 
 
 	
@@ -210,17 +258,37 @@ StatisticList::StatisticList()
 //ts: 将只输出ts所指向的字符串数组相关的各个地区的疫情情况的各类型信息内容 
 //rs: 将只输出rs所指向的字符串数组相关的地区的疫情情况
 bool StatisticList::selectiveOutput(const vector<string> &ts,
-const vector<string> &rs,const ofstream &out)
+const vector<string> &rs,ofstream &out)
 {
-	
-	
+	int needOutputRegion[REGIONNUM]={0};//零表示屏蔽输出
+	if(rs.size()==0)//默认情况 ，输出全部疫情情况 
+	{
+		for(int i=0;i<REGIONNUM;i++)
+		{
+			regionsList[i].selectiveOutput(ts,out);
+		}
+	}
+	else
+	{
+		for(int i=0;i<rs.size();i++)
+		{
+			needOutputRegion[matchRegion(rs[i])]=1;
+		} 
+		for(int j=0;j<REGIONNUM;j++)
+		{
+			if(needOutputRegion[j])//只输出提到的地区 
+			{
+				regionsList[j].selectiveOutput(ts,out);
+			}
+		}
+	}
 }
 
 
 //判断使用的命令是否合理 
 //c: 需要判断的命令
 //返回值：true命令无误，false命令有误 
-bool isSuportComand(string c){
+bool isSuportComand(const string &c){
 	if(c==LIST) 
 	{
 		return true;
@@ -237,42 +305,40 @@ bool isSuportComand(string c){
 //ac:需要处理的命令行参数的字符串数+2后的值（因为包含了文件本身和list占用两个位置） 
 //arv:命令行参数字符串 （包含了文件本身和list占用两个位置,在0、1的位置）
 //返回noErorOcured：false表示过程中出错，true表示无错执行 
-bool dealParameters(int ac,const char* arv[]) 
+bool dealParameters(int ac,char* arv[]) 
 {
 	bool noErorOcured=true;//用以返回是否无问题处理命令行参数 
 	int pnum;//用于记录多参数的命令的参数个数
 	vector<string> typeParas,proParas;//记录type和privince的相关参数 
 	string timeP="null";//用于记录截止日期参数  
-	string fileLocation=null;//记录日志文件所在位置 
+	string fileLocation="null";//记录日志文件所在位置 
 	StatisticList sList;//地区疫情统计列表 
 	ofstream out;//输出重定向
 	 
 	for(int i=2;i<ac;i+=(pnum+2))
 	{
 		pnum=0;
-		switch(argv[i]){
-			case LOG:
-				fileLocation=argv[i+1];
-				break;
-			case DATE:
-				timeP=argv[i+1];
-				break;
-			case TYPE:
-				noErorOcured=dealMulParameter(i,ac,arv,typeParas,pnum);
-				break;
-			case OUT:
-				noErorOcured=dealOutParameters(out,argv[i+1]);
-				break;	
-			case PROVINCE:
-				noErorOcured=dealMulParameter(i,ac,arv,proParas,pnum);
-				break;
-			default://与已设命令行参数不匹配，有错误存在 
-				noErorOcured=false;
-				break;
+		if(arv[i]==LOG){
+			fileLocation=arv[i+1];
 		}
-		if(erorOcured)
+		else if(arv[i]==DATE){
+			timeP=arv[i+1];
+		}
+		else if(arv[i]==TYPE){
+			noErorOcured=dealMulParameter(i,ac,arv,typeParas,pnum);
+		}
+		else if(arv[i]==OUT){
+			noErorOcured=dealOutParameters(out,arv[i+1]);
+		}
+		else if(arv[i]==PROVINCE){
+			noErorOcured=dealMulParameter(i,ac,arv,proParas,pnum);
+		}
+		else{//与已设命令行参数不匹配，有错误存在
+			noErorOcured=false;
+		}
+		if(!noErorOcured)
 		{
-			return erorOcured;//出现问题立即终止
+			return noErorOcured;//出现问题立即终止
 		}
 	}
 	performOptns(fileLocation,timeP,sList);//读入操作 
@@ -288,10 +354,11 @@ bool dealParameters(int ac,const char* arv[])
 //arv: 要进行分析的数组
 //paras: 要进行存储参数的数组 
 //forward: 记录前进的步数 
-bool dealMulParameter(int ini,const int &max,const char* arv[],vector<string> &paras,
+bool dealMulParameter(int ini,const int &max,char* arv[],vector<string> &paras,
 int &forward)
 {
 	int num=0;//用于记录循环次数，避免产生死循环 
+	int nowLocation;//记录当前在数组中所处位置 
 	while(1)
 	{
 		num++;
@@ -369,7 +436,7 @@ bool readLogMessage(StatisticList &slist,const vector<string> &files)
 	bool noOcuredEror=true;//用于记录是否有错误出现 
 	for(int i=0;i<files.size();i++)  
 	{  
-    	readOneFile(sList,files[i]);
+    	readOneFile(slist,files[i]);
 	}
 	return noOcuredEror;
 }
@@ -385,6 +452,8 @@ bool readOneFile(StatisticList &slist,const string &file)
 	ifstream in;//输入流对象 
 	char s[100];//临时存储获取到的一行语句
     string s1;//存储获取到的一行语句 
+    
+   // int times=0;//测试用，统计读取的行数 
 	
 	in.open(file);
 	if(!in)
@@ -394,18 +463,132 @@ bool readOneFile(StatisticList &slist,const string &file)
 	}
 	while(in.getline(s,100))
 	{
+		if((s[0]==s[1])&&(s[0]=='/')) break;//读取到注释位置了 
    		s1=s;
     	doStringSmatch(s1,tyNum,strSon);
+    	setMessage(slist,strSon,tyNum);
+    	strSon.clear();
+    	//times++; //测试用 
 	}
-	
+//	cout<<"file: "<<file<<"行数："<<times<<endl;//测试用 
 	in.close();
 }
 
 
+//看与哪个地区名匹配 
+//返回地区对应的位置（以REGIONNAME[]为参考） 
+int matchRegion(const string &s){
+	for (int i=0;i<REGIONNUM;i++){
+		if(s==REGIONNAME[i]){
+			//cout<<"当前匹配到的地区为："<<s<<" 编号："<<i<<endl;
+			return i;
+		}
+	}
+	cout<<"s: "<<s<<endl;
+	cout<<"匹配城市出错！\n";
+	return -1;
+}
+
+
 //将获取到的信息放入疫情地区列表中
-bool setMessage(StatisticList &slist,vector<string> strMesg) 
+//strMesg：要存储的信息 
+//tyNum： 信息是属于哪一类型 
+//StatisticList友元 
+/*
+const string typeMatch[TMNUM]={
+"(.*) 新增 感染患者 (.*)人",
+"(.*) 新增 疑似患者 (.*)人",
+"(.*) 感染患者 流入 (.*) (.*)人",
+"(.*) 疑似患者 流入 (.*) (.*)人",
+"(.*) 死亡 (.*)人",
+"(.*) 治愈 (.*)人",
+"(.*) 疑似患者 确诊感染 (.*)人",
+"(.*) 排除 疑似患者 (.*)人"
+};
+*/
+bool setMessage(StatisticList &slist,vector<string> strMesg,const int &tyNum) 
 {
+	int reNum=-1;//存储地区编号 （以在REGIONNAME[]中的位置为参考） 
+	int breakNum=0;//等于1时跳出循环体 
+	//测试排错用 
+/*	cout<<"要存储的信息的内容：";
+	for(int i=0;i<strMesg.size();i++){
+		cout<<"内容"<<i<<": "<<strMesg[i]; 
+	}
+	cout<<endl;*/
 	
+	for (int i=1;i<REGIONNUM;i++)//0是全国
+	{
+		breakNum=0;
+		switch(tyNum)
+		{
+			case 0:
+				reNum=matchRegion(strMesg[0]);
+				//cout<<"感染患者增加:"<<atoi(strMesg[1].c_str())<<endl;//测试排错用 
+				slist.regionsList[0].confirmedPeopleAdd(atoi(strMesg[1].c_str()));
+				slist.regionsList[reNum].confirmedPeopleAdd(atoi(strMesg[1].c_str()));
+				breakNum=1;
+				break;
+			case 1:
+				reNum=matchRegion(strMesg[0]);
+				slist.regionsList[0].suspectPeopleAdd(atoi(strMesg[1].c_str()));
+				slist.regionsList[reNum].suspectPeopleAdd(atoi(strMesg[1].c_str()));
+				breakNum=1;
+				break;
+			case 2:
+				reNum=matchRegion(strMesg[0]);
+				slist.regionsList[reNum].confirmedPeopleAdd((0-atoi(strMesg[2].c_str())));
+				reNum=matchRegion(strMesg[1]);
+				slist.regionsList[reNum].confirmedPeopleAdd(atoi(strMesg[2].c_str()));
+				breakNum=1;
+				break;
+			case 3:
+				reNum=matchRegion(strMesg[0]);
+				slist.regionsList[reNum].suspectPeopleAdd((0-atoi(strMesg[2].c_str())));
+				reNum=matchRegion(strMesg[1]);
+				slist.regionsList[reNum].suspectPeopleAdd(atoi(strMesg[2].c_str()));
+				breakNum=1;
+				break;
+			case 4:
+				reNum=matchRegion(strMesg[0]);
+				slist.regionsList[0].deathPeopleAdd(atoi(strMesg[1].c_str()));
+				slist.regionsList[0].confirmedPeopleAdd((0-atoi(strMesg[1].c_str())));
+				slist.regionsList[reNum].deathPeopleAdd(atoi(strMesg[1].c_str()));
+				slist.regionsList[reNum].confirmedPeopleAdd((0-atoi(strMesg[1].c_str())));
+				breakNum=1;
+				break;
+			case 5:
+				reNum=matchRegion(strMesg[0]);
+				slist.regionsList[0].curePeopleAdd(atoi(strMesg[1].c_str()));
+				slist.regionsList[0].confirmedPeopleAdd((0-atoi(strMesg[1].c_str())));
+				slist.regionsList[reNum].curePeopleAdd(atoi(strMesg[1].c_str()));
+				slist.regionsList[reNum].confirmedPeopleAdd((0-atoi(strMesg[1].c_str())));
+				breakNum=1;
+				break;
+			case 6:
+				reNum=matchRegion(strMesg[0]);
+				slist.regionsList[0].confirmedPeopleAdd(atoi(strMesg[1].c_str()));
+				slist.regionsList[0].suspectPeopleAdd((0-atoi(strMesg[1].c_str())));
+				slist.regionsList[reNum].confirmedPeopleAdd(atoi(strMesg[1].c_str()));
+				slist.regionsList[reNum].suspectPeopleAdd((0-atoi(strMesg[1].c_str())));
+				breakNum=1;
+				break;
+			case 7:
+				reNum=matchRegion(strMesg[0]);
+				slist.regionsList[0].suspectPeopleAdd((0-atoi(strMesg[1].c_str())));
+				slist.regionsList[reNum].suspectPeopleAdd((0-atoi(strMesg[1].c_str())));
+				breakNum=1;
+				break;
+			default:
+				cout<<"无匹配项，文件内容出错!\n";
+				breakNum=1;
+				break;
+				
+		}
+		if(breakNum){
+			break;
+		}
+	}
 }
 
 
@@ -433,7 +616,7 @@ bool doStringSmatch(const string &target,int &tyNum,vector<string> &strSon)
 		if(sm.size()){
 			for (int j=1;j<sm.size();j++)//收集匹配得到的关键子串,排除0位置的本身 
 			{
-       			strSon.push_back([j].str());
+       			strSon.push_back(sm[j].str());
     		}
     		tyNum=i;
 			noOcuredEror=true;//只有出现匹配，才证明没问题 
@@ -458,12 +641,12 @@ void getFilesName(const string &path,const string &timeP,vector<string> &files)
 // "*"是指读取文件夹下的所有类型的文件，若想读取特定类型的文件，以png为例，则用"*.png" 
     if((hFile=_findfirst((p.assign(path)).append(FILEFORMAT).c_str(),&fileinfo))!=-1)  
     {  
-		if(isRightTimeLog(fileinfo.name))
+		if(isRightTimeLog(fileinfo.name,timeP))
 		{
 			files.push_back(path+fileinfo.name); 
         	while(_findnext(hFile,&fileinfo)==0) 
        		{
-				if(isRightTimeLog(fileinfo.name))
+				if(isRightTimeLog(fileinfo.name,timeP))
 				{
         			files.push_back(path+fileinfo.name); 
 				}
@@ -489,6 +672,15 @@ bool performOptns(const string &fLocation,const string &timeP,StatisticList &sLi
 } 
 
 
+//将int类型转换为字符串
+string itos(int num)
+{
+ 	stringstream ss;
+ 	ss<<num; 
+ 	string s1 = ss.str();
+ 	return s1;
+}
+
 
 
 int main(int argc, char* argv[])
@@ -507,6 +699,5 @@ int main(int argc, char* argv[])
 	{
 		cout<<"未输入参数！\n";	
 	}
-	cout<<"over\n"; 
 	return 0;
 }
