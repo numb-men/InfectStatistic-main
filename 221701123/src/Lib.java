@@ -167,7 +167,7 @@ public class Lib {
 				 String [] completNames = new String[names.length];
 				 for(int i = 0;i < names.length;i++) {
 					 String fileDate=(String) names[i].subSequence(0, 10);
-					 if(date.compareTo(fileDate)>0) {
+					 if(date.compareTo(fileDate)>=0) {
 					 completNames [i] = this.logPath+names[i];
 					 //System.out.println(completNames [i]);
 					 readFromFile(completNames[i]);
@@ -382,11 +382,15 @@ public class Lib {
 				out.write("\r\n");
 				
 			}
+			int provinceIndex;
 			for(String proStr:province) {
-				int provinceIndex=getProvinceIndex(proStr);
+				provinceIndex=getProvinceIndex(proStr);
+				//System.out.println(proStr);
 				out.write(proStr+" ");// \r\n即为换行  
 				for(String patStr:type) {
 					int patientIndex=getPatientIndex(patStr);
+					//System.out.println(patientIndex);
+					//System.out.println(provinceIndex);
 					out.write(PATIENTS_STATUS.get(patientIndex)+data[provinceIndex][patientIndex]+"人 ");
 				}
 				out.write("\r\n");
