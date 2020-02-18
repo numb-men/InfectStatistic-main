@@ -26,7 +26,7 @@ class InfectStatistic {
 	int[] ip;
 	int[] sp;
 	int[] cure;
-	int[] death;
+	int[] dead;
 	boolean[] flg;
 	String[] argv;
 	String[] provience_array;
@@ -51,7 +51,7 @@ class InfectStatistic {
 		ip = new int[PROVIENCE_NUM];
 		sp = new int[PROVIENCE_NUM];
 		cure = new int[PROVIENCE_NUM];
-		death = new int[PROVIENCE_NUM];
+		dead = new int[PROVIENCE_NUM];
 		cmd4type = new Vector<String>();
 		cmd4provience = new Vector<String>();
 		provience_array = new String[] {"全国","安徽","北京","重庆","福建","甘肃","广东","广西",
@@ -60,7 +60,7 @@ class InfectStatistic {
 		
 		for(int i = 0; i < PROVIENCE_NUM; i++) {
 			flg[i] = false;
-			ip[i] = sp[i] = cure[i] = death[i] = 0;
+			ip[i] = sp[i] = cure[i] = dead[i] = 0;
 		}
 	}
 	
@@ -118,6 +118,7 @@ class InfectStatistic {
 			getData(listFile4log.get(i));
 		}
 		calculate_total();
+		writeData(dir4out);
 	}
 	
   public List<String> getPath(String path) {
@@ -153,6 +154,7 @@ class InfectStatistic {
   				headleData(dataLine);
   			}
   			dataLine = br.readLine();
+  			System.out.println(dataLine);
   		}
   	} catch(Exception e) {
   		e.printStackTrace();
@@ -247,7 +249,7 @@ class InfectStatistic {
 		for(int i = 0; i < PROVIENCE_NUM; i++) {
 			if(str[0].equals(provience_array[i])) {
 				ip[i] -= Integer.parseInt(str[2].substring(0, str[2].indexOf("人")));
-				death[i] += Integer.parseInt(str[2].substring(0, str[2].indexOf("人")));
+				dead[i] += Integer.parseInt(str[2].substring(0, str[2].indexOf("人")));
 				if(flg4provience == false) {
 					flg[i] = true;
 				}
@@ -302,7 +304,7 @@ class InfectStatistic {
 			ip[0] += ip[i];
 			sp[0] += sp[i];
 			cure[0] += cure[i];
-			death[0] += death[i];
+			dead[0] += dead[i];
 		}
 	}
 
@@ -314,11 +316,25 @@ class InfectStatistic {
 	    String out;
 
 	    for(int i = 0; i < PROVIENCE_NUM; i++) {
-	    	if(flg[i] == true) {
+	    	if(flg[i] == true && flg4type == false) {
 	    		writer.write("\n");
 	    		out = provience_array[i] + "感染患者" + ip[i] + "人 疑似患者" + sp[i] + 
-	    				"人 治愈" + cure[i] + "人 死亡" + death[i] + "人";
+	    				"人 治愈" + cure[i] + "人 死亡" + dead[i] + "人";
 	    		writer.write("out");
+	    	} else if(flg[i] == true && flg4type == true) {
+	    		writer.write("\n");
+	    		out = provience_array[i];
+	    		for(int j = 0; j < cmd4type.size(); j ++) {
+	    			if(cmd4type.get(j).equals("ip")) {
+	    				out += " 感染患者" + ip[i] + "人";
+	    			} else if(cmd4type.get(j).equals("sp")) {
+	    				out += " 疑似患者" + sp[i] + "人";
+	    			} else if(cmd4type.get(j).equals("cure")) {
+	    				out += " 治愈" + cure[i] + "人";
+	    			} else if(cmd4type.get(j).equals("dead")) {
+	    				out += " 死亡" + dead[i] + "人";
+	    			} 
+	    		}
 	    	}
 	    }
 	    writer.write("\n");
@@ -327,6 +343,32 @@ class InfectStatistic {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public void printData() {
+		String out;
+    for(int i = 0; i < PROVIENCE_NUM; i++) {
+    	if(flg[i] == true && flg4type == false) {
+    		out = provience_array[i] + "感染患者" + ip[i] + "人 疑似患者" + sp[i] + 
+    				"人 治愈" + cure[i] + "人 死亡" + dead[i] + "人";
+    		System.out.println(out);
+    	} else if(flg[i] == true && flg4type == true) {
+    		out = provience_array[i];
+    		for(int j = 0; j < cmd4type.size(); j ++) {
+    			if(cmd4type.get(j).equals("ip")) {
+    				out += " 感染患者" + ip[i] + "人";
+    			} else if(cmd4type.get(j).equals("sp")) {
+    				out += " 疑似患者" + sp[i] + "人";
+    			} else if(cmd4type.get(j).equals("cure")) {
+    				out += " 治愈" + cure[i] + "人";
+    			} else if(cmd4type.get(j).equals("dead")) {
+    				out += " 死亡" + dead[i] + "人";
+    			} 
+      		System.out.println(out);
+    		}
+    		
+    	}
+    }
 	}
 	
 	public static void main(String[] args) {
