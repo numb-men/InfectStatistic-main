@@ -1,4 +1,5 @@
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.*;
 import java.io.File;
 import java.time.LocalDate;
@@ -11,12 +12,12 @@ public class InfectStatistic {
      * 默认0：没有状况
      * 1：有状况
      */
-    public static int[] province_status = new int[32];
+    private static int[] province_status = new int[32];
 
     /**
      * 省份排序（包括“全国”）
      */
-    public static String[] province_str = {"全国", "安徽", "北京", "重庆", "福建", "甘肃",
+    private static String[] province_str = {"全国", "安徽", "北京", "重庆", "福建", "甘肃",
             "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南",
             "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西",
             "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
@@ -26,46 +27,47 @@ public class InfectStatistic {
      * 0：不需要输出
      * 默认为1：需要输出
      */
-    public static int[] type_num = new int[]{1, 1, 1, 1};
+    private static int[] type_num = new int[]{1, 1, 1, 1};
 
     /**
      * 类型列表
      */
-    public static String[] type_str = {"感染患者", "疑似患者", "治愈", "死亡"};
+    private static String[] type_str = {"感染患者", "疑似患者", "治愈", "死亡"};
 
     /**
      * 指定人数
      * 一级：省份
      * 二级：患者类型
      */
-    public static int[][] people_num = new int[32][4];
+    private static int[][] people_num = new int[32][4];
 
     /**
      * 文本中存在的所有情况
      */
-    public static String[] situation_str = {"(\\S+) 新增 感染患者 (\\d+)人", "(\\S+) 新增 疑似患者 (\\d+)人",
+    private static String[] situation_str = {"(\\S+) 新增 感染患者 (\\d+)人", "(\\S+) 新增 疑似患者 (\\d+)人",
             "(\\S+) 感染患者 流入 (\\S+) (\\d+)人", "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人",
             "(\\S+) 死亡 (\\d+)人", "(\\S+) 治愈 (\\d+)人",
             "(\\S+) 疑似患者 确诊感染 (\\d+)人", "(\\S+) 排除 疑似患者 (\\d+)人"};
 
-    public static String in_path;
-    public static String out_path;
+    private static String in_path;
+    private  static String out_path;
 
     /**
      * 文件输入输出
      */
 
-    class ioFile {
+    static class ioFile {
         /**
          * 获取文件
          */
-        public void getFile() throws Throwable {
+        void getFile() throws Throwable {
             File file = new File(in_path);
             File[] fileList = file.listFiles();
             String fileName;
 
-            for (int i = 0; i < fileList.length; i++) {
-                fileName = fileList[i].getName();
+            assert fileList != null;
+            for (File value : fileList) {
+                fileName = value.getName();
                 readFile(in_path + fileName);
             }
         }
@@ -75,30 +77,18 @@ public class InfectStatistic {
          */
         void readFile(String filePath) throws Throwable {
             try {
-                Throwable var1 = null;
-                Object var2 = null;
+                Throwable var1;
 
                 try {
-                    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
 
-                    String line;
-                    try {
-                        while((line = in.readLine()) != null) {
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), StandardCharsets.UTF_8))) {
+                        String line;
+                        while ((line = in.readLine()) != null) {
                             LogLine.FileProcessing(line);
                         }
-                    } finally {
-                        if (in != null) {
-                            in.close();
-                        }
-
                     }
                 } catch (Throwable var11) {
-                    if (var1 == null) {
-                        var1 = var11;
-                    } else if (var1 != var11) {
-                        var1.addSuppressed(var11);
-                    }
-
+                    var1 = var11;
                     throw var1;
                 }
             } catch (Exception var12) {
@@ -112,15 +102,13 @@ public class InfectStatistic {
          */
         void writeFile() throws Throwable {
             try {
-                Throwable var0 = null;
-                Object var1 = null;
+                Throwable var0;
 
                 try {
-                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(out_path)), "UTF-8"));
-                    try {
+                    try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(out_path)), StandardCharsets.UTF_8))) {
                         province_status[0] = 1;
-                        for(int i = 0; i < province_str.length; i++) {
-                            if(province_status[i] == 1) {
+                        for (int i = 0; i < province_str.length; i++) {
+                            if (province_status[i] == 1) {
                                 bw.write(province_str[i] + " ");
                                 for (int j = 0; j < type_num.length; j++) {
                                     if (type_num[j] == 1) {
@@ -131,18 +119,9 @@ public class InfectStatistic {
                             }
                         }
                         bw.write("// 该文档并非真实数据，仅供测试使用");
-                    } finally {
-                        if (bw != null) {
-                            bw.close();
-                        }
-
                     }
                 } catch (Throwable var10) {
-                    if (var0 == null) {
-                        var0 = var10;
-                    } else if (var0 != var10) {
-                        var0.addSuppressed(var10);
-                    }
+                    var0 = var10;
 
                     throw var0;
                 }
@@ -161,7 +140,7 @@ public class InfectStatistic {
         /**
          * 文本内容处理
          */
-        public static void FileProcessing(String string) {
+        private static void FileProcessing(String string) {
             int num = -1;
             for (int i = 0; i < situation_str.length; i++) {
                 boolean isMatch = Pattern.matches(situation_str[i], string);
@@ -199,18 +178,26 @@ public class InfectStatistic {
         }
 
         /**
-         * 新增 感染患者
+         * 提取行里人数
          */
-        static void addInfected(String string) {
+        static String[] getNum(String string){
             Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
             Matcher m = p.matcher(string);
-            String[] arr = new String[5];
+            String[] arr = new String[6];
             int cnt = 0;
             while (m.find()) {
                 arr[cnt] = m.group();
                 cnt++;
             }
-            int n = Integer.parseInt(arr[3]);
+            return arr;
+        }
+
+        /**
+         * 新增 感染患者
+         */
+        static void addInfected(String string) {
+            String[] arr = getNum(string);
+            int n = Integer.parseInt(arr[arr.length-3]);
             for (int i = 0; i < province_str.length; i++) {
                 if (arr[0].equals(province_str[i])) {
                     people_num[0][0] += n;
@@ -225,15 +212,8 @@ public class InfectStatistic {
          * 新增 疑似患者
          */
         static void addSuspected(String string) {
-            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-            Matcher m = p.matcher(string);
-            String[] arr = new String[5];
-            int cnt = 0;
-            while (m.find()) {
-                arr[cnt] = m.group();
-                cnt++;
-            }
-            int n = Integer.parseInt(arr[3]);
+            String[] arr = getNum(string);
+            int n = Integer.parseInt(arr[arr.length-3]);
             for (int i = 0; i < province_str.length; i++) {
                 if (arr[0].equals(province_str[i])) {
                     people_num[0][1] += n;
@@ -248,15 +228,8 @@ public class InfectStatistic {
          * 感染患者 流入
          */
         static void flowInfected(String string) {
-            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-            Matcher m = p.matcher(string);
-            String[] arr = new String[6];
-            int cnt = 0;
-            while (m.find()) {
-                arr[cnt] = m.group();
-                cnt++;
-            }
-            int n = Integer.parseInt(arr[4]);
+            String[] arr = getNum(string);
+            int n = Integer.parseInt(arr[arr.length-2]);
             for (int i = 0; i < province_str.length; i++) {
                 if (arr[0].equals(province_str[i])) {
                     people_num[i][0] -= n;
@@ -273,15 +246,8 @@ public class InfectStatistic {
          * 疑似患者 流入
          */
         static void flowSuspected(String string) {
-            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-            Matcher m = p.matcher(string);
-            String[] arr = new String[6];
-            int cnt = 0;
-            while (m.find()) {
-                arr[cnt] = m.group();
-                cnt++;
-            }
-            int n = Integer.parseInt(arr[4]);
+            String[] arr = getNum(string);
+            int n = Integer.parseInt(arr[arr.length-2]);
             for (int i = 0; i < province_str.length; i++) {
                 if (arr[0].equals(province_str[i])) {
                     people_num[i][1] -= n;
@@ -299,15 +265,8 @@ public class InfectStatistic {
          * 死亡
          */
         static void addDead(String string) {
-            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-            Matcher m = p.matcher(string);
-            String[] arr = new String[4];
-            int cnt = 0;
-            while (m.find()) {
-                arr[cnt] = m.group();
-                cnt++;
-            }
-            int n = Integer.parseInt(arr[2]);
+            String[] arr = getNum(string);
+            int n = Integer.parseInt(arr[arr.length-4]);
             for (int i = 0; i < province_str.length; i++) {
                 if (arr[0].equals(province_str[i])) {
                     people_num[0][3] += n;
@@ -324,15 +283,8 @@ public class InfectStatistic {
          * 治愈
          */
         static void addCure(String string) {
-            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-            Matcher m = p.matcher(string);
-            String[] arr = new String[4];
-            int cnt = 0;
-            while (m.find()) {
-                arr[cnt] = m.group();
-                cnt++;
-            }
-            int n = Integer.parseInt(arr[2]);
+            String[] arr = getNum(string);
+            int n = Integer.parseInt(arr[arr.length-4]);
             for (int i = 0; i < province_str.length; i++) {
                 if (arr[0].equals(province_str[i])) {
                     people_num[0][2] += n;
@@ -349,15 +301,8 @@ public class InfectStatistic {
          * 疑似患者 确诊感染
          */
         static void diagnosisSuspected(String string) {
-            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-            Matcher m = p.matcher(string);
-            String[] arr = new String[5];
-            int cnt = 0;
-            while (m.find()) {
-                arr[cnt] = m.group();
-                cnt++;
-            }
-            int n = Integer.parseInt(arr[3]);
+            String[] arr = getNum(string);
+            int n = Integer.parseInt(arr[arr.length-3]);
             for (int i = 0; i < province_str.length; i++) {
                 if (arr[0].equals(province_str[i])) {
                     people_num[0][1] -= n;
@@ -374,15 +319,8 @@ public class InfectStatistic {
          * 排除 疑似患者
          */
         static void removeSuspected(String string) {
-            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-            Matcher m = p.matcher(string);
-            String[] arr = new String[5];
-            int cnt = 0;
-            while (m.find()) {
-                arr[cnt] = m.group();
-                cnt++;
-            }
-            int n = Integer.parseInt(arr[3]);
+            String[] arr = getNum(string);
+            int n = Integer.parseInt(arr[arr.length-3]);
             for (int i = 0; i < province_str.length; i++) {
                 if (arr[0].equals(province_str[i])) {
                     people_num[i][1] -= n;
@@ -397,14 +335,14 @@ public class InfectStatistic {
     /**
      * 解析命令行参数
      */
-    class CmdArgs{
+    static class CmdArgs{
         String[] args;
 
         CmdArgs(String[] args_str){
             args = args_str;
         }
 
-        public boolean extractCmd() {
+        boolean extractCmd() {
             if(!args[0].equals("list")) {
                 System.out.println("错误命令：开头非list");
                 return false;
@@ -422,7 +360,7 @@ public class InfectStatistic {
                         break;
                     case "-out":
                         m = getOutPath(i+1);
-                        if (i == -1) {
+                        if (m == -1) {
                             System.out.println("错误命令：输出路径错误");
                             return false;
 
@@ -431,7 +369,7 @@ public class InfectStatistic {
                         break;
                     case "-date":
                         m = getDate(i+1);
-                        if (i == -1) {
+                        if (m == -1) {
                             System.out.println("错误命令：日期错误");
                             return false;
                         }
@@ -439,7 +377,7 @@ public class InfectStatistic {
                         break;
                     case "-type":
                         m = getType(i+1);
-                        if (i == -1) {
+                        if (m == -1) {
                             System.out.println("错误命令：类型错误");
                             return false;
                         }
@@ -447,7 +385,7 @@ public class InfectStatistic {
                         break;
                     case "-province":
                         m = getProvince(i+1);
-                        if (i == -1) {
+                        if (m == -1) {
                             System.out.println("错误命令：省份错误");
                             return false;
                         }
@@ -464,7 +402,7 @@ public class InfectStatistic {
         /**
          * 获取输入位置
          */
-        public int getInPath(int i) {
+        int getInPath(int i) {
             if(args[i].matches("^[A-z]:\\\\(.+?\\\\)*$"))
                 in_path = args[i];
             else
@@ -475,7 +413,7 @@ public class InfectStatistic {
         /**
          * 获取输出位置
          */
-        public int getOutPath(int i) {
+        int getOutPath(int i) {
             if(args[i].matches("^[A-z]:\\\\(\\S+)+(\\.txt)$"))
                 out_path = args[i];
             else
@@ -489,7 +427,7 @@ public class InfectStatistic {
         /**
          * 获取日期
          */
-        public int getDate(int i) {
+        int getDate(int i) {
             if(isValidDate(args[i])) {
                 if(date.compareTo(args[i]) >= 0)
                     date = args[i] + ".log.txt";
@@ -503,7 +441,7 @@ public class InfectStatistic {
         /**
          * 判断日期格式是否正确
          */
-        public boolean isValidDate(String dateStr) {
+        boolean isValidDate(String dateStr) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             try {
                 LocalDate date = LocalDate.parse(dateStr, formatter);
@@ -518,7 +456,7 @@ public class InfectStatistic {
         /**
          * 获取类型
          */
-        public int getType(int i) {
+        int getType(int i) {
             int m = i;
             for(int j = 0; j < 4; j++)
                 type_num[j] = 0;
@@ -553,7 +491,7 @@ public class InfectStatistic {
         /**
          * 获取省份
          */
-        public int getProvince(int i) {
+        int getProvince(int i) {
             int j, m = i;
             province_status[0] = 0;
             while(i<args.length) {
@@ -577,14 +515,13 @@ public class InfectStatistic {
             System.out.println("未输入参数!");
             return;
         }
-        InfectStatistic infect = new InfectStatistic();
-        InfectStatistic.CmdArgs cmdargs = infect.new CmdArgs(args);
-        boolean b = cmdargs.extractCmd();
-        if(b == false) {
+        InfectStatistic.CmdArgs cmd_args = new CmdArgs(args);
+        boolean b = cmd_args.extractCmd();
+        if(!b) {
             return;
         }
-        InfectStatistic.ioFile filestream = infect.new ioFile();
-        filestream.getFile();
-        filestream.writeFile();
+        InfectStatistic.ioFile file_stream = new ioFile();
+        file_stream.getFile();
+        file_stream.writeFile();
     }
 }
