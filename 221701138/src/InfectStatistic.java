@@ -110,7 +110,7 @@ public class InfectStatistic {
     	}
     }
     
-    //读取文件内容
+    //读取文件内容（参考）
     /*public static ArrayList<String> ReadTxt(File file) {
     	ArrayList<String> as = new ArrayList<String>();
     	StringBuilder result = new StringBuilder();
@@ -229,8 +229,14 @@ public class InfectStatistic {
     	}
     	PrintStream ps=new PrintStream(out);
     	System.setOut(ps);
-    	for(int i=1;i<32;i++) 
-    		for(int j=0;j<4;j++) totaltype[0][j]+=totaltype[i][j];
+    	for(int i = 0;i < province.length;i++){
+    		//System.out.print("province[i]");
+		}
+		for(int i = 0;i < type.length;i++){
+			//System.out.print("type[i]");
+		}
+    	for(int i = 1;i < 32;i++)
+    		for(int j = 0;j < 4;j++) totaltype[0][j] += totaltype[i][j];
     	//System.out.println('1');
 		if(province[0].equals("undefined")){
 			province = prov.clone();
@@ -238,17 +244,17 @@ public class InfectStatistic {
 		if(type[0].equals("undefined")){
 			type = typeId.clone();
 		}
-    	for(int i=0;i<prov.length;i++) {
-        	for(int j=0;j<province.length;j++) if(prov[i].equals(province[j])){
-        		System.out.print(prov[i]+" ");
-        		Integer pronum=(Integer) pmap.get(prov[i]);
-        		int typecnt=0;
-        		for(int k=0;k<4;k++) {
+    	for(int i = 0;i < prov.length;i++) {
+        	for(int j = 0;j < province.length;j++) if(prov[i].equals(province[j])){
+        		System.out.print(prov[i] + " ");
+        		Integer pronum = (Integer) pmap.get(prov[i]);
+        		int typecnt = 0;
+        		for(int k = 0;k < 4;k++) {
         			if(type[k].equals("undefined")) typecnt++;
         		}
-        		for(int k=0;k<4;k++) if((typecnt==4)||(!type[k].equals("undefined"))){
-        			Integer tynum=(Integer) tmap.get(type[k]);
-        			System.out.print(typeName[tynum]+totaltype[pronum][tynum]+" ");
+        		for(int k = 0;k < 4;k++) if((typecnt == 4)||(!type[k].equals("undefined"))){
+        			Integer typenum = (Integer) tmap.get(type[k]);
+        			System.out.print(typeName[typenum] + totaltype[pronum][typenum] + " ");
         		}
         		System.out.println();
         	}
