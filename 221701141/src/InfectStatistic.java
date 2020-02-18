@@ -12,7 +12,7 @@ import java.util.Scanner;
  * TODO
  *
  * @author massizhi
- * @version 1.6
+ * @version 2.0
  */
 class InfectStatistic
 {
