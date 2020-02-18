@@ -380,7 +380,7 @@ class commandline {
 	String targetpath;
 	//analysisCommand方法
 	//对参数进行判断分析保存
-	void analysisCommand(String[] args) {
+	public void analysisCommand(String args[]) {
 		// TODO Auto-generated method stub
 		int test = 0;
 		for (int i = 1; i < args.length; i++) {
