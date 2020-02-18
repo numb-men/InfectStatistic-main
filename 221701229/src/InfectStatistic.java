@@ -278,7 +278,7 @@ class list implements Command{
         int allcured=0;
         int alldead=0;
 
-        if(province!=null)
+        if(province==null)
         {
             allprovinceSet=new HashSet<>(infected.keySet());
             allprovinceSet.addAll(suspected.keySet());
