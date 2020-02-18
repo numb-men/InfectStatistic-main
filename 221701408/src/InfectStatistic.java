@@ -162,7 +162,7 @@ class FileHandle {
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     if (!line.startsWith("//"))
-                        FileProcessing(line);
+                        DataProcessing(line);
                 }
             }
         } catch (Exception e) {
@@ -172,10 +172,10 @@ class FileHandle {
         return 1;
     }
     /*
-     * 文本处理
+     * 数据处理
      *
      */
-    public void FileProcessing(String line) {
+    public void DataProcessing(String line) {
 
         String pattern1 = "(\\S+) 新增 感染患者 (\\d+)人";
         String pattern2 = "(\\S+) 新增 疑似患者 (\\d+)人";
@@ -197,19 +197,19 @@ class FileHandle {
         if(isMatch1) //新增 感染患者处理
             DealIP(line);
         else if(isMatch2) //新增 疑似患者处理
-            //addSP(string) ;
+            DealSP(line) ;
         else if(isMatch3) //新增 治愈患者处理
-            //addCure(string);
+            DealCure(line);
         else if(isMatch4) //新增 死亡患者处理
-            //addDead(string);
+            DealDead(line);
         else if(isMatch5) //感染患者 流入处理
-            //flowIP(string);
+            FlowIP(line);
         else if(isMatch6) //疑似患者 流入处理
-            //flowSP(string);
+            FlowSP(line);
         else if(isMatch7) //疑似患者 确诊感染处理
-            //diagnosisSP(string);
+            TurnSPtoIP(line);
         else if(isMatch8) //排除 疑似患者处理
-            //removeSP(string);
+            RemoveSP(line);
         }
         public void DealIP(String line){
             String[] str = line.split(" "); //将字符串以空格分割为多个字符串
@@ -223,7 +223,83 @@ class FileHandle {
                 }
             }
         }
+        public void DealSP(String line){
+        String[] str = line.split(" "); //将字符串以空格分割为多个字符串
+        int n = Integer.valueOf(str[3].replace("人", ""));//将人前的数字从字符串类型转化为int类型
+        for(int i = 0; i < provinces.length; i++){
+            if(str[0].equals(provinces[i])){
+                SuspectedPatients[i]+=n;//该省份感染患者人数增加
+                AllSP+=n;//全国感染患者人数增加
+                IsProvince[i] = true;
+                break;
+            }
+        }
+        }
+        public void DealCure(String line){
+            String[] str = line.split(" "); //将字符串以空格分割为多个字符串
+            int n = Integer.valueOf(str[2].replace("人", ""));//将人前的数字从字符串类型转化为int类型
+            for(int i = 0; i < provinces.length; i++){
+                if(str[0].equals(provinces[i])){
+                    SuspectedPatients[i]-=n;//该省份感染患者人数减少
+                    CurePatients[i]+=n;//该省份治愈患者人数增加
+                    AllSP-=n;//全国感染患者人数减少
+                    AllCURE+=n;
+                    IsProvince[i] = true;
+                    break;
+                }
+            }
+        }
+        public void DealDead(String line){
+        String[] str = line.split(" "); //将字符串以空格分割为多个字符串
+        int n = Integer.valueOf(str[2].replace("人", ""));//将人前的数字从字符串类型转化为int类型
+        for(int i = 0; i < provinces.length; i++){
+            if(str[0].equals(provinces[i])){
+                SuspectedPatients[i]-=n;//该省份感染患者人数减少
+                DeadPatients[i]+=n;//该省份治愈患者人数增加
+                AllSP-=n;//全国感染患者人数减少
+                AllDEAD+=n;
+                IsProvince[i] = true;
+                break;
+            }
+        }
+        }
+        public void FlowIP(String line){
+            String[] str = line.split(" "); //将字符串以空格分割为多个字符串
+            int n = Integer.valueOf(str[4].replace("人", ""));//将人前的数字从字符串类型转化为int类型
+            for(int i = 0; i < provinces.length; i++){
+                if(str[0].equals(provinces[i])){
+                    InfectedPatients[i]-=n;//该省份感染患者人数减少
+                    IsProvince[i] = true;
+                    break;
+                }
+                if(str[3].equals(provinces[i])){
+                    InfectedPatients[i]+=n;//该省份感染患者人数增加
+                    IsProvince[i] = true;
+                    break;
+                }
+            }
+        }
+        public void FlowSP(String line){
+        String[] str = line.split(" "); //将字符串以空格分割为多个字符串
+        int n = Integer.valueOf(str[4].replace("人", ""));//将人前的数字从字符串类型转化为int类型
+        for(int i = 0; i < provinces.length; i++){
+            if(str[0].equals(provinces[i])){
+                SuspectedPatients[i]-=n;//该省份疑似患者人数减少
+                IsProvince[i] = true;
+                break;
+            }
+            if(str[3].equals(provinces[i])){
+                SuspectedPatients[i]+=n;//该省份疑似患者人数增加
+                IsProvince[i] = true;
+                break;
+            }
+        }
+        }
+        public void TurnSPtoIP(String line){
 
-    }
+        }
+        public void RemoveSP(String line){
+
+        }
 
 }
