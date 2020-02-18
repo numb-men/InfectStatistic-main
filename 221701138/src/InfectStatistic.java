@@ -30,14 +30,14 @@ class InfectStatistic {
 	public static String []provincec = new String[32];
 	
 	//省份数量和类型数量
-	int typenum = 4;
-	int provincenum = 32;
+	public static int typenum = 4;
+	public static int provincenum = 32;
 	//总人数
-	public int [][] totaltype = new int [provincenum][typenum];
+	public static int [][] totaltype = new int [provincenum][typenum];
 	
 	//存放省信息
-    Map pmap = new HashMap();
-    String [] prov= {"全国","安徽","北京","重庆","福建",
+    static Map pmap = new HashMap();
+    static String [] prov= {"全国","安徽","北京","重庆","福建",
     		"甘肃","广东"," 广西","贵州"," 海南",
     		"河北","河南","黑龙江","湖北","湖南",
     		"吉林","江苏","江西","辽宁","内蒙古",
@@ -45,12 +45,12 @@ class InfectStatistic {
     		"四川","天津","西藏","新疆","云南","浙江"};
     
     //存放患者类型信息
-    Map tmap = new HashMap();
-    String [] typeName = {"感染患者","疑似患者","治愈患者","死亡患者"};
-    String [] typeId = {"ip","sp","cure","dead"};
+    static Map tmap = new HashMap();
+    static String [] typeName = {"感染患者","疑似患者","治愈患者","死亡患者"};
+    static String [] typeId = {"ip","sp","cure","dead"};
 	
     //初始化map信息
-    public void InitMessage() {
+    public static void InitMessage() {
     	for(int i = 0;i < prov.length;i++) {
     		pmap.put(prov[i], Integer.valueOf(i));
     	}
@@ -124,14 +124,13 @@ class InfectStatistic {
     	return as;
     }
     
-    //返回所有文件内容
+    //获取指定日期所有文件名
     public static ArrayList<String> GetTxt(String path,String date){
     	//先获取指定日期之前的所有文件名
     	File file1 = new File(path);
         File[] templist = file1.listFiles();
         ArrayList<String> ls1 = new ArrayList<String>();
         ArrayList<String> ls2 = new ArrayList<String>();
-        ArrayList<String> lt = new ArrayList<String>();
         for(int i = 0 ; i < templist.length;i++){
 			if(templist[i].isFile()) {
 				ls1.add(templist[i].toString());
@@ -142,25 +141,33 @@ class InfectStatistic {
 				ls2.add(ls1.get(i));
 			}
         }
-        
-        //获取已知文件绝对路径的文件内容
-        for(String s : ls2) {
-        	File file3 = new File(s);
-        	lt=ReadTxt(file3);
-        	for(int j = 0 ; j < lt.size();j++){	
-    			//System.out.print(lt.get(j)+"\n");
-    		}
-        }
-        return lt;
+        return ls2;
     }
     //执行命令
     public static void ExcuteCommand(String log,String out,String date,String []type,String []province){
-    	ArrayList<String> lt = GetTxt(log,date);
+    	//正则表达式匹配文件内容
+		String smatch1="(\\S+) 新增 感染患者 (\\d+)人";
+		String sorigin1=" 新增 感染患者 |人";
+		String smatch2="(\\S+) 新增 疑似患者 (\\d+)人";
+		String sorigin2=" 新增 疑似患者 |人";
+		String smatch3="(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
+		String sorigin3=" 感染患者 流入 | |人";
+		String smatch4="(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
+		String sorigin4=" 疑似患者 流入 | |人";
+		String smatch5="(\\S+) 死亡 (\\d+)人";
+		String sorigin5=" 死亡 |人";
+		String smatch6="(\\S+) 治愈 (\\d+)人";
+		String sorigin6=" 治愈 |人";
+		String smatch7="(\\S+) 疑似患者 确诊感染 (\\d+)人";
+		String sorigin7=" 疑似患者 确诊感染 |人";
+		String smatch8="(\\S+) 排除 疑似患者 (\\d+)人";
+		String sorigin8=" 排除 疑似患者 |人";
     	
     }
     
     public static void main(String[] args) {
-    	
+    	InitMessage();
+    	ExcuteCommand(logc,outc,datec,typec,provincec);
     	System.out.println("1");
     }
 }
