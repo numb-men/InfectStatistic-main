@@ -12,54 +12,83 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.*;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.util.Date;
 
 class InfectStatistic {
+    //命令执行参数初始化
+	public static String logc = new String();
+	public static String outc = new String();
+	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	public static String datec = new String("0000-00-00");
+	static String dateFormat = sdf.format(new Date());
+	public static String []typec = new String[4];
+	public static String []provincec = new String[32];
 	
-	//命令接口
-    public interface Command{
-        public int excute();
-    }
-
-    //命令具象化
-    public static class CmdCommand implements Command{
-    	private final String s;
+	//存放省信息
+    Map<String,String> pmap = new HashMap<String,String>();
+    String [] prov= {"全国","安徽","北京","重庆","福建",
+    		"甘肃","广东"," 广西","贵州"," 海南",
+    		"河北","河南","黑龙江","湖北","湖南",
+    		"吉林","江苏","江西","辽宁","内蒙古",
+    		"宁夏","青海","山东","山西","陕西","上海",
+    		"四川","天津","西藏","新疆","云南","浙江"};
+    
+    //存放患者类型信息
+    Map<String,String> tmap = new HashMap<String,String>();
+    String [] typeName = {"感染患者","疑似患者","治愈患者","死亡患者"};
+    String [] typeId = {"ip","sp","cure","dead"};
+	
+    //初始化
+    public void InitMessage() {
     	
-    	public CmdCommand(String s) {
-    		this.s = s;
-    	}
-    	@Override
-    	public int excute() {
-    		return Analyze(s);
-    	}
     }
     
-    //分析命令
-    public static int Analyze(String s) {
-    	int x = 0;
-    	if(s.equals("-log")) x = 1;
-    	else if(s.equals("-out")) x = 2;
-    	else if(s.equals("-date")) x =3;
-    	else if(s.equals("-type")) x = 4;
-    	else if(s.equals("-province")) x = 5;
-    	return x;
-    }  
-    
-    //ִ运行器
-    public static class Runner{
-    	private Command command;
-    	
-    	public Runner(Command command) {
-    		this.command = command;
-    	}
-    	public int Run() {
-    		return command.excute();
+    //分析整个命令行给全局变量赋值
+    public static void CmdAnalyze(String s[]) {
+    	int len = s.length;
+    	int a,b,c,d;
+    	a = b = c = d = 0;
+    	String c1 = new String("-log");
+    	String c2 = new String("-out");
+    	String c3 = new String("-date");
+    	String c4 = new String("-type");
+    	String c5 = new String("-province");
+    	for(int i=0;i<4;i++) typec[i]="undefined";
+    	for(int i=0;i<31;i++) provincec[i]="undefined";
+    	for(int i = 1;i < len;i++) {
+    		if(s.equals("c1")) {
+    			logc = s[i+1];
+    		}
+    		else if(s.equals("c2")) {
+    			outc = s[i+1];
+    		}
+    		else if(s.equals("c3")){
+    			datec = s[i+1];
+    		}
+    		else if(s.equals("c4")) {
+    			a = i;
+    			for(int j = a + 1;j < len;j++) {
+    				if(s[i].charAt(0)!='-') {
+    					typec[b++] = s[i];
+    				}
+    				else break;
+    			}
+    		}
+    		else if(s.equals("c5")) {
+    			c = i;
+    			for(int k = c + 1;k < len;k++) {
+    				if(s[i].charAt(0)!='-') {
+    					provincec[d++] = s[i];
+    				}
+    				else break;
+    			}
+    		}
+    		
     	}
     }
     
@@ -80,69 +109,34 @@ class InfectStatistic {
     	return as;
     }
     
-    public static void main(String[] args) {
-    	String cm[] = new String[] {"1","2","3","4","5","6","7","8"};
-    	int x = 0;
-    	//存取参数
-        for(int i=0;i<args.length;i++){
-            Command command = new CmdCommand(args[i]);
-            Runner runner = new Runner(command);
-            x = runner.Run();
-            //log
-            if(x == 1) {
-            	cm[0] = args[i+1];
-            }
-            //out
-            else if(x == 2) {
-            	cm[1] = args[i+1];
-            }
-            //date
-            else if(x == 3) {
-            	cm[2] = args[i+1];
-            }
-            //type
-            else if(x == 4) {
-            	for(int a = i+1;;a++) {
-            		if(args[a].equals("ip"))
-            			cm[3] = args[a];
-            		else if(args[a].equals("sp"))
-            			cm[4] = args[a];
-            		else if(args[a].equals("cure"))
-            			cm[5] = args[a];
-            		else if(args[a].equals("dead"))
-            			cm[6] = args[a];
-            		else break;
-            	}
-            }
-            else if(x == 5) {
-            	int c = 7;
-            	for(int a = i+1;args[a].isEmpty();a++) {
-            		cm[c] = args[a];
-            		c++;
-            	}
-            }
-        }
-        //ִ开始读写
+    //返回所有文件内容
+    public static ArrayList<String> GetTxt(String path){
+    	File file1 = new File(path);
+        File templist[] = file1.listFiles();
         ArrayList<String> ls = new ArrayList<String>();
         ArrayList<String> lt = new ArrayList<String>();
-        String path = cm[0];
-        File file1 = new File(path);
-        File templist[] = file1.listFiles();
-        
         for(int i = 0 ; i < templist.length;i++){
 			if(templist[i].isFile()) {
 				ls.add(templist[i].toString());
 			}
         }
-        /*for(int j = 0 ; j < ls.size();j++){
-			System.out.print(ls.get(j)+"\n");
-		}*/
         for(String s : ls) {
         	File file2 = new File(s);
         	lt=ReadTxt(file2);
-        	for(int j = 0 ; j < lt.size();j++){
-    			System.out.print(lt.get(j)+"\n");
+        	for(int j = 0 ; j < lt.size();j++){	
+    			//System.out.print(lt.get(j)+"\n");
     		}
         }
+        return lt;
+    }
+    //执行命令
+    public static void ExcuteCommand(String log,String out,String date,String []type,String []province){
+    	ArrayList<String> lt = GetTxt(log);
+    	
+    }
+    
+    public static void main(String[] args) {
+    	
+    	System.out.println("1");
     }
 }
