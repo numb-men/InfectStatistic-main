@@ -308,7 +308,7 @@ class ListCommand {
         deadMap.put("全国", deadAmount);
 
         FileOutputStream outFile = new FileOutputStream(outDirectory);
-        BufferedWriter writer=new BufferedWriter(new OutputStreamWriter(outFile,"utf-8"));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outFile, "utf-8"));
         if (typeIsExist) {
             if (!provinceIsExist) {
                 // 未提供要输出的省份，则输出日志文件有提供的省份的数据，
@@ -372,7 +372,7 @@ class ListCommand {
      */
     private void handleFile(String route) throws Exception {
         FileInputStream fstream = new FileInputStream(new File(route));
-        BufferedReader br = new BufferedReader(new InputStreamReader(fstream,"utf-8"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(fstream, "utf-8"));
         String strLine;
         while ((strLine = br.readLine()) != null) {
             if (strLine.matches(s1)) {
