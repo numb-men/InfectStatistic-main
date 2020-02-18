@@ -1,15 +1,13 @@
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * InfectStatistic
  * TODO
  *
  * @author massizhi
- * @version 1.2
+ * @version 1.4
  */
 class InfectStatistic
 {
@@ -109,17 +107,66 @@ class InfectStatistic
     	File file=new File(logList);
         //获取该路径下的文件和文件夹
         String[] arr=file.list();
-        //for()
         //遍历
-        for(String s:arr){
-        	FileInputStream fs;
-			try {
-				fs = new FileInputStream(logList+s);
-				System.out.println(logList+s);
-				InputStreamReader is=new InputStreamReader(fs,"UTF-8");
-				
+        for(String s:arr)
+        {
+        	if (s.compareTo(dateList+".log")>0)
+        	{
+        		continue;
+        	}
+			try 
+			{
+				File afile = new File(logList+s);
+				//System.out.println(logList+s);
+		        Scanner sc = new Scanner(afile);
+		        System.out.println(afile.exists());
+		        while (sc.hasNext()) 
+		        {
+		            String first=sc.next();
+		            System.out.println(first);
+		            if (first.equals("//")) 
+		            {
+		            	sc.nextLine();
+		            } 
+		            else 
+		            {
+		            	int index=0;
+		            	for (int i=0;i<32;i++)
+		            	{
+		            		if (first.equals("province[i]"))
+		            		{
+		            			index=i;
+		            			break;
+		            		}
+		            	}
+		            	String second=sc.next();
+		                if (second.equals("新增")) 
+		                {
+		                	String third=sc.next();
+		                	String four=sc.next();
+		                	System.out.println(second);
+		                	System.out.println(third);
+		                	System.out.println(four);
+		                	four=four.replace("人", "");
+		                	int member=Integer.parseInt(four);
+		                	if (third.equals("感染患者"))
+		                	{
+		                		number[0][0]+=member;
+		                		number[index][0]+=member;
+		                	}
+		                	else
+		                	{
+		                		number[0][1]+=member;
+		                		number[index][1]+=member;
+		                	}
+		                }
+		            }
+		                	
+		        }
+		        sc.close();
 			} 
-			catch (Exception e) {
+			catch (Exception e) 
+			{
 				e.printStackTrace();
 			}           
         }
@@ -135,5 +182,21 @@ class InfectStatistic
     		System.out.print(provinceInt.get(i));
     	System.out.println();
     	//list -date 2020-01-22 -province 江苏 福建 -log D:/log/ -out D:/output.txt -type ip sp cure
+    	
+    	for (int i=0;i<32;i++)
+    	{
+    		for (int j=0;j<4;j++)
+    		{
+    			if(number[i][j]!=0) {
+    			System.out.print(i);
+    			System.out.print(" ");
+    			System.out.print(j);
+    			System.out.print(" ");
+    			System.out.print(number[i][j]);
+    			System.out.println();
+    			}
+    			
+    		}
+    	}
     }
 }
