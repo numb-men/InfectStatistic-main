@@ -223,6 +223,7 @@ public class InfectStatistic {
 			String[] str=line.split(" ");
 			int index=findProvince(str[0]);
 			provincelist[0].ip-=Integer.parseInt(str[2].substring(0, str[2].length()-1));
+			provincelist[0].dead+=Integer.parseInt(str[2].substring(0, str[2].length()-1));
 			provincelist[index].ip-=Integer.parseInt(str[2].substring(0,str[2].length()-1));
 			provincelist[index].dead+=Integer.parseInt(str[2].substring(0,str[2].length()-1));
 			provincelist[index].status=true;
@@ -233,6 +234,7 @@ public class InfectStatistic {
 			String[] str=line.split(" ");
 			int index=findProvince(str[0]);
 			provincelist[0].ip-=Integer.parseInt(str[2].substring(0, str[2].length()-1));
+			provincelist[0].cure+=Integer.parseInt(str[2].substring(0, str[2].length()-1));
 			provincelist[index].ip-=Integer.parseInt(str[2].substring(0,str[2].length()-1));
 			provincelist[index].cure+=Integer.parseInt(str[2].substring(0,str[2].length()-1));
 			provincelist[index].status=true;
@@ -288,6 +290,7 @@ public class InfectStatistic {
 		
 		if(sprovince.toString().equals("")) haveprovince=false;
 		else {
+			haveprovince=true;
 			for(int i=0;i<province.length;i++) {
 				provincelist[findProvince(province[i])].showstatus=true;
 			}
@@ -295,8 +298,9 @@ public class InfectStatistic {
 		
 		File f=new File(out);
         FileOutputStream fop=new FileOutputStream(f);
-        OutputStreamWriter writer=new OutputStreamWriter(fop, "UTF-8");
+        OutputStreamWriter writer=new OutputStreamWriter(fop,"UTF-8");
         
+//        //test
 //        for(int i=0;i<provinces.length;i++) {
 //        	if(provincelist[i].status==true) {
 //        		writer.append(provincelist[i].name+" ");
@@ -309,7 +313,7 @@ public class InfectStatistic {
 //        }
 //        writer.close();
         
-		if(haveprovince=false) {
+		if(haveprovince==false) {
 			for(int i=0;i<provinces.length;i++) {
 				if(provincelist[i].status==true) {
 					writer.append(provincelist[i].name+" ");
@@ -339,20 +343,16 @@ public class InfectStatistic {
 			}
 			writer.append("// 该文档并非真实数据，仅供测试使用");
 			writer.flush();
+			writer.close();
 		}
 		fop.close();
 		FileInputStream fip=new FileInputStream(f);
-	    InputStreamReader reader=new InputStreamReader(fip, "UTF-8");
+	    InputStreamReader reader=new InputStreamReader(fip,"UTF-8");
 	    StringBuffer sb=new StringBuffer();
 	        while(reader.ready()) {
 	            sb.append((char) reader.read());
 	        }
 	        System.out.println(sb.toString());
-	        // System.out.println(log);
-			// System.out.println(out);
-			// System.out.println(date);
-			// System.out.println(type);
-			// System.out.println(province);
 	        reader.close();
 	        fip.close();
 	}
