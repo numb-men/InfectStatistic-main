@@ -10,25 +10,26 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 class InfectStatistic {
     public static void main(String[] args) {
         argparse arg=new argparse(args);
-        TreeSet<String> logpath=getfile();
+        TreeSet<String> logfiles=getfile(arg.logpath);
+        Iterator i=logfiles.iterator();
+        while(i.hasNext())
+            System.out.println(i.next());
 
     }
-    private static TreeSet<String> getfile(){
+    private static TreeSet<String> getfile(String n){
         TreeSet<String> files=new TreeSet<String>();
-        File logpath =new File("log");
+        File logpath =new File(n);
         File[] teplist= logpath.listFiles();
+        Pattern pattern = Pattern.compile("(\\d){4}-(\\d){2}-(\\d){2}\\.log\\.txt");
         for (int i=0;i<teplist.length;i++){
-            if(teplist[i].isFile())
+            if(teplist[i].isFile()&&pattern.matcher(teplist[i].getName()).matches())
                 files.add(teplist[i].toString());
         }
-        /*files.add("log\\2020-01-25.log.txt");
-        Iterator i=files.iterator();
-        while(i.hasNext())
-            System.out.println(i.next());*/
         return files;
     }
 }
