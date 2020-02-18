@@ -1,6 +1,5 @@
 package src;
 
-
 import java.io.*;
 import java.text.Collator;
 import java.text.DateFormat;
@@ -25,16 +24,65 @@ class InfectStatistic {
     public static void main(String[] args) throws Exception {
 
     	
-    	String[] string= {
-    			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\output.txt",
-        	};
+    	
+    	
+    	
    
-    	CommandLine cmd=new CommandLine(string);
+    	CommandLine cmd=new CommandLine(test4);
     	CommandLineParser parser=new CommandLineParser(cmd.getCommandName(), cmd.getParameters());
     	parser.excuteListCommand();
     
     }
 }
+
+/**
+ * 	测试类，存放供测试时用的字符串数组
+ * 
+ * @author ZhangYuhui
+ * @version 1.0
+ */
+class Test{
+	String[] test1= {
+			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\output.txt",
+    	};
+	
+	String[] test2= {
+			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\output.txt",
+			"-type", "sp","ip",
+	};
+	
+	String[] test3= {
+			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\output.txt",
+			"-province", "全国","湖北",
+	};
+	
+	String[] test4= {
+			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\output.txt",
+			"-province", "全国","湖北","-type", "sp","ip",
+	};
+	
+	String[] test5= {
+			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\output.txt",
+			"-date","2020-01-22"
+	};
+	
+	String[] test6= {
+			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\output.txt",
+			"-date","2020-01-22"
+	};
+	
+	String[] test7= {
+			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\output.txt",
+			"-date","2020-01-22"
+	};
+	
+	
+	String[] test8= {
+			"list","-log", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\log", "-out", "C:\\Users\\ThinkPad\\Desktop\\软件工程实践二\\output.txt",
+			"-province", "全国","湖北","-type", "sp","ip","-date","2020-01-22"
+	};
+}
+
 
 /**
  *	命令行
@@ -50,7 +98,6 @@ class CommandLine{
 	public CommandLine(String[] args) {
 		parameters=new String[args.length-1];
 		commandName=args[0];
-		//System.out.println(commandName);
 		for(int i=1;i<args.length;i++) {
 			parameters[i-1]=args[i];
 		}
@@ -108,31 +155,6 @@ interface Parameters{
 	
 }
 
-/**
- *	 命令的参数的值
- * 
- * @author ZhangYuhui
- * @version 1.0
- */
-class ParameterValue{
-//	boolean valueRequired;
-	boolean multiValue;
-	Object value;
-	
-	public ParameterValue( boolean multiValue, Object value) {
-		super();
-//		this.valueRequired = valueRequired;
-		this.multiValue = multiValue;
-		this.value = value;
-	}
-
-	@Override
-	public String toString() {
-		return "	[multiValue=" + multiValue + ", value=" + value+ "]\n";
-	}
-	
-	
-}
 
 
 /**
@@ -142,13 +164,11 @@ class ParameterValue{
  * @version 1.0
  */
 class ParameterValue{
-//	boolean valueRequired;
 	boolean multiValue;
 	Object value;
 	
 	public ParameterValue( boolean multiValue, Object value) {
 		super();
-//		this.valueRequired = valueRequired;
 		this.multiValue = multiValue;
 		this.value = value;
 	}
@@ -204,7 +224,6 @@ class ListParameters implements Parameters{
 		
 		for(int i=0;i<parameters.length;) {
 			String parameter=parameters[i];
-			//System.out.println(parameter);
 			if(listParameterMap.containsKey(parameter)) {//该项为参数
 				if(listParameterMap.get(parameter).multiValue) {//参数可多值
 					List<String> value=new LinkedList<String>();
@@ -229,8 +248,6 @@ class ListParameters implements Parameters{
 				continue;
 			}
 		}
-		//System.out.println(this.toString());
-		
 	}
 	
 
@@ -280,9 +297,7 @@ class CommandLineParser{
 	public void parseListCommand(String[] parameters) {
 		ListParameters listParameters=new ListParameters(parameters);
 		listParameters.formatParameters();
-//		listParameters.judgeParameters();
 		parameterMap=listParameters.getParametersMap();
-		//System.out.println(parameterMap);
 	}
 	
 	/**
@@ -296,19 +311,12 @@ class CommandLineParser{
 		LogFileReader logFileReader=new LogFileReader(logAddress);
 		
 		String content=logFileReader.defaultContent();
-	//	System.out.println(content);
 		LogContentParaser contentParaser=new LogContentParaser();
 		Map<String,DailyInfectItem> resultMap=contentParaser.paraseLogContent(content);
 		
-		
-//		for(Map.Entry<String, DailyInfectItem> entry:resultMap.entrySet()) {
-//			System.out.println(entry.getKey()+entry.getValue().getAllResult());
-//		}
-//		
-		
 		String outputAddress=(String)parameterMap.get("-out").value;
-		ResultOutputter outputter=new ResultOutputter(outputAddress,resultMap);
-		//outputter.outputResult(resultMap);
+		ResultOutputter outputter=new ResultOutputter(outputAddress,resultMap,parameterMap);
+		outputter.output();
 	}
 }
 
@@ -914,6 +922,10 @@ class ResultOutputter{
 		this.resultMap=resultMap;
 		this.listParameterMap=listParameterMap;
 		this.outPath=outPath;
+//		for(Entry<String, DailyInfectItem> entry:resultMap.entrySet()) {
+//			System.out.println(entry.getKey()+entry.getValue().getAllResult());
+//		}
+		
 	}
 	
 	public String getFinalResult() {
@@ -935,46 +947,101 @@ class ResultOutputter{
 				 return cmp.compare(o1.getKey(), o2.getKey());
 			 }
 		});
-		
-		//resultMap.put("重庆", resultMap.remove("冲庆"));
 		if(resultMap.containsKey("全国")) {
-			sb.append("全国");
-			if(listParameterMap.get("-type").value!=null) {
-				LinkedList<String> typeList=(LinkedList<String>)listParameterMap.get("-type").value;
-				for(int i=0;i<typeList.size();i++) {
-					switch(typeList.get(i)) {
-						case "ip":
-							sb.append(resultMap.get("全国").getIpResult());break;
-						case "sp":
-							sb.append(resultMap.get("全国").getSpResult());break;
-						case "cure":
-							sb.append(resultMap.get("全国").getIpResult());break;
-						case "dead":
-							sb.append(resultMap.get("全国").getSpResult());break;	
-						default:break;
-					}
-				}
-			}else {
-				
-			}
+			handleCountry(sb);
 		}
+		handleOrdinary(sb, list);
 		
-		for(int i=0;i<list.size();i++) {
-			for(int j=0;j<TYPES.length;j++) {
-				sb.append(list.get(i).getKey())
-			}
-		}
 		
 		
 		return sb.toString();
 	}
 	
 	/**
+	 * 	处理一般省份
+	 * 
+	 * @param sb
+	 */
+	public void handleOrdinary(StringBuilder sb,List<Map.Entry<String, DailyInfectItem>> list) {
+		LinkedList<String> typeList=(LinkedList<String>)listParameterMap.get("-type").value;
+		boolean hasType=(listParameterMap.get("-type").value!=null);
+		for(int j=0;j<list.size();j++) {
+			DailyInfectItem item=list.get(j).getValue();
+			String province=list.get(j).getKey();
+			
+			if(province=="全国") {
+				continue;
+			}
+			
+			if(province=="冲庆") {
+				sb.append("重庆");
+			}else {
+				sb.append(province);
+			}	
+			
+			
+			if(hasType) {
+				for(int i=0;i<typeList.size();i++) {
+					switch(typeList.get(i)) {
+						case "ip":
+							sb.append(item.getIpResult());break;
+						case "sp":
+							sb.append(item.getSpResult());break;
+						case "cure":
+							sb.append(item.getCureResult());break;
+						case "dead":
+							sb.append(item.getDeadResult());break;	
+						default:break;
+					}
+					
+				}
+				sb.append("\n");
+			}else {
+				sb.append(item.getAllResult()+"\n");
+			}
+			
+		}
+	}
+	
+	/**
+	 * 	特殊处理全国的情况
+	 * 
+	 * @param sb
+	 */
+	public void handleCountry(StringBuilder sb) {
+				
+		sb.append("全国");
+		DailyInfectItem item=resultMap.get("全国");
+		if(listParameterMap.get("-type").value!=null) {
+			LinkedList<String> typeList=(LinkedList<String>)listParameterMap.get("-type").value;
+			for(int i=0;i<typeList.size();i++) {
+				switch(typeList.get(i)) {
+					case "ip":
+						sb.append(item.getIpResult());break;
+					case "sp":
+						sb.append(item.getSpResult());break;
+					case "cure":
+						sb.append(item.getIpResult());break;
+					case "dead":
+						sb.append(item.getSpResult());break;	
+					default:break;
+				}
+				
+			}
+			sb.append("\n");
+		}else {
+			sb.append(item.getAllResult()+"\n");
+		}
+	}
+	
+	
+	/**
 	 * 	将结果字符串输入到指定路径的文件中
 	 * 
 	 * @param s
 	 */
-	public void output(String s) {
+	public void output() {
+		String s=getFinalResult();
 		try {
 			FileOutputStream out = new FileOutputStream(new File(outPath));
 			BufferedOutputStream Buff = new BufferedOutputStream(out);
@@ -1018,6 +1085,7 @@ class ResultOutputter{
 		
 		StringBuilder sb=new StringBuilder();
 		if(listParameterMap.get("-province").value!=null) {
+			
 			LinkedList<String> provinces=(LinkedList<String>) listParameterMap.get("-province").value;
 			resultMap.entrySet().removeIf(m->(!provinces.contains(m.getKey())));
 		}

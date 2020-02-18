@@ -12,3 +12,5 @@ InfectStatistic-example.iml
 /bin/
 .classpath
 .project
+*.log
+/071703434/src/*.class
