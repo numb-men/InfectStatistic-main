@@ -6,11 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="8ad29b63-fe4c-497a-8ac3-a6a55670831e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/221701138/src/InfectStatistic.java" beforeDir="false" afterPath="$PROJECT_DIR$/221701138/src/InfectStatistic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/221701138/src/Lib.java" beforeDir="false" afterPath="$PROJECT_DIR$/221701138/src/Lib.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/InfectStatistic.iml" beforeDir="false" afterPath="$PROJECT_DIR$/InfectStatistic.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/InfectStatistic/src/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/InfectStatistic/src/Lib.class" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +86,7 @@
       <workItem from="1581898939206" duration="3862000" />
       <workItem from="1581924825323" duration="408000" />
       <workItem from="1581925258048" duration="2677000" />
-      <workItem from="1582020101421" duration="2200000" />
+      <workItem from="1582020101421" duration="3204000" />
     </task>
     <servers />
   </component>
