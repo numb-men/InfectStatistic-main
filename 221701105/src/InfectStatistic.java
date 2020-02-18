@@ -33,13 +33,25 @@ class List{
     TreeSet<String> logFiles;
 
     List(ArgParse arg) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date endDate = sdf.parse(arg.endDate);
-        String strDate,strPath;
+
         for (int i = 0; i < provList.length; i++) {
             map.put(provList[i], i);
         }
+        String temp;
         logFiles = getFile(arg.logPath);
+        temp = logFiles.last().toString();
+        temp = temp.substring(temp.lastIndexOf("\\") + 1, temp.lastIndexOf("\\") + 11);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        if(arg.endDate==null) {
+            arg.endDate=temp;
+        }
+        else if(sdf.parse(arg.endDate).compareTo(sdf.parse(temp))>0){
+             System.out.println("日期错误");
+             System.exit(1);
+        }
+
+        Date endDate = sdf.parse(arg.endDate);
+        String strDate,strPath;
         provStat = new int[31][4];
         Iterator i = logFiles.iterator();
         while(i.hasNext()){
