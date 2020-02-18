@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class Province {
 	String name;
@@ -40,10 +42,10 @@ public class InfectStatistic {
 	static Province[] provincelist=new Province[provinces.length];
 	
 	public static void main(String[] args) throws IOException {
-//		readCommand(args);
-//		readFile("D:log");
 		provinceInit();
-		System.out.println(provincelist[0].name);
+//		readCommand(args);
+		readFile("D:log");
+//		System.out.println(provincelist[0].name);
     }
 	
 	public static void readCommand(String[] args) {
@@ -150,5 +152,95 @@ public class InfectStatistic {
 		String p7=".*疑似患者 确诊感染.*";
 		String p8=".*排除 疑似患者.*";
 		
+		Pattern r1=Pattern.compile(p1);
+		Pattern r2=Pattern.compile(p2);
+		Pattern r3=Pattern.compile(p3);
+		Pattern r4=Pattern.compile(p4);
+		Pattern r5=Pattern.compile(p5);
+		Pattern r6=Pattern.compile(p6);
+		Pattern r7=Pattern.compile(p7);
+		Pattern r8=Pattern.compile(p8);
+		
+		Matcher m1=r1.matcher(line);
+		Matcher m2=r2.matcher(line);
+		Matcher m3=r3.matcher(line);
+		Matcher m4=r4.matcher(line);
+		Matcher m5=r5.matcher(line);
+		Matcher m6=r6.matcher(line);
+		Matcher m7=r7.matcher(line);
+		Matcher m8=r8.matcher(line);
+		
+		if(m1.find()) {
+			String[] str=line.split(" ");
+			int index=findProvince(str[0]);
+			provincelist[index].ip+=Integer.parseInt(str[3].substring(0, str[3].length()-1));
+			provincelist[index].status=true;
+//			System.out.println(provincelist[index].ip);
+		}
+		
+		else if(m2.find()) {
+			String[] str=line.split(" ");
+			int index=findProvince(str[0]);
+			provincelist[index].sp+=Integer.parseInt(str[3].substring(0, str[3].length()-1));
+			provincelist[index].status=true;
+//			System.out.println(provincelist[index].sp);
+		}
+		
+		else if(m3.find()) {
+			String[] str=line.split(" ");
+			int index1=findProvince(str[0]);
+			int index2=findProvince(str[3]);
+			provincelist[index1].ip-=Integer.parseInt(str[4].substring(0, str[4].length()-1));
+			provincelist[index2].ip+=Integer.parseInt(str[4].substring(0, str[4].length()-1));
+			provincelist[index1].status=true;
+			provincelist[index2].status=true;
+//			System.out.println(provincelist[index2].ip);
+		}
+		
+		else if(m4.find()) {
+			String[] str=line.split(" ");
+			int index1=findProvince(str[0]);
+			int index2=findProvince(str[3]);
+			provincelist[index1].sp-=Integer.parseInt(str[4].substring(0, str[4].length()-1));
+			provincelist[index2].sp+=Integer.parseInt(str[4].substring(0, str[4].length()-1));
+			provincelist[index1].status=true;
+			provincelist[index2].status=true;
+//			System.out.println(provincelist[index2].sp);
+		}
+		
+		else if(m5.find()) {
+			String[] str=line.split(" ");
+			int index=findProvince(str[0]);
+			provincelist[index].ip-=Integer.parseInt(str[2].substring(0,str[2].length()-1));
+			provincelist[index].dead+=Integer.parseInt(str[2].substring(0,str[2].length()-1));
+			provincelist[index].status=true;
+//			System.out.println(provincelist[index].dead);
+		}
+		
+		else if(m6.find()) {
+			String[] str=line.split(" ");
+			int index=findProvince(str[0]);
+			provincelist[index].ip-=Integer.parseInt(str[2].substring(0,str[2].length()-1));
+			provincelist[index].cure+=Integer.parseInt(str[2].substring(0,str[2].length()-1));
+			provincelist[index].status=true;
+//			System.out.println(provincelist[index].cure);
+		}
+		
+		else if(m7.find()) {
+			String[] str=line.split(" ");
+			int index=findProvince(str[0]);
+			provincelist[index].ip+=Integer.parseInt(str[3].substring(0, str[3].length()-1));
+			provincelist[index].sp-=Integer.parseInt(str[3].substring(0, str[3].length()-1));
+			provincelist[index].status=true;
+//			System.out.println(provincelist[index].ip);
+		}
+		
+		else if(m8.find()) {
+			String[] str=line.split(" ");
+			int index=findProvince(str[0]);
+			provincelist[index].sp-=Integer.parseInt(str[3].substring(0, str[3].length()-1));
+			provincelist[index].status=true;
+//			System.out.println(provincelist[index].sp);
+		}
 	}
 }
