@@ -19,23 +19,30 @@ import java.util.regex.Pattern;
 class InfectStatistic {
     public static void main(String[] args) {
         ArgParse arg=new ArgParse(args);
-        TreeSet<String> logFiles=getFile(arg.logPath);
-        String[] provList={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
-        HashMap<String, Integer> map = new HashMap<String, Integer>();
-        for(int i=0;i<provList.length;i++){
-            map.put(provList[i],i);
+        if(arg.command.equals("list"))
+            new List(arg);
+    }
+}
+
+class List{
+    String[] provList={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
+    HashMap<String, Integer> map = new HashMap<String, Integer>();
+    int[][] provStat;
+    TreeSet<String> logFiles;
+
+    List(ArgParse arg) {
+        for (int i = 0; i < provList.length; i++) {
+            map.put(provList[i], i);
         }
-        TreeSet<String> files = getFile(arg.logPath);
-        Iterator i=logFiles.iterator();
-        applyLog(i.next().toString(),map);
-        /*
-        Iterator i=logFiles.iterator();
-        while(i.hasNext())
-            System.out.println(i.next());*/
+        logFiles = getFile(arg.logPath);
+        provStat = new int[31][4];
+        Iterator i = logFiles.iterator();
+        applyLog(i.next().toString());
+        write();
     }
 
-
-    private static TreeSet<String> getFile(String n){
+    //得到log文件列表，传入目录，返回文件路径集合
+    TreeSet<String> getFile(String n){
         TreeSet<String> files=new TreeSet<String>();
         File logPath =new File(n);
         File[] tepList= logPath.listFiles();
@@ -46,8 +53,8 @@ class InfectStatistic {
         }
         return files;
     }
-    private static void applyLog(String path,HashMap<String, Integer> map){
-        System.out.println(path);
+    //应用一个log文件，传入log文件路径，直接修改数组provStat
+    void applyLog(String path){
         File file = null;
         BufferedReader br = null;
         StringBuffer buffer = null;
@@ -72,10 +79,18 @@ class InfectStatistic {
         Pattern pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 新增 疑似患者 \\d+[人]");
         Matcher matcher = pattern.matcher(data);
         while (matcher.find()) {
-            String [] arr = (matcher.group().split("\\s+"));
+            String [] arr = matcher.group().split("\\s+");
             prov1=arr[0];
             num= Integer.parseInt(arr[3].substring(0,arr[3].length()-1));
-            System.out.println("省"+prov1+"人数"+num);
+            provStat[map.get(prov1)][1]+=num;
+        }
+    }
+    //写文件，传入人员类型、省份，无返回
+    void write(){
+        for(int i=0;i<31;i++){
+            System.out.println(provList[i]+"  确诊"+provStat[i][0]+"人  疑似"
+                +provStat[i][1]+"人  治愈"+provStat[i][2]+"人  死亡"
+                +provStat[i][3]+"人");
         }
     }
 }
@@ -90,10 +105,11 @@ class ArgParse{
             System.out.println("至少要输入一个命令");
             System.exit(0);
         }
+        command=args[0];
         HashSet types=new HashSet();
         HashSet provinces=new HashSet();
 
-        if(args[0].equals("list")){
+        if(command.equals("list")){
             for(int i=1;i<args.length;i++){
                 switch (args[i]){
                     case "-log":
@@ -119,7 +135,4 @@ class ArgParse{
             }
         }
     }
-}
-class Province{
-    public int ip=0,sp=0,cure=0,dead=0;
 }
