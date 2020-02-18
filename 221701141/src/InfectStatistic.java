@@ -12,7 +12,7 @@ import java.util.Scanner;
  * TODO
  *
  * @author massizhi
- * @version 1.4
+ * @version 1.6
  */
 class InfectStatistic
 {
@@ -274,18 +274,91 @@ class InfectStatistic
         	}
         	else
         	{
-        		
+        		for (int i=0;i<32;i++)
+            	{
+        			if (number[i][4]==0)
+        			{
+        				continue;
+        			}
+        			String mid=province[i];
+        			for (int j=0;j<typeInt.size();j++)
+        			{
+        				if (typeInt.get(j)==0)
+        				{
+        					mid=mid+" 感染患者"+""+number[i][0]+""+"人";
+        				}
+        				else if (typeInt.get(j)==1)
+        				{
+        					mid=mid+" 疑似患者"+""+number[i][1]+""+"人";
+        				}
+        				else if (typeInt.get(j)==2)
+        				{
+        					mid=mid+" 治愈"+""+number[i][2]+""+"人";
+        				}
+        				else if (typeInt.get(j)==3)
+        				{
+        					mid=mid+" 死亡"+""+number[i][3]+""+"人";
+        				}
+        			}
+        			mid+="\n";
+        			result.add(mid);
+            	}
         	}
         }
         else
         {
+        	for (int i=0;i<32;i++)
+        	{
+        		number[i][4]=0;
+        	}
+        	for (int i=0;i<provinceInt.size();i++)
+        	{
+        		number[provinceInt.get(i)][4]=1;
+        	}
         	if(typeInt.size()==0)
         	{
-        		
+        		for (int i=0;i<32;i++)
+            	{
+        			if (number[i][4]==0)
+        			{
+        				continue;
+        			}
+        			String mid=province[i]+" 感染患者"+""+number[i][0]+""+"人"+" 疑似患者"+""+number[i][1]+""+"人"
+        			+" 治愈"+""+number[i][2]+""+"人"+" 死亡"+""+number[i][3]+""+"人\n";
+        			result.add(mid);
+            	}
         	}
         	else
         	{
-        		
+        		for (int i=0;i<32;i++)
+            	{
+        			if (number[i][4]==0)
+        			{
+        				continue;
+        			}
+        			String mid=province[i];
+        			for (int j=0;j<typeInt.size();j++)
+        			{
+        				if (typeInt.get(j)==0)
+        				{
+        					mid=mid+" 感染患者"+""+number[i][0]+""+"人";
+        				}
+        				else if (typeInt.get(j)==1)
+        				{
+        					mid=mid+" 疑似患者"+""+number[i][1]+""+"人";
+        				}
+        				else if (typeInt.get(j)==2)
+        				{
+        					mid=mid+" 治愈"+""+number[i][2]+""+"人";
+        				}
+        				else if (typeInt.get(j)==3)
+        				{
+        					mid=mid+" 死亡"+""+number[i][3]+""+"人";
+        				}
+        			}
+        			mid+="\n";
+        			result.add(mid);
+            	}
         	}
         }
         
@@ -304,7 +377,7 @@ class InfectStatistic
 			e.printStackTrace();
 		}   
         
-    	//test
+    	/*//test
     	System.out.println(logList);
     	System.out.println(outList);
     	System.out.println(dateList);
@@ -329,5 +402,6 @@ class InfectStatistic
     			} 			
     		}
     	}
+    	*/
     }
 }
