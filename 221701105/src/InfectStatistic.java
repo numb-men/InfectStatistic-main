@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -30,6 +31,7 @@ class List{
     String[] provList={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
     HashMap<String, Integer> map = new HashMap<String, Integer>();
     int[][] provStat;
+    int[] all;
     TreeSet<String> logFiles;
 
     List(ArgParse arg) throws ParseException {
@@ -53,6 +55,7 @@ class List{
         Date endDate = sdf.parse(arg.endDate);
         String strDate,strPath;
         provStat = new int[31][4];
+        all = new int[4];
         Iterator i = logFiles.iterator();
         while(i.hasNext()){
             strPath=i.next().toString();
@@ -63,7 +66,7 @@ class List{
             else
                 break;
         }
-        write();
+        write(arg.arr,arg.aprovs);
     }
 
     //得到log文件列表，传入目录，返回文件路径集合
@@ -181,11 +184,32 @@ class List{
         }
     }
     //写文件，传入人员类型、省份，无返回
-    void write(){
+    void write(String[] arr,String[] provs){
+        String str="";
+        for(int i=0;i<31;i++)
+        {
+            all[0]+=provStat[i][0];
+            all[1]+=provStat[i][1];
+            all[2]+=provStat[i][2];
+            all[3]+=provStat[i][3];
+        }
+        if( provs.length==0||Arrays.asList(provs).contains("全国")) {
+            str = "全国";
+            if (arr.length==0||Arrays.asList(arr).contains("ip")) str = str + "  确诊" + all[0] + "人";
+            if (arr.length==0||Arrays.asList(arr).contains("sp")) str = str + "  疑似" + all[1] + "人";
+            if (arr.length==0||Arrays.asList(arr).contains("cure")) str = str + "  治愈" + all[2] + "人";
+            if (arr.length==0||Arrays.asList(arr).contains("dead")) str = str + "  死亡" + all[3] + "人";
+            System.out.println(str);
+        }
         for(int i=0;i<31;i++){
-            System.out.println(provList[i]+"  确诊"+provStat[i][0]+"人  疑似"
-                +provStat[i][1]+"人  治愈"+provStat[i][2]+"人  死亡"
-                +provStat[i][3]+"人");
+            if( provs.length==0||Arrays.asList(provs).contains(provList[i])) {
+                str = provList[i];
+                if (arr.length==0||Arrays.asList(arr).contains("ip")) str = str + "  确诊" + provStat[i][0] + "人";
+                if (arr.length==0||Arrays.asList(arr).contains("sp")) str = str + "  疑似" + provStat[i][1] + "人";
+                if (arr.length==0||Arrays.asList(arr).contains("cure")) str = str + "  治愈" + provStat[i][2] + "人";
+                if (arr.length==0||Arrays.asList(arr).contains("dead")) str = str + "  死亡" + provStat[i][3] + "人";
+                System.out.println(str);
+            }
         }
     }
 }
@@ -195,6 +219,8 @@ class ArgParse{
     public String logPath=null,outPath=null,endDate=null;
     public HashSet types=new HashSet();
     public HashSet provinces=new HashSet();
+    public String[] arr;
+    public String[] aprovs;
     ArgParse(String[] args){
         if (args.length==0){
             System.out.println("至少要输入一个命令");
@@ -229,5 +255,7 @@ class ArgParse{
                 }
             }
         }
+        arr= (String[]) types.toArray(new String[types.size()]);
+        aprovs=(String[]) provinces.toArray(new String[types.size()]);
     }
 }
