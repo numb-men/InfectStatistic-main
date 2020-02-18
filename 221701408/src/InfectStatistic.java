@@ -35,15 +35,15 @@ class CmdHandle {
         command = x;
     }
     /**
-     * 获得各命令位置和参数
+     * 获得各命令参数
      */
-    public void GetCmdOrderParam(){
+    public void GetCmdParam(){
         int logorder=0,outorder=0,dateorder=0,typeorder=0,provinceorder=0;
         ArrayList<String > typeparam=new ArrayList<>();
         ArrayList<String > provinceparam = new ArrayList<>();
         String logparam="",outparam="",dateparam="";
         if(!command[0].equals("list")) {
-            System.out.println("命令格式错误！");
+            //System.out.println("命令格式错误！");
             return ;
         }
         else{
@@ -100,7 +100,7 @@ class CmdHandle {
         }
         FileHandle f = new FileHandle();
         f.ReadFile(logparam,dateparam);
-        //f.WriteFile(outparam,typeparam,provinceparam);
+        f.WriteFile(outparam,typeparam,provinceparam);
 
     }
 }
@@ -149,14 +149,14 @@ class FileHandle {
         }
 
         if(flag==0){
-            System.out.println("日期超出范围！");
+            System.out.println("日期超出范围");
             return 0;
         }
         try {
             for (int i = 0; i <= stopPoint; i++) {
-                String SingleFile = FilePath + "\\" + FileNames.get(i);
+                String Filename = FilePath + "\\" + FileNames.get(i);
                 BufferedReader br = new BufferedReader(new InputStreamReader(
-                        new FileInputStream(SingleFile), "UTF-8"));
+                        new FileInputStream(Filename), "UTF-8"));
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     if (!line.startsWith("//"))
@@ -322,5 +322,38 @@ class FileHandle {
 
             }
         }
+    public void WriteFile(String FileName,ArrayList<String> typeparam,ArrayList<String> provinceparam){
+        try{
+
+            File file =new File(FileName);
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            FileWriter fileWritter = new FileWriter(file);//直接覆盖原来文件
+            if((provinceparam.size() == 0)&&(typeparam.size() == 0)){
+                //fileWritter.write(content);
+            }
+            if((provinceparam.size() > 0)&&(typeparam.size() == 0)){
+                //fileWritter.write(content);
+            }
+            if((provinceparam.size() == 0)&&(typeparam.size() > 0)){
+                //fileWritter.write(content);
+            }
+            if((provinceparam.size() > 0)&&(typeparam.size() > 0)){
+                //fileWritter.write(content);
+            }
+
+
+            fileWritter.flush();
+
+            fileWritter.close();
+        }catch(IOException e){
+
+            e.printStackTrace();
+
+        }
+
+
+    }
 
 }
