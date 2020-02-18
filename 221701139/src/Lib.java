@@ -252,176 +252,273 @@ class NoCommand implements Command {
     }
 }
 
-class RegOne {
+abstract class RegApprover {
+
+    // 下一个处理者
+    RegApprover regApprover;
+
+    public RegApprover() {
+
+    }
+
+    // 设置下一个正则表达式处理者
+    public void setRegApprover(RegApprover regApprover) {
+        this.regApprover = regApprover;
+    }
+
+    // 处理每一行
+    public abstract Map<String,Integer[]> process(String line);
+}
+class RegOne extends RegApprover{
 
     // <省> 新增 感染患者 n人
-//    private final String REGEX = "(\\S+) 新增 感染患者 (\\d+)人";
+    private final String REGEX = "(\\S+) 新增 感染患者 (\\d+)人";
 
     // 返回一个省份对应信息的映射
+    @Override
     public Map<String, Integer[]> process(String line) {
+        Pattern pattern = Pattern.compile(REGEX);
+        Matcher matcher = pattern.matcher(line);
         Map<String,Integer[]> map = new HashMap<>();
         // 如果匹配代表该行由这个正则表达式处理
-        String[] result = line.split(" ");
-        // 获取省份
-        String province = result[0];
-        // 获取人数
-        int population = Integer.parseInt(result[3].substring(0,result[3].length()-1));
+        if (matcher.find()) {
+            // 如果匹配代表该行由这个正则表达式处理
+            String[] result = line.split(" ");
+            // 获取省份
+            String province = result[0];
+            // 获取人数
+            int population = Integer.parseInt(result[3].substring(0,result[3].length()-1));
 
-        // 封装成map
-        Integer[] num = {population,0,0,0};
-        map.put(province,num);
-        map.put("全国",new Integer[]{population,0,0,0});
+            // 封装成map
+            Integer[] num = {population,0,0,0};
+            map.put(province,num);
+            map.put("全国",new Integer[]{population,0,0,0});
+        }
+        else {
+            // 没有匹配交给下一个正则表达式处理
+            map = regApprover.process(line);
+        }
         return map;
     }
 }
-class RegTwo {
-//    private final String REGEX = "(\\S+) 新增 疑似患者 (\\d+)人";
+class RegTwo extends RegApprover{
+    private final String REGEX = "(\\S+) 新增 疑似患者 (\\d+)人";
 
     // 返回一个省份对应信息的映射
+    @Override
     public Map<String, Integer[]> process(String line) {
+        Pattern pattern = Pattern.compile(REGEX);
+        Matcher matcher = pattern.matcher(line);
         Map<String,Integer[]> map = new HashMap<>();
-        String[] result = line.split(" ");
-        // 获取省份
-        String province = result[0];
-        // 获取人数
-        int population = Integer.parseInt(result[3].substring(0,result[3].length()-1));
 
-        // 封装成map
-        Integer[] num = {0,population,0,0};
-        map.put(province,num);
-        map.put("全国",new Integer[]{0,population,0,0});
+        if (matcher.find()) {
+//            System.out.println("这是第二个");
+            String[] result = line.split(" ");
+//            for (String s:result) {
+//                System.out.println(s);
+//            }
+            // 获取省份
+            String province = result[0];
+            // 获取人数
+            int population = Integer.parseInt(result[3].substring(0,result[3].length()-1));
+
+            // 封装成map
+            Integer[] num = {0,population,0,0};
+            map.put(province,num);
+            map.put("全国",new Integer[]{0,population,0,0});
+        }
+        else {
+            map = regApprover.process(line);
+        }
         return map;
     }
 }
 
-class RegThree {
-//    private final String REGEX = "(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
+class RegThree extends RegApprover {
+    private final String REGEX = "(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
     // 返回一个省份对应信息的映射
 
+    @Override
     public Map<String, Integer[]> process(String line) {
-
+        Pattern pattern = Pattern.compile(REGEX);
+        Matcher matcher = pattern.matcher(line);
         Map<String,Integer[]> map = new HashMap<>();
+        if (matcher.find()) {
+            String[] result = line.split(" ");
+//            for (String s:result) {
+//                System.out.println(s);
+//            }
+            // 获取流出省份和流入省份
+            String province1 = result[0];
+            String province2 = result[3];
+            // 获取人数
+            int population = Integer.parseInt(result[4].substring(0,result[4].length()-1));
 
-        String[] result = line.split(" ");
-        // 获取流出省份和流入省份
-        String province1 = result[0];
-        String province2 = result[3];
-        // 获取人数
-        int population = Integer.parseInt(result[4].substring(0,result[4].length()-1));
-
-        // 封装成map
-        Integer[] num = {-population,0,0,0};
-        Integer[] num2 = {population,0,0,0};
-        map.put(province1,num);
-        map.put(province2,num2);
+            // 封装成map
+            Integer[] num = {-population,0,0,0};
+            Integer[] num2 = {population,0,0,0};
+            map.put(province1,num);
+            map.put(province2,num2);
+        }
+        else {
+            map = regApprover.process(line);
+        }
         return map;
     }
 }
 
-class RegFour {
-//    private final String REGEX = "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
+class RegFour extends RegApprover {
+    private final String REGEX = "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
     // 返回一个省份对应信息的映射
 
+    @Override
     public Map<String, Integer[]> process(String line) {
-
+        Pattern pattern = Pattern.compile(REGEX);
+        Matcher matcher = pattern.matcher(line);
         Map<String,Integer[]> map = new HashMap<>();
+        if (matcher.find()) {
+            String[] result = line.split(" ");
+//            for (String s:result) {
+//                System.out.println(s);
+//            }
+            // 获取流出省份和流入省份
+            String province1 = result[0];
+            String province2 = result[3];
+            // 获取流入的疑似患者
+            Integer population = Integer.parseInt(result[4].substring(0,result[4].length()-1));
 
-        String[] result = line.split(" ");
-        // 获取流出省份和流入省份
-        String province1 = result[0];
-        String province2 = result[3];
-        // 获取流入的疑似患者
-        int population = Integer.parseInt(result[4].substring(0,result[4].length()-1));
-
-        // 封装成map
-        Integer[] num = {0,-population,0,0};
-        Integer[] num2 = {0,population,0,0};
-        map.put(province1,num);
-        map.put(province2,num2);
-
+            // 封装成map
+            Integer[] num = {0,-population,0,0};
+            Integer[] num2 = {0,population,0,0};
+            map.put(province1,num);
+            map.put(province2,num2);
+        }
+        else {
+            map = regApprover.process(line);
+        }
         return map;
     }
 }
 
-class RegFive {
-//    private final String REGEX = "(\\S+) 死亡 (\\d+)人";
+class RegFive extends RegApprover {
+    private final String REGEX = "(\\S+) 死亡 (\\d+)人";
 
 
     // 返回一个省份对应信息的映射
+    @Override
     public Map<String, Integer[]> process(String line) {
+        Pattern pattern = Pattern.compile(REGEX);
+        Matcher matcher = pattern.matcher(line);
         Map<String,Integer[]> map = new HashMap<>();
-        String[] result = line.split(" ");
+        if (matcher.find()) {
+            String[] result = line.split(" ");
+//            for (String s:result) {
+//                System.out.println(s);
+//            }
+            // 获取省份
+            String province = result[0];
+            // 获取人数
+            int population = Integer.parseInt(result[2].substring(0,result[2].length()-1));
 
-        // 获取省份
-        String province = result[0];
-        // 获取人数
-        int population = Integer.parseInt(result[2].substring(0,result[2].length()-1));
-
-        // 封装成map
-        Integer[] num = {-population,0,0,population};
-        map.put(province,num);
-        map.put("全国",new Integer[]{-population,0,0,population});
+            // 封装成map
+            Integer[] num = {0,0,0,population};
+            map.put(province,num);
+            map.put("全国",new Integer[]{-population,0,0,population});
+        }
+        else {
+            map = regApprover.process(line);
+        }
         return map;
     }
 }
 
-class RegSix {
-//    private final String REGEX = "(\\S+) 治愈 (\\d+)人";
+class RegSix extends RegApprover {
+    private final String REGEX = "(\\S+) 治愈 (\\d+)人";
 
     // 返回一个省份对应信息的映射
+    @Override
     public Map<String, Integer[]> process(String line) {
-
+        Pattern pattern = Pattern.compile(REGEX);
+        Matcher matcher = pattern.matcher(line);
         Map<String,Integer[]> map = new HashMap<>();
+        if (matcher.find()) {
+            String[] result = line.split(" ");
+//            for (String s:result) {
+//                System.out.println(s);
+//            }
+            // 获取省份
+            String province = result[0];
+            // 获取人数
+            int population = Integer.parseInt(result[2].substring(0,result[2].length()-1));
 
-        String[] result = line.split(" ");
-        // 获取省份
-        String province = result[0];
-        // 获取人数
-        int population = Integer.parseInt(result[2].substring(0,result[2].length()-1));
+            // 封装成map
+            Integer[] num = {0,0,population,0};
+            map.put(province,num);
+            map.put("全国",new Integer[]{-population,0,population,0});
+        }
+        else {
+            map = regApprover.process(line);
+        }
 
-        // 封装成map
-        Integer[] num = {-population,0,population,0};
-        map.put(province,num);
-        map.put("全国",new Integer[]{-population,0,population,0});
         return map;
     }
 }
-class RegSeven {
-//    private final String REGEX = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
+class RegSeven extends RegApprover {
+    private final String REGEX = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
     // 返回一个省份对应信息的映射
 
+    @Override
     public Map<String, Integer[]> process(String line) {
 
+        Pattern pattern = Pattern.compile(REGEX);
+        Matcher matcher = pattern.matcher(line);
         Map<String,Integer[]> map = new HashMap<>();
-        String[] result = line.split(" ");
-        // 获取省份
-        String province = result[0];
-        // 获取人数
-        int population = Integer.parseInt(result[3].substring(0,result[3].length()-1));
 
-        // 封装成map
-        Integer[] num = {population,-population,0,0};
-        map.put(province,num);
-        map.put("全国",new Integer[]{population,-population,0,0});
+        if (matcher.find()) {
+            String[] result = line.split(" ");
+            // 获取省份
+            String province = result[0];
+            // 获取人数
+            int population = Integer.parseInt(result[3].substring(0,result[3].length()-1));
+
+            // 封装成map
+
+            Integer[] num = {population,-population,0,0};
+            map.put(province,num);
+            map.put("全国",new Integer[]{population,-population,0,0});
+
+        }
+        else {
+            map = regApprover.process(line);
+        }
         return map;
     }
 }
-class RegEight {
+class RegEight extends RegApprover {
     private final String REGEX = "(\\S+) 排除 疑似患者 (\\d+)人";
     // 返回一个省份对应信息的映射
+    @Override
     public Map<String, Integer[]> process(String line) {
-
+        Pattern pattern = Pattern.compile(REGEX);
+        Matcher matcher = pattern.matcher(line);
         Map<String,Integer[]> map = new HashMap<>();
-        String[] result = line.split(" ");
 
-        // 获取省份
-        String province = result[0];
-        // 获取人数
-        int population = Integer.parseInt(result[3].substring(0,result[3].length()-1));
-        // 封装成map
-        Integer[] num = {0,-population,0,0};
-        map.put(province,num);
-        map.put("全国",new Integer[]{0,-population,0,0});
+        if (matcher.find()) {
+            String[] result = line.split(" ");
+            // 获取省份
+            String province = result[0];
+            // 获取人数
+            Integer population = Integer.parseInt(result[3].substring(0,result[3].length()-1));
+
+            // 封装成map
+            Integer[] num = {0,-population,0,0};
+            map.put(province,num);
+            map.put("全国",new Integer[]{0,-population,0,0});
+
+        }
+        else {
+            map = regApprover.process(line);
+        }
         return map;
     }
 }
@@ -533,56 +630,78 @@ class AllInformation {
     }
     // 判断用哪个正则表达式
     public Map<String,Integer[]> judgeReg(String line) {
+//        Map<String,Integer[]> lineInfo = new HashMap<>();
+//        Pattern pattern1 = Pattern.compile(REGEX1);
+//        Pattern pattern2 = Pattern.compile(REGEX2);
+//        Pattern pattern3 = Pattern.compile(REGEX3);
+//        Pattern pattern4 = Pattern.compile(REGEX4);
+//        Pattern pattern5 = Pattern.compile(REGEX5);
+//        Pattern pattern6 = Pattern.compile(REGEX6);
+//        Pattern pattern7 = Pattern.compile(REGEX7);
+//        Pattern pattern8 = Pattern.compile(REGEX8);
+//
+//        Matcher matcher1 = pattern1.matcher(line);
+//        Matcher matcher2 = pattern2.matcher(line);
+//        Matcher matcher3 = pattern3.matcher(line);
+//        Matcher matcher4 = pattern4.matcher(line);
+//        Matcher matcher5 = pattern5.matcher(line);
+//        Matcher matcher6 = pattern6.matcher(line);
+//        Matcher matcher7 = pattern7.matcher(line);
+//        Matcher matcher8 = pattern8.matcher(line);
+//
+//        if(matcher1.find()) {
+//            lineInfo = new RegOne().process(line);
+//        }
+//        else if (matcher2.find()) {
+//            lineInfo = new RegTwo().process(line);
+//
+//        }
+//        else if (matcher3.find()) {
+//            lineInfo = new RegThree().process(line);
+//
+//        }
+//        else if (matcher4.find()) {
+//            lineInfo = new RegFour().process(line);
+//
+//        }
+//        else if (matcher5.find()) {
+//            lineInfo = new RegFive().process(line);
+//
+//        }
+//        else if (matcher6.find()) {
+//            lineInfo = new RegSix().process(line);
+//
+//        }
+//        else if (matcher7.find()) {
+//            lineInfo = new RegSeven().process(line);
+//
+//
+//        }
+//        else if (matcher8.find()) {
+//            lineInfo = new RegEight().process(line);
+//        }
+//        return lineInfo;
+        RegOne regOne = new RegOne();
+        RegTwo regTwo = new RegTwo();
+        RegThree regThree = new RegThree();
+        RegFour regFour = new RegFour();
+        RegFive regFive = new RegFive();
+        RegSix regSix = new RegSix();
+        RegSeven regSeven = new RegSeven();
+        RegEight regEight = new RegEight();
+
+        regOne.setRegApprover(regTwo);
+        regTwo.setRegApprover(regThree);
+        regThree.setRegApprover(regFour);
+        regFour.setRegApprover(regFive);
+        regFive.setRegApprover(regSix);
+        regSix.setRegApprover(regSeven);
+        regSeven.setRegApprover(regEight);
+        regEight.setRegApprover(regOne);
+
         Map<String,Integer[]> lineInfo = new HashMap<>();
-        Pattern pattern1 = Pattern.compile(REGEX1);
-        Pattern pattern2 = Pattern.compile(REGEX2);
-        Pattern pattern3 = Pattern.compile(REGEX3);
-        Pattern pattern4 = Pattern.compile(REGEX4);
-        Pattern pattern5 = Pattern.compile(REGEX5);
-        Pattern pattern6 = Pattern.compile(REGEX6);
-        Pattern pattern7 = Pattern.compile(REGEX7);
-        Pattern pattern8 = Pattern.compile(REGEX8);
+        lineInfo = regOne.process(line);
 
-        Matcher matcher1 = pattern1.matcher(line);
-        Matcher matcher2 = pattern2.matcher(line);
-        Matcher matcher3 = pattern3.matcher(line);
-        Matcher matcher4 = pattern4.matcher(line);
-        Matcher matcher5 = pattern5.matcher(line);
-        Matcher matcher6 = pattern6.matcher(line);
-        Matcher matcher7 = pattern7.matcher(line);
-        Matcher matcher8 = pattern8.matcher(line);
-
-        if(matcher1.find()) {
-            lineInfo = new RegOne().process(line);
-        }
-        else if (matcher2.find()) {
-            lineInfo = new RegTwo().process(line);
-
-        }
-        else if (matcher3.find()) {
-            lineInfo = new RegThree().process(line);
-
-        }
-        else if (matcher4.find()) {
-            lineInfo = new RegFour().process(line);
-
-        }
-        else if (matcher5.find()) {
-            lineInfo = new RegFive().process(line);
-
-        }
-        else if (matcher6.find()) {
-            lineInfo = new RegSix().process(line);
-
-        }
-        else if (matcher7.find()) {
-            lineInfo = new RegSeven().process(line);
-
-
-        }
-        else if (matcher8.find()) {
-            lineInfo = new RegEight().process(line);
-        }
         return lineInfo;
     }
 
