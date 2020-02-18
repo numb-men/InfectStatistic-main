@@ -35,7 +35,7 @@ public class InfectStatistic {
 	
 	static String log="";
 	static String out="";
-	static String date="2020-03-03";
+	static String date="";
 	static StringBuffer type=new StringBuffer("");
 	static StringBuffer province=new StringBuffer("");
 	static String[] provinces={"全国",
@@ -267,7 +267,7 @@ public class InfectStatistic {
 		boolean spstatus=false;
 		boolean curestatus=false;
 		boolean deadstatus=false;
-		boolean provincestatus=false;
+		boolean haveprovince=false;
 		String[] type=stype.toString().split(" ");
 		String[] province=sprovince.toString().split(" ");
 		
@@ -286,7 +286,7 @@ public class InfectStatistic {
 			}
 		}
 		
-		if(sprovince.toString().equals("")) provincestatus=false;
+		if(sprovince.toString().equals("")) haveprovince=false;
 		else {
 			for(int i=0;i<province.length;i++) {
 				provincelist[findProvince(province[i])].showstatus=true;
@@ -309,7 +309,7 @@ public class InfectStatistic {
 //        }
 //        writer.close();
         
-		if(provincestatus=true) {
+		if(haveprovince=false) {
 			for(int i=0;i<provinces.length;i++) {
 				if(provincelist[i].status==true) {
 					writer.append(provincelist[i].name+" ");
