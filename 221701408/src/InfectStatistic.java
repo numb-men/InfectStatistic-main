@@ -46,7 +46,7 @@ class CmdHandle {
         ArrayList<String > provinceparam = new ArrayList<>();
         String logparam="",outparam="",dateparam="";
         if(!command[0].equals("list")) {
-            //System.out.println("命令格式错误！");
+            System.out.println("命令格式错误！");
             return ;
         }
         else{
@@ -70,10 +70,11 @@ class CmdHandle {
             for(int i=0;i<command.length;i++) {
                 if (command[i].equals("-date")) {
                     dateorder = i;
+                    dateparam=command[dateorder+1];
                     break;
                 }
             }
-            dateparam=command[dateorder+1];
+
             /*type命令位置获取和参数*/
             for(int i=0;i<command.length;i++) {
                 if (command[i].equals("-type")) {
