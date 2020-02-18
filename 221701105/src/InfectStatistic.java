@@ -14,32 +14,32 @@ import java.util.regex.Pattern;
 
 class InfectStatistic {
     public static void main(String[] args) {
-        argparse arg=new argparse(args);
-        TreeSet<String> logfiles=getfile(arg.logpath);
-        Iterator i=logfiles.iterator();
+        ArgParse arg=new ArgParse(args);
+        TreeSet<String> logFiles=getFile(arg.logPath);
+        Iterator i=logFiles.iterator();
         while(i.hasNext())
             System.out.println(i.next());
 
     }
-    private static TreeSet<String> getfile(String n){
+    private static TreeSet<String> getFile(String n){
         TreeSet<String> files=new TreeSet<String>();
-        File logpath =new File(n);
-        File[] teplist= logpath.listFiles();
+        File logPath =new File(n);
+        File[] tepList= logPath.listFiles();
         Pattern pattern = Pattern.compile("(\\d){4}-(\\d){2}-(\\d){2}\\.log\\.txt");
-        for (int i=0;i<teplist.length;i++){
-            if(teplist[i].isFile()&&pattern.matcher(teplist[i].getName()).matches())
-                files.add(teplist[i].toString());
+        for (int i=0;i<tepList.length;i++){
+            if(tepList[i].isFile()&&pattern.matcher(tepList[i].getName()).matches())
+                files.add(tepList[i].toString());
         }
         return files;
     }
 }
 
-class argparse{
+class ArgParse{
     public String command=null;
-    public String logpath=null,outpath=null,enddate=null;
+    public String logPath=null,outPath=null,endDate=null;
     public HashSet types=new HashSet();
     public HashSet provinces=new HashSet();
-    argparse(String[] args){
+    ArgParse(String[] args){
         if (args.length==0){
             System.out.println("至少要输入一个命令");
             System.exit(0);
@@ -51,13 +51,13 @@ class argparse{
             for(int i=1;i<args.length;i++){
                 switch (args[i]){
                     case "-log":
-                        logpath=args[++i];
+                        logPath=args[++i];
                         break;
                     case "-out":
-                        outpath=args[++i];
+                        outPath=args[++i];
                         break;
                     case "-date":
-                        enddate=args[++i];
+                        endDate=args[++i];
                         break;
                     case "-type":
                         while(i+1<args.length && !args[i+1].startsWith("-")){
