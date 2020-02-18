@@ -1,6 +1,7 @@
 /*
 	疫情统计代码
 	编辑者：lhf
+	参数举例：list -date 2020-01-22 -log E:\log\ -out E:\log\output.txt 
 */
 
 #include <iostream>
@@ -284,6 +285,7 @@ const vector<string> &rs,ofstream &out)
 			}
 		}
 	}
+	out<<"// 该文档并非真实数据，仅供测试使用\n";
 }
 
 
