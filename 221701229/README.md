@@ -1,9 +1,9 @@
 # InfectStatistic-221701229
 ##疫情统计
 
-> [作业要求链接](https://edu.cnblogs.com/campus/fzu/2020SpringW/homework/10281)
+ [作业要求链接](https://edu.cnblogs.com/campus/fzu/2020SpringW/homework/10281)
 
-> [博客链接](https://www.cnblogs.com/sup187/p/12260807.html)
+ [博客链接](https://www.cnblogs.com/sup187/p/12260807.html)
 > ##
 1、日志文本
 假设有一家统计网站每天都会提供一个对应的日志文本，记录国内各省前一天的感染情况，如它2020-01-23发布的日志文本可能长这样：
