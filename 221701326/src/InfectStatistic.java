@@ -11,55 +11,24 @@ import java.util.regex.*;
 
 public class InfectStatistic {
 	public static void main(String args[]) throws IOException {
-			/*try {
-				@SuppressWarnings("resource")
-				BufferedReader in = new BufferedReader(new FileReader("D:\\log.txt"));
-	            String str=null;
-	            int i=0;
-	            int conditions[][]=new int [32][4];
-	            state status=new state(); 
-	            while ((str = in.readLine())!=null) {
-	            	if(str.startsWith("//"))
-	            		break;
-	                i++;	                
-	                System.out.print("第"+i+"行："+str+"\n");	 
-	                       		
-	        		status.conditions(str, conditions);
-	        		
-	        		}
-	            for(int k=0;k<32;k++) {
-        			for(int j=0;j<4;j++)
-        				System.out.print(conditions[k][j]+" ");
-        			System.out.println("\n");     
-	               
-	            }                 			    			            		            	     
-					
-					File file = new File("D:\\output.txt");
-					if(!file.exists()){
-						file.createNewFile();
-					}
-					FileWriter fileWriter = new FileWriter(file.getAbsoluteFile());
-					BufferedWriter bw = new BufferedWriter(fileWriter);
-					for(int k=0;k<32;k++) {
-	        				String write=status.provinces[k]+" 感染患者"+conditions[k][0]+"人"+
-	        						         " 疑似患者"+conditions[k][1]+"人"+" 治愈"+conditions[k][2]+"人"+
-	        						         " 死亡"+conditions[k][3]+"人"+"\n";
-	        			    bw.write(write);
-					}
-					bw.write("//该文档并非真实数据，仅供测试使用");
-					bw.close();
-					System.out.println("finish");
-			    } catch (IOException e) {
-			        e.printStackTrace();
-			    }*/
-		 String basepath="D:\\log";
-		 String targetfile="D:\\output.txt";
-		 int conditions [][]=new int [32][4];
-		 fileoperate fo=new fileoperate();
-		 fo.findFile(new File(basepath), conditions);
-		 fo.writetoFile(new File(targetfile), conditions);
-				 
-		
+		int conditions [][]=new int [32][4];
+		commandline cmd=new commandline();
+		fileoperate fo=new fileoperate();
+		if (args.length == 0) {
+			System.out.println("主函数参数不为空");
+			return;
+		}
+		if (cmd.isList(args[0])) {
+			cmd.analysisCommand(args);// 命令分析并存储
+			 fo.findFile(new File(cmd.logpath), conditions);
+			 fo.writetoFile(new File(cmd.targetpath), conditions);
+			return;
+		} else {
+			System.out
+				.println("只接受list命令 相关参数：-log -out ");
+			System.out.println("暂不支持其他命令");
+			return;
+		}	 	 				 
 	}
 }
 
@@ -101,8 +70,7 @@ class state{
 	}
 	public  void  conditions(String textstr,int conditions[][]) {
 		String strs[]=textstr.split("\\s+");
-		int choice=judgetxtline(textstr);	
-		
+		int choice=judgetxtline(textstr);		
 		int province1 = 0,province2 = 0;
 		switch(choice) {
 		case 1:{	
@@ -313,49 +281,21 @@ class fileoperate{
 	    state status=new state();
 	    for(File temp : dirFiles){
 	    //查找指定的文件
-	    if(temp.isFile() && temp.getAbsolutePath().endsWith(".txt") ){
-	    System.out.println(temp.isFile() + " " + temp.getAbsolutePath());
+	    if(temp.isFile() && temp.getAbsolutePath().endsWith(".txt") ){    
 	    BufferedReader in = new BufferedReader(new FileReader(temp));
-        String str=null;
-        int i=0;         
+        String str=null;                
         while ((str = in.readLine())!=null) {
         	if(str.startsWith("//"))
-        		break;
-            i++;	                
-            System.out.print("第"+i+"行："+str+"\n");	                  		
-    		status.conditions(str, conditions);   		
+        		break;                           	                  		
+    		status.conditions(str, conditions); 
+    		System.out.println(temp.isFile() + " " + temp.getAbsolutePath());
     		}
         in.close();
         }
     }
 }
 	
-	/**
-	　　* @param file　要读取的文件对象
-	　　* @return 返回文件的内容
-	　　* */
-	/*public static void readFileContent(File file,int conditions[][]) throws IOException{
-	    FileReader fr = new FileReader(file);
-	    BufferedReader br = new BufferedReader(fr);
-	    StringBuffer sb = new StringBuffer();
-	    while(br.ready()){
-    	sb.append(br.readLine());
-	    }
-	    System.out.println(sb.toString());
-	    return sb.toString();
-		BufferedReader in = new BufferedReader(new FileReader("D:\\log.txt"));
-        String str=null;
-        int i=0;
-        state status=new state(); 
-        while ((str = in.readLine())!=null) {
-        	if(str.startsWith("//"))
-        		break;
-            i++;	                
-            System.out.print("第"+i+"行："+str+"\n");	                  		
-    		status.conditions(str, conditions);   		
-    		}
-        in.close();
-}*/	
+
     public  void writetoFile(File file,int conditions[][]) throws IOException{
     	state status=new state();
     	int count=0;
@@ -383,14 +323,77 @@ class fileoperate{
 		System.out.println("finish");
 	}
 	
-   /* public static void main(String[] args) {
-	    try {
-	    	int conditions [][]=new int [32][4];
-            findFile(new File(basePath),conditions);
-            writetoFile(new File(targetfile),conditions);
-	        } catch (IOException e) {	
-              // TODO Auto-generated catch block
-                e.printStackTrace();
-                }
-}*/
+
+}
+class commandline {
+	String logpath;
+	String targetpath;
+	void analysisCommand(String[] args) {
+		// TODO Auto-generated method stub
+		int test = 0;
+		for (int i = 1; i < args.length; i++) {
+			if (isCommand(args[i])) {
+				test = 0;
+				if (isLog(args[i])) {
+					test = 1;
+				} else if (isOut(args[i])) {
+					test = 2;
+				} 
+			} else {
+				if (test == 1) {
+					File file = new File(args[i]);
+					if (!file.exists()) {
+						System.out.println("-log文件名错误，'" + args[i] + "'文件不存在");
+						System.exit(0);
+					}
+					if (!file.isDirectory()) {
+						System.out.println("-log文件名错误，'" + args[i] + "'不是一个目录文件");
+						System.exit(0);
+					}
+					logpath=args[i];
+				} 
+				else if (test == 2) {
+					File file = new File(args[i]);
+					if (!file.exists()) {
+						try {
+							file.createNewFile();// 创建日志文件
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							System.out.println(
+								"-out错误，'" + args[i] + "'不存在并且无法创建该文件");
+							e.printStackTrace();
+						}
+					}
+					targetpath=args[i];
+				}
+			}
+		}
+}
+	boolean isCommand(String args) {
+		if (args.charAt(0) == '-') {
+			return true;
+		}
+		return false;
+	}
+
+	boolean isList(String args) {
+		if (args.equals("list")) {
+			return true;
+		}
+		return false;
+	}
+
+	boolean isLog(String args) {
+		if (args.equals("-log")) {
+			return true;
+		}
+		return false;
+	}
+
+	boolean isOut(String args) {
+		if (args.equals("-out")) {
+			return true;
+		}
+		return false;
+	}
 }
