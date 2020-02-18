@@ -47,13 +47,13 @@ class InfectStatistic {
 	public InfectStatistic(int argc, String[] argv) {
 		this.argc = argc;
 		this.argv = argv;
-		flg = new boolean[PROVIENCE_NUM + 1];
+		flg = new boolean[PROVIENCE_NUM];
+		cmd4type = new Vector<String>();
+		cmd4provience = new Vector<String>();
 		ip = new int[PROVIENCE_NUM];
 		sp = new int[PROVIENCE_NUM];
 		cure = new int[PROVIENCE_NUM];
 		dead = new int[PROVIENCE_NUM];
-		cmd4type = new Vector<String>();
-		cmd4provience = new Vector<String>();
 		provience_array = new String[] {"全国","安徽","北京","重庆","福建","甘肃","广东","广西",
 				"贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古",
 				"宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
@@ -76,7 +76,7 @@ class InfectStatistic {
 				}
 			}
 		} else {
-			flg[PROVIENCE_NUM] = true;
+			flg[0] = true;
 		}
 		
 	}
