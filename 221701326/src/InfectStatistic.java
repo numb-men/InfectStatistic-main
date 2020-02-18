@@ -1,14 +1,29 @@
+/**
+ * InfectStatistic
+ * TODO
+ *
+ * @author puzb
+ * @version 1.0
+ * @since 2020-2-10
+ */
+
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.regex.*;
 
-
-
+/**
+ * TODO
+ *
+ * @author puzb
+ * @version 1.0
+ * @since 2020-2-10
+ * @param int conditions[][] 存储各个省感染患者 疑似患者 治愈 死亡 人数
+ */
 public class InfectStatistic {
 	public static void main(String args[]) throws IOException {
 		int conditions [][]=new int [32][4];
@@ -20,31 +35,41 @@ public class InfectStatistic {
 		}
 		if (cmd.isList(args[0])) {
 			cmd.analysisCommand(args);// 命令分析并存储
-			 fo.findFile(new File(cmd.logpath), conditions);
-			 fo.writetoFile(new File(cmd.targetpath), conditions);
+			 fo.findFile(new File(cmd.logpath),conditions);
+			 fo.writetoFile(new File(cmd.targetpath),conditions);
 			return;
 		} else {
-			System.out
-				.println("只接受list命令 相关参数：-log -out ");
+			System.out.println("只接受list命令 相关参数：-log -out ");
 			System.out.println("暂不支持其他命令");
 			return;
 		}	 	 				 
 	}
 }
-
+/**
+ * TODO
+ *
+ * @author puzb
+ * @version 1.0
+ * @since 2020-2-10
+ * @param String provinces[]存储省份
+ * @param pattern1-pattern8 文本格式
+ */
 class state{
 	 String provinces[]= {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南",
                           "黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东",
         	              "山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
-	 String pattern1= ".*新增 感染患者.*";
-	 String pattern2= ".*新增 疑似患者.*";
+	 String pattern1=".*新增 感染患者.*";
+	 String pattern2=".*新增 疑似患者.*";
 	 String pattern3=".*治愈.*";
 	 String pattern4=".*死亡.*";	
-	 String pattern5= ".*感染患者 流入.*";
-	 String pattern6= ".*疑似患者 流入.*";	
+	 String pattern5=".*感染患者 流入.*";
+	 String pattern6=".*疑似患者 流入.*";	
 	 String pattern7=".*疑似患者 确诊感染.*";
 	 String pattern8=".*排除 疑似患者.*";
-	public  int judgetxtline(String textstr) {	
+	 
+	 
+	
+	public  int judgetxtline(String textstr) {	 //判断文本当前行的文本格式
 		int type=0;
 		if(Pattern.matches(pattern1,textstr)) 
 		    type=1;
@@ -68,7 +93,7 @@ class state{
 		}
 		return type;
 	}
-	public  void  conditions(String textstr,int conditions[][]) {
+	public  void  conditions(String textstr,int conditions[][]) { //对每行的文本数据进行人数操作
 		String strs[]=textstr.split("\\s+");
 		int choice=judgetxtline(textstr);		
 		int province1 = 0,province2 = 0;
@@ -274,28 +299,43 @@ class state{
 	}   
 
 }
+
+
+/**
+ * fileoperate
+ *
+ * @author puzb
+ * @version 1.0
+ * @since 2020-2-10
+
+ */
+
+
 class fileoperate{
-	
+	//findfile方法
+	//读取参数路径，遍历该路径下的所有text文件
+	//readline读取每行
 	public void findFile(File dir,int conditions[][]) throws IOException{
 	    File[] dirFiles = dir.listFiles();
 	    state status=new state();
 	    for(File temp : dirFiles){
 	    //查找指定的文件
-	    if(temp.isFile() && temp.getAbsolutePath().endsWith(".txt") ){    
-	    BufferedReader in = new BufferedReader(new FileReader(temp));
-        String str=null;                
-        while ((str = in.readLine())!=null) {
-        	if(str.startsWith("//"))
-        		break;                           	                  		
-    		status.conditions(str, conditions); 
-    		System.out.println(temp.isFile() + " " + temp.getAbsolutePath());
-    		}
-        in.close();
+	    if(temp.isFile() && temp.getAbsolutePath().endsWith(".txt") ){   
+	    	System.out.println(temp.isFile() + " " + temp.getAbsolutePath());
+	        BufferedReader in = new BufferedReader(new FileReader(temp));
+            String str=null;                
+            while ((str = in.readLine())!=null) {
+        	    if(str.startsWith("//"))
+        		    break;              
+    		    status.conditions(str, conditions);   		
+    	    	}
+            in.close();
+            }
         }
-    }
 }
 	
-
+    //writetoFile方法
+	//将conditions[][]里的数据 格式化输出到指定文本
     public  void writetoFile(File file,int conditions[][]) throws IOException{
     	state status=new state();
     	int count=0;
@@ -325,9 +365,20 @@ class fileoperate{
 	
 
 }
+/**
+ * commandline
+ *
+ * @author puzb
+ * @version 1.0
+ * @since 2020-2-10
+ * @param String logpath 日志文本路径
+ * @param String targetpath output文本路径
+ */
 class commandline {
 	String logpath;
 	String targetpath;
+	//analysisCommand方法
+	//对参数进行判断分析保存
 	void analysisCommand(String[] args) {
 		// TODO Auto-generated method stub
 		int test = 0;
