@@ -67,6 +67,9 @@ public class Lib {
      */
     public final static String REMOVED = "排除";
 
+    /**
+     * DATE_REGEX
+     */
     private final static String DATE_REGEX = "(19|20)[0-9][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])";
 
 
@@ -115,7 +118,15 @@ public class Lib {
     }
 }
 
+/**
+ * Argument exception
+ */
 class ArgumentException extends Exception {
+    /**
+     * Argument exception
+     *
+     * @param message message
+     */
     ArgumentException(String message) {
         super(message);
     }
@@ -132,7 +143,13 @@ class ArgumentException extends Exception {
     }
 }
 
+/**
+ * Log format exception
+ */
 class LogFormatException extends Exception {
+    /**
+     * Log format exception
+     */
     LogFormatException() {
         super();
     }
@@ -326,9 +343,20 @@ class RecordContainer {
      */
     Record wholeCountry;
 
+    /**
+     * Patient types
+     */
     ArrayList<String> patientTypes;
+    /**
+     * Province list
+     */
     HashSet<String> provinceList;
 
+    /**
+     * Record container
+     *
+     * @param argumentContainer argument container
+     */
     public RecordContainer(ArgumentContainer argumentContainer) {
         patientTypes = argumentContainer.patientTypes;
         provinceList = argumentContainer.provinceList;
@@ -354,6 +382,7 @@ class RecordContainer {
      * @param province    province
      * @param patientType patient type
      * @param number      number
+     * @throws LogFormatException log format exception
      */
     private void updateRecord(String province, String patientType, int number) throws LogFormatException {
         switch (patientType) {
@@ -385,6 +414,7 @@ class RecordContainer {
      * @param operation   operation
      * @param patientType patient type
      * @param number      number
+     * @throws LogFormatException log format exception
      */
     private void updateRecord(String province, String operation, String patientType, int number) throws LogFormatException {
         switch (patientType) {
@@ -423,6 +453,7 @@ class RecordContainer {
      * @param patientType patient type
      * @param number      number
      * @param provinceIn  province in
+     * @throws LogFormatException log format exception
      */
     private void updateRecord(String provinceOut, String patientType, int number, String provinceIn) throws LogFormatException {
         switch (patientType) {
@@ -444,6 +475,7 @@ class RecordContainer {
      * 将一行log分割成字符串数组，根据数组元素的个数（3、4、5）分别调用不同的updateRecord方法
      *
      * @param line line
+     * @throws LogFormatException log format exception
      */
     void parseSingleLine(String line) throws LogFormatException {
         //将一行log用空格分隔成字符串数组
@@ -550,6 +582,7 @@ class ArgumentHandler {
      *
      * @param originalArguments original arguments
      * @return the argument container
+     * @throws ArgumentException argument exception
      */
     public static ArgumentContainer getArgumentContainer(String[] originalArguments) throws ArgumentException {
         //处理list命令的异常
@@ -606,6 +639,7 @@ class ArgumentHandler {
      *
      * @param originalArguments original arguments
      * @return the date
+     * @throws ArgumentException argument exception
      */
     private static String getDate(String[] originalArguments) throws ArgumentException {
 
@@ -628,6 +662,7 @@ class ArgumentHandler {
      *
      * @param originalArguments original arguments
      * @return the patient type
+     * @throws ArgumentException argument exception
      */
     private static ArrayList<String> getPatientType(String[] originalArguments) throws ArgumentException {
 
@@ -718,6 +753,9 @@ class ArgumentContainer {
      * Patient types
      */
     ArrayList<String> patientTypes;
+    /**
+     * Patient type registered
+     */
     boolean patientTypeRegistered = false;
     /**
      * Province
@@ -785,6 +823,7 @@ class FileTools {
      * File tools
      *
      * @param arguments arguments
+     * @throws ArgumentException argument exception
      */
     public FileTools(ArgumentContainer arguments) throws ArgumentException {
 
@@ -819,6 +858,7 @@ class FileTools {
      * Init file list with date limit *
      *
      * @param newestFileName newest file name
+     * @throws ArgumentException argument exception
      */
     private void initFileListWithDateLimit(String newestFileName) throws ArgumentException {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(logPath))) {

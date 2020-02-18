@@ -8,6 +8,7 @@
 out
 /lib
 gen
+result
 *Test.java
 221701223/src/test
 .idea/
