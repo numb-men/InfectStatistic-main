@@ -20,9 +20,9 @@
 #####如：$ java InfectStatistic list -date 2020-01-22 -log D:/log/ -out D:/output.txt
 #####会读取D:/log/下的所有日志，然后处理日志和命令，在D盘下生成ouput.txt文件列出2020-01-22全国和所有省的情况（全国总是排第一个，别的省按拼音先后排序）
 ***
-作业链接
+[作业链接](https://github.com/maysky-blue/InfectStatistic-main.git)
 -
 ***
-博客链接
+[博客链接](https://www.cnblogs.com/chenyi-maysky/p/12327405.html)
 -
 ***
