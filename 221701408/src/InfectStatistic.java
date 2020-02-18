@@ -120,9 +120,9 @@ class FileHandle {
     public int[] DeadPatients=new int[31];
     public boolean[] IsVisited = new boolean[31];
     public int AllIP=0,AllSP=0,AllCP=0,AllDP=0;
-    private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";/* 中文正则*/
+    //private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";/* 中文正则*/
     ArrayList<String> FileNames = new ArrayList<>();//日志名字
-    ArrayList<String> FileContent = new ArrayList<>();//日志内容
+    //ArrayList<String> FileContent = new ArrayList<>();//日志内容
     public FileHandle(){
 
     }
@@ -162,20 +162,22 @@ class FileHandle {
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     if (!line.startsWith("//"))
-                        FileContent.add(line);//指定日期前所有日志全输入filecontent
+                        //FileContent.add(line);//指定日期前所有日志全输入filecontent
+                        FileProcessing(line);
                 }
             }
         } catch (Exception e) {
 
         }
-        //GetStatistic(FileContent);
+
         return 1;
     }
     /*
      * 文本处理
      *
      */
-    public void textProcessing(String string) {
+    public void FileProcessing(String line) {
+
         String pattern1 = "(\\S+) 新增 感染患者 (\\d+)人";
         String pattern2 = "(\\S+) 新增 疑似患者 (\\d+)人";
         String pattern3 = "(\\S+) 治愈 (\\d+)人";
@@ -184,14 +186,14 @@ class FileHandle {
         String pattern6 = "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
         String pattern7 = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
         String pattern8 = "(\\S+) 排除 疑似患者 (\\d+)人";
-        boolean isMatch1 = Pattern.matches(pattern1, string);
-        boolean isMatch2 = Pattern.matches(pattern2, string);
-        boolean isMatch3 = Pattern.matches(pattern3, string);
-        boolean isMatch4 = Pattern.matches(pattern4, string);
-        boolean isMatch5 = Pattern.matches(pattern5, string);
-        boolean isMatch6 = Pattern.matches(pattern6, string);
-        boolean isMatch7 = Pattern.matches(pattern7, string);
-        boolean isMatch8 = Pattern.matches(pattern8, string);
+        boolean isMatch1 = Pattern.matches(pattern1, line);
+        boolean isMatch2 = Pattern.matches(pattern2, line);
+        boolean isMatch3 = Pattern.matches(pattern3, line);
+        boolean isMatch4 = Pattern.matches(pattern4, line);
+        boolean isMatch5 = Pattern.matches(pattern5, line);
+        boolean isMatch6 = Pattern.matches(pattern6, line);
+        boolean isMatch7 = Pattern.matches(pattern7, line);
+        boolean isMatch8 = Pattern.matches(pattern8, line);
 
         if(isMatch1) //新增 感染患者处理
             //addIP(string);
@@ -209,6 +211,8 @@ class FileHandle {
             //diagnosisSP(string);
         else if(isMatch8) //排除 疑似患者处理
             //removeSP(string);
+        }
+
     }
 
 }
