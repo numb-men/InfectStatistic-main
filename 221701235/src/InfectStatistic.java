@@ -28,8 +28,8 @@ public class InfectStatistic {
         //记录输入的日期
         String dateInput = "";
         //所有类型
-        String  allType [] = {"ip","sp","cure","dead"};
-        //类型出现次数是否大于0，是就输出相关，若无大于0就全部输出。
+        String  allType [] = {"感染患者","疑似患者","治愈","死亡"};
+        //类型出现的次序
         int typeAppear [] = {0,0,0,0};
         //可能出现的所有省(包括全国) 31+1
         String allProvince [] = {"全国","安徽","北京","重庆","福建","甘肃","广东","广西",
@@ -77,22 +77,27 @@ public class InfectStatistic {
             if (args[i].equals("-type")) {
                 typeCount++;
                 int j = i+1;
+                int order = 1;
                 //从"-type"下一处开始往后寻找参数
                 while (true) {
                     if (j == args.length || args[j].charAt(0) == '-') {
                         break;
                     }
                     if (args[j].equals("ip")) {
-                        typeAppear[0] = 1;
+                        typeAppear[0] = order;
+                        order++;
                     }
                     if (args[j].equals("sp")) {
-                        typeAppear[1] = 1;
+                        typeAppear[1] = order;
+                        order++;
                     }
                     if (args[j].equals("cure")) {
-                        typeAppear[2] = 1;
+                        typeAppear[2] = order;
+                        order++;
                     }
                     if (args[j].equals("dead")) {
-                        typeAppear[3] = 1;
+                        typeAppear[3] = order;
+                        order++;
                     }
                     j++;
                 }
@@ -326,16 +331,23 @@ public class InfectStatistic {
                             if (provinceReade[i] == 1) {
                                 if (typeCount == 0) {
                                     fileContent += allProvince[i];
-                                    fileContent += " 感染患者" + totalTable[i][0] + "人" ;
-                                    fileContent += " 疑似患者" + totalTable[i][1] + "人" ;
-                                    fileContent += " 治愈" + totalTable[i][2] + "人" ;
-                                    fileContent += " 死亡" + totalTable[i][3] + "人";
+                                    for (int n = 0; n < 4; n++) {
+                                        fileContent += " " + allType[n] + totalTable[i][n] + "人" ;
+                                    }
+                                    
                                 } else {
                                     fileContent += allProvince[i];
-                                    if (typeAppear[0] == 1) fileContent += " 感染患者" + totalTable[i][0] + "人" ;
-                                    if (typeAppear[1] == 1) fileContent += " 疑似患者" + totalTable[i][1] + "人" ;
-                                    if (typeAppear[2] == 1) fileContent += " 治愈" + totalTable[i][2] + "人" ;
-                                    if (typeAppear[3] == 1) fileContent += " 死亡" + totalTable[i][3] + "人";
+                                    for (int m = 0; m < 4; m++) {
+                                        int k = m + 1;
+                                        for (int n = 0; n < 4; n++) {
+                                            if (typeAppear[n] == k) {
+                                                fileContent += " " + allType[n] + totalTable[i][n] + "人" ;
+                                                break;
+                                            } else {
+                                                if (n == 4) break;
+                                            }
+                                        }
+                                    }
                                 }
                                 
                                 fileContent += "\n";
@@ -358,16 +370,22 @@ public class InfectStatistic {
                             if (provinceAppear[i] == 1) {
                                 if (typeCount == 0) {
                                     fileContent += allProvince[i];
-                                    fileContent += " 感染患者" + totalTable[i][0] + "人" ;
-                                    fileContent += " 疑似患者" + totalTable[i][1] + "人" ;
-                                    fileContent += " 治愈" + totalTable[i][2] + "人" ;
-                                    fileContent += " 死亡" + totalTable[i][3] + "人";
+                                    for (int n = 0; n < 4; n++) {
+                                        fileContent += " " + allType[n] + totalTable[i][n] + "人" ;
+                                    }
                                 } else {
                                     fileContent += allProvince[i];
-                                    if (typeAppear[0] == 1) fileContent += " 感染患者" + totalTable[i][0] + "人" ;
-                                    if (typeAppear[1] == 1) fileContent += " 疑似患者" + totalTable[i][1] + "人" ;
-                                    if (typeAppear[2] == 1) fileContent += " 治愈" + totalTable[i][2] + "人" ;
-                                    if (typeAppear[3] == 1) fileContent += " 死亡" + totalTable[i][3] + "人";
+                                    for (int m = 0; m < 4; m++) {
+                                        int k = m + 1;
+                                        for (int n = 0; n < 4; n++) {
+                                            if (typeAppear[n] == k) {
+                                                fileContent += " " + allType[n] + totalTable[i][n] + "人" ;
+                                                break;
+                                            } else {
+                                                if (n == 4) break;
+                                            }
+                                        }
+                                    }
                                 }
                                 
                                 fileContent += "\n";
