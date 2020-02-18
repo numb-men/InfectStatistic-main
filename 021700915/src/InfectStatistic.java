@@ -1,9 +1,10 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,8 +33,8 @@ class Province {
 
 public class InfectStatistic {
 	
-	static String log="D:log";
-	static String out="D:a.txt";
+	static String log="";
+	static String out="";
 	static String date="2020-03-03";
 	static StringBuffer type=new StringBuffer("");
 	static StringBuffer province=new StringBuffer("");
@@ -47,9 +48,8 @@ public class InfectStatistic {
 	
 	public static void main(String[] args) throws IOException {
 		provinceInit();
-//		readCommand(args);
-//		readFile(log);
-//		System.out.println(provincelist[0].name);
+		readCommand(args);
+		readFile(log);
 		outputFile(out,type,province);
     }
 	
@@ -80,18 +80,19 @@ public class InfectStatistic {
 			if(args[i].equals("-province")) {
 				province.append(args[++i]);
 				for(int j=i;j<args.length-1;j++) {
-					if(!(args[i].equals("-log")||args[i].equals("-out")||args[i].equals("-date"))) {
+					if(!(args[i].equals("-log")||args[i].equals("-out")
+					||args[i].equals("-date")||args[i].equals("-type"))) {
 						i++;
 						province.append(" "+args[i]);
 					}
 				}
 			}
 		}
-		System.out.println(log);
-		System.out.println(out);
-		System.out.println(date);
-		System.out.println(type);
-		System.out.println(province);
+//		System.out.println(log);
+//		System.out.println(out);
+//		System.out.println(date);
+//		System.out.println(type);
+//		System.out.println(province);
 	}
 	
 	public static void readFile(String path) throws IOException {
@@ -261,6 +262,7 @@ public class InfectStatistic {
 		provincelist[0].status=true;
 	}
 	static void outputFile(String out,StringBuffer stype,StringBuffer sprovince) throws IOException {
+		
 		boolean ipstatus=false;
 		boolean spstatus=false;
 		boolean curestatus=false;
@@ -268,6 +270,7 @@ public class InfectStatistic {
 		boolean provincestatus=false;
 		String[] type=stype.toString().split(" ");
 		String[] province=sprovince.toString().split(" ");
+		
 		if(stype.toString().equals("")) {
 			ipstatus=true;
 			spstatus=true;
@@ -282,19 +285,70 @@ public class InfectStatistic {
 				if(type[i].equals("dead")) deadstatus=true;
 			}
 		}
+		
 		if(sprovince.toString().equals("")) provincestatus=false;
 		else {
 			for(int i=0;i<province.length;i++) {
 				provincelist[findProvince(province[i])].showstatus=true;
 			}
 		}
+		
 		File f=new File(out);
         FileOutputStream fop=new FileOutputStream(f);
         OutputStreamWriter writer=new OutputStreamWriter(fop, "UTF-8");
-		for(int i=0;i<provinces.length;i++) {
-			
-	        writer.append("hello");
-	        writer.close();
+        
+//        for(int i=0;i<provinces.length;i++) {
+//        	if(provincelist[i].status==true) {
+//        		writer.append(provincelist[i].name+" ");
+//            	writer.append("感染患者"+provincelist[i].ip+"人 ");
+//            	writer.append("疑似患者"+provincelist[i].sp+"人 ");
+//            	writer.append("治愈"+provincelist[i].cure+"人 ");
+//            	writer.append("死亡"+provincelist[i].dead+"人");
+//            	writer.append("\n");
+//        	}
+//        }
+//        writer.close();
+        
+		if(provincestatus=true) {
+			for(int i=0;i<provinces.length;i++) {
+				if(provincelist[i].status==true) {
+					writer.append(provincelist[i].name+" ");
+					if(ipstatus==true) writer.append("感染患者"+provincelist[i].ip+"人 ");
+					if(spstatus==true) writer.append("疑似患者"+provincelist[i].sp+"人 ");
+					if(curestatus==true) writer.append("治愈"+provincelist[i].cure+"人 ");
+					if(deadstatus==true) writer.append("死亡"+provincelist[i].dead+"人");
+					writer.append("\n");
+				}
+			}
+			writer.append("// 该文档并非真实数据，仅供测试使用");
+			writer.flush();
 		}
+		else {
+			for(int i=0;i<province.length;i++) {
+				provincelist[findProvince(province[i])].showstatus=true;
+			}
+			for(int i=0;i<provinces.length;i++) {
+				if(provincelist[i].showstatus==true) {
+					writer.append(provincelist[i].name+" ");
+					if(ipstatus==true) writer.append("感染患者"+provincelist[i].ip+"人 ");
+					if(spstatus==true) writer.append("疑似患者"+provincelist[i].sp+"人 ");
+					if(curestatus==true) writer.append("治愈"+provincelist[i].cure+"人 ");
+					if(deadstatus==true) writer.append("死亡"+provincelist[i].dead+"人");
+					writer.append("\n");
+				}
+			}
+			writer.append("// 该文档并非真实数据，仅供测试使用");
+			writer.flush();
+		}
+		fop.close();
+		FileInputStream fip=new FileInputStream(f);
+	    InputStreamReader reader=new InputStreamReader(fip, "UTF-8");
+	    StringBuffer sb=new StringBuffer();
+	        while(reader.ready()) {
+	            sb.append((char) reader.read());
+	        }
+	        System.out.println(sb.toString());
+	        reader.close();
+	        fip.close();
 	}
 }
