@@ -117,6 +117,7 @@ class CommandInvoker{
         if(match)
         {
             //执行命令
+            cm.setArguments();
             System.out.println("执行命令:"+cmd.getCmdName());
             cmd.execute(cm.getArguments());
         }
@@ -152,7 +153,7 @@ class list implements Command{
     private String out=null;  //输出文件路径
     private ArrayList type=null;  //指定的输出类型
     private ArrayList<String> province=null;  //指定的省份
-    private Set<String> allprovinceSet;//日志中出现的省份
+    private HashSet<String> allprovinceSet;//日志中出现的省份
     private ArrayList<String> allprovinceList;//日志中出现的省份
     private String date=null;
     private int[] all={0,0,0,0};
@@ -279,7 +280,7 @@ class list implements Command{
 
         if(province!=null)
         {
-            allprovinceSet=infected.keySet();
+            allprovinceSet=new HashSet<>(infected.keySet());
             allprovinceSet.addAll(suspected.keySet());
             allprovinceSet.addAll(cured.keySet());
             allprovinceSet.addAll(died.keySet());
@@ -289,17 +290,17 @@ class list implements Command{
             {
                 allinfectd+=val;
             }
-            for(Integer val:infected.values())
+            for(Integer val:suspected.values())
             {
-                allinfectd+=val;
+                allsuspected+=val;
             }
-            for(Integer val:infected.values())
+            for(Integer val:cured.values())
             {
-                allinfectd+=val;
+                allcured+=val;
             }
-            for(Integer val:infected.values())
+            for(Integer val:died.values())
             {
-                allinfectd+=val;
+                alldead+=val;
             }
 
         }
@@ -312,23 +313,20 @@ class list implements Command{
             boolean sp=false;
             boolean cure=false;
             boolean dead=false;
-           type.remove(0);
-           Iterator typeit=type.iterator();
-           String typ=null;
-           //筛选有设定的选项
-           while (typeit.hasNext())
+
+           for(Object typ:type)
            {
-               typ=(String)typeit.next();
-               if("ip".equals(typ))
+
+               if("ip".equals((String) typ))
                {
                    ip=true;
-               }else if("sp".equals(typ))
+               }else if("sp".equals((String) typ))
                {
                    sp=true;
-               }else if("cure".equals(typ))
+               }else if("cure".equals((String) typ))
                {
                    cure=true;
-               }else if("dead".equals(typ))
+               }else if("dead".equals((String) typ))
                {
                    dead=true;
                }
@@ -341,6 +339,7 @@ class list implements Command{
                String prov=null;
            if(null!=province)
            {
+
                province.sort(comp); //排序
                for (String value : province) {
                    prov = value;
@@ -365,7 +364,11 @@ class list implements Command{
            {
 
                //计算全国
-                fw.write("全国 "+"感染患者 "+allinfectd+" 疑似患者 "+allsuspected+" 治愈 "+allcured+" 死亡"+"\n");
+               if (ip) fw.write("全国感染患者" + allinfectd + "人 ");
+               if (sp) fw.write("疑似患者" + allsuspected + "人 ");
+               if (cure) fw.write("治愈" + allcured + "人 ");
+               if (dead) fw.write("死亡" + alldead + "人");
+               fw.write('\n');
                //给所有省份按给定的顺序排序
                allprovinceList.sort(comp);
                for (String value : allprovinceList) {
@@ -654,7 +657,7 @@ class PatientsCure extends MyPatterns{
     {
         String[] str=line.split("\\s+");
         int change=Integer.parseInt(str[2].substring(0,str[2].indexOf("人")));//治愈人数
-        infected.put(str[0],infected.get(str[0])-change); //感染人数相应减少
+        infected.put(str[0],infected.get(str[0])-change); System.out.println(str[0]+"感染减少"+change);
         if(cured.containsKey(str[0]))
         {
             cured.put(str[0],cured.get(str[0])+change);
@@ -709,7 +712,6 @@ class SuspectedExclude extends MyPatterns{
         String[] str=line.split("\\s+");
         int change=Integer.parseInt(str[3].substring(0,str[3].indexOf("人")));
         suspected.put(str[0],suspected.get(str[0])-change);
-        System.out.println(str[0]+"排除疑似"+change);
     }
 
     public String getReg()
