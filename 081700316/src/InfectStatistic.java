@@ -312,11 +312,13 @@ public class InfectStatistic {
      */
     static class CmdArgs{
         String[] args;
-
         CmdArgs(String[] args_str){
             args = args_str;
         }
 
+        /**
+         * 命令行识别
+         */
         boolean extractCmd() {
             if(!args[0].equals("list")) {
                 System.out.println("错误命令：开头非list");
@@ -358,14 +360,6 @@ public class InfectStatistic {
                         }
                         i = m;
                         break;
-//                    case "-province":
-//                        m = getProvince(i+1);
-//                        if (m == -1) {
-//                            System.out.println("错误命令：省份错误");
-//                            return false;
-//                        }
-//                        i = m;
-//                        break;
                     default:
                         System.out.println("错误命令！");
                         return false;
@@ -459,25 +453,6 @@ public class InfectStatistic {
                 return -1;
             return (i - 1);
         }
-
-//        /**
-//         * 获取省份
-//         */
-//        int getProvince(int i) {
-//            //int m = i;
-//                //while (i < args.length) {
-//                    for (int j = 0; j < province_str.length; j++) {
-//                        if (args[i].equals(province_str[j])) {
-//                            province_status[j] = 0;
-//                            //i++;
-//                            break;
-//                        }
-//                    }
-//                //}
-//            //if (m == i)
-//            //    return -1;
-//            return i;
-//        }
     }
 
 
@@ -486,10 +461,10 @@ public class InfectStatistic {
             System.out.println("未输入参数!");
             return;
         }
-        InfectStatistic infect = new InfectStatistic();
+
         InfectStatistic.CmdArgs cmd_args = new CmdArgs(args);
-        boolean b = cmd_args.extractCmd();
-        if(!b) {
+        boolean bool = cmd_args.extractCmd();
+        if(!bool) {
             return;
         }
         InfectStatistic.ioFile file_stream = new ioFile();
