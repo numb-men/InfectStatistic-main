@@ -12,12 +12,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class InfectStatistic {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         ArgParse arg=new ArgParse(args);
         if(arg.command.equals("list"))
             new List(arg);
@@ -30,14 +32,25 @@ class List{
     int[][] provStat;
     TreeSet<String> logFiles;
 
-    List(ArgParse arg) {
+    List(ArgParse arg) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date endDate = sdf.parse(arg.endDate);
+        String strDate,strPath;
         for (int i = 0; i < provList.length; i++) {
             map.put(provList[i], i);
         }
         logFiles = getFile(arg.logPath);
         provStat = new int[31][4];
         Iterator i = logFiles.iterator();
-        applyLog(i.next().toString());
+        while(i.hasNext()){
+            strPath=i.next().toString();
+            strDate=strPath.substring(strPath.lastIndexOf("\\")+1,strPath.lastIndexOf("\\")+11);
+            if(sdf.parse(strDate).compareTo(endDate)<=0) {
+                applyLog(strPath);
+            }
+            else
+                break;
+        }
         write();
     }
 
@@ -83,7 +96,6 @@ class List{
             prov1=arr[0];
             num= Integer.parseInt(arr[3].substring(0,arr[3].length()-1));
             provStat[map.get(prov1)][1]+=num;
-            System.out.println("1"+prov1+num);
         }
 
         pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 新增 感染患者 \\d+[人]");
@@ -93,7 +105,6 @@ class List{
             prov1=arr[0];
             num= Integer.parseInt(arr[3].substring(0,arr[3].length()-1));
             provStat[map.get(prov1)][0]+=num;
-            System.out.println("2"+prov1+num);
         }
 
         pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 感染患者 流入 [\\u4e00-\\u9fa5]{2,3} \\d+[人]");
@@ -105,7 +116,6 @@ class List{
             num= Integer.parseInt(arr[4].substring(0,arr[4].length()-1));
             provStat[map.get(prov1)][0]-=num;
             provStat[map.get(prov2)][0]+=num;
-            System.out.println("3"+prov1+prov2+num);
         }
 
         pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 疑似患者 流入 [\\u4e00-\\u9fa5]{2,3} \\d+[人]");
@@ -117,7 +127,6 @@ class List{
             num= Integer.parseInt(arr[4].substring(0,arr[4].length()-1));
             provStat[map.get(prov1)][1]-=num;
             provStat[map.get(prov2)][1]+=num;
-            System.out.println("4"+prov1+prov2+num);
         }
 
         pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 死亡 \\d+[人]");
@@ -128,7 +137,6 @@ class List{
             num= Integer.parseInt(arr[2].substring(0,arr[2].length()-1));
             provStat[map.get(prov1)][3]+=num;
             provStat[map.get(prov1)][0]-=num;
-            System.out.println("5"+prov1+num);
         }
 
         pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 治愈 \\d+[人]");
@@ -139,7 +147,6 @@ class List{
             num= Integer.parseInt(arr[2].substring(0,arr[2].length()-1));
             provStat[map.get(prov1)][2]+=num;
             provStat[map.get(prov1)][0]-=num;
-            System.out.println("6"+prov1+num);
         }
 
         pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 疑似患者 确诊感染 \\d+[人]");
@@ -150,7 +157,6 @@ class List{
             num= Integer.parseInt(arr[3].substring(0,arr[3].length()-1));
             provStat[map.get(prov1)][1]-=num;
             provStat[map.get(prov1)][0]+=num;
-            System.out.println("7"+prov1+num);
         }
 
         pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 排除 疑似患者 \\d+[人]");
@@ -160,7 +166,6 @@ class List{
             prov1=arr[0];
             num= Integer.parseInt(arr[3].substring(0,arr[3].length()-1));
             provStat[map.get(prov1)][1]-=num;
-            System.out.println("8"+prov1+num);
         }
     }
     //写文件，传入人员类型、省份，无返回
