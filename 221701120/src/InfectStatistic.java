@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.junit.internal.matchers.StacktracePrintingMatcher;
 
 /**
  * InfectStatistic
@@ -93,6 +94,7 @@ class CommandParser{
                     }
                     i++;
                 }
+                
                 if (typeList.size() == 4) {
                     hasType = false;
                 }
@@ -127,11 +129,13 @@ class CommandRun{
     
     public CommandRun(CommandParser parser) {
         if (!parser.dateString.equals("")) {
-            hasDate = true;
-        }else if (parser.hasType) {
-            hasType = true;
-        }else if (parser.hasProvince) {
-            hasProvince = true;
+            this.hasDate = true;
+        }
+        if (parser.hasType) {
+            this.hasType = true;
+        }
+        if (parser.hasProvince) {
+            this.hasProvince = true;
         }
         this.parser = parser;
     }
@@ -140,7 +144,6 @@ class CommandRun{
         InfectedMap map = new InfectedMap();
         FileInputUtils reader = new FileInputUtils();
         FileOutputUtils writer = new FileOutputUtils();
-        
         
         try {
             reader.parseFile(parser.srcPath, map, hasDate, parser.dateString);
@@ -189,6 +192,7 @@ class FileInputUtils{
         String absolutePath = "";
         if (hasDate) {
             absolutePath = dirPath + dateString + ".log.txt";
+
         }
         String lastFile = filesName.get(filesName.size() - 1);
         int len = lastFile.length();
