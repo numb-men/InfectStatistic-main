@@ -92,6 +92,8 @@ public class InfectStatistic {
                     try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), StandardCharsets.UTF_8))) {
                         String line;
                         while ((line = in.readLine()) != null) {
+                            if(line.equals("// 该文档并非真实数据，仅供测试使用"))
+                                break;
                             LogLine.FileProcessing(line);
                         }
                     }
