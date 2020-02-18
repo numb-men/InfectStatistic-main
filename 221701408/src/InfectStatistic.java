@@ -363,7 +363,6 @@ class FileHandle {
                         fileWritter.write(result);
                     }
                 }
-
                 for(int j=0;j<31;j++){
                     for(int i=0;i<provinceparam.size();i++){
                         if(provinces[j].equals(provinceparam.get(i))){
@@ -371,14 +370,50 @@ class FileHandle {
                                     InfectedPatients[j], SuspectedPatients[j], CurePatients[j], DeadPatients[j])+ "\n";
                             fileWritter.write(st);
                         }
-
                     }
-
                 }
 
             }
             if((provinceparam.size() == 0)&&(typeparam.size() > 0)){
-                //fileWritter.write(content);
+                String result="全国"+" ";
+                for (int i = 0; i < typeparam.size(); i++) {
+                    if (typeparam.get(i).equals("ip")) {
+                        result +="感染患者" + AllIP + "人 ";
+                    }
+                    if (typeparam.get(i).equals("sp")) {
+                        result +="疑似患者" + AllSP + "人 ";
+                    }
+                    if (typeparam.get(i).equals("cure")) {
+                        result +="治愈" + AllCURE + "人 ";
+                    }
+                    if (typeparam.get(i).equals("dead")) {
+                        result +="死亡" + AllDEAD + "人 ";
+                    }
+                }
+                result+="\n";
+                fileWritter.write(result);
+                for (int i = 0; i < 31; i++) {
+                    if (IsProvince[i]) {
+                        String st =provinces[i]+" ";
+                        for (int j = 0; j< typeparam.size(); j++) {
+                            if (typeparam.get(j).equals("ip")) {
+                                st +="感染患者" + InfectedPatients[i] + "人 ";
+                            }
+                            if (typeparam.get(j).equals("sp")) {
+                                st +="疑似患者" + SuspectedPatients[i] + "人 ";
+                            }
+                            if (typeparam.get(j).equals("cure")) {
+                                st +="治愈" + CurePatients[i] + "人 ";
+                            }
+                            if (typeparam.get(j).equals("dead")) {
+                                st +="死亡" + DeadPatients[i] + "人 ";
+                            }
+
+                        }
+                        st +="\n";
+                        fileWritter.write(st);
+                    }
+                }
             }
             if((provinceparam.size() > 0)&&(typeparam.size() > 0)){
                 //fileWritter.write(content);
