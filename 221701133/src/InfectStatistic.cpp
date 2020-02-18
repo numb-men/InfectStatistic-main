@@ -76,6 +76,8 @@ bool performOptns(const string &fLocation,const string &timeP,StatisticList &sLi
 int matchRegion(const string &s);
 //将int类型转换为字符串
 string itos(int num); 
+//查看是否是规定的命令行参数之一
+bool isPosibleP(const string &s);
 
 
 //地区类
@@ -325,15 +327,20 @@ bool dealParameters(int ac,char* arv[])
 			timeP=arv[i+1];
 		}
 		else if(arv[i]==TYPE){
-			noErorOcured=dealMulParameter(i,ac,arv,typeParas,pnum);
+			noErorOcured=dealMulParameter(i+1,ac,arv,typeParas,pnum);
+			//cout<<"typeParas的数据数："<<typeParas.size()<<endl;//测试排错用 
 		}
 		else if(arv[i]==OUT){
 			noErorOcured=dealOutParameters(out,arv[i+1]);
 		}
 		else if(arv[i]==PROVINCE){
-			noErorOcured=dealMulParameter(i,ac,arv,proParas,pnum);
+			noErorOcured=dealMulParameter(i+1,ac,arv,proParas,pnum);
+			//cout<<"proParas的数据数："<<proParas.size()<<endl;//测试排错用
+			//cout<<"pnum："<<pnum<<endl;//测试排错用
 		}
 		else{//与已设命令行参数不匹配，有错误存在
+			cout<<"命令行参数有出错:";
+			cout<<arv[i]<<endl;
 			noErorOcured=false;
 		}
 		if(!noErorOcured)
@@ -345,6 +352,20 @@ bool dealParameters(int ac,char* arv[])
 	sList.selectiveOutput(typeParas,proParas,out);//输出操作 
 	out.close();
 	return true;
+}
+
+
+//查看是否是规定的命令行参数之一
+bool isPosibleP(const string &s)
+{
+	for(int j=0;j<POSIBLEPNUM;j++)
+	{
+		if(s==POSIBLEP[j]) 
+		{
+			return true;
+		}
+	} 
+	return false;
 }
 
 
@@ -367,27 +388,22 @@ int &forward)
 		{
 			cout<<"处理多参数时出现死循环\n";
 			return false;
-			break; 
 		}
-		if(nowLocation>=max)
+		if(nowLocation>=max){break;}
+		else
 		{
-			break;
-		}
-		else{
-			for(int j=0;j<POSIBLEPNUM;j++)
+			if(!isPosibleP(arv[nowLocation]))
 			{
-				if(arv[nowLocation]==POSIBLEP[j])//说明本次参数记录结束了 
-				{
-					break;
-				}
-				else
-				{
-					paras.push_back(arv[nowLocation]);
-					forward++;
-				}
-			} 
+				paras.push_back(arv[nowLocation]);
+				forward++;
+			}
+			else//说明本次参数记录结束了
+			{
+				break;
+			}
 		}
 	}
+	forward--;
 	return true;
 }
 
