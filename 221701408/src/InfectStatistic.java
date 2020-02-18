@@ -416,7 +416,53 @@ class FileHandle {
                 }
             }
             if((provinceparam.size() > 0)&&(typeparam.size() > 0)){
-                //fileWritter.write(content);
+                for(int i=0;i<provinceparam.size();i++){
+                    if(provinceparam.get(i).equals("全国")){
+                        String result="全国" + " ";
+                        for (int j = 0; j < typeparam.size(); j++) {
+                            if (typeparam.get(j).equals("ip")) {
+                                result +="感染患者" + AllIP + "人 ";
+                            }
+                            if (typeparam.get(j).equals("sp")) {
+                                result +="疑似患者" + AllSP + "人 ";
+                            }
+                            if (typeparam.get(j).equals("cure")) {
+                                result +="治愈" + AllCURE + "人 ";
+                            }
+                            if (typeparam.get(j).equals("dead")) {
+                                result +="死亡" + AllDEAD + "人 ";
+                            }
+                        }
+                        result+="\n";
+                        fileWritter.write(result);
+                    }
+                }
+
+                for(int j=0;j<31;j++){
+                    for(int i=0;i<provinceparam.size();i++){
+                        if(provinces[j].equals(provinceparam.get(i))){
+                            String st =provinces[j] +" ";
+                            for (int z = 0; z< typeparam.size(); z++) {
+                                if (typeparam.get(z).equals("ip")) {
+                                    st +="感染患者" + InfectedPatients[j] + "人 ";
+                                }
+                                if (typeparam.get(z).equals("sp")) {
+                                    st +="疑似患者" + SuspectedPatients[j] + "人 ";
+                                }
+                                if (typeparam.get(z).equals("cure")) {
+                                    st +="治愈" + CurePatients[j] + "人 ";
+                                }
+                                if (typeparam.get(z).equals("dead")) {
+                                    st +="死亡" + DeadPatients[j] + "人 ";
+                                }
+
+                            }
+                            st +="\n";
+                            fileWritter.write(st);
+                        }
+                    }
+                }
+
             }
             fileWritter.write("//该文档并非真实数据，仅供测试使用\n");
 
