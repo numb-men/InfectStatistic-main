@@ -3,15 +3,12 @@
  * TODO
  *
  * @author 邵研
- * @version 0.1
+ * @version 1.0
  * @since xxx
  */
 import sun.reflect.generics.tree.Tree;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -20,7 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class InfectStatistic {
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) throws ParseException, IOException {
         ArgParse arg=new ArgParse(args);
         if(arg.command.equals("list"))
             new List(arg);
@@ -34,7 +31,7 @@ class List{
     int[] all;
     TreeSet<String> logFiles;
 
-    List(ArgParse arg) throws ParseException {
+    List(ArgParse arg) throws ParseException, IOException {
 
         for (int i = 0; i < provList.length; i++) {
             map.put(provList[i], i);
@@ -66,7 +63,7 @@ class List{
             else
                 break;
         }
-        write(arg.arr,arg.aprovs);
+        write(arg.outPath,arg.arr,arg.aprovs);
     }
 
     //得到log文件列表，传入目录，返回文件路径集合
@@ -183,8 +180,8 @@ class List{
             provStat[map.get(prov1)][1]-=num;
         }
     }
-    //写文件，传入人员类型、省份，无返回
-    void write(String[] arr,String[] provs){
+    //写文件，传入输出文件路径，人员类型、省份，无返回
+    void write(String outPath,String[] arr,String[] provs) throws IOException {
         String str="";
         for(int i=0;i<31;i++)
         {
@@ -193,24 +190,32 @@ class List{
             all[2]+=provStat[i][2];
             all[3]+=provStat[i][3];
         }
+
+
+        File file = new File(outPath);
+        file.createNewFile();
+        BufferedWriter out = new BufferedWriter(new FileWriter(file));
         if( provs.length==0||Arrays.asList(provs).contains("全国")) {
             str = "全国";
-            if (arr.length==0||Arrays.asList(arr).contains("ip")) str = str + "  确诊" + all[0] + "人";
-            if (arr.length==0||Arrays.asList(arr).contains("sp")) str = str + "  疑似" + all[1] + "人";
-            if (arr.length==0||Arrays.asList(arr).contains("cure")) str = str + "  治愈" + all[2] + "人";
-            if (arr.length==0||Arrays.asList(arr).contains("dead")) str = str + "  死亡" + all[3] + "人";
-            System.out.println(str);
+            if (arr.length==0||Arrays.asList(arr).contains("ip")) str = str + " 感染" + all[0] + "人";
+            if (arr.length==0||Arrays.asList(arr).contains("sp")) str = str + " 疑似" + all[1] + "人";
+            if (arr.length==0||Arrays.asList(arr).contains("cure")) str = str + " 治愈" + all[2] + "人";
+            if (arr.length==0||Arrays.asList(arr).contains("dead")) str = str + " 死亡" + all[3] + "人";
+            out.write(str+"\n");
         }
         for(int i=0;i<31;i++){
             if( provs.length==0||Arrays.asList(provs).contains(provList[i])) {
                 str = provList[i];
-                if (arr.length==0||Arrays.asList(arr).contains("ip")) str = str + "  确诊" + provStat[i][0] + "人";
+                if (arr.length==0||Arrays.asList(arr).contains("ip")) str = str + "  感染" + provStat[i][0] + "人";
                 if (arr.length==0||Arrays.asList(arr).contains("sp")) str = str + "  疑似" + provStat[i][1] + "人";
                 if (arr.length==0||Arrays.asList(arr).contains("cure")) str = str + "  治愈" + provStat[i][2] + "人";
                 if (arr.length==0||Arrays.asList(arr).contains("dead")) str = str + "  死亡" + provStat[i][3] + "人";
-                System.out.println(str);
+                out.write(str+"\n");
             }
         }
+        out.write("// 该文档并非真实数据，仅供测试使用");
+        out.flush();
+        out.close();
     }
 }
 
