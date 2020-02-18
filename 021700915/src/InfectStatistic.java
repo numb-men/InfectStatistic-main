@@ -13,13 +13,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class Province {
-	String name;
-	int ip;
-	int sp;
-	int cure;
-	int dead;
-	boolean status;
-	boolean showstatus;
+	String name;  //省份名称
+	int ip;  //感染人数
+	int sp;  //疑似人数人数
+	int cure;  //治愈人数
+	int dead;  //死亡人数
+	boolean status;  //省份是否在日志文件出现过
+	boolean showstatus;  //-province参数中是否包含该省份
 	Province(String name) {
 		this.name=name;
 		this.ip=0;
@@ -88,14 +88,9 @@ public class InfectStatistic {
 				}
 			}
 		}
-//		System.out.println(log);
-//		System.out.println(out);
-//		System.out.println(date);
-//		System.out.println(type);
-//		System.out.println(province);
 	}
 	
-	public static void readFile(String path) throws IOException {
+	static void readFile(String path) throws IOException {
 		File file=new File(path);
         if (file.exists()) {
             File[] files=file.listFiles();
