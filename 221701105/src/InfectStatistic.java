@@ -83,6 +83,84 @@ class List{
             prov1=arr[0];
             num= Integer.parseInt(arr[3].substring(0,arr[3].length()-1));
             provStat[map.get(prov1)][1]+=num;
+            System.out.println("1"+prov1+num);
+        }
+
+        pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 新增 感染患者 \\d+[人]");
+        matcher = pattern.matcher(data);
+        while (matcher.find()) {
+            String [] arr = matcher.group().split("\\s+");
+            prov1=arr[0];
+            num= Integer.parseInt(arr[3].substring(0,arr[3].length()-1));
+            provStat[map.get(prov1)][0]+=num;
+            System.out.println("2"+prov1+num);
+        }
+
+        pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 感染患者 流入 [\\u4e00-\\u9fa5]{2,3} \\d+[人]");
+        matcher = pattern.matcher(data);
+        while (matcher.find()) {
+            String [] arr = matcher.group().split("\\s+");
+            prov1=arr[0];
+            prov2=arr[3];
+            num= Integer.parseInt(arr[4].substring(0,arr[4].length()-1));
+            provStat[map.get(prov1)][0]-=num;
+            provStat[map.get(prov2)][0]+=num;
+            System.out.println("3"+prov1+prov2+num);
+        }
+
+        pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 疑似患者 流入 [\\u4e00-\\u9fa5]{2,3} \\d+[人]");
+        matcher = pattern.matcher(data);
+        while (matcher.find()) {
+            String [] arr = matcher.group().split("\\s+");
+            prov1=arr[0];
+            prov2=arr[3];
+            num= Integer.parseInt(arr[4].substring(0,arr[4].length()-1));
+            provStat[map.get(prov1)][1]-=num;
+            provStat[map.get(prov2)][1]+=num;
+            System.out.println("4"+prov1+prov2+num);
+        }
+
+        pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 死亡 \\d+[人]");
+        matcher = pattern.matcher(data);
+        while (matcher.find()) {
+            String [] arr = matcher.group().split("\\s+");
+            prov1=arr[0];
+            num= Integer.parseInt(arr[2].substring(0,arr[2].length()-1));
+            provStat[map.get(prov1)][3]+=num;
+            provStat[map.get(prov1)][0]-=num;
+            System.out.println("5"+prov1+num);
+        }
+
+        pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 治愈 \\d+[人]");
+        matcher = pattern.matcher(data);
+        while (matcher.find()) {
+            String [] arr = matcher.group().split("\\s+");
+            prov1=arr[0];
+            num= Integer.parseInt(arr[2].substring(0,arr[2].length()-1));
+            provStat[map.get(prov1)][2]+=num;
+            provStat[map.get(prov1)][0]-=num;
+            System.out.println("6"+prov1+num);
+        }
+
+        pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 疑似患者 确诊感染 \\d+[人]");
+        matcher = pattern.matcher(data);
+        while (matcher.find()) {
+            String [] arr = matcher.group().split("\\s+");
+            prov1=arr[0];
+            num= Integer.parseInt(arr[3].substring(0,arr[3].length()-1));
+            provStat[map.get(prov1)][1]-=num;
+            provStat[map.get(prov1)][0]+=num;
+            System.out.println("7"+prov1+num);
+        }
+
+        pattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,3} 排除 疑似患者 \\d+[人]");
+        matcher = pattern.matcher(data);
+        while (matcher.find()) {
+            String [] arr = matcher.group().split("\\s+");
+            prov1=arr[0];
+            num= Integer.parseInt(arr[3].substring(0,arr[3].length()-1));
+            provStat[map.get(prov1)][1]-=num;
+            System.out.println("8"+prov1+num);
         }
     }
     //写文件，传入人员类型、省份，无返回
