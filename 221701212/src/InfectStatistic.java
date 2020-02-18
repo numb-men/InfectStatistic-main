@@ -22,8 +22,7 @@ import java.util.Vector;
  */
 class InfectStatistic {
 	int argc;
-	int total_ip, total_sp, total_cure, total_death;
-	int PROVIENCE_NUM = 31;
+	int PROVIENCE_NUM = 32;
 	int[] ip;
 	int[] sp;
 	int[] cure;
@@ -55,16 +54,14 @@ class InfectStatistic {
 		death = new int[PROVIENCE_NUM];
 		cmd4type = new Vector<String>();
 		cmd4provience = new Vector<String>();
-		provience_array = new String[] {"安徽","北京","重庆","福建","甘肃","广东","广西","贵州",
-				"海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古",
+		provience_array = new String[] {"全国","安徽","北京","重庆","福建","甘肃","广东","广西",
+				"贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古",
 				"宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
 		
 		for(int i = 0; i < PROVIENCE_NUM; i++) {
 			flg[i] = false;
 			ip[i] = sp[i] = cure[i] = death[i] = 0;
 		}
-		flg[PROVIENCE_NUM] = false;
-		total_ip = total_sp = total_cure = total_death = 0;
 	}
 	
 	public void initArgument() {
@@ -74,9 +71,6 @@ class InfectStatistic {
 				for(int i = 0; i < PROVIENCE_NUM; i++) {
 					if(cmd4provience.get(j).equals(provience_array[i])) {
 						flg[i] = true;
-						break;
-					} else if(cmd4provience.get(j).equals("全国")) {
-						flg[PROVIENCE_NUM] = true;
 						break;
 					}
 				}
@@ -304,11 +298,11 @@ class InfectStatistic {
 	}
 
 	public void calculate_total() {
-		for(int i = 0; i < PROVIENCE_NUM; i++) {
-			total_cure += cure[i];
-			total_death += death[i];
-			total_ip += ip[i];
-			total_sp += sp[i];
+		for(int i = 1; i < PROVIENCE_NUM; i++) {
+			ip[0] += ip[i];
+			sp[0] += sp[i];
+			cure[0] += cure[i];
+			death[0] += death[i];
 		}
 	}
 
@@ -318,12 +312,7 @@ class InfectStatistic {
 	    OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream, "utf-8");
 	    BufferedWriter writer = new BufferedWriter(outputWriter);
 	    String out;
-	    
-	    if(flg[PROVIENCE_NUM] == true) {
-	    	out = "全国 感染患者" + total_ip + "人 疑似患者" + total_sp + "人 治愈" + 
-						total_cure + "人 死亡" + total_death + "人";
-	    	writer.write("out");
-	    }   
+
 	    for(int i = 0; i < PROVIENCE_NUM; i++) {
 	    	if(flg[i] == true) {
 	    		writer.write("\n");
