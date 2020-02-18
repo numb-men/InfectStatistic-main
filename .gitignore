@@ -9,6 +9,7 @@ out
 /lib
 gen
 result
+.puml
 *Test.java
 221701223/src/test
 .idea/
