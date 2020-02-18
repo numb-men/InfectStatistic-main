@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.io.FileOutputStream;  
+import java.io.PrintStream;
 /**
  * InfectStatistic
  *
@@ -70,8 +72,7 @@ class InfectStatistic {
 				now[index++]=th[i];
 			}else break;
 		}
-		if(index!=0) return now;
-		else return ori;
+		return now;
     }
     //对输入的命令进行处理分解
     public static void AnalysisCommand(String[] command) {
@@ -115,7 +116,7 @@ class CoronavirusDetail{
 			"四川"  ,"天津"  ,"西藏"  ,"新疆"  ,"云南"  ,"浙江" 
 	};
 	String[] TypeStr={
-		"ip" , "sp", "curu", "dead"
+		"ip" , "sp", "cure", "dead"
 	};
 	String[] TypeStrCn={
 			"感染患者" , "疑似患者", "治愈", "死亡"
@@ -140,22 +141,26 @@ class CoronavirusDetail{
 	}
 	
 	//输出所需信息
-    public void Printdetail(String log,String out,String date,String [] type,String [] province) {
+    public void Printdetail(String log,String out,String date,String [] type,String [] province) throws IOException {
+    	File file=new File(out);
+    	if(!file.exists()) {
+    		file.createNewFile();
+    	}
+    	PrintStream ps=new PrintStream(out);
+    	System.setOut(ps);
     	for(int i=1;i<32;i++) 
     		for(int j=0;j<4;j++) detail[0][j]+=detail[i][j];
     	for(int i=0;i<ProvinceStr.length;i++) {
         	for(int j=0;j<province.length;j++) if(ProvinceStr[i].equals(province[j])){
         		System.out.print(ProvinceStr[i]+" ");
         		Integer pronum=(Integer) ProvinceMap.get(ProvinceStr[i]);
-        		//System.out.print(pronum);
         		int typecnt=0;
         		for(int k=0;k<4;k++) {
-        			//System.out.println(type[k]);
         			if(type[k].equals($nothing)) typecnt++;
         		}
         		for(int k=0;k<4;k++) if((typecnt==4)||(!type[k].equals($nothing))){
-        			//System.out.println((Integer) TypeMap.get(type[j]));
-        			System.out.print(TypeStrCn[(Integer) TypeMap.get(type[k])]+detail[pronum][(Integer) TypeMap.get(type[k])]+" ");
+        			Integer tynum=(Integer) TypeMap.get(type[k]);
+        			System.out.print(TypeStrCn[tynum]+detail[pronum][tynum]+" ");
         		}
         		System.out.println();
         	}
@@ -169,10 +174,8 @@ class CoronavirusDetail{
 	    File file = new File(path);
 	    File[] tempList = file.listFiles();
 	    
-	    
 	    for (int i = 0; i < tempList.length; i++) {
 	        if (tempList[i].isFile()) {
-//	              System.out.println("文 件：" + tempList[i]);
 	            files.add(tempList[i].toString());
 	        }
 	        //得到当前日期之前的文件名
@@ -215,11 +218,7 @@ class CoronavirusDetail{
 		String matString_8="(\\S+) 排除 疑似患者 (\\d+)人";
 		String splitString_8=" 排除 疑似患者 |人";
 		
-//		System.out.println(txtString.matches(matString_3));
-//		String [] reStrings=txtString.split(splitString_3);
-//		for(int i=0;i<reStrings.length;i++) {
-//			System.out.println(reStrings[i]);
-//		}
+
 		
 		for(int i=0;i<4;i++) {
 			//System.out.println(type[i]);
