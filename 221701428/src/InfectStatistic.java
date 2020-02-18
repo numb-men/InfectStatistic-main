@@ -21,13 +21,13 @@ import java.util.Set;
  * TODO
  *
  * @author xxx
- * @version 1.0
+ * @version 2.0
  */
 class InfectStatistic {
 
-    /** 保存args的值 */
+    /** 保存args中的参数值 */
     public static String[] paramenterStrings;
-    /** index为参数名在哈希表中的位置，值为参数名在paramenterStrings中的下标，不存在参数名则为-1 */
+    /** index为参数名在哈希表中的位置 */
     public static int[]  indexOfParamenterStrings = {-1, -1, -1, -1, -1, -1};
     /** log 日志文件目录 */
     public static String inputDir = "";
@@ -96,13 +96,13 @@ class InfectStatistic {
         public long getDead() {
             return dead;
         }
-        /** description：打印全部统计的数据结果 */
+        /** description：默认的数据统计结果 */
         public String getDefaultResult() {
             String resString = provinceName + ' ' + "感染患者" + ip + "人" + ' ' + "疑似患者" + sp + "人" + ' ' + "治愈" + cure
                     + "人" + ' ' + "死亡" + dead + "人";
             return resString;
         }
-        /** description：按指定参数值要求给出结果 */
+        /** description：按参数值指定要求的数据统计结果 */
         public String getAppointResult(String[] paramentersOfType) {
             String resString = provinceName + ' ';
             for(int i=0; paramentersOfType[i] != null; i++) {
@@ -127,15 +127,13 @@ class InfectStatistic {
         }
     }
 
-    /** description:关于操作单行字符串（从文本读入的一行数据）的一些方法 */
+    /** description:读取文本中的单行数据 */
     static class OperateLineString {
 
-        /** description：获取一个字符串前的数字 */
-        public static int getNumber(String string) {
+        /** description：获取字符串中对应参数值 */
+        public static int getValue(String string) {
             for (int i=0,len=string.length(); i < len; i++) {
-                if (Character.isDigit(string.charAt(i))) {
-                    ;
-                } else {
+                if (!Character.isDigit(string.charAt(i))) {
                     string = string.substring(0, i);
                     break;
                 }
@@ -143,7 +141,7 @@ class InfectStatistic {
 
             return Integer.parseInt(string);
         }
-        /** description：得到要修改数据的省份名称modifyProvinceName */
+        /** description：获取需修改数据的省份名称 */
         public static String[] getProvince(String[] strings) {
             int len = strings.length;
             String[] resStrings = new String[2];
@@ -156,7 +154,7 @@ class InfectStatistic {
             }
             return resStrings;
         }
-        /**  description：判断操作类型 */
+        /**  description：根据命令行中参数判断操作类型 */
         public static int getOperateType(String[] strings) {
             int len = strings.length;
             int res = 0;
@@ -187,27 +185,19 @@ class InfectStatistic {
             }
             return res;
         }
-        /** description：简单判断该行是注释行，仅判断前两个字符"//"，如果是空行也跳过 */
-        public static boolean isNotes(String lineString) {
-            if (lineString.equals("") || lineString.charAt(0) == '/' && lineString.charAt(1) == '/') {
-                return true;
-            } else {
-                return false;
-            }
-        }
     }
 
-    /** description:获取输入文件的相关方法 */
+    /** description:获取输入文件 */
     static class GetFile {
 
-        /** description：取得所有log中最大的日期 */
+        /** description：获取log目录中最大的日期 */
         public static Date getMaxDate(String[] nameStrings) {
             SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd");
             String maxDateString = "2020-01-01";
             Date maxDate = null;
             try {
                 maxDate = dFormat.parse(maxDateString);
-                Date tmpDate = new Date();  //性能优化点1
+                Date tmpDate = new Date();
                 for(int i=0, len=nameStrings.length; i<len; i++) {
                     tmpDate = dFormat.parse(nameStrings[i]);
                     if(tmpDate.getTime() >= maxDate.getTime()) {
@@ -215,7 +205,6 @@ class InfectStatistic {
                     }
                 }
             } catch (Exception e) {
-                // TODO: handle exception
                 e.printStackTrace();
             }
             return maxDate;
@@ -225,16 +214,16 @@ class InfectStatistic {
             SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd");
             File file = new File(path);
             String[] nameStrings = file.list(); //取得所有文件名称
-            Date maxDate = getMaxDate(nameStrings); //得到所有文件名称的最大日期
+            Date maxDate = getMaxDate(nameStrings);
             if (nameStrings != null) {
                 try {
                     String dateOfFileNameString = "";
                     Date dateOfFileNameDate = new Date();
-                    Date limitDate = dFormat.parse(date);   //指定日期--统计到哪一天
+                    Date limitDate = dFormat.parse(date);
                     for (int i = 0, len=nameStrings.length; i < len; i++) {
                         dateOfFileNameString = nameStrings[i].substring(0, nameStrings[i].indexOf('.')); //取得文件名中的日期****-**-**
-                        dateOfFileNameDate = dFormat.parse(dateOfFileNameString);  //将string日期转为date格式
-                        limitDate = dFormat.parse(date);   //指定日期--统计到哪一天
+                        dateOfFileNameDate = dFormat.parse(dateOfFileNameString);
+                        limitDate = dFormat.parse(date);
                         if(limitDate.getTime() > maxDate.getTime()) {
                             System.out.println("日期超出范围");
                         }else {
@@ -244,12 +233,11 @@ class InfectStatistic {
                         }
                     }
                 } catch (Exception e) {
-                    // TODO: handle exception
                     e.printStackTrace();
                 }
             }
         }
-        /** description：取得指定目录中最大的日期 */
+        /** description：获取指定目录中最大的日期 */
         public static String getMaxDateInputDir(String inputDir) {
             SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd");
             File file = new File(inputDir);
@@ -260,17 +248,17 @@ class InfectStatistic {
 
     }
 
-    /** description:涉及到Province的一些方法 */
+    /** description:各省份数据统计 */
     static class ProviceStatistic {
 
         /** description：统计省份数据 */
         public static void StatisticProvince(String lineString, Hashtable<String, Province> hashtable) {
             InfectStatistic infectStatistic = new InfectStatistic();
             String[] afterSplitStrings = lineString.split(" ");
-            int numAfterSplit = afterSplitStrings.length; // 切割后数量
-            int number = OperateLineString.getNumber(afterSplitStrings[numAfterSplit - 1]); // 一行信息中涉及的人数
-            String[] provinceNameStrings = OperateLineString.getProvince(afterSplitStrings);   //需要修改数据的省份名称
-            int operateType = OperateLineString.getOperateType(afterSplitStrings);    // 获得操作类型
+            int numAfterSplit = afterSplitStrings.length;
+            int number = OperateLineString.getValue(afterSplitStrings[numAfterSplit - 1]);
+            String[] provinceNameStrings = OperateLineString.getProvince(afterSplitStrings);
+            int operateType = OperateLineString.getOperateType(afterSplitStrings);
 
             if (provinceNameStrings[1].equals("")) { // 只有一个省
                 if (!hashtable.containsKey(provinceNameStrings[0])) { // 哈希表中没有该省
@@ -321,7 +309,7 @@ class InfectStatistic {
             }
             hashtable.put("全国", Nation);
         }
-        /** description：根据省份和操作类型ID执行相应的操作 */
+        /** description：根据省份和操作类型统计相应数据 */
         public static void execOperate(Province province1, Province province2, int operateType, int number) {
             switch (operateType) {
                 case 1:
@@ -359,12 +347,12 @@ class InfectStatistic {
         }
     }
 
-    /** description:输出文件的相关方法 */
+    /** description:输出文件 */
     static class OutPutFile {
 
         /** description:遍历哈希表，打印所有信息 */
         public static void writeInfoOfHashtale(Hashtable<String, Province> hashtable,OutputStreamWriter outputStreamWriter) {
-            List<Map.Entry<String,Province>> list = OperateHashTable.sortByHead(hashtable);       //排序
+            List<Map.Entry<String,Province>> list = OperateHashTable.sortByHead(hashtable);
             Province province = null;
             try {
                 for (Map.Entry entry : list){
@@ -379,7 +367,6 @@ class InfectStatistic {
                     }
                 }
             } catch (Exception e) {
-                // TODO: handle exception
                 e.printStackTrace();
             }
         }
@@ -419,13 +406,12 @@ class InfectStatistic {
                 }
 
             } catch (Exception e) {
-                // TODO: handle exception
                 e.printStackTrace();
             }
         }
     }
 
-    /** description:有关哈希表的一些操作 */
+    /** description:哈希表操作 */
     static class OperateHashTable {
 
         /** description：HashMap根据value获取key */
@@ -486,8 +472,13 @@ class InfectStatistic {
             });
             return list;
         }
-        /** description：初始化参数名哈希表 */
-        public static HashMap<Integer, String> initParamentHashMap() {
+    }
+
+    /** description:命令行相关操作 */
+    static class StartCMD {
+
+        /** description:解析命令行中参数名和参数值并初始化相应参数 */
+        public static void separateCMDInit(String[] args) {
             HashMap<Integer, String> paramenterHashMap = new HashMap<Integer, String>(5);
             paramenterHashMap.put(1, "-log");
             paramenterHashMap.put(2, "-out");
@@ -495,51 +486,32 @@ class InfectStatistic {
             paramenterHashMap.put(4, "-type");
             paramenterHashMap.put(5, "-province");
 
-            return paramenterHashMap;
-        }
-    }
-
-    /** description:命令行操作、变量初始化、执行统计并写入 */
-    static class StartCMD {
-
-        /** description:分离参数名和参数值 */
-        public static void separateCMD(String[] args) {
-            HashMap<Integer, String> paramenterHashMap = OperateHashTable.initParamentHashMap(); //一个包含所有参数名的哈希表
-
-            paramenterStrings = new String[args.length - 1];   //存储传入的参数名、参数值
+            paramenterStrings = new String[args.length - 1];
             for(int i=1,len=args.length; i<len; i++) {
                 paramenterStrings[i-1] = args[i];
             }
-
             int key;
-            //找到参数名，并记录位置
             for(int i=0,len=paramenterStrings.length; i<len; i++) {
                 key = OperateHashTable.getKey(paramenterHashMap, paramenterStrings[i]);
-                if( key != -1) {   //是参数名
-                    indexOfParamenterStrings[key] = i;   //key对应的参数名在patamenterStrings的i下标位置,值为-1则代表无此参数名
+                if( key != -1) {
+                    indexOfParamenterStrings[key] = i;
                 }
             }
-        }
-        /** description:初始化输入路径、输出路径、截至日期、type参数值、province参数值 */
-        public static void init() {
-            HashMap<Integer, String> paramenterHashMap = OperateHashTable.initParamentHashMap(); //一个包含所有参数名的哈希表
             paramentersOfType[0] = "null";
             paramentersOfProvince[0] = "null";
 
-            //接着处理每个参数名对应的参数值
             for(int i=1; i<=5; i++) {
-                if(indexOfParamenterStrings[i] != -1) { //传入了该参数名
+                if(indexOfParamenterStrings[i] != -1) {
                     if(i == 1) {    // -log
-                        inputDir = paramenterStrings[indexOfParamenterStrings[i] + 1];    //配置log路径
-                        toDateString = GetFile.getMaxDateInputDir(inputDir); // 得到输入路径后立即初始化指定的日期
+                        inputDir = paramenterStrings[indexOfParamenterStrings[i] + 1];
+                        toDateString = GetFile.getMaxDateInputDir(inputDir);
                     }else if(i == 2) {  //-out
-                        outputFileNameString = paramenterStrings[indexOfParamenterStrings[i] + 1];      //配置输出文件路径
+                        outputFileNameString = paramenterStrings[indexOfParamenterStrings[i] + 1];
                     }else if(i == 3) {  //-date
-                        toDateString = paramenterStrings[indexOfParamenterStrings[i] + 1];  //统计到哪一天
-                    }else if(i == 4) {  //-type 可能会有多个参数
-                        String[] paramenterValues = new String[20]; //记录所有参数值
+                        toDateString = paramenterStrings[indexOfParamenterStrings[i] + 1];
+                    }else if(i == 4) {  //-type
+                        String[] paramenterValues = new String[20];
                         int cnt = 0;
-                        //取得参数值，直到找到下一个参数名时停止，   当前参数名 参数值1 参数值2 ... 下一个参数名
                         for(int j = indexOfParamenterStrings[i]+1;
                             j<paramenterStrings.length && OperateHashTable.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) {
                             paramenterValues[cnt++] = paramenterStrings[j];
@@ -548,7 +520,6 @@ class InfectStatistic {
                     }else if(i == 5) {  //-province
                         String[] paramenterValues = new String[20];
                         int cnt = 0;
-                        //取得参数值，直到找到下一个参数名时停止，   当前参数名 参数值1 参数值2 ... 下一个参数名
                         for(int j = indexOfParamenterStrings[i]+1;
                             j<paramenterStrings.length && OperateHashTable.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) {
                             paramenterValues[cnt++] = paramenterStrings[j];
@@ -561,8 +532,8 @@ class InfectStatistic {
         /** description:执行统计并写入文件 */
         public static void execCMD(String[] args) {
             InfectStatistic infectStatistic = new InfectStatistic();
-            ArrayList<String> listFileNameArrayList = new ArrayList<String>();      //用来保存一个文件夹下的文件夹名的数组
-            GetFile.getBeforeDateFileName(inputDir, toDateString, listFileNameArrayList);    //初始化listFileNameArrayList
+            ArrayList<String> listFileNameArrayList = new ArrayList<String>();
+            GetFile.getBeforeDateFileName(inputDir, toDateString, listFileNameArrayList);
 
             try {
                 File file = null;
@@ -573,7 +544,7 @@ class InfectStatistic {
                 InputStreamReader reader = null;
                 String filePathString = "";
                 for (int cnt=0, len=listFileNameArrayList.size(); cnt < len; cnt++) {
-                    filePathString = inputDir + "/" + listFileNameArrayList.get(cnt);  //输入文件路径
+                    filePathString = inputDir + "/" + listFileNameArrayList.get(cnt);
                     file = new File(filePathString);
 
                     if(!outputDir.exists()) {
@@ -589,10 +560,10 @@ class InfectStatistic {
 
                         String lineString = null;
                         while ((lineString = bufferedReader.readLine()) != null) {
-                            if (!OperateLineString.isNotes(lineString)) { // 不是注释行
-                                ProviceStatistic.StatisticProvince(lineString, hashtable); // 进行统计
-                            } else { // 是注释行，不执行任何操作
+                            if (lineString.charAt(0) == '/' && lineString.charAt(1) == '/') { //注释行
                                 ;
+                            } else {
+                                ProviceStatistic.StatisticProvince(lineString, hashtable);
                             }
                         }
                     }else {
@@ -605,15 +576,13 @@ class InfectStatistic {
                 OutPutFile.writeFile(hashtable, fileOutputStream, paramentersOfType, paramentersOfProvince, args);
                 reader.close();
             } catch (Exception e) {
-                // TODO: handle exception
                 e.printStackTrace();
             }
         }
     }
 
     public static void main(String[] args) {
-        StartCMD.separateCMD(args);
-        StartCMD.init();
+        StartCMD.separateCMDInit(args);
         StartCMD.execCMD(args);
     }
 }
