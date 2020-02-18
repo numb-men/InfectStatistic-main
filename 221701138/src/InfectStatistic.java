@@ -6,8 +6,6 @@
  * @version 1.0
  * @since 2020/2/18
  */
-package src;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,13 +19,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-class InfectStatistic {
+public class InfectStatistic {
     //命令执行参数初始化
 	public static String logc = new String();
 	public static String outc = new String();
 	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	public static String datec = new String("0000-00-00");
+	public static String datec = new String(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 	static String dateFormat = sdf.format(new Date());
 	public static String []typec = new String[4];
 	public static String []provincec = new String[32];
@@ -111,7 +111,7 @@ class InfectStatistic {
     }
     
     //读取文件内容
-    public static ArrayList<String> ReadTxt(File file) {
+    /*public static ArrayList<String> ReadTxt(File file) {
     	ArrayList<String> as = new ArrayList<String>();
     	StringBuilder result = new StringBuilder();
     	try {
@@ -125,7 +125,7 @@ class InfectStatistic {
     		e.printStackTrace();
     	}
     	return as;
-    }
+    }*/
     
     //获取指定日期所有文件名
     public static ArrayList<String> GetTxt(String path,String date){
@@ -228,10 +228,16 @@ class InfectStatistic {
     		file.createNewFile();
     	}
     	PrintStream ps=new PrintStream(out);
-    	//System.setOut(ps);
+    	System.setOut(ps);
     	for(int i=1;i<32;i++) 
     		for(int j=0;j<4;j++) totaltype[0][j]+=totaltype[i][j];
     	//System.out.println('1');
+		if(province[0].equals("undefined")){
+			province = prov.clone();
+		}
+		if(type[0].equals("undefined")){
+			type = typeId.clone();
+		}
     	for(int i=0;i<prov.length;i++) {
         	for(int j=0;j<province.length;j++) if(prov[i].equals(province[j])){
         		System.out.print(prov[i]+" ");
@@ -262,10 +268,10 @@ class InfectStatistic {
     		System.out.println(s);*/
     	ExcuteCommand(logc,outc,datec,typec,provincec);
     	PrintTxt(logc,outc,datec,typec,provincec);
-    	for(int i = 0;i < provincenum;i++) {
+    	/*for(int i = 0;i < provincenum;i++) {
     		for(int j = 0;j < typenum;j++) {
     			System.out.println(totaltype[i][j]);
     		}
-    	}
+    	}*/
     }
 }
