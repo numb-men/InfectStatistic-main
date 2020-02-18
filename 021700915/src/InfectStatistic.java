@@ -20,7 +20,6 @@ class Province {
 		this.ip=0;
 		this.sp=0;
 		this.cure=0;
-		this.cure=0;
 		this.dead=0;
 		this.status=false;
 	}
@@ -46,6 +45,7 @@ public class InfectStatistic {
 //		readCommand(args);
 		readFile("D:log");
 //		System.out.println(provincelist[0].name);
+		outputFile();
     }
 	
 	public static void readCommand(String[] args) {
@@ -173,6 +173,7 @@ public class InfectStatistic {
 		if(m1.find()) {
 			String[] str=line.split(" ");
 			int index=findProvince(str[0]);
+			provincelist[0].ip+=Integer.parseInt(str[3].substring(0, str[3].length()-1));
 			provincelist[index].ip+=Integer.parseInt(str[3].substring(0, str[3].length()-1));
 			provincelist[index].status=true;
 //			System.out.println(provincelist[index].ip);
@@ -181,6 +182,7 @@ public class InfectStatistic {
 		else if(m2.find()) {
 			String[] str=line.split(" ");
 			int index=findProvince(str[0]);
+			provincelist[0].sp+=Integer.parseInt(str[3].substring(0, str[3].length()-1));
 			provincelist[index].sp+=Integer.parseInt(str[3].substring(0, str[3].length()-1));
 			provincelist[index].status=true;
 //			System.out.println(provincelist[index].sp);
@@ -211,6 +213,7 @@ public class InfectStatistic {
 		else if(m5.find()) {
 			String[] str=line.split(" ");
 			int index=findProvince(str[0]);
+			provincelist[0].ip-=Integer.parseInt(str[2].substring(0, str[2].length()-1));
 			provincelist[index].ip-=Integer.parseInt(str[2].substring(0,str[2].length()-1));
 			provincelist[index].dead+=Integer.parseInt(str[2].substring(0,str[2].length()-1));
 			provincelist[index].status=true;
@@ -220,6 +223,7 @@ public class InfectStatistic {
 		else if(m6.find()) {
 			String[] str=line.split(" ");
 			int index=findProvince(str[0]);
+			provincelist[0].ip-=Integer.parseInt(str[2].substring(0, str[2].length()-1));
 			provincelist[index].ip-=Integer.parseInt(str[2].substring(0,str[2].length()-1));
 			provincelist[index].cure+=Integer.parseInt(str[2].substring(0,str[2].length()-1));
 			provincelist[index].status=true;
@@ -229,6 +233,8 @@ public class InfectStatistic {
 		else if(m7.find()) {
 			String[] str=line.split(" ");
 			int index=findProvince(str[0]);
+			provincelist[0].ip+=Integer.parseInt(str[3].substring(0, str[3].length()-1));
+			provincelist[0].sp-=Integer.parseInt(str[3].substring(0, str[3].length()-1));
 			provincelist[index].ip+=Integer.parseInt(str[3].substring(0, str[3].length()-1));
 			provincelist[index].sp-=Integer.parseInt(str[3].substring(0, str[3].length()-1));
 			provincelist[index].status=true;
@@ -238,9 +244,19 @@ public class InfectStatistic {
 		else if(m8.find()) {
 			String[] str=line.split(" ");
 			int index=findProvince(str[0]);
+			provincelist[0].sp-=Integer.parseInt(str[3].substring(0, str[3].length()-1));
 			provincelist[index].sp-=Integer.parseInt(str[3].substring(0, str[3].length()-1));
 			provincelist[index].status=true;
 //			System.out.println(provincelist[index].sp);
+		}
+		
+		provincelist[0].status=true;
+	}
+	static void outputFile() {
+		for(int i=0;i<provinces.length;i++) {
+			if(provincelist[i].status==true) {
+				System.out.println(provincelist[i].name+"感染："+provincelist[i].ip+" 疑似感染："+provincelist[i].sp);
+			}
 		}
 	}
 }
