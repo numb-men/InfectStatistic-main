@@ -49,7 +49,7 @@ class InfectStatistic {
     String [] typeName = {"感染患者","疑似患者","治愈患者","死亡患者"};
     String [] typeId = {"ip","sp","cure","dead"};
 	
-    //初始化信息
+    //初始化map信息
     public void InitMessage() {
     	for(int i = 0;i < prov.length;i++) {
     		pmap.put(prov[i], Integer.valueOf(i));
@@ -126,18 +126,27 @@ class InfectStatistic {
     
     //返回所有文件内容
     public static ArrayList<String> GetTxt(String path,String date){
+    	//先获取指定日期之前的所有文件名
     	File file1 = new File(path);
-        File templist[] = file1.listFiles();
-        ArrayList<String> ls = new ArrayList<String>();
+        File[] templist = file1.listFiles();
+        ArrayList<String> ls1 = new ArrayList<String>();
+        ArrayList<String> ls2 = new ArrayList<String>();
         ArrayList<String> lt = new ArrayList<String>();
         for(int i = 0 ; i < templist.length;i++){
 			if(templist[i].isFile()) {
-				ls.add(templist[i].toString());
+				ls1.add(templist[i].toString());
+			}
+			File file2 = new File(ls1.get(i).trim());
+			String fileName = file2.getName().substring(0,10);
+			if(datec.compareTo(fileName) >= 0) {
+				ls2.add(ls1.get(i));
 			}
         }
-        for(String s : ls) {
-        	File file2 = new File(s);
-        	lt=ReadTxt(file2);
+        
+        //获取已知文件绝对路径的文件内容
+        for(String s : ls2) {
+        	File file3 = new File(s);
+        	lt=ReadTxt(file3);
         	for(int j = 0 ; j < lt.size();j++){	
     			//System.out.print(lt.get(j)+"\n");
     		}
