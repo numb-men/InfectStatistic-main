@@ -172,7 +172,6 @@ class CoronavirusDetail{
     	
     	for(int i=1;i<32;i++) 
     		for(int j=0;j<4;j++) Detail[0][j]+=Detail[i][j];
-    	
     	for(int i=0;i<ProvinceStr.length;i++) {
         	for(int j=0;j<Province.length;j++) 
         	if(ProvinceStr[i].equals(Province[j])){
@@ -182,8 +181,11 @@ class CoronavirusDetail{
         		for(int k=0;k<4;k++) {
         			if(Type[k].equals($nothing)) Typecnt++;
         		}
+        		if(Typecnt==4)
+        			for(int k=0;k<4;k++)
+        				Type[k]=TypeStr[k];
         		for(int k=0;k<4;k++) 
-        		if((Typecnt==4)||(!Type[k].equals($nothing))){
+        		if(!Type[k].equals($nothing)){
         			Integer Tynum=(Integer) TypeMap.get(Type[k]);
         			System.out.print(TypeStrCn[Tynum]+Detail[Pronum][Tynum]+" ");
         		}
@@ -194,21 +196,20 @@ class CoronavirusDetail{
     }
     
 	//获取指定日期之前的文件名
-	public static ArrayList<String> GetFilesName(String path,String date){
-		
+	public static ArrayList<String> GetFilesName(String Path,String Date){
 		ArrayList<String> Files = new ArrayList<String>();
 		ArrayList<String> Beforefiles = new ArrayList<String>();
-	    File file = new File(path);
-	    File[] tempList = file.listFiles();
+	    File File = new File(Path);
+	    File[] TempList = File.listFiles();
 	    
-	    for (int i = 0; i < tempList.length; i++) {
-	        if (tempList[i].isFile()) {
-	            Files.add(tempList[i].toString());
+	    for (int i = 0; i < TempList.length; i++) {
+	        if (TempList[i].isFile()) {
+	            Files.add(TempList[i].toString());
 	        }
 	        //得到当前日期之前的文件名
-	        File tempFile=new File(Files.get(i).trim());
-	        String fileName=tempFile.getName().substring(0,10);
-	        if(date.compareTo(fileName)>=0){
+	        File TempFile=new File(Files.get(i).trim());
+	        String FileName=TempFile.getName().substring(0,10);
+	        if(Date.compareTo(FileName)>=0){
 	        	Beforefiles.add(Files.get(i));
 	        }
 	    }
@@ -243,14 +244,6 @@ class CoronavirusDetail{
 		
 		String MatString_8="(\\S+) 排除 疑似患者 (\\d+)人";
 		String SplitString_8=" 排除 疑似患者 |人";
-		
-		for(int i=0;i<4;i++) {
-			//System.out.println(type[i]);
-		}
-		
-		for(int i=0;i<31;i++) {
-			//System.out.println(province[i]);
-		}
 		
 		//得到需要的文件路径并将其读入
 		ArrayList<String> TeArrayList=GetFilesName(Log,Date);
