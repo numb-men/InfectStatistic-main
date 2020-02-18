@@ -12,10 +12,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Date;
 
@@ -73,28 +75,28 @@ class InfectStatistic {
     	String c3 = new String("-date");
     	String c4 = new String("-type");
     	String c5 = new String("-province");
-    	for(int i=0;i<4;i++) typec[i]="undefined";
-    	for(int i=0;i<31;i++) provincec[i]="undefined";
+    	for(int i = 0;i < 4;i++) typec[i] = "undefined";
+    	for(int i = 0;i < 32;i++) provincec[i] = "undefined";
     	for(int i = 1;i < len;i++) {
-    		if(s.equals("c1")) {
+    		if(s[i].equals(c1)) {
     			logc = s[i+1];
     		}
-    		else if(s.equals("c2")) {
+    		else if(s[i].equals(c2)) {
     			outc = s[i+1];
     		}
-    		else if(s.equals("c3")){
+    		else if(s[i].equals(c3)){
     			datec = s[i+1];
     		}
-    		else if(s.equals("c4")) {
+    		else if(s[i].equals(c4)) {
     			a = i;
     			for(int j = a + 1;j < len;j++) {
-    				if(s[i].charAt(0)!='-') {
+    				if(s[i].charAt(0) != '-') {
     					typec[b++] = s[i];
     				}
     				else break;
     			}
     		}
-    		else if(s.equals("c5")) {
+    		else if(s[i].equals(c5)) {
     			c = i;
     			for(int k = c + 1;k < len;k++) {
     				if(s[i].charAt(0)!='-') {
@@ -144,7 +146,7 @@ class InfectStatistic {
         return ls2;
     }
     //执行命令
-    public static void ExcuteCommand(String log,String out,String date,String []type,String []province){
+    public static void ExcuteCommand(String log,String out,String date,String []type,String []province) throws IOException{
     	//正则表达式匹配文件内容
 		String smatch1="(\\S+) 新增 感染患者 (\\d+)人";
 		String sorigin1=" 新增 感染患者 |人";
@@ -162,12 +164,97 @@ class InfectStatistic {
 		String sorigin7=" 疑似患者 确诊感染 |人";
 		String smatch8="(\\S+) 排除 疑似患者 (\\d+)人";
 		String sorigin8=" 排除 疑似患者 |人";
-    	
+    
+		//读入文件路径
+		ArrayList<String> filePath = GetTxt(log,date);
+		for(int i=0;i<filePath.size();i++) {
+			System.out.println(filePath.get(i));
+
+			BufferedReader inBufferedReader=new BufferedReader(new InputStreamReader(new FileInputStream(filePath.get(i)), "UTF-8"));
+			String nowString;
+			while((nowString=inBufferedReader.readLine())!=null) {
+				System.out.print(nowString);
+				System.out.println("???");
+				//A 新增 感染患者 x人
+				if(nowString.matches(smatch1)) {
+					String [] s1=nowString.split(sorigin1);
+					totaltype[(Integer) pmap.get(s1[0])][0]+=Integer.parseInt(s1[1]);
+				}
+				//A 新增 疑似患者 x人
+				else if(nowString.matches(smatch2)) {
+					String [] s2=nowString.split(sorigin2);
+					totaltype[(Integer) pmap.get(s2[0])][1]+=Integer.parseInt(s2[1]);
+				}
+				//A 感染患者 流入 B x人
+				else if(nowString.matches(smatch3)) {
+					String [] s3=nowString.split(sorigin3);
+					totaltype[(Integer) pmap.get(s3[0])][0]-=Integer.parseInt(s3[2]);
+					totaltype[(Integer) pmap.get(s3[1])][0]+=Integer.parseInt(s3[2]);
+				}
+				//A 疑似患者 流入 B x人
+				else if(nowString.matches(smatch4)) {
+					String [] s4=nowString.split(sorigin4);
+					totaltype[(Integer) pmap.get(s4[0])][1]-=Integer.parseInt(s4[2]);
+					totaltype[(Integer) pmap.get(s4[1])][1]+=Integer.parseInt(s4[2]);
+				}
+				//A 死亡 x人
+				else if(nowString.matches(smatch5)) {
+					String [] s5=nowString.split(sorigin5);
+					totaltype[(Integer) pmap.get(s5[0])][3]+=Integer.parseInt(s5[1]);
+					totaltype[(Integer) pmap.get(s5[0])][0]-=Integer.parseInt(s5[1]);
+				}
+				//A 治愈 x人
+				else if(nowString.matches(smatch6)) {
+					String [] s6=nowString.split(sorigin6);
+					totaltype[(Integer) pmap.get(s6[0])][2]+=Integer.parseInt(s6[1]);
+					totaltype[(Integer) pmap.get(s6[0])][0]-=Integer.parseInt(s6[1]);
+				}
+				//a 疑似患者 确诊感染 x人
+				else if(nowString.matches(smatch7)) {
+					String [] s7=nowString.split(sorigin7);
+					totaltype[(Integer) pmap.get(s7[0])][0]+=Integer.parseInt(s7[1]);
+					totaltype[(Integer) pmap.get(s7[0])][1]-=Integer.parseInt(s7[1]);
+				}
+				//A 排除 疑似患者 x人
+				else if(nowString.matches(smatch8)) {
+					String [] s8=nowString.split(sorigin8);
+					totaltype[(Integer) pmap.get(s8[0])][1]-=Integer.parseInt(s8[1]);
+				}
+				System.out.println("+++++");
+			}
+		}
     }
     
-    public static void main(String[] args) {
+    //打印信息
+    public static void PrintTxt(String log,String out,String date,String [] type,String [] province) {
+    	for(int i=1;i<32;i++) 
+    		for(int j=0;j<4;j++) totaltype[0][j]+=totaltype[i][j];
+    	for(int i=0;i<prov.length;i++) {
+        	for(int j=0;j<province.length;j++) if(prov[i].equals(province[j])){
+        		System.out.print(prov[i]+" ");
+        		Integer pronum=(Integer) pmap.get(prov[i]);
+        		int typecnt=0;
+        		for(int k=0;k<type.length;k++) {
+        			if(type[k].equals("undefined")) typecnt++;
+        		}
+        		for(int k=0;k<4;k++) if((typecnt==4)||(!type[k].equals("undefined"))){
+        			//System.out.println((Integer) TypeMap.get(type[j]));
+        			System.out.print(typeName[(Integer) tmap.get(type[k])]+totaltype[pronum][(Integer) tmap.get(type[k])]+" ");
+        		}
+        		System.out.println();
+        	}
+    	}
+    }
+    
+    public static void main(String[] args) throws IOException {
     	InitMessage();
+    	CmdAnalyze(args);
+    	//for(String s:args)
+    		//System.out.println(s);
+    	//System.out.println(logc);
+    	//System.out.println(outc);
     	ExcuteCommand(logc,outc,datec,typec,provincec);
+    	PrintTxt(logc,outc,datec,typec,provincec);
     	System.out.println("1");
     }
 }
