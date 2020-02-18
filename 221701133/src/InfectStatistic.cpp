@@ -8,6 +8,7 @@
 #include <fstream>
 #include <vector>
 #include <io.h>
+#include <regex>
 
 
 using namespace std;
@@ -29,6 +30,44 @@ const string POSIBLEP[]={LOG,DATE,TYPE,OUT,PROVINCE};//可能的命令行参数�
 const int POSIBLEPNUM=sizeof(POSIBLEP) / sizeof(POSIBLEP[0]);//支持的命令行参数数 
 
 const string FILEFORMAT="*.log.txt";//要读取的日志文件的后缀格式 
+
+const int TMNUM=8;//设置的正则表达式的个数 
+//读取日志文件时用到的正则表达式 
+const string typeMatch[TMNUM]={
+"(.*) 新增 感染患者 (.*)人",
+"(.*) 新增 疑似患者 (.*)人",
+"(.*) 感染患者 流入 (.*) (.*)人",
+"(.*) 疑似患者 流入 (.*) (.*)人",
+"(.*) 死亡 (.*)人",
+"(.*) 治愈 (.*)人",
+"(.*) 疑似患者 确诊感染 (.*)人",
+"(.*) 排除 疑似患者 (.*)人"
+};
+
+
+//判断使用的命令是否合理 
+bool isSuportComand(string c);
+//处理传入的命令行参数
+bool dealParameters(int ac,const char* arv[]);
+//处理可能携带多参数的命令行参数 
+bool dealMulParameter(int ini,const int &max,const char* arv[],vector<string> &paras,
+int &forward);
+//处理out的参数
+bool dealOutParameters(ofstream &out,string s);
+//判断日志是否为要读取的
+bool isRightTimeLog(const string &s,const string &timeP);
+//读取日志文件并存储
+bool readLogMessage(StatisticList &slist,const vector<string> &files);
+//读取一份日志文件并存储
+bool readOneFile(StatisticList &slist,const string &file);
+//进行读取而来的字符串的正则表达式匹配
+bool doStringSmatch(const string &target,int &tyNum,vector<string> &strSon);
+//获取指定的文件夹中的所有文件路径名
+void getFilesName(const string &path,const string &timeP,vector<string> &files);
+//开始读取文件
+bool performOptns(const string &fLocation,const string &timeP,StatisticList &sList);
+//将获取到的信息放入疫情地区列表中
+bool setMessage(StatisticList &slist,vector<string> strMesg);
 
 
 
@@ -57,8 +96,8 @@ class StatisticList
 	Regions regionsList[REGIONNUM];//地区情况统计表
 public:
 	StatisticList();
-	bool selectiveOutput(const vector<string> &ts,const vector &rs,const ofstream &out);//选择性输出 
-	friend bool readLogMessage(StatisticList &slist,const vector<string> &files);//读取日志文件并存储
+	bool selectiveOutput(const vector<string> &ts,const vector &rs,const ofstream &out);//选择性输出
+	 
 };
 
 
@@ -341,7 +380,68 @@ bool readLogMessage(StatisticList &slist,const vector<string> &files)
 //files：存储要读取的文件的文件路径 
 bool readOneFile(StatisticList &slist,const string &file)
 {
+	vector<string> strSon;
+	int tyNum;
+	ifstream in;//输入流对象 
+	char s[100];//临时存储获取到的一行语句
+    string s1;//存储获取到的一行语句 
 	
+	in.open(file);
+	if(!in)
+	{
+		cout<<"文件打开失败！\n";
+		return false;
+	}
+	while(in.getline(s,100))
+	{
+   		s1=s;
+    	doStringSmatch(s1,tyNum,strSon);
+	}
+	
+	in.close();
+}
+
+
+//将获取到的信息放入疫情地区列表中
+bool setMessage(StatisticList &slist,vector<string> strMesg) 
+{
+	
+}
+
+
+
+//进行读取而来的字符串的正则表达式匹配
+//target：需要进行获取关键子串的字符串
+//tyNum：记录匹配到的是哪一类正则表达式 
+//strSon：记录收集的子串 
+bool doStringSmatch(const string &target,int &tyNum,vector<string> &strSon)
+{
+	bool noOcuredEror=false;//用于记录是否有错误出现 
+	
+	regex e[TMNUM]=
+			{
+				regex(typeMatch[0]),regex(typeMatch[1]),regex(typeMatch[2]),
+				regex(typeMatch[3]),regex(typeMatch[4]),
+				regex(typeMatch[5]),regex(typeMatch[6]),regex(typeMatch[7])
+			};
+	
+    smatch sm;
+    
+    for(int i=0;i<TMNUM;i++)
+	{
+		regex_search(target,sm,e[i]);
+		if(sm.size()){
+			for (int j=1;j<sm.size();j++)//收集匹配得到的关键子串,排除0位置的本身 
+			{
+       			strSon.push_back([j].str());
+    		}
+    		tyNum=i;
+			noOcuredEror=true;//只有出现匹配，才证明没问题 
+			break;	
+		}
+	}
+	
+	return noOcuredEror; 
 }
 
 
