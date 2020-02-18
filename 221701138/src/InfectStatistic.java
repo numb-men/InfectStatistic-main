@@ -29,8 +29,14 @@ class InfectStatistic {
 	public static String []typec = new String[4];
 	public static String []provincec = new String[32];
 	
+	//省份数量和类型数量
+	int typenum = 4;
+	int provincenum = 32;
+	//总人数
+	public int [][] totaltype = new int [provincenum][typenum];
+	
 	//存放省信息
-    Map<String,String> pmap = new HashMap<String,String>();
+    Map pmap = new HashMap();
     String [] prov= {"全国","安徽","北京","重庆","福建",
     		"甘肃","广东"," 广西","贵州"," 海南",
     		"河北","河南","黑龙江","湖北","湖南",
@@ -39,13 +45,22 @@ class InfectStatistic {
     		"四川","天津","西藏","新疆","云南","浙江"};
     
     //存放患者类型信息
-    Map<String,String> tmap = new HashMap<String,String>();
+    Map tmap = new HashMap();
     String [] typeName = {"感染患者","疑似患者","治愈患者","死亡患者"};
     String [] typeId = {"ip","sp","cure","dead"};
 	
-    //初始化
+    //初始化信息
     public void InitMessage() {
-    	
+    	for(int i = 0;i < prov.length;i++) {
+    		pmap.put(prov[i], Integer.valueOf(i));
+    	}
+    	for(int i = 0;i < typeId.length;i++) {
+    		tmap.put(typeId[i],Integer.valueOf(i));
+    	}
+    	for(int i = 0;i < provincenum;i++) {
+    		for(int j = 0;j <typenum;j++) 
+    			totaltype[i][j] = 0;
+    	}
     }
     
     //分析整个命令行给全局变量赋值
@@ -110,7 +125,7 @@ class InfectStatistic {
     }
     
     //返回所有文件内容
-    public static ArrayList<String> GetTxt(String path){
+    public static ArrayList<String> GetTxt(String path,String date){
     	File file1 = new File(path);
         File templist[] = file1.listFiles();
         ArrayList<String> ls = new ArrayList<String>();
@@ -131,7 +146,7 @@ class InfectStatistic {
     }
     //执行命令
     public static void ExcuteCommand(String log,String out,String date,String []type,String []province){
-    	ArrayList<String> lt = GetTxt(log);
+    	ArrayList<String> lt = GetTxt(log,date);
     	
     }
     
