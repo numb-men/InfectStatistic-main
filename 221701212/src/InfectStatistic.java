@@ -54,9 +54,9 @@ class InfectStatistic {
 		dead = new int[PROVIENCE_NUM];
 		cmd4type = new Vector<String>();
 		cmd4provience = new Vector<String>();
-		provience_array = new String[] {"È«¹ú","°²»Õ","±±¾©","ÖØÇì","¸£½¨","¸ÊËà","¹ã¶«","¹ãÎ÷",
-				"¹óÖÝ","º£ÄÏ","ºÓ±±","ºÓÄÏ","ºÚÁú½­","ºþ±±","ºþÄÏ","¼ªÁÖ","½­ËÕ","½­Î÷","ÁÉÄþ","ÄÚÃÉ¹Å",
-				"ÄþÏÄ","Çàº£","É½¶«","É½Î÷","ÉÂÎ÷","ÉÏº£","ËÄ´¨","Ìì½ò","Î÷²Ø","ÐÂ½®","ÔÆÄÏ","Õã½­"};
+		provience_array = new String[] {"å…¨å›½","å®‰å¾½","åŒ—äº¬","é‡åº†","ç¦å»º","ç”˜è‚ƒ","å¹¿ä¸œ","å¹¿è¥¿",
+				"è´µå·ž","æµ·å—","æ²³åŒ—","æ²³å—","é»‘é¾™æ±Ÿ","æ¹–åŒ—","æ¹–å—","å‰æž—","æ±Ÿè‹","æ±Ÿè¥¿","è¾½å®","å†…è’™å¤",
+				"å®å¤","é’æµ·","å±±ä¸œ","å±±è¥¿","é™•è¥¿","ä¸Šæµ·","å››å·","å¤©æ´¥","è¥¿è—","æ–°ç–†","äº‘å—","æµ™æ±Ÿ"};
 		
 		for(int i = 0; i < PROVIENCE_NUM; i++) {
 			flg[i] = false;
@@ -160,14 +160,14 @@ class InfectStatistic {
   }
   
 	public void headleData(String dataLine) {
-		String status1 = "(\\S+) ÐÂÔö ¸ÐÈ¾»¼Õß (\\d+)ÈË";
-    String status2 = "(\\S+) ¸ÐÈ¾»¼Õß Á÷Èë (\\S+) (\\d+)ÈË";
-    String status3 = "(\\S+) ÖÎÓú (\\d+)ÈË";
-    String status4 = "(\\S+) ËÀÍö (\\d+)ÈË";
-		String status5 = "(\\S+) ÐÂÔö ÒÉËÆ»¼Õß (\\d+)ÈË";
-    String status6 = "(\\S+) ÒÉËÆ»¼Õß Á÷Èë (\\S+) (\\d+)ÈË";
-    String status7 = "(\\S+) ÒÉËÆ»¼Õß È·Õï¸ÐÈ¾ (\\d+)ÈË";
-    String status8 = "(\\S+) ÅÅ³ý ÒÉËÆ»¼Õß (\\d+)ÈË";
+		String status1 = "(\\S+) æ–°å¢ž æ„ŸæŸ“æ‚£è€… (\\d+)äºº";
+    String status2 = "(\\S+) æ„ŸæŸ“æ‚£è€… æµå…¥ (\\S+) (\\d+)äºº";
+    String status3 = "(\\S+) æ²»æ„ˆ (\\d+)äºº";
+    String status4 = "(\\S+) æ­»äº¡ (\\d+)äºº";
+		String status5 = "(\\S+) æ–°å¢ž ç–‘ä¼¼æ‚£è€… (\\d+)äºº";
+    String status6 = "(\\S+) ç–‘ä¼¼æ‚£è€… æµå…¥ (\\S+) (\\d+)äºº";
+    String status7 = "(\\S+) ç–‘ä¼¼æ‚£è€… ç¡®è¯Šæ„ŸæŸ“ (\\d+)äºº";
+    String status8 = "(\\S+) æŽ’é™¤ ç–‘ä¼¼æ‚£è€… (\\d+)äºº";
     
     if(dataLine.matches(status1)) {
     	ip_inc(dataLine);
@@ -192,7 +192,7 @@ class InfectStatistic {
 		String[] str = dataLine.split(" ");
 		for(int i = 0; i < PROVIENCE_NUM; i++) {
 			if(str[0].equals(provience_array[i])) {
-				sp[i] -= Integer.parseInt(str[3].substring(0, str[3].indexOf("ÈË")));
+				sp[i] -= Integer.parseInt(str[3].substring(0, str[3].indexOf("äºº")));
 				if(flg4provience == false) {
 					flg[i] = true;
 				}
@@ -204,8 +204,8 @@ class InfectStatistic {
 		String[] str = dataLine.split(" ");
 		for(int i = 0; i < PROVIENCE_NUM; i++) {
 			if(str[0].equals(provience_array[i])) {
-				sp[i] -= Integer.parseInt(str[3].substring(0, str[3].indexOf("ÈË")));
-				ip[i] += Integer.parseInt(str[3].substring(0, str[3].indexOf("ÈË")));
+				sp[i] -= Integer.parseInt(str[3].substring(0, str[3].indexOf("äºº")));
+				ip[i] += Integer.parseInt(str[3].substring(0, str[3].indexOf("äºº")));
 				if(flg4provience == false) {
 					flg[i] = true;
 				}
@@ -219,8 +219,8 @@ class InfectStatistic {
 			if(str[0].equals(provience_array[i])) {
 				for(int j = 0; j < PROVIENCE_NUM; j++) {
 					if(str[3].equals(provience_array[j])) {
-						sp[i] -= Integer.parseInt(str[4].substring(0, str[4].indexOf("ÈË")));
-						sp[j] += Integer.parseInt(str[4].substring(0, str[4].indexOf("ÈË")));
+						sp[i] -= Integer.parseInt(str[4].substring(0, str[4].indexOf("äºº")));
+						sp[j] += Integer.parseInt(str[4].substring(0, str[4].indexOf("äºº")));
 						if(flg4provience == false) {
 							flg[i] = flg[j] = true;
 						}
@@ -234,7 +234,7 @@ class InfectStatistic {
 		String[] str = dataLine.split(" ");
 		for(int i = 0; i < PROVIENCE_NUM; i++) {
 			if(str[0].equals(provience_array[i])) {
-				sp[i] += Integer.parseInt(str[3].substring(0, str[3].indexOf("ÈË")));
+				sp[i] += Integer.parseInt(str[3].substring(0, str[3].indexOf("äºº")));
 				if(flg4provience == false) {
 					flg[i] = true;
 				}
@@ -246,8 +246,8 @@ class InfectStatistic {
 		String[] str = dataLine.split(" ");
 		for(int i = 0; i < PROVIENCE_NUM; i++) {
 			if(str[0].equals(provience_array[i])) {
-				ip[i] -= Integer.parseInt(str[2].substring(0, str[2].indexOf("ÈË")));
-				dead[i] += Integer.parseInt(str[2].substring(0, str[2].indexOf("ÈË")));
+				ip[i] -= Integer.parseInt(str[2].substring(0, str[2].indexOf("äºº")));
+				dead[i] += Integer.parseInt(str[2].substring(0, str[2].indexOf("äºº")));
 				if(flg4provience == false) {
 					flg[i] = true;
 				}
@@ -259,8 +259,8 @@ class InfectStatistic {
 		String[] str = dataLine.split(" ");
 		for(int i = 0; i < PROVIENCE_NUM; i++) {
 			if(str[0].equals(provience_array[i])) {
-				ip[i] -= Integer.parseInt(str[2].substring(0, str[2].indexOf("ÈË")));
-				cure[i] += Integer.parseInt(str[2].substring(0, str[2].indexOf("ÈË")));
+				ip[i] -= Integer.parseInt(str[2].substring(0, str[2].indexOf("äºº")));
+				cure[i] += Integer.parseInt(str[2].substring(0, str[2].indexOf("äºº")));
 				if(flg4provience == false) {
 					flg[i] = true;
 				}
@@ -274,8 +274,8 @@ class InfectStatistic {
 			if(str[0].equals(provience_array[i])) {
 				for(int j = 0; j < PROVIENCE_NUM; j++) {
 					if(str[3].equals(provience_array[j])) {
-						ip[i] -= Integer.parseInt(str[4].substring(0, str[4].indexOf("ÈË")));
-						ip[j] += Integer.parseInt(str[4].substring(0, str[4].indexOf("ÈË")));
+						ip[i] -= Integer.parseInt(str[4].substring(0, str[4].indexOf("äºº")));
+						ip[j] += Integer.parseInt(str[4].substring(0, str[4].indexOf("äºº")));
 						if(flg4provience == false) {
 							flg[i] = flg[j] = true;
 						}
@@ -289,7 +289,7 @@ class InfectStatistic {
 		String[] str = dataLine.split(" ");
 		for(int i = 0; i < PROVIENCE_NUM; i++) {
 			if(str[0].equals(provience_array[i])) {
-				ip[i] += Integer.parseInt(str[3].substring(0, str[3].indexOf("ÈË")));
+				ip[i] += Integer.parseInt(str[3].substring(0, str[3].indexOf("äºº")));
 				if(flg4provience == false) {
 					flg[i] = true;
 				}
@@ -315,28 +315,28 @@ class InfectStatistic {
 
 	    for(int i = 0; i < PROVIENCE_NUM; i++) {
 	    	if(flg[i] == true && flg4type == false) {
-	    		out = provience_array[i] + " ¸ÐÈ¾»¼Õß" + ip[i] + "ÈË ÒÉËÆ»¼Õß" + sp[i] + 
-	    				"ÈË ÖÎÓú" + cure[i] + "ÈË ËÀÍö" + dead[i] + "ÈË";
+	    		out = provience_array[i] + " æ„ŸæŸ“æ‚£è€…" + ip[i] + "äºº ç–‘ä¼¼æ‚£è€…" + sp[i] + 
+	    				"äºº æ²»æ„ˆ" + cure[i] + "äºº æ­»äº¡" + dead[i] + "äºº";
 	    		writer.write(out);
 			    writer.write("\n");
 	    	} else if(flg[i] == true && flg4type == true) {
 	    		out = provience_array[i];
 	    		for(int j = 0; j < cmd4type.size(); j ++) {
 	    			if(cmd4type.get(j).equals("ip")) {
-	    				out += " ¸ÐÈ¾»¼Õß" + ip[i] + "ÈË";
+	    				out += " æ„ŸæŸ“æ‚£è€…" + ip[i] + "äºº";
 	    			} else if(cmd4type.get(j).equals("sp")) {
-	    				out += " ÒÉËÆ»¼Õß" + sp[i] + "ÈË";
+	    				out += " ç–‘ä¼¼æ‚£è€…" + sp[i] + "äºº";
 	    			} else if(cmd4type.get(j).equals("cure")) {
-	    				out += " ÖÎÓú" + cure[i] + "ÈË";
+	    				out += " æ²»æ„ˆ" + cure[i] + "äºº";
 	    			} else if(cmd4type.get(j).equals("dead")) {
-	    				out += " ËÀÍö" + dead[i] + "ÈË";
+	    				out += " æ­»äº¡" + dead[i] + "äºº";
 	    			} 
 	    		}
 	    		writer.write(out);
 			    writer.write("\n");
 	    	}
 	    }
-	    writer.write("// ¸ÃÎÄµµ²¢·ÇÕæÊµÊý¾Ý£¬½ö¹©²âÊÔÊ¹ÓÃ");
+	    writer.write("// è¯¥æ–‡æ¡£å¹¶éžçœŸå®žæ•°æ®ï¼Œä»…ä¾›æµ‹è¯•ä½¿ç”¨");
 	    writer.close();
 		} catch(Exception e){
 			e.printStackTrace();
@@ -345,26 +345,24 @@ class InfectStatistic {
 	
 	public void printData() {
 		String out;
-    for(int i = 0; i < PROVIENCE_NUM; i++) {
+		for(int i = 0; i < PROVIENCE_NUM; i++) {
     	if(flg[i] == true && flg4type == false) {
-    		out = provience_array[i] + " ¸ÐÈ¾»¼Õß" + ip[i] + "ÈË ÒÉËÆ»¼Õß" + sp[i] + 
-    				"ÈË ÖÎÓú" + cure[i] + "ÈË ËÀÍö" + dead[i] + "ÈË";
-    		System.out.println(out);
+    		out = provience_array[i] + " æ„ŸæŸ“æ‚£è€…" + ip[i] + "äºº ç–‘ä¼¼æ‚£è€…" + sp[i] + 
+    				"äºº æ²»æ„ˆ" + cure[i] + "äºº æ­»äº¡" + dead[i] + "äºº";
     	} else if(flg[i] == true && flg4type == true) {
     		out = provience_array[i];
     		for(int j = 0; j < cmd4type.size(); j ++) {
     			if(cmd4type.get(j).equals("ip")) {
-    				out += " ¸ÐÈ¾»¼Õß" + ip[i] + "ÈË";
+    				out += " æ„ŸæŸ“æ‚£è€…" + ip[i] + "äºº";
     			} else if(cmd4type.get(j).equals("sp")) {
-    				out += " ÒÉËÆ»¼Õß" + sp[i] + "ÈË";
+    				out += " ç–‘ä¼¼æ‚£è€…" + sp[i] + "äºº";
     			} else if(cmd4type.get(j).equals("cure")) {
-    				out += " ÖÎÓú" + cure[i] + "ÈË";
+    				out += " æ²»æ„ˆ" + cure[i] + "äºº";
     			} else if(cmd4type.get(j).equals("dead")) {
-    				out += " ËÀÍö" + dead[i] + "ÈË";
-    			} 
-      		System.out.println(out);
+    				out += " æ­»äº¡" + dead[i] + "äºº";
+    			}     		 
     		}
-    		
+    		System.out.println(out);		
     	}
     }
 	}
