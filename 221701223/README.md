@@ -34,7 +34,7 @@ PS : 每一行记录的输出顺序规则如下
 
 1.源文件在/src目录下，通过javac命令编译。Windows下在编译时还要加上-encoding utf-8来避免编码问题。
 
-2.通过IDEA导入项目，点击Run->Edit Configurations，在Program arguments栏中正确输入上述参数的组合，然后编译运行。
+2.通过IDEA导入项目，点击Run->Edit Configurations，在Program arguments栏中正确输入下面列出的参数的组合，然后编译运行。
 
 ### 功能简介
 list命令支持以下命令行参数 : 
