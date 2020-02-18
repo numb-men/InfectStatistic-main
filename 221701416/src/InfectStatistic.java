@@ -17,87 +17,82 @@ import java.text.SimpleDateFormat;
 class InfectStatistic {
 	public static String log=new String();
 	public static String out=new String();
-	public static String date=new String("0000-00-00");
 	static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
 	static String tttString=df.format(new Date());
-	public static String []type= new String[4];
-	public static String []province=new String[31];
+	public static String date=new String(tttString);
+	public static String []type= new String[50];
+	public static String []province=new String[50];
+	
     public static void main(String[] args) throws IOException {
-    	System.out.print(tttString);
     	CoronavirusDetail CD=new CoronavirusDetail();
     	CD.Init();
     	AnalysisCommand(args);
     	CD.ReadAll(log,out,date,type,province);
     	CD.Printdetail(log,out,date,type,province);
     }
+    
+    static String $list= new String("list");
+	static String $log= new String("-log");
+	static String $out= new String("-out");
+	static String $date= new String("-date");
+	static String $type= new String("-type");
+	static String $province= new String("-province");
+	static String $nothing=new String("nothing");
+    //单命令匹配
+    public static boolean match(String th,String tar) {
+    	if(tar.equals(th)) 
+    		return true;
+    	return false;
+    }
+    //双命令匹配
+    public static String matchtot(String []th,String tar,int len,String ori) {
+    	for(int i=1;i<len;i++) {
+    		if(th[i].equals(tar)) {
+    			return th[i+1];
+    		}
+    	}
+    	return ori;
+    }
+    //多命令匹配
+    public static String[] matchmuch(String []th,String tar,int len,String[] ori) {
+    	String []now=new String[50];
+    	for(int i=0;i<50;i++) now[i]=$nothing;
+    	int pos=0;
+		for(int i=1;i<len;i++) {
+			if(th[i].equals(tar)) {
+				pos=i;
+				break;
+			}
+		}
+		int index=0;
+		for(int i=pos+1;i<len;i++) {
+			if(th[i].charAt(0)!='-') {
+				now[index++]=th[i];
+			}else break;
+		}
+		if(index!=0) return now;
+		else return ori;
+    }
     //对输入的命令进行处理分解
     public static void AnalysisCommand(String[] command) {
     	int len=command.length;
-    	String $list= new String("list");
-    	String $log= new String("-log");
-    	String $out= new String("-out");
-    	String $date= new String("-date");
-    	String $type= new String("-type");
-    	String $province= new String("-province");
-    	String $nothing=new String("nothing");
     	//初始化type和province
-    	for(int i=0;i<4;i++) type[i]=$nothing;
-    	for(int i=0;i<31;i++) province[i]=$nothing;
+    	for(int i=0;i<50;i++) type[i]=$nothing;
+    	for(int i=0;i<50;i++) province[i]=$nothing;
     	
     	//list检查
-		if(!(command[0].equals($list))) {
+		if(!(match(command[0],$list))) {
 			System.out.println("请使用list命令进行操作");
 			System.exit(0);
 		}
-		//获取log目录
-		for(int i=1;i<len;i++) {
-			if(command[i].equals($log)) {
-				log=command[i+1];
-				break;
-			}
-		}
-		//获取out目录
-		for(int i=1;i<len;i++) {
-			if(command[i].equals($out)) {
-				out=command[i+1];
-				break;
-			}
-		}
-		//获取date数值
-		for(int i=1;i<len;i++) {
-			if(command[i].equals($date)) {
-				date=command[i+1];
-				break;
-			}
-		}
-		//获取type的参数
-		int typepos=0;
-		for(int i=1;i<len;i++) {
-			if(command[i].equals($type)) {
-				typepos=i;
-				break;
-			}
-		}
-		int typeindex=0;
-		for(int i=typepos+1;i<len;i++) {
-			if(command[i].charAt(0)!='-') {
-				type[typeindex++]=command[i];
-			}else break;
-		}
-		//获取province的参数
-		int provincepos=0;
-		for(int i=1;i<len;i++) {
-			if(command[i].equals($province)) {
-				provincepos=i;
-				break;
-			}
-		}
-		int provinceindex=0;
-		for(int i=provincepos+1;i<len;i++) {
-			if(command[i].charAt(0)!='-') {
-				province[provinceindex++]=command[i];
-			}else break;
-		}
+		//获取log目录,out目录,date数值
+		log=matchtot(command,$log,len,log);
+		out=matchtot(command,$out,len,out);
+		date=matchtot(command,$date,len,date);
+		//获取type的参数，province的参数
+		type=matchmuch(command,$type,len,type);
+		province=matchmuch(command,$province,len,province);
+		
     }
 }
 /**
@@ -154,7 +149,8 @@ class CoronavirusDetail{
         		Integer pronum=(Integer) ProvinceMap.get(ProvinceStr[i]);
         		//System.out.print(pronum);
         		int typecnt=0;
-        		for(int k=0;k<type.length;k++) {
+        		for(int k=0;k<4;k++) {
+        			//System.out.println(type[k]);
         			if(type[k].equals($nothing)) typecnt++;
         		}
         		for(int k=0;k<4;k++) if((typecnt==4)||(!type[k].equals($nothing))){
@@ -235,13 +231,13 @@ class CoronavirusDetail{
 		//得到需要的文件路径并将其读入
 		ArrayList<String> teArrayList=getFilesName(log,date);
 		for(int i=0;i<teArrayList.size();i++) {
-			System.out.println(teArrayList.get(i));
+			//System.out.println(teArrayList.get(i));
 
 			BufferedReader inBufferedReader=new BufferedReader(new InputStreamReader(new FileInputStream(teArrayList.get(i)), "UTF-8"));
 			String nowString;
 			while((nowString=inBufferedReader.readLine())!=null) {
-				System.out.print(nowString);
-				System.out.println("???");
+				//System.out.print(nowString);
+				//System.out.println("???");
 				//<省> 新增 感染患者 n人
 				if(nowString.matches(matString_1)) {
 					String [] Strings_1=nowString.split(splitString_1);
@@ -287,7 +283,7 @@ class CoronavirusDetail{
 					String [] Strings_8=nowString.split(splitString_8);
 					detail[(Integer) ProvinceMap.get(Strings_8[0])][1]-=Integer.parseInt(Strings_8[1]);
 				}
-				System.out.println("+++++");
+				//System.out.println("+++++");
 			}
 		}
 	}
