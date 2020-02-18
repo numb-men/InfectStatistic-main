@@ -20,7 +20,7 @@ import java.util.Date;
  * @since 2020-2-12
  */
 class InfectStatistic{
-    public static void main(String[] args) {   
+    public static void main(String[] args) { 
         if(args.length!=0) {    //无命令行参数出错，不能进行处理
         	CmdAnalysis cmdObject = new CmdAnalysis(args);
             if(cmdObject.isCmdString()) {
@@ -231,29 +231,6 @@ class CmdAnalysis{
 		return provinceShow;
 	}
 	
-	/**
-	 * 用于测试验证，可忽略
-	 */
-	public void showAll() {
-		/*for(int i = 0;i < cmdString.length;i++) {
-			System.out.println(cmdString[i]);
-		}*/
-		System.out.println(logLocation);
-		System.out.println(outLocation);
-		System.out.println(logDate);
-		for(int i = 0;i < typeOrder.length;i++) {
-			if(typeOrder[i] != -1) {
-				System.out.println(typeString[typeOrder[i]]);
-			}
-			
-		}
-		for(int i = 0;i < provinceShow.length - 1;i++) {
-			if(provinceShow[i] != -1) {
-				System.out.println(province[i]);
-			}
-			
-		}
-	}
 }
 
 /**
@@ -552,45 +529,6 @@ class HandleLog{
 				if(provinceShow[32] == -1) {    //按默认方式，标记日志中出现的省份 以默认显示，否则则按指定省份显示
 					provinceShow[i] = 0;
 				}
-			}
-		}
-	}
-	
-	/**
-	 * 用于测试输入 可忽略
-	 */
-	public void showAll() {
-		/*System.out.println(logLocation);
-		System.out.println(outLocation);
-		System.out.println(logDate);
-		for(int i = 0;i < typeOrder.length;i++) {
-			if(typeOrder[i] != -1) {
-				System.out.println(CmdAnalysis.typeString[typeOrder[i]]);
-			}
-			
-		}
-		for(int i = 0;i < provinceShow.length;i++) {
-			if(provinceShow[i] != -1) {
-				System.out.println(CmdAnalysis.province[i]);
-			}
-			
-		}
-		for(int i = 0;i < sum.length;i++) {
-			System.out.print(CmdAnalysis.province[i]+" ");
-			for(int j = 0;j < sum[i].length;j++) {
-				System.out.print(CmdAnalysis.typeString[j]+sum[i][j]+"人 ");
-			}
-			System.out.println();
-		}*/
-		for(int i = 0;i < provinceShow.length-1;i++) {
-			if(provinceShow[i] != -1) {
-				System.out.print(CmdAnalysis.province[i]+" ");
-				for(int j = 0;j<typeOrder.length;j++) {
-					if(typeOrder[j] != -1) {
-						System.out.print(typeString[typeOrder[j]]+""+sum[i][typeOrder[j]]+" ");
-					}
-				}
-				System.out.print("\n");
 			}
 		}
 	}
