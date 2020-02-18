@@ -94,18 +94,17 @@ class InfectStatistic {
 				cmd4data = argv[i] + ".log.txt";
 				flg4data = true;
 			} else if(argv[i].equals("-type")) {
-				i++;
 				flg4type = true;
-				while(!argv[i].startsWith("-")) {
-					cmd4type.add(argv[i]);
+				while(!argv[i + 1].startsWith("-")) {
 					i++;
+					cmd4type.add(argv[i]);
 				}
 			} else if(argv[i].equals("-provience")) {
-				i++;
 				flg4provience = true;
-				while(!argv[i].startsWith("-")) {
-					cmd4provience.add(argv[i]);
+				while(!argv[i + 1].startsWith("-")) {
 					i++;
+					//System.out.println(argv[i]);
+					cmd4provience.add(argv[i]);
 				}
 			}
 		}
@@ -119,6 +118,7 @@ class InfectStatistic {
 		}
 		calculate_total();
 		writeData(dir4out);
+		//printData();
 	}
 	
   public List<String> getPath(String path) {
@@ -143,7 +143,6 @@ class InfectStatistic {
 	
   public void getData(String path) {
   	try {
-  		//BufferedReader br = new BufferedReader(new FileReader(path));
   		FileInputStream fis = new FileInputStream(path);   
   		InputStreamReader isr = new InputStreamReader(fis, "UTF-8");   
   		BufferedReader br = new BufferedReader(isr);  
@@ -154,7 +153,6 @@ class InfectStatistic {
   				headleData(dataLine);
   			}
   			dataLine = br.readLine();
-  			System.out.println(dataLine);
   		}
   	} catch(Exception e) {
   		e.printStackTrace();
@@ -317,12 +315,11 @@ class InfectStatistic {
 
 	    for(int i = 0; i < PROVIENCE_NUM; i++) {
 	    	if(flg[i] == true && flg4type == false) {
-	    		writer.write("\n");
-	    		out = provience_array[i] + "感染患者" + ip[i] + "人 疑似患者" + sp[i] + 
+	    		out = provience_array[i] + " 感染患者" + ip[i] + "人 疑似患者" + sp[i] + 
 	    				"人 治愈" + cure[i] + "人 死亡" + dead[i] + "人";
-	    		writer.write("out");
+	    		writer.write(out);
+			    writer.write("\n");
 	    	} else if(flg[i] == true && flg4type == true) {
-	    		writer.write("\n");
 	    		out = provience_array[i];
 	    		for(int j = 0; j < cmd4type.size(); j ++) {
 	    			if(cmd4type.get(j).equals("ip")) {
@@ -335,21 +332,22 @@ class InfectStatistic {
 	    				out += " 死亡" + dead[i] + "人";
 	    			} 
 	    		}
+	    		writer.write(out);
+			    writer.write("\n");
 	    	}
 	    }
-	    writer.write("\n");
 	    writer.write("// 该文档并非真实数据，仅供测试使用");
+	    writer.close();
 		} catch(Exception e){
 			e.printStackTrace();
 		}
-		
 	}
 	
 	public void printData() {
 		String out;
     for(int i = 0; i < PROVIENCE_NUM; i++) {
     	if(flg[i] == true && flg4type == false) {
-    		out = provience_array[i] + "感染患者" + ip[i] + "人 疑似患者" + sp[i] + 
+    		out = provience_array[i] + " 感染患者" + ip[i] + "人 疑似患者" + sp[i] + 
     				"人 治愈" + cure[i] + "人 死亡" + dead[i] + "人";
     		System.out.println(out);
     	} else if(flg[i] == true && flg4type == true) {
