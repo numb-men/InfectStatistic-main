@@ -1,6 +1,7 @@
 # InfectStatistic-221701438
 疫情统计
-
+作业链接：https://edu.cnblogs.com/campus/fzu/2020SpringW/homework/10281
+博客链接：https://www.cnblogs.com/huangmaoxian/p/12320490.html
 ##1.解题思路描述
 作业发布前几天还是不知从何做起，在查阅了资料和询问同学后有如下思路：
 - 提取命令行args来解析出各个参数：log和date参数读取txt文件内容，type参数确定输出，province选择省份，最后输出到out参数指定文件
