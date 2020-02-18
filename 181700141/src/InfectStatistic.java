@@ -1,8 +1,11 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -14,8 +17,8 @@ import java.util.regex.Pattern;
  * InfectStatistic TODO
  *
  * @author 181700141_呼叫哆啦A梦
- * @version xxx
- * @since xxx
+ * @version 1.0
+ * @since 1.0
  */
 class InfectStatistic {
     public static void main(String[] args) {
@@ -101,14 +104,14 @@ class ListCommand {
     private boolean provinceIsExist = false;
 
     // 定义正则表达式，表达式内的空格不可随意修该，否则会影响读取处理
-    String s1 = "\\s*\\S+ 新增 感染患者 \\d+人\\s*";
-    String s2 = "\\s*\\S+ 新增 疑似患者 \\d+人\\s*";
-    String s3 = "\\s*\\S+ 感染患者 流入 \\S+ \\d+人\\s*";
-    String s4 = "\\s*\\S+ 疑似患者 流入 \\S+ \\d+人\\s*";
-    String s5 = "\\s*\\S+ 死亡 \\d+人\\s*";
-    String s6 = "\\s*\\S+ 治愈 \\d+人\\s*";
-    String s7 = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
-    String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
+    private String s1 = "\\s*\\S+ 新增 感染患者 \\d+人\\s*";
+    private String s2 = "\\s*\\S+ 新增 疑似患者 \\d+人\\s*";
+    private String s3 = "\\s*\\S+ 感染患者 流入 \\S+ \\d+人\\s*";
+    private String s4 = "\\s*\\S+ 疑似患者 流入 \\S+ \\d+人\\s*";
+    private String s5 = "\\s*\\S+ 死亡 \\d+人\\s*";
+    private String s6 = "\\s*\\S+ 治愈 \\d+人\\s*";
+    private String s7 = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
+    private String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
 
     private String[] provincesArray = { "全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江",
             "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南",
@@ -254,7 +257,7 @@ class ListCommand {
     }
 
     // 读取目录下的日志文件
-    public void handleFiles(File file) throws Exception {
+    private void handleFiles(File file) throws Exception {
         // 获得目录下全部文件列表
         String[] logFiles = file.list();
         int l = logFiles.length;
@@ -304,8 +307,8 @@ class ListCommand {
             deadAmount += i;
         deadMap.put("全国", deadAmount);
 
-        File outFile = new File(outDirectory);
-        FileWriter writer = new FileWriter(outFile, false);
+        FileOutputStream outFile = new FileOutputStream(outDirectory);
+        BufferedWriter writer=new BufferedWriter(new OutputStreamWriter(outFile,"utf-8"));
         if (typeIsExist) {
             if (!provinceIsExist) {
                 // 未提供要输出的省份，则输出日志文件有提供的省份的数据，
@@ -367,9 +370,9 @@ class ListCommand {
      * @param route 待读取日志文件路径
      * @throws Exception
      */
-    public void handleFile(String route) throws Exception {
+    private void handleFile(String route) throws Exception {
         FileInputStream fstream = new FileInputStream(new File(route));
-        BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+        BufferedReader br = new BufferedReader(new InputStreamReader(fstream,"utf-8"));
         String strLine;
         while ((strLine = br.readLine()) != null) {
             if (strLine.matches(s1)) {
@@ -493,14 +496,14 @@ class ListCommand {
      * @param s：满足handleFile函数中正则表达式s1-s8的字符串
      * @return 返回s里面的整数
      */
-    public int getAmount(String s) {
+    private int getAmount(String s) {
         Pattern p = Pattern.compile("\\d+");
         Matcher m = p.matcher(s);
         m.find();
         return Integer.parseInt(s.substring(m.start(), m.end()));
     }
 
-    public void out(FileWriter writer, List<String> provinces) throws Exception {
+    private void out(BufferedWriter writer, List<String> provinces) throws Exception {
         for (String province : provinces) {
             writer.write(province);
             int size = types.size();
