@@ -357,7 +357,25 @@ class FileHandle {
                 }
             }
             if((provinceparam.size() > 0)&&(typeparam.size() == 0)){
-                //fileWritter.write(content);
+                for(int i=0;i<provinceparam.size();i++){
+                    if(provinceparam.get(i).equals("全国")){
+                        String result="全国" + " " + String.format("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人", AllIP,AllSP,AllCURE,AllDEAD)+ "\n";
+                        fileWritter.write(result);
+                    }
+                }
+
+                for(int j=0;j<31;j++){
+                    for(int i=0;i<provinceparam.size();i++){
+                        if(provinces[j].equals(provinceparam.get(i))){
+                            String st =provinces[j] +" " +String.format("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人",
+                                    InfectedPatients[j], SuspectedPatients[j], CurePatients[j], DeadPatients[j])+ "\n";
+                            fileWritter.write(st);
+                        }
+
+                    }
+
+                }
+
             }
             if((provinceparam.size() == 0)&&(typeparam.size() > 0)){
                 //fileWritter.write(content);
