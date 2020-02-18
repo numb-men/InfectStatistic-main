@@ -531,7 +531,6 @@ class AllInformation {
         }
 
     }
-
     // 判断用哪个正则表达式
     public Map<String,Integer[]> judgeReg(String line) {
         Map<String,Integer[]> lineInfo = new HashMap<>();
