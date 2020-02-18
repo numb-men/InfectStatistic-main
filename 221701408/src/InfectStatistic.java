@@ -119,8 +119,6 @@ class FileHandle {
     public int[] CurePatients=new int[31];
     public int[] DeadPatients=new int[31];
     public boolean[] IsProvince = new boolean[31];
-
-
     public int AllIP=0,AllSP=0,AllCURE=0,AllDEAD=0;
     ArrayList<String> FileNames = new ArrayList<>();//日志名字
     public FileHandle(){
@@ -210,7 +208,7 @@ class FileHandle {
             TurnSPtoIP(line);
         else if(isMatch8) //排除 疑似患者处理
             RemoveSP(line);
-        }
+    }
         public void DealIP(String line){
             String[] str = line.split(" "); //将字符串以空格分割为多个字符串
             int n = Integer.valueOf(str[3].replace("人", ""));//将人前的数字从字符串类型转化为int类型
@@ -296,10 +294,33 @@ class FileHandle {
         }
         }
         public void TurnSPtoIP(String line){
+            String[] str = line.split(" "); //将字符串以空格分割为多个字符串
+            int n = Integer.valueOf(str[3].replace("人", ""));//将人前的数字从字符串类型转化为int类型
+            for(int i = 0; i < provinces.length; i++){
+                if(str[0].equals(provinces[i])){
+                    SuspectedPatients[i]-=n;//该省份疑似患者人数减少
+                    InfectedPatients[i]+=n;//该省份感染患者人数增加
+                    AllSP-=n;
+                    AllIP+=n;
+                    IsProvince[i] = true;
+                    break;
+                }
+
+            }
 
         }
         public void RemoveSP(String line){
+            String[] str = line.split(" "); //将字符串以空格分割为多个字符串
+            int n = Integer.valueOf(str[3].replace("人", ""));//将人前的数字从字符串类型转化为int类型
+            for(int i = 0; i < provinces.length; i++){
+                if(str[0].equals(provinces[i])){
+                    SuspectedPatients[i]-=n;//该省份疑似患者人数减少
+                    AllSP-=n;
+                    IsProvince[i] = true;
+                    break;
+                }
 
+            }
         }
 
 }
