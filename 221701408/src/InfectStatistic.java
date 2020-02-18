@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+//import java.util.regex.*;
 
 /**
  *
@@ -98,9 +98,9 @@ class CmdHandle {
                     provinceparam.add(command[i]);
             }
         }
-        //FileManager fm = new FileManager();
-        //    fm.ReadFile(logparam,dateparam);
-        //    fm.WriteFile(outparam,typeparam,provinceparam);
+        FileHandle f = new FileHandle();
+        f.ReadFile(logparam,dateparam);
+        //f.WriteFile(outparam,typeparam,provinceparam);
 
     }
 }
@@ -118,11 +118,11 @@ class FileHandle {
     public int[] SuspectedPatients=new int[31];
     public int[] CurePatients=new int[31];
     public int[] DeadPatients=new int[31];
-    public boolean[] IsVisited = new boolean[31];
-    public int AllIP=0,AllSP=0,AllCP=0,AllDP=0;
-    //private static String REGEX_CHINESE = "[\u4e00-\u9fa5]";/* 中文正则*/
+    public boolean[] IsProvince = new boolean[31];
+
+
+    public int AllIP=0,AllSP=0,AllCURE=0,AllDEAD=0;
     ArrayList<String> FileNames = new ArrayList<>();//日志名字
-    //ArrayList<String> FileContent = new ArrayList<>();//日志内容
     public FileHandle(){
 
     }
@@ -162,7 +162,6 @@ class FileHandle {
                 String line = "";
                 while ((line = br.readLine()) != null) {
                     if (!line.startsWith("//"))
-                        //FileContent.add(line);//指定日期前所有日志全输入filecontent
                         FileProcessing(line);
                 }
             }
@@ -196,7 +195,7 @@ class FileHandle {
         boolean isMatch8 = Pattern.matches(pattern8, line);
 
         if(isMatch1) //新增 感染患者处理
-            //addIP(string);
+            DealIP(line);
         else if(isMatch2) //新增 疑似患者处理
             //addSP(string) ;
         else if(isMatch3) //新增 治愈患者处理
@@ -211,6 +210,18 @@ class FileHandle {
             //diagnosisSP(string);
         else if(isMatch8) //排除 疑似患者处理
             //removeSP(string);
+        }
+        public void DealIP(String line){
+            String[] str = line.split(" "); //将字符串以空格分割为多个字符串
+            int n = Integer.valueOf(str[3].replace("人", ""));//将人前的数字从字符串类型转化为int类型
+            for(int i = 0; i < provinces.length; i++){
+                if(str[0].equals(provinces[i])){
+                    InfectedPatients[i]+=n;//该省份感染患者人数增加
+                    AllIP+=n;//全国感染患者人数增加
+                    IsProvince[i] = true;
+                    break;
+                }
+            }
         }
 
     }
