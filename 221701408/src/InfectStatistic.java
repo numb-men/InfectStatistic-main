@@ -50,56 +50,39 @@ class CmdHandle {
             return ;
         }
         else{
-            /*log命令位置获取和参数*/
+
             for(int i=0;i<command.length;i++) {
+                /*log命令位置获取和参数*/
                 if (command[i].equals("-log")) {
                     logorder = i;
-                    break;
+                    logparam=command[logorder+1];
                 }
-            }
-            logparam=command[logorder+1];
-            /*out命令位置获取和参数*/
-            for(int i=0;i<command.length;i++) {
-                if(command[i].equals("-out")) {
+                else if(command[i].equals("-out")) {
                     outorder = i;
-                    break;
+                    outparam=command[outorder+1];
                 }
-            }
-            outparam=command[outorder+1];
-            /*date命令位置获取和参数*/
-            for(int i=0;i<command.length;i++) {
-                if (command[i].equals("-date")) {
+                else if (command[i].equals("-date")) {
                     dateorder = i;
                     dateparam=command[dateorder+1];
-                    break;
                 }
-            }
-
-            /*type命令位置获取和参数*/
-            for(int i=0;i<command.length;i++) {
-                if (command[i].equals("-type")) {
+                else if (command[i].equals("-type")) {
                     typeorder = i;
-                    break;
+                    for(int j=typeorder+1;j<command.length;j++){
+                        if(command[j].startsWith("-"))
+                            break;
+                        else
+                            typeparam.add(command[j]);
+                    }
                 }
-            }
-            for(int i=typeorder+1;i<command.length;i++){
-                if(command[i].startsWith("-"))
-                    break;
-                else
-                    typeparam.add(command[i]);
-            }
-            /*province命令位置获取和参数*/
-            for(int i=0;i<command.length;i++) {
-                if (command[i].equals("-province")) {
+                else if (command[i].equals("-province")) {
                     provinceorder = i;
-                    break;
+                    for(int j=provinceorder+1;j<command.length;j++){
+                        if(command[j].startsWith("-"))
+                            break;
+                        else
+                            provinceparam.add(command[j]);
+                    }
                 }
-            }
-            for(int i=provinceorder+1;i<command.length;i++){
-                if(command[i].startsWith("-"))
-                    break;
-                else
-                    provinceparam.add(command[i]);
             }
         }
         FileHandle f = new FileHandle();
