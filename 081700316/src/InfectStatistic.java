@@ -52,334 +52,346 @@ public class InfectStatistic {
     public static String out_path;
 
     /**
-     * 获取文件
+     * 文件输入输出
      */
-    public static void getFile() throws Throwable {
-        File file = new File(in_path);
-        File[] fileList = file.listFiles();
-        String fileName;
 
-        for (int i = 0; i < fileList.length; i++) {
-            fileName = fileList[i].getName();
-            readFile(in_path + fileName);
-        }
-    }
+    class ioFile {
+        /**
+         * 获取文件
+         */
+        public void getFile() throws Throwable {
+            File file = new File(in_path);
+            File[] fileList = file.listFiles();
+            String fileName;
 
-    /**
-     * 读文件
-     */
-    public static void readFile(String filePath) throws Throwable {
-        try {
-            Throwable var1 = null;
-            Object var2 = null;
-
-            try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
-
-                String line;
-                try {
-                    while((line = in.readLine()) != null) {
-                        FileProcessing(line);
-                    }
-                } finally {
-                    if (in != null) {
-                        in.close();
-                    }
-
-                }
-            } catch (Throwable var11) {
-                if (var1 == null) {
-                    var1 = var11;
-                } else if (var1 != var11) {
-                    var1.addSuppressed(var11);
-                }
-
-                throw var1;
+            for (int i = 0; i < fileList.length; i++) {
+                fileName = fileList[i].getName();
+                readFile(in_path + fileName);
             }
-        } catch (Exception var12) {
-            var12.printStackTrace();
         }
 
+        /**
+         * 读文件
+         */
+        void readFile(String filePath) throws Throwable {
+            try {
+                Throwable var1 = null;
+                Object var2 = null;
+
+                try {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
+
+                    String line;
+                    try {
+                        while((line = in.readLine()) != null) {
+                            LogLine.FileProcessing(line);
+                        }
+                    } finally {
+                        if (in != null) {
+                            in.close();
+                        }
+
+                    }
+                } catch (Throwable var11) {
+                    if (var1 == null) {
+                        var1 = var11;
+                    } else if (var1 != var11) {
+                        var1.addSuppressed(var11);
+                    }
+
+                    throw var1;
+                }
+            } catch (Exception var12) {
+                var12.printStackTrace();
+            }
+
+        }
+
+        /**
+         * 写文件
+         */
+        void writeFile() throws Throwable {
+            try {
+                Throwable var0 = null;
+                Object var1 = null;
+
+                try {
+                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(out_path)), "UTF-8"));
+                    try {
+                        province_status[0] = 1;
+                        for(int i = 0; i < province_str.length; i++) {
+                            if(province_status[i] == 1) {
+                                bw.write(province_str[i] + " ");
+                                for (int j = 0; j < type_num.length; j++) {
+                                    if (type_num[j] == 1) {
+                                        bw.write(type_str[j] + people_num[i][j] + "人 ");
+                                    }
+                                }
+                                bw.newLine();
+                            }
+                        }
+                        bw.write("// 该文档并非真实数据，仅供测试使用");
+                    } finally {
+                        if (bw != null) {
+                            bw.close();
+                        }
+
+                    }
+                } catch (Throwable var10) {
+                    if (var0 == null) {
+                        var0 = var10;
+                    } else if (var0 != var10) {
+                        var0.addSuppressed(var10);
+                    }
+
+                    throw var0;
+                }
+            } catch (Exception var11) {
+                var11.printStackTrace();
+            }
+
+        }
     }
 
-    /**
-     * 文本内容处理
-     */
-    public static void FileProcessing(String string) {
-        int num = -1;
-        for(int i=0; i<situation_str.length; i++){
-            boolean isMatch = Pattern.matches(situation_str[i], string);
-            if(isMatch)
-                num = i;
-        }
-        switch(num) {
-            case 0:
-                addInfected(string);
-                break;
-            case 1:
-                addSuspected(string);
-                break;
-            case 2:
-                flowInfected(string);
-                break;
-            case 3:
-                flowSuspected(string);
-                break;
-            case 4:
-                addDead(string);
-                break;
-            case 5:
-                addCure(string);
-                break;
-            case 6:
-                diagnosisSuspected(string);
-                break;
-            case 7:
-                removeSuspected(string);
-                break;
-            default:
-                System.out.println("wrong!!!");
-        }
-    }
 
     /**
-     * 新增 感染患者
+     * 不同类型日志行处理
      */
-    public static void addInfected(String string) {
-        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-        Matcher m = p.matcher(string);
-        String[] arr = new String[5];
-        int cnt=0;
-        while (m.find()) {
+    static class LogLine {
+        /**
+         * 文本内容处理
+         */
+        public static void FileProcessing(String string) {
+            int num = -1;
+            for (int i = 0; i < situation_str.length; i++) {
+                boolean isMatch = Pattern.matches(situation_str[i], string);
+                if (isMatch)
+                    num = i;
+            }
+            switch (num) {
+                case 0:
+                    addInfected(string);
+                    break;
+                case 1:
+                    addSuspected(string);
+                    break;
+                case 2:
+                    flowInfected(string);
+                    break;
+                case 3:
+                    flowSuspected(string);
+                    break;
+                case 4:
+                    addDead(string);
+                    break;
+                case 5:
+                    addCure(string);
+                    break;
+                case 6:
+                    diagnosisSuspected(string);
+                    break;
+                case 7:
+                    removeSuspected(string);
+                    break;
+                default:
+                    System.out.println("wrong!!!");
+            }
+        }
+
+        /**
+         * 新增 感染患者
+         */
+        static void addInfected(String string) {
+            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
+            Matcher m = p.matcher(string);
+            String[] arr = new String[5];
+            int cnt = 0;
+            while (m.find()) {
                 arr[cnt] = m.group();
                 cnt++;
-        }
-        int n = Integer.parseInt(arr[3]);
-        for(int i = 0; i < province_str.length; i++) {
-            if(arr[0].equals(province_str[i])) {
-                people_num[0][0] += n;
-                people_num[i][0] += n;
-                province_status[i] = 1;
-                break;
             }
-        }
-    }
-
-    /**
-     * 新增 疑似患者
-     */
-    public static void addSuspected(String string) {
-        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-        Matcher m = p.matcher(string);
-        String[] arr = new String[5];
-        int cnt=0;
-        while (m.find()) {
-            arr[cnt] = m.group();
-            cnt++;
-        }
-        int n = Integer.parseInt(arr[3]);
-        for(int i = 0; i < province_str.length; i++) {
-            if(arr[0].equals(province_str[i])) {
-                people_num[0][1] += n;
-                people_num[i][1] += n;
-                province_status[i] = 1;
-                break;
-            }
-        }
-    }
-
-    /**
-     * 感染患者 流入
-     */
-    public static void flowInfected(String string) {
-        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-        Matcher m = p.matcher(string);
-        String[] arr = new String[6];
-        int cnt=0;
-        while (m.find()) {
-            arr[cnt] = m.group();
-            cnt++;
-        }
-        int n = Integer.parseInt(arr[4]);
-        for(int i = 0; i < province_str.length; i++) {
-            if(arr[0].equals(province_str[i])) {
-                people_num[i][0] -= n;
-                province_status[i] = 1;
-            }
-            if(arr[3].equals(province_str[i])) {
-                people_num[i][0] += n;
-                province_status[i] = 1;
-            }
-        }
-    }
-
-    /**
-     * 疑似患者 流入
-     */
-    public static void flowSuspected(String string) {
-        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-        Matcher m = p.matcher(string);
-        String[] arr = new String[6];
-        int cnt=0;
-        while (m.find()) {
-            arr[cnt] = m.group();
-            cnt++;
-        }
-        int n = Integer.parseInt(arr[4]);
-        for(int i = 0; i < province_str.length; i++) {
-            if(arr[0].equals(province_str[i])) {
-                people_num[i][1] -= n;
-                province_status[i] = 1;
-            }
-            if(arr[3].equals(province_str[i])) {
-                people_num[i][1] += n;
-                province_status[i] = 1;
-            }
-        }
-
-    }
-
-    /**
-     * 死亡
-     */
-    public static void addDead(String string) {
-        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-        Matcher m = p.matcher(string);
-        String[] arr = new String[4];
-        int cnt=0;
-        while (m.find()) {
-            arr[cnt] = m.group();
-            cnt++;
-        }
-        int n = Integer.parseInt(arr[2]);
-        for(int i = 0; i < province_str.length; i++) {
-            if(arr[0].equals(province_str[i])) {
-                people_num[0][3] += n;
-                people_num[0][0] -= n;
-                people_num[i][3] += n;
-                people_num[i][0] -= n;
-                province_status[i] = 1;
-                break;
-            }
-        }
-    }
-
-    /**
-     * 治愈
-     */
-    public static void addCure(String string) {
-        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-        Matcher m = p.matcher(string);
-        String[] arr = new String[4];
-        int cnt=0;
-        while (m.find()) {
-            arr[cnt] = m.group();
-            cnt++;
-        }
-        int n = Integer.parseInt(arr[2]);
-        for(int i = 0; i < province_str.length; i++) {
-            if(arr[0].equals(province_str[i])) {
-                people_num[0][2] += n;
-                people_num[0][0] -= n;
-                people_num[i][2] += n;
-                people_num[i][0] -= n;
-                province_status[i] = 1;
-                break;
-            }
-        }
-    }
-
-    /**
-     * 疑似患者 确诊感染
-     */
-    public static void diagnosisSuspected(String string) {
-        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-        Matcher m = p.matcher(string);
-        String[] arr = new String[5];
-        int cnt=0;
-        while (m.find()) {
-            arr[cnt] = m.group();
-            cnt++;
-        }
-        int n = Integer.parseInt(arr[3]);
-        for(int i = 0; i < province_str.length; i++) {
-            if(arr[0].equals(province_str[i])) {
-                people_num[0][1] -= n;
-                people_num[0][0] += n;
-                people_num[i][1] -= n;
-                people_num[i][0] += n;
-                province_status[i] = 1;
-                break;
-            }
-        }
-    }
-
-    /**
-     * 排除 疑似患者
-     */
-    public static void removeSuspected(String string) {
-        Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
-        Matcher m = p.matcher(string);
-        String[] arr = new String[5];
-        int cnt=0;
-        while (m.find()) {
-            arr[cnt] = m.group();
-            cnt++;
-        }
-        int n = Integer.parseInt(arr[3]);
-        for(int i = 0; i < province_str.length; i++) {
-            if(arr[0].equals(province_str[i])) {
-                people_num[i][1] -= n;
-                people_num[0][1] -= n;
-                province_status[i] = 1;
-                break;
-            }
-        }
-    }
-
-    /**
-     * 写文件
-     */
-    public static void writeFile() throws Throwable {
-        try {
-            Throwable var0 = null;
-            Object var1 = null;
-
-            try {
-                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(out_path)), "UTF-8"));
-                try {
-                    province_status[0] = 1;
-                    for(int i = 0; i < province_str.length; i++) {
-                        if(province_status[i] == 1) {
-                            bw.write(province_str[i] + " ");
-                            for (int j = 0; j < type_num.length; j++) {
-                                if (type_num[j] == 1) {
-                                    bw.write(type_str[j] + people_num[i][j] + "人 ");
-                                }
-                            }
-                            bw.newLine();
-                        }
-                    }
-                    bw.write("// 该文档并非真实数据，仅供测试使用");
-                } finally {
-                    if (bw != null) {
-                        bw.close();
-                    }
-
+            int n = Integer.parseInt(arr[3]);
+            for (int i = 0; i < province_str.length; i++) {
+                if (arr[0].equals(province_str[i])) {
+                    people_num[0][0] += n;
+                    people_num[i][0] += n;
+                    province_status[i] = 1;
+                    break;
                 }
-            } catch (Throwable var10) {
-                if (var0 == null) {
-                    var0 = var10;
-                } else if (var0 != var10) {
-                    var0.addSuppressed(var10);
-                }
-
-                throw var0;
             }
-        } catch (Exception var11) {
-            var11.printStackTrace();
         }
 
+        /**
+         * 新增 疑似患者
+         */
+        static void addSuspected(String string) {
+            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
+            Matcher m = p.matcher(string);
+            String[] arr = new String[5];
+            int cnt = 0;
+            while (m.find()) {
+                arr[cnt] = m.group();
+                cnt++;
+            }
+            int n = Integer.parseInt(arr[3]);
+            for (int i = 0; i < province_str.length; i++) {
+                if (arr[0].equals(province_str[i])) {
+                    people_num[0][1] += n;
+                    people_num[i][1] += n;
+                    province_status[i] = 1;
+                    break;
+                }
+            }
+        }
+
+        /**
+         * 感染患者 流入
+         */
+        static void flowInfected(String string) {
+            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
+            Matcher m = p.matcher(string);
+            String[] arr = new String[6];
+            int cnt = 0;
+            while (m.find()) {
+                arr[cnt] = m.group();
+                cnt++;
+            }
+            int n = Integer.parseInt(arr[4]);
+            for (int i = 0; i < province_str.length; i++) {
+                if (arr[0].equals(province_str[i])) {
+                    people_num[i][0] -= n;
+                    province_status[i] = 1;
+                }
+                if (arr[3].equals(province_str[i])) {
+                    people_num[i][0] += n;
+                    province_status[i] = 1;
+                }
+            }
+        }
+
+        /**
+         * 疑似患者 流入
+         */
+        static void flowSuspected(String string) {
+            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
+            Matcher m = p.matcher(string);
+            String[] arr = new String[6];
+            int cnt = 0;
+            while (m.find()) {
+                arr[cnt] = m.group();
+                cnt++;
+            }
+            int n = Integer.parseInt(arr[4]);
+            for (int i = 0; i < province_str.length; i++) {
+                if (arr[0].equals(province_str[i])) {
+                    people_num[i][1] -= n;
+                    province_status[i] = 1;
+                }
+                if (arr[3].equals(province_str[i])) {
+                    people_num[i][1] += n;
+                    province_status[i] = 1;
+                }
+            }
+
+        }
+
+        /**
+         * 死亡
+         */
+        static void addDead(String string) {
+            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
+            Matcher m = p.matcher(string);
+            String[] arr = new String[4];
+            int cnt = 0;
+            while (m.find()) {
+                arr[cnt] = m.group();
+                cnt++;
+            }
+            int n = Integer.parseInt(arr[2]);
+            for (int i = 0; i < province_str.length; i++) {
+                if (arr[0].equals(province_str[i])) {
+                    people_num[0][3] += n;
+                    people_num[0][0] -= n;
+                    people_num[i][3] += n;
+                    people_num[i][0] -= n;
+                    province_status[i] = 1;
+                    break;
+                }
+            }
+        }
+
+        /**
+         * 治愈
+         */
+        static void addCure(String string) {
+            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
+            Matcher m = p.matcher(string);
+            String[] arr = new String[4];
+            int cnt = 0;
+            while (m.find()) {
+                arr[cnt] = m.group();
+                cnt++;
+            }
+            int n = Integer.parseInt(arr[2]);
+            for (int i = 0; i < province_str.length; i++) {
+                if (arr[0].equals(province_str[i])) {
+                    people_num[0][2] += n;
+                    people_num[0][0] -= n;
+                    people_num[i][2] += n;
+                    people_num[i][0] -= n;
+                    province_status[i] = 1;
+                    break;
+                }
+            }
+        }
+
+        /**
+         * 疑似患者 确诊感染
+         */
+        static void diagnosisSuspected(String string) {
+            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
+            Matcher m = p.matcher(string);
+            String[] arr = new String[5];
+            int cnt = 0;
+            while (m.find()) {
+                arr[cnt] = m.group();
+                cnt++;
+            }
+            int n = Integer.parseInt(arr[3]);
+            for (int i = 0; i < province_str.length; i++) {
+                if (arr[0].equals(province_str[i])) {
+                    people_num[0][1] -= n;
+                    people_num[0][0] += n;
+                    people_num[i][1] -= n;
+                    people_num[i][0] += n;
+                    province_status[i] = 1;
+                    break;
+                }
+            }
+        }
+
+        /**
+         * 排除 疑似患者
+         */
+        static void removeSuspected(String string) {
+            Pattern p = Pattern.compile("[\\u4e00-\\u9fa5]+|\\d+");
+            Matcher m = p.matcher(string);
+            String[] arr = new String[5];
+            int cnt = 0;
+            while (m.find()) {
+                arr[cnt] = m.group();
+                cnt++;
+            }
+            int n = Integer.parseInt(arr[3]);
+            for (int i = 0; i < province_str.length; i++) {
+                if (arr[0].equals(province_str[i])) {
+                    people_num[i][1] -= n;
+                    people_num[0][1] -= n;
+                    province_status[i] = 1;
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -495,6 +507,8 @@ public class InfectStatistic {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             try {
                 LocalDate date = LocalDate.parse(dateStr, formatter);
+                if(!date.isLeapYear())
+                    return false;
             } catch (Exception e) {
                 return false;
             }
@@ -569,7 +583,8 @@ public class InfectStatistic {
         if(b == false) {
             return;
         }
-        getFile();
-        writeFile();
+        InfectStatistic.ioFile filestream = infect.new ioFile();
+        filestream.getFile();
+        filestream.writeFile();
     }
 }
