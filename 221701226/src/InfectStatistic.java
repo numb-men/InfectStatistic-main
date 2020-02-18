@@ -8,6 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
 
+import org.junit.Test;
+
 
 /**
  * InfectStatistic
@@ -78,14 +80,14 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 			if(args[i].equals("-log")) {  //-log部分的解析
 				i++;  //将命令行参数移动到准备解析的部分
 				isLogExist = true ;  //-log存在的判断
-								i = getLogPath(i, args);
+				i = getLogPath(i, args);
 				if(i == -1) {  //获得日志文件所在地址存在错误
 					System.out.println("命令行有误");
 					return false;
 				}
 			}
 			
-			if(args[i].equals("-out")) {  //-out部分的解析
+			else if(args[i].equals("-out")) {  //-out部分的解析
 				i++;  //将命令行参数移动到准备解析的部分
 				isOutExist = true; 
 				i = getOutPath(i, args);
@@ -95,7 +97,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 				}
 			}
 			
-			if(args[i].equals("-date")) {  //-date部分的解析
+			else if(args[i].equals("-date")) {  //-date部分的解析
 				i++;  //将命令行参数移动到准备解析的部分
 				i = getDate(i, args);
 				if(i == -1) {  //获得日志文件所在地址存在错误
@@ -104,7 +106,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 				}
 			}
 			
-			if(args[i].equals("-type")) {  //-type部分的解析
+			else if(args[i].equals("-type")) {  //-type部分的解析
 				isTypeExist = 1;  //-type部分有指定
 				i++;  //将命令行参数移动到准备解析的部分
 				i = getType(i, args);
@@ -114,7 +116,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 				}
 			}
 			
-			if(args[i].equals("-province")) {  //-province部分的解析
+			else if(args[i].equals("-province")) {  //-province部分的解析
 				isProvinceExist = 1;  //-province部分有指定
 				i++;  //将命令行参数移动到准备解析的部分
 				i = getProvince(i, args);
@@ -149,15 +151,15 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 				outPath = args[i];
 			else  
 	         return -1;
-		return i;  		
+			return i;  		
 		}
 	
 		public  int getDate(int i, String[] args) {  //获得指定日期
-		 if(date.compareTo(args[i]) >= 0)  //判断指定日期是否超过当前日期
+			if(date.compareTo(args[i]) >= 0)  //判断指定日期是否超过当前日期
 				date = args[i];   //若不超过，将日期更改为指定日期
 			else 
 			  return -1;
-		return i;  
+			return i;  
 		}
 	
 		public int getType(int i, String[] args) {  //获得指定类型
@@ -171,17 +173,17 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
     				j++;
     				i++;
     			} 
-    			if(args[i].equals("sp")){
+    			else if(args[i].equals("sp")){
     				type[j] = 2;
     				j++;
     				i++;
     			} 
-    			if(args[i].equals("cure")){
+    			else if(args[i].equals("cure")){
     				type[j] = 3;
     				j++;
     				i++;
     			} 
-    			if(args[i].equals("dead")){
+    			else if(args[i].equals("dead")){
     				type[j] = 4;
     				j++;
     				i++;
@@ -202,9 +204,9 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
     					break;
     				 }
     			 }
-    	}
-	return i-1;  //避免解析过程中漏掉部分信息 	
-	}
+    		}
+    			return i-1;  //避免解析过程中漏掉部分信息 	
+		}
     
 	}
 	
@@ -424,7 +426,7 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 							else{  //若-type指定
 								for( j = 0; j < 4; j++)
 									if(type[j] != 0)
-									fwriter.write(typeStr[type[j]] + peopleNumber[i][type[j+1]-1] + "人 ");
+									fwriter.write(typeStr[type[j]-1] + peopleNumber[i][type[j]-1] + "人 ");
 							}
 							fwriter.write("\n");
 						}
@@ -440,8 +442,8 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 							}
 							else{  //若-type指定
 								for( j = 0; j < 4; j++)
-									if(type[j+1] != 0)
-										fwriter.write(typeStr[type[j]] + peopleNumber[i][type[j+1]-1] + "人 ");
+									if(type[j] != 0)
+										fwriter.write(typeStr[type[j]-1] + peopleNumber[i][type[j]-1] + "人 ");
 							} 
 							fwriter.write("\n");
 						}
@@ -467,4 +469,85 @@ class InfectStatistic { //主类有内部类FileDispose(文件处理类)，CmdAr
 
 	
 	}
+//以下为测试样本
+/*import org.junit.Test;
+
+public class InfectStatisticTest {
+
+	@Test  //测试1只有-log和-out两个命令，其他命令未指定
+	public void test1() {
+		String[] testStr = {"list", "-log", "D:\\InfectStatistic-test\\log\\", 
+				"-out", "D:\\InfectStatistic-test\\result\\testOut1.txt"};
+		InfectStatistic.main(testStr);
+	}
+	
+	@Test  //测试2在测试1的基础上添加-date命令,日期为第一篇日志发布的时间之前
+	public void test2() {
+		String[] testStr = {"list", "-log", "D:\\InfectStatistic-test\\log\\", 
+				"-out", "D:\\InfectStatistic-test\\result\\testOut2.txt", "-date", "2020-01-01"} ;
+		InfectStatistic.main(testStr);
+	}
+	
+	@Test  //测试3在测试2的基础上修改了日期的值，日期为2020-01-24，即没有对应当天的日志文件但是有之前日期的对应日志文件
+	public void test3() {
+		String[] testStr = {"list", "-log", "D:\\InfectStatistic-test\\log\\", 
+				"-out", "D:\\InfectStatistic-test\\result\\testOut3.txt", "-date", "2020-01-24"} ;
+		InfectStatistic.main(testStr);
+	}
+	
+	@Test   //测试4在测试3的基础上添加了-province命令，值为一个出现过的省份福建
+	public void test4() {
+		String[] testStr = {"list", "-log", "D:\\InfectStatistic-test\\log\\", 
+				"-out", "D:\\InfectStatistic-test\\result\\testOut4.txt", "-date", "2020-01-24"
+				, "-province", "福建"} ;
+		InfectStatistic.main(testStr);
+	}
+	
+	@Test  //测试5在测试4的基础上修改了省份的值，值为全国和一个未出现的省份浙江
+	public void test5() {
+		String[] testStr = {"list", "-log", "D:\\InfectStatistic-test\\log\\", 
+				"-out", "D:\\InfectStatistic-test\\result\\testOut5.txt", "-date", "2020-01-24",
+				 "-province", "全国", "浙江"} ;
+		InfectStatistic.main(testStr);
+	}
+	
+	@Test  //测试6在测试4的基础上添加了-type命令，值为sp和ip
+	public void test6() {   
+		String[] testStr = {"list", "-log", "D:\\InfectStatistic-test\\log\\", 
+				"-out", "D:\\InfectStatistic-test\\result\\testOut6.txt", "-date", "2020-01-24",
+				 "-type", "sp", "ip"} ;
+		InfectStatistic.main(testStr);
+	}
+	
+	@Test  //测试7在测试6的基础上替换了sp和ip的位置
+	public void test7() {  
+		String[] testStr = {"list", "-log", "D:\\InfectStatistic-test\\log\\", 
+				"-out", "D:\\InfectStatistic-test\\result\\testOut7.txt", "-date", "2020-01-24",
+				"-type", "ip" , "sp"} ;
+		InfectStatistic.main(testStr);
+	}
+	
+	@Test  //测试8运用加入了所有的-type的值，且以cure，ip，dead，sp的顺序输入
+	public void test8() {
+		String[] testStr = {"list", "-log", "D:\\InfectStatistic-test\\log\\", 
+				"-out", "D:\\InfectStatistic-test\\result\\testOut8.txt", "-date", "2020-01-24",
+				"-type", "cure", "ip", "dead", "sp"} ;
+		InfectStatistic.main(testStr);
+	}
+	
+	@Test   //测试9在测试8的基础上添加了-province的命令，值为全国，福建，浙江  
+	public void test9() {  
+		String[] testStr = {"list", "-log", "D:\\InfectStatistic-test\\log\\", 
+				"-out", "D:\\InfectStatistic-test\\result\\testOut9.txt",
+				"-province", "全国", "福建", "浙江","-type", "cure", "ip", "dead", "sp"} ;
+		InfectStatistic.main(testStr);
+	}
+
+	@Test  //测试10在测试1的基础上更改了-log和-out命令的输入顺序
+	public void test10() {
+		String[] testStr = {"list", "-out", "D:\\InfectStatistic-test\\result\\testOut10.txt" 
+				, "-log", "D:\\InfectStatistic-test\\log\\"} ;
+		InfectStatistic.main(testStr);
+	}
+}*/
 
