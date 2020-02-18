@@ -348,6 +348,11 @@ public class InfectStatistic {
 	            sb.append((char) reader.read());
 	        }
 	        System.out.println(sb.toString());
+	        // System.out.println(log);
+			// System.out.println(out);
+			// System.out.println(date);
+			// System.out.println(type);
+			// System.out.println(province);
 	        reader.close();
 	        fip.close();
 	}
