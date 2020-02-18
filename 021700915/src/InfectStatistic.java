@@ -1,7 +1,10 @@
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,6 +18,7 @@ class Province {
 	int cure;
 	int dead;
 	boolean status;
+	boolean showstatus;
 	Province(String name) {
 		this.name=name;
 		this.ip=0;
@@ -22,13 +26,14 @@ class Province {
 		this.cure=0;
 		this.dead=0;
 		this.status=false;
+		this.showstatus=false;
 	}
 }
 
 public class InfectStatistic {
 	
-	static String log=null;
-	static String out=null;
+	static String log="D:log";
+	static String out="D:a.txt";
 	static String date="2020-03-03";
 	static StringBuffer type=new StringBuffer("");
 	static StringBuffer province=new StringBuffer("");
@@ -43,9 +48,9 @@ public class InfectStatistic {
 	public static void main(String[] args) throws IOException {
 		provinceInit();
 //		readCommand(args);
-		readFile("D:log");
+//		readFile(log);
 //		System.out.println(provincelist[0].name);
-		outputFile();
+		outputFile(out,type,province);
     }
 	
 	public static void readCommand(String[] args) {
@@ -105,11 +110,10 @@ public class InfectStatistic {
                     	SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-dd");
                     	Date logdate=null;
                     	Date cmddate=null;
-						try {
-							logdate = format.parse(filedate);
-//							if(date.equals(null)) date="2050-1-1";
+                    	try {
+                    		logdate = format.parse(filedate);
 							cmddate = format.parse(date);
-						} catch (ParseException e) {
+							} catch (ParseException e) {
 							e.printStackTrace();
 						}
 //                    	System.out.println(logdate.toString());
@@ -143,6 +147,7 @@ public class InfectStatistic {
 	}
 	static void statistic(String line) {
 		
+		String p="\\\\";
 		String p1=".*新增 感染患者.*";
 		String p2=".*新增 疑似患者.*";
 		String p3=".*感染患者 流入.*";
@@ -152,6 +157,7 @@ public class InfectStatistic {
 		String p7=".*疑似患者 确诊感染.*";
 		String p8=".*排除 疑似患者.*";
 		
+		Pattern r=Pattern.compile(p);
 		Pattern r1=Pattern.compile(p1);
 		Pattern r2=Pattern.compile(p2);
 		Pattern r3=Pattern.compile(p3);
@@ -161,6 +167,7 @@ public class InfectStatistic {
 		Pattern r7=Pattern.compile(p7);
 		Pattern r8=Pattern.compile(p8);
 		
+		Matcher m=r.matcher(line);
 		Matcher m1=r1.matcher(line);
 		Matcher m2=r2.matcher(line);
 		Matcher m3=r3.matcher(line);
@@ -170,7 +177,8 @@ public class InfectStatistic {
 		Matcher m7=r7.matcher(line);
 		Matcher m8=r8.matcher(line);
 		
-		if(m1.find()) {
+		if(m.find()) return;
+		else if(m1.find()) {
 			String[] str=line.split(" ");
 			int index=findProvince(str[0]);
 			provincelist[0].ip+=Integer.parseInt(str[3].substring(0, str[3].length()-1));
@@ -252,11 +260,41 @@ public class InfectStatistic {
 		
 		provincelist[0].status=true;
 	}
-	static void outputFile() {
-		for(int i=0;i<provinces.length;i++) {
-			if(provincelist[i].status==true) {
-				System.out.println(provincelist[i].name+"感染："+provincelist[i].ip+" 疑似感染："+provincelist[i].sp);
+	static void outputFile(String out,StringBuffer stype,StringBuffer sprovince) throws IOException {
+		boolean ipstatus=false;
+		boolean spstatus=false;
+		boolean curestatus=false;
+		boolean deadstatus=false;
+		boolean provincestatus=false;
+		String[] type=stype.toString().split(" ");
+		String[] province=sprovince.toString().split(" ");
+		if(stype.toString().equals("")) {
+			ipstatus=true;
+			spstatus=true;
+			curestatus=true;
+			deadstatus=true;
+		}
+		else {
+			for(int i=0;i<type.length;i++) {
+				if(type[i].equals("ip")) ipstatus=true;
+				if(type[i].equals("sp")) spstatus=true;
+				if(type[i].equals("cure")) curestatus=true;
+				if(type[i].equals("dead")) deadstatus=true;
 			}
+		}
+		if(sprovince.toString().equals("")) provincestatus=false;
+		else {
+			for(int i=0;i<province.length;i++) {
+				provincelist[findProvince(province[i])].showstatus=true;
+			}
+		}
+		File f=new File(out);
+        FileOutputStream fop=new FileOutputStream(f);
+        OutputStreamWriter writer=new OutputStreamWriter(fop, "UTF-8");
+		for(int i=0;i<provinces.length;i++) {
+			
+	        writer.append("hello");
+	        writer.close();
 		}
 	}
 }
