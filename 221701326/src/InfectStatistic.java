@@ -38,7 +38,8 @@ public class InfectStatistic {
 			 fo.findFile(new File(cmd.logpath),conditions);
 			 fo.writetoFile(new File(cmd.targetpath),conditions);
 			return;
-		} else {
+		} 
+		else {
 			System.out.println("只接受list命令 相关参数：-log -out ");
 			System.out.println("暂不支持其他命令");
 			return;
@@ -387,10 +388,12 @@ class commandline {
 				test = 0;
 				if (isLog(args[i])) {
 					test = 1;
-				} else if (isOut(args[i])) {
+				} 
+				else if (isOut(args[i])) {
 					test = 2;
 				} 
-			} else {
+			} 
+			else {
 				if (test == 1) {
 					File file = new File(args[i]);
 					if (!file.exists()) {
@@ -408,7 +411,8 @@ class commandline {
 					if (!file.exists()) {
 						try {
 							file.createNewFile();// 创建日志文件
-						} catch (IOException e) {
+						} 
+						catch (IOException e) {
 							// TODO Auto-generated catch block
 							System.out.println(
 								"-out错误，'" + args[i] + "'不存在并且无法创建该文件");
