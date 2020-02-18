@@ -115,15 +115,12 @@ class InfectStatistic
         		continue;
         	}
 			try 
-			{
+			{			    
 				File afile = new File(logList+s);
-				//System.out.println(logList+s);
 		        Scanner sc = new Scanner(afile);
-		        System.out.println(afile.exists());
 		        while (sc.hasNext()) 
 		        {
 		            String first=sc.next();
-		            System.out.println(first);
 		            if (first.equals("//")) 
 		            {
 		            	sc.nextLine();
@@ -133,22 +130,20 @@ class InfectStatistic
 		            	int index=0;
 		            	for (int i=0;i<32;i++)
 		            	{
-		            		if (first.equals("province[i]"))
+		            		if (first.equals(province[i]))
 		            		{
 		            			index=i;
 		            			break;
 		            		}
 		            	}
+		            	//System.out.println(index);
 		            	String second=sc.next();
 		                if (second.equals("新增")) 
 		                {
 		                	String third=sc.next();
 		                	String four=sc.next();
-		                	System.out.println(second);
-		                	System.out.println(third);
-		                	System.out.println(four);
 		                	four=four.replace("人", "");
-		                	int member=Integer.parseInt(four);
+		                	int member=Integer.parseInt(four);	                	
 		                	if (third.equals("感染患者"))
 		                	{
 		                		number[0][0]+=member;
@@ -160,8 +155,87 @@ class InfectStatistic
 		                		number[index][1]+=member;
 		                	}
 		                }
-		            }
-		                	
+		                else if (second.equals("感染患者"))
+		                {
+		                	sc.next();
+		                	String four=sc.next();
+		                	String five=sc.next();
+		                	five=five.replace("人", "");
+		                	int member=Integer.parseInt(five);
+		                	int index1=0;
+		                	for (int i=0;i<32;i++)
+			            	{
+			            		if (four.equals(province[i]))
+			            		{
+			            			index1=i;
+			            			break;
+			            		}
+			            	}
+		                	number[index][0]-=member;
+		                	number[index1][0]+=member;
+		                }
+		                else if (second.equals("疑似患者"))
+		                {
+		                	String three=sc.next();
+		                	if (three.equals("流入"))
+		                	{
+		                		String four=sc.next();
+			                	String five=sc.next();
+			                	five=five.replace("人", "");
+			                	int member=Integer.parseInt(five);
+			                	int index1=0;
+			                	for (int i=0;i<32;i++)
+				            	{
+				            		if (four.equals(province[i]))
+				            		{
+				            			index1=i;
+				            			break;
+				            		}
+				            	}
+			                	number[index][1]-=member;
+			                	number[index1][1]+=member;
+		                	}
+		                	else
+		                	{
+		                		String four=sc.next();
+		                		four=four.replace("人", "");
+			                	int member=Integer.parseInt(four);
+			                	number[index][0]+=member;
+			                	number[index][1]-=member;
+			                	number[0][0]+=member;
+			                	number[0][1]-=member;
+		                	}
+		                }
+		                else if (second.equals("死亡"))
+		                {
+		                	String three=sc.next();
+		                	three=three.replace("人", "");
+		                	int member=Integer.parseInt(three);
+		                	number[index][3]+=member;
+		                	number[index][0]-=member;
+		                	number[0][3]+=member;
+		                	number[0][0]-=member;
+		                }
+		                else if (second.equals("治愈"))
+		                {
+		                	String three=sc.next();
+		                	three=three.replace("人", "");
+		                	int member=Integer.parseInt(three);
+		                	number[index][2]+=member;
+		                	number[index][0]-=member;
+		                	number[0][2]+=member;
+		                	number[0][0]-=member;
+		                }
+		                else if (second.equals("排除"))
+		                {
+		                	sc.next();
+		                	String four=sc.next();
+	                		four=four.replace("人", "");
+		                	int member=Integer.parseInt(four);
+		                	number[index][1]-=member;
+		                	number[0][1]-=member;
+		                }
+		            }	                	
 		        }
 		        sc.close();
 			} 
@@ -194,8 +268,7 @@ class InfectStatistic
     			System.out.print(" ");
     			System.out.print(number[i][j]);
     			System.out.println();
-    			}
-    			
+    			} 			
     		}
     	}
     }
