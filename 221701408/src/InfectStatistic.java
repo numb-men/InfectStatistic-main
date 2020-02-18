@@ -8,6 +8,7 @@
  */
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.regex.Matcher;
@@ -21,6 +22,8 @@ import java.util.regex.Pattern;
 class InfectStatistic {
     public static void main(String[] args)
     {
+        CmdHandle cmd=new CmdHandle(args);
+        cmd.GetCmdParam();
 
     }
 }
@@ -238,9 +241,9 @@ class FileHandle {
             int n = Integer.valueOf(str[2].replace("人", ""));//将人前的数字从字符串类型转化为int类型
             for(int i = 0; i < provinces.length; i++){
                 if(str[0].equals(provinces[i])){
-                    SuspectedPatients[i]-=n;//该省份感染患者人数减少
+                    InfectedPatients[i]-=n;//该省份感染患者人数减少
                     CurePatients[i]+=n;//该省份治愈患者人数增加
-                    AllSP-=n;//全国感染患者人数减少
+                    AllIP-=n;//全国感染患者人数减少
                     AllCURE+=n;
                     IsProvince[i] = true;
                     break;
@@ -252,9 +255,9 @@ class FileHandle {
         int n = Integer.valueOf(str[2].replace("人", ""));//将人前的数字从字符串类型转化为int类型
         for(int i = 0; i < provinces.length; i++){
             if(str[0].equals(provinces[i])){
-                SuspectedPatients[i]-=n;//该省份感染患者人数减少
+                InfectedPatients[i]-=n;//该省份感染患者人数减少
                 DeadPatients[i]+=n;//该省份治愈患者人数增加
-                AllSP-=n;//全国感染患者人数减少
+                AllIP-=n;//全国感染患者人数减少
                 AllDEAD+=n;
                 IsProvince[i] = true;
                 break;
@@ -263,34 +266,42 @@ class FileHandle {
         }
         public void FlowIP(String line){
             String[] str = line.split(" "); //将字符串以空格分割为多个字符串
+            int flag2=0;
             int n = Integer.valueOf(str[4].replace("人", ""));//将人前的数字从字符串类型转化为int类型
             for(int i = 0; i < provinces.length; i++){
                 if(str[0].equals(provinces[i])){
                     InfectedPatients[i]-=n;//该省份感染患者人数减少
                     IsProvince[i] = true;
-                    break;
+                    flag2+=1;
+                    //break;
                 }
                 if(str[3].equals(provinces[i])){
                     InfectedPatients[i]+=n;//该省份感染患者人数增加
                     IsProvince[i] = true;
-                    break;
+                    flag2+=1;
+                    //break;
                 }
+                if(flag2==2) break;
             }
         }
         public void FlowSP(String line){
         String[] str = line.split(" "); //将字符串以空格分割为多个字符串
-        int n = Integer.valueOf(str[4].replace("人", ""));//将人前的数字从字符串类型转化为int类型
-        for(int i = 0; i < provinces.length; i++){
+            int flag3=0;
+            int n = Integer.valueOf(str[4].replace("人", ""));//将人前的数字从字符串类型转化为int类型
+            for(int i = 0; i < provinces.length; i++){
             if(str[0].equals(provinces[i])){
                 SuspectedPatients[i]-=n;//该省份疑似患者人数减少
                 IsProvince[i] = true;
-                break;
+                flag3+=1;
+                //break;
             }
             if(str[3].equals(provinces[i])){
                 SuspectedPatients[i]+=n;//该省份疑似患者人数增加
                 IsProvince[i] = true;
-                break;
+                //break;
+                flag3+=1;
             }
+                if(flag3==2) break;
         }
         }
         public void TurnSPtoIP(String line){
@@ -329,9 +340,20 @@ class FileHandle {
             if(!file.exists()){
                 file.createNewFile();
             }
-            FileWriter fileWritter = new FileWriter(file);//直接覆盖原来文件
+            //FileWriter fileWritter = new FileWriter(file);//直接覆盖原来文件
+            BufferedWriter fileWritter= null;
+            fileWritter= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), Charset.forName("UTF-8")));
+
             if((provinceparam.size() == 0)&&(typeparam.size() == 0)){
-                //fileWritter.write(content);
+                String result="全国" + " " + String.format("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人", AllIP,AllSP,AllCURE,AllDEAD)+ "\n";
+                fileWritter.write(result);
+                for (int i = 0; i < 31; i++) {
+                    if (IsProvince[i]) {
+                        String st =provinces[i] +" " +String.format("感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人",
+                                InfectedPatients[i], SuspectedPatients[i], CurePatients[i], DeadPatients[i])+ "\n";
+                        fileWritter.write(st);
+                    }
+                }
             }
             if((provinceparam.size() > 0)&&(typeparam.size() == 0)){
                 //fileWritter.write(content);
@@ -342,6 +364,7 @@ class FileHandle {
             if((provinceparam.size() > 0)&&(typeparam.size() > 0)){
                 //fileWritter.write(content);
             }
+            fileWritter.write("//该文档并非真实数据，仅供测试使用\n");
 
 
             fileWritter.flush();
