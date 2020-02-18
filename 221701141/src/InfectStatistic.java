@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 /**
@@ -5,7 +9,7 @@ import java.util.ArrayList;
  * TODO
  *
  * @author massizhi
- * @version 1.0
+ * @version 1.2
  */
 class InfectStatistic
 {
@@ -41,6 +45,9 @@ class InfectStatistic
     	{
     		if (args[i].equals("-log")) {
     			logList=args[++i];
+    			//System.out.println(logList);
+    			logList=logList.replace('/', '\\');
+    			//System.out.println(logList);
     		}
     		else if (args[i].equals("-out")) {
     			outList=args[++i];
@@ -77,7 +84,7 @@ class InfectStatistic
     			}
     		}
 		}//获取ArrayList循环结束
-    	
+    	//获取省份、类型对应的下标
     	for (int i=0;i<typeList.size();i++)
     	{
     		for (int j=0;j<type.length;j++)
@@ -98,6 +105,25 @@ class InfectStatistic
     			}
     		}
     	}
+    	
+    	File file=new File(logList);
+        //获取该路径下的文件和文件夹
+        String[] arr=file.list();
+        //for()
+        //遍历
+        for(String s:arr){
+        	FileInputStream fs;
+			try {
+				fs = new FileInputStream(logList+s);
+				System.out.println(logList+s);
+				InputStreamReader is=new InputStreamReader(fs,"UTF-8");
+				
+			} 
+			catch (Exception e) {
+				e.printStackTrace();
+			}           
+        }
+    	
     	//test
     	System.out.println(logList);
     	System.out.println(outList);
