@@ -133,19 +133,22 @@ public class InfectStatistic {
                 } else {
                     dateInput = dateInput + ".log.txt";
                 }
-                //首先与最早日志日期比较
-                int firstRes = dateInput.compareTo(nameOfFirst);
-                if (firstRes < 0) {
-                    System.out.print("指定日期"+dateInput+"未出现疫情");
-                    System.exit(0);
-                }
-                //其次与最晚日志日期比较
-                int lastRes = dateInput.compareTo(nameOfLast);
-                if (lastRes > 0) {
-                    System.out.print("日期超出范围");
-                    System.exit(0);
-                }
+                
                 for (String name : names) {
+                    
+                    //首先与最早日志日期比较
+                    int firstRes = dateInput.compareTo(nameOfFirst);
+                    if (firstRes < 0) {
+                        System.out.println("指定日期"+dateInput+"未出现疫情");
+                        break;
+                    }
+                    //其次与最晚日志日期比较
+                    int lastRes = dateInput.compareTo(nameOfLast);
+                    if (lastRes > 0) {
+                        System.out.println("日期超出范围");
+                        break;
+                    }
+                    
                     int res = dateInput.compareTo(name);
                     if (res < 0) {
                         //指定日期比日志文件的日期早
