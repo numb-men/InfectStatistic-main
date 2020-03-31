@@ -1,4 +1,5 @@
-set pr_name=ANDTENET
+set pr_name=Hanani-Chen
+git pull
 git checkout -b %pr_name%-master master
 git pull https://github.com/%pr_name%/InfectStatistic-main.git master
 del .gitignore
