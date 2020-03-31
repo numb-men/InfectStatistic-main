@@ -1,15 +1,18 @@
-# Created by .ignore support plugin (hsz.mobi)
-### Example user template template
-### Example user template
-
-# IntelliJ project files
+#忽略学号文件
+/221701138/*
+#不忽略codestyle和README文件
+!/221701138/codestyle.md
+!/221701138/README.md
+#不忽略src文件夹
+!/221701138/src/
+#src文件忽略
+/221701138/src/*
+#InfectStatistic和Lib文件
+!/221701138/src/InfectStatistic.java
+!/221701138/src/Lib.java
 .idea
-*.iml
+.settings
+.classpath
+.project
+.iml
 out
-gen
-.idea/
-InfectStatistic-example.iml
-/out/
-/log/
-/result/
-/221701337/test/
