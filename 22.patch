@@ -1,0 +1,2902 @@
+From ccdaaa0e5e0d408544dad18763eb8fb22e21ec5b Mon Sep 17 00:00:00 2001
+From: XTG-L <XTG-L@github.com>
+Date: Sun, 9 Feb 2020 11:10:06 +0800
+Subject: [PATCH 01/13] =?UTF-8?q?=E6=96=B0=E5=BB=BA=E6=96=87=E4=BB=B6?=
+ =?UTF-8?q?=E5=A4=B9221701127?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+新建文件夹221701127作为往后的代码编写的目录
+---
+ 221701127/README.md                |  4 ++++
+ 221701127/codestyle.md             | 13 +++++++++++++
+ 221701127/log/2020-01-22.log.txt   | 15 +++++++++++++++
+ 221701127/log/2020-01-23.log.txt   | 16 ++++++++++++++++
+ 221701127/log/2020-01-27.log.txt   | 15 +++++++++++++++
+ 221701127/result/ListOut1.txt      |  5 +++++
+ 221701127/result/ListOut2.txt      |  4 ++++
+ 221701127/result/ListOut3.txt      |  5 +++++
+ 221701127/src/InfectStatistic.java | 13 +++++++++++++
+ 221701127/src/Lib.java             | 10 ++++++++++
+ 10 files changed, 100 insertions(+)
+ create mode 100644 221701127/README.md
+ create mode 100644 221701127/codestyle.md
+ create mode 100644 221701127/log/2020-01-22.log.txt
+ create mode 100644 221701127/log/2020-01-23.log.txt
+ create mode 100644 221701127/log/2020-01-27.log.txt
+ create mode 100644 221701127/result/ListOut1.txt
+ create mode 100644 221701127/result/ListOut2.txt
+ create mode 100644 221701127/result/ListOut3.txt
+ create mode 100644 221701127/src/InfectStatistic.java
+ create mode 100644 221701127/src/Lib.java
+
+diff --git a/221701127/README.md b/221701127/README.md
+new file mode 100644
+index 0000000..0b7fb93
+--- /dev/null
++++ b/221701127/README.md
+@@ -0,0 +1,4 @@
++# InfectStatistic-学号
++疫情统计
++
++描述你的项目，包括如何运行、功能简介、作业链接、博客链接等
+diff --git a/221701127/codestyle.md b/221701127/codestyle.md
+new file mode 100644
+index 0000000..50bf5d5
+--- /dev/null
++++ b/221701127/codestyle.md
+@@ -0,0 +1,13 @@
++## 代码风格
++
++- 缩进
++- 变量命名
++- 每行最多字符数
++- 函数最大行数
++- 函数、类命名
++- 常量
++- 空行规则
++- 注释规则
++- 操作符前后空格
++- 其他规则
++- ...
+diff --git a/221701127/log/2020-01-22.log.txt b/221701127/log/2020-01-22.log.txt
+new file mode 100644
+index 0000000..d1470de
+--- /dev/null
++++ b/221701127/log/2020-01-22.log.txt
+@@ -0,0 +1,15 @@
++福建 新增 感染患者 2人
++福建 新增 疑似患者 5人
++湖北 新增 感染患者 15人
++湖北 新增 疑似患者 20人
++湖北 感染患者 流入 福建 2人
++湖北 疑似患者 流入 福建 3人
++湖北 死亡 1人
++湖北 治愈 2人
++福建 疑似患者 确诊感染 1人
++湖北 排除 疑似患者 2人
++// 该文档并非真实数据，仅供测试使用
++// 当日情况：list
++// 全国 感染患者15人 疑似患者22人 治愈2人 死亡1人
++// 福建 感染患者2+2+1=5人 疑似患者5+3-1=7人 治愈0人 死亡0人
++// 湖北 感染患者15-2-1-2=10人 疑似患者20-3-2=15人 治愈2人 死亡1人
+\ No newline at end of file
+diff --git a/221701127/log/2020-01-23.log.txt b/221701127/log/2020-01-23.log.txt
+new file mode 100644
+index 0000000..feef7d6
+--- /dev/null
++++ b/221701127/log/2020-01-23.log.txt
+@@ -0,0 +1,16 @@
++福建 新增 感染患者 3人
++福建 新增 疑似患者 6人
++湖北 新增 感染患者 25人
++湖北 新增 疑似患者 39人
++湖北 感染患者 流入 福建 2人
++湖北 疑似患者 流入 福建 5人
++湖北 死亡 2人
++湖北 治愈 1人
++湖北 疑似患者 确诊感染 3人
++福建 排除 疑似患者 2人
++福建 治愈 1人
++// 该文档并非真实数据，仅供测试使用
++// 当日情况：list
++// 全国 感染患者42人 疑似患者62人 治愈4人 死亡3人
++// 福建 感染患者5+3+2-1=9人 疑似患者7+6+5-2=16人 治愈1人 死亡0人
++// 湖北 感染患者10+25-2-2-1+3=33人 疑似患者15+39-5-3=46人 治愈2+1=3人 死亡1+2=3人
+\ No newline at end of file
+diff --git a/221701127/log/2020-01-27.log.txt b/221701127/log/2020-01-27.log.txt
+new file mode 100644
+index 0000000..6add394
+--- /dev/null
++++ b/221701127/log/2020-01-27.log.txt
+@@ -0,0 +1,15 @@
++福建 新增 感染患者 13人
++福建 新增 疑似患者 26人
++湖北 新增 感染患者 125人
++湖北 新增 疑似患者 239人
++湖北 死亡 18人
++湖北 治愈 21人
++湖北 疑似患者 确诊感染 6人
++福建 排除 疑似患者 2人
++福建 疑似患者 确诊感染 2人
++福建 治愈 2人
++// 该文档并非真实数据，仅供测试使用
++// 当日情况：list
++// 全国 感染患者22+125=147人 疑似患者38+279=317人 治愈3+24=27人 死亡21人
++// 福建 感染患者9+13+2-2=22人 疑似患者16+26-2-2=38人 治愈1+2=3人 死亡0人
++// 湖北 感染患者33+125-18-21+6=125人 疑似患者46+239-6=279人 治愈3+21=24人 死亡3+18=21人
+\ No newline at end of file
+diff --git a/221701127/result/ListOut1.txt b/221701127/result/ListOut1.txt
+new file mode 100644
+index 0000000..e64e984
+--- /dev/null
++++ b/221701127/result/ListOut1.txt
+@@ -0,0 +1,5 @@
++全国 感染患者15人 疑似患者22人 治愈2人 死亡1人
++福建 感染患者5人 疑似患者7人 治愈0人 死亡0人
++湖北 感染患者10人 疑似患者15人 治愈2人 死亡1人
++// 该文档并非真实数据，仅供测试使用
++// 命令：list -log D:\log\ -out D:\ListOut1.txt -date 2020-01-22
+diff --git a/221701127/result/ListOut2.txt b/221701127/result/ListOut2.txt
+new file mode 100644
+index 0000000..2165091
+--- /dev/null
++++ b/221701127/result/ListOut2.txt
+@@ -0,0 +1,4 @@
++福建 感染患者5人 疑似患者7人 治愈0人 死亡0人
++河北 感染患者0人 疑似患者0人 治愈0人 死亡0人
++// 该文档并非真实数据，仅供测试使用
++// 命令：list -log D:\log\ -out D:\ListOut2.txt -date 2020-01-22 -province 福建 河北
+diff --git a/221701127/result/ListOut3.txt b/221701127/result/ListOut3.txt
+new file mode 100644
+index 0000000..072c530
+--- /dev/null
++++ b/221701127/result/ListOut3.txt
+@@ -0,0 +1,5 @@
++全国 治愈4人 死亡3人 感染患者42人
++福建 治愈1人 死亡0人 感染患者9人
++浙江 治愈0人 死亡0人 感染患者0人
++// 该文档并非真实数据，仅供测试使用
++// 命令：list -log D:\log\ -out D:\ListOut7.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建
+diff --git a/221701127/src/InfectStatistic.java b/221701127/src/InfectStatistic.java
+new file mode 100644
+index 0000000..a33e635
+--- /dev/null
++++ b/221701127/src/InfectStatistic.java
+@@ -0,0 +1,13 @@
++/**
++ * InfectStatistic
++ * TODO
++ *
++ * @author xxx
++ * @version xxx
++ * @since xxx
++ */
++class InfectStatistic {
++    public static void main(String[] args) {
++        System.out.println("helloworld");
++    }
++}
+diff --git a/221701127/src/Lib.java b/221701127/src/Lib.java
+new file mode 100644
+index 0000000..54c6121
+--- /dev/null
++++ b/221701127/src/Lib.java
+@@ -0,0 +1,10 @@
++/**
++ * Lib
++ * TODO
++ *
++ * @author xxx
++ * @version xxx
++ * @since xxx
++ */
++public class Lib {
++}
+
+From 7d7f0864a1ab20488eca22b0650451cf8e0748df Mon Sep 17 00:00:00 2001
+From: XTG-L <XTG-L@github.com>
+Date: Sun, 9 Feb 2020 17:25:52 +0800
+Subject: [PATCH 02/13] =?UTF-8?q?=E5=AE=9E=E7=8E=B0=E9=83=A8=E5=88=86?=
+ =?UTF-8?q?=E5=87=BD=E6=95=B0=E5=8A=9F=E8=83=BD?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ 221701127/src/InfectStatistic.java | 87 ++++++++++++++++++++++++++++--
+ 221701127/src/Lib.java             |  1 -
+ 2 files changed, 82 insertions(+), 6 deletions(-)
+
+diff --git a/221701127/src/InfectStatistic.java b/221701127/src/InfectStatistic.java
+index a33e635..1d900d9 100644
+--- a/221701127/src/InfectStatistic.java
++++ b/221701127/src/InfectStatistic.java
+@@ -1,13 +1,90 @@
+ /**
+  * InfectStatistic
+- * TODO
+  *
+- * @author xxx
+- * @version xxx
+- * @since xxx
++ * @author XTG-L
++ * @version 0.1
++ * @since 2020-2-9
+  */
+ class InfectStatistic {
+     public static void main(String[] args) {
+-        System.out.println("helloworld");
++        CmdArgs cmd=new CmdArgs(args);
++        cmd.argVals("log");
+     }
+ }
++
++class CmdArgs {
++    String[] args;
++    String noUseInStart="//";
++
++    /**
++     * 传入命令行参数数组构造
++     * @param args
++     */
++    CmdArgs(String[] args) {
++        this.args=args;
++    }
++
++    /**
++     * 传入命令构造，可以设置无用的前缀，如`groovy Lib`
++     * @param args
++     * @param noUseInStart
++     */
++    CmdArgs(String[] args, String noUseInStart) {
++        this.args=args;
++        this.noUseInStart=noUseInStart;
++    }
++
++    /**
++     * 获取命令
++     * @return
++     */
++    String getCmd() {
++        String cmd=new String(args[0]);
++        for(int i=1; i<args.length;i++) {
++            cmd+=" "+args[i];
++        }
++        return cmd;
++    }
++
++    /**
++     * 获取某个命令行参数的值，多个值只会返回第一个
++     * @param key
++     * @return
++     */
++    String argVal(String key) {
++        String[] values=argVals(key);
++        String value=values[0];
++        return value;
++    }
++
++    /**
++     * 获取某个命令行参数的值，返回列表
++     * @param key
++     * @return
++     */
++    String[] argVals(String key) {
++        String[] values=null;
++        String cmd=getCmd();
++        String[] splitedCmd=cmd.split("-");
++        for (String string : splitedCmd) {
++            if(string.contains(key)) {
++                String s=string.replaceAll(key, "");
++                values=s.split(" ");
++            }
++        }
++        for (String s : values) {
++            System.out.println(s);
++        }
++        return values;
++    }
++
++    /**
++     * 判断该命令是否有对应的参数
++     * @param key
++     * @return
++     */
++    boolean has(String key) {
++        return false;
++        //...
++    }
++}
+\ No newline at end of file
+diff --git a/221701127/src/Lib.java b/221701127/src/Lib.java
+index 54c6121..86f51e2 100644
+--- a/221701127/src/Lib.java
++++ b/221701127/src/Lib.java
+@@ -1,6 +1,5 @@
+ /**
+  * Lib
+- * TODO
+  *
+  * @author xxx
+  * @version xxx
+
+From b425d63055ba93cb5c4f54f0f013018e49065c32 Mon Sep 17 00:00:00 2001
+From: XTG-L <XTG-L@github.com>
+Date: Sun, 9 Feb 2020 17:32:18 +0800
+Subject: [PATCH 03/13] Update .gitignore
+
+---
+ .gitignore | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/.gitignore b/.gitignore
+index 0fdfccb..3d393af 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -9,3 +9,4 @@ out
+ gen
+ .idea/
+ InfectStatistic-example.iml
++/bin/
+
+From 935ac602500a8a255703a78c192b56a5924495c1 Mon Sep 17 00:00:00 2001
+From: XTG-L <XTG-L@github.com>
+Date: Sun, 9 Feb 2020 22:57:15 +0800
+Subject: [PATCH 04/13] =?UTF-8?q?=E5=AE=9E=E7=8E=B0=E5=B9=B6=E4=BC=98?=
+ =?UTF-8?q?=E5=8C=96=E9=83=A8=E5=88=86=E5=87=BD=E6=95=B0=E5=8A=9F=E8=83=BD?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ 221701127/src/InfectStatistic.java | 28 +++++++++++++++++++---------
+ 1 file changed, 19 insertions(+), 9 deletions(-)
+
+diff --git a/221701127/src/InfectStatistic.java b/221701127/src/InfectStatistic.java
+index 1d900d9..2da37f4 100644
+--- a/221701127/src/InfectStatistic.java
++++ b/221701127/src/InfectStatistic.java
+@@ -2,13 +2,13 @@
+  * InfectStatistic
+  *
+  * @author XTG-L
+- * @version 0.1
++ * @version 0.2
+  * @since 2020-2-9
+  */
+ class InfectStatistic {
+     public static void main(String[] args) {
+         CmdArgs cmd=new CmdArgs(args);
+-        cmd.argVals("log");
++        System.out.println(cmd.argVals("log")[0]);
+     }
+ }
+ 
+@@ -63,18 +63,18 @@ String argVal(String key) {
+      * @return
+      */
+     String[] argVals(String key) {
++        if(!hasValue(key)) {
++            return null;
++        }
+         String[] values=null;
+         String cmd=getCmd();
+         String[] splitedCmd=cmd.split("-");
+         for (String string : splitedCmd) {
+             if(string.contains(key)) {
+-                String s=string.replaceAll(key, "");
+-                values=s.split(" ");
++                String s=string.replaceAll(key+" ", "");
++                values=s.split("[\\s]+");
+             }
+         }
+-        for (String s : values) {
+-            System.out.println(s);
+-        }
+         return values;
+     }
+ 
+@@ -83,8 +83,18 @@ String argVal(String key) {
+      * @param key
+      * @return
+      */
+-    boolean has(String key) {
++    boolean hasValue(String key) {
++        String cmd=getCmd();
++        String[] splitedCmd=cmd.split("-");
++        for (String string : splitedCmd) {
++            if(string.contains(key)) {
++                if(string.trim().length()>key.length()) {
++                    return true;
++                } else {
++                    break;
++                }
++            }
++        }
+         return false;
+-        //...
+     }
+ }
+\ No newline at end of file
+
+From 90beed2b5b5f310ca0d830e1ee13981a2dfde618 Mon Sep 17 00:00:00 2001
+From: XTG-L <XTG-L@github.com>
+Date: Wed, 12 Feb 2020 14:37:13 +0800
+Subject: [PATCH 05/13] =?UTF-8?q?=E5=AE=9E=E7=8E=B0CmdArgs=E7=B1=BB?=
+ =?UTF-8?q?=E5=92=8CCmdList=E7=B1=BB?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ 221701127/src/InfectStatistic.java | 303 +++++++++++++++++++++++++----
+ 1 file changed, 268 insertions(+), 35 deletions(-)
+
+diff --git a/221701127/src/InfectStatistic.java b/221701127/src/InfectStatistic.java
+index 2da37f4..81d842d 100644
+--- a/221701127/src/InfectStatistic.java
++++ b/221701127/src/InfectStatistic.java
+@@ -1,78 +1,97 @@
++import java.io.BufferedReader;
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.IOException;
++import java.io.InputStreamReader;
++import java.util.ArrayList;
++import java.util.regex.Pattern;
++
+ /**
+  * InfectStatistic
+  *
+  * @author XTG-L
+  * @version 0.2
+- * @since 2020-2-9
++ * @since 2020-2-8
+  */
+ class InfectStatistic {
+     public static void main(String[] args) {
+-        CmdArgs cmd=new CmdArgs(args);
+-        System.out.println(cmd.argVals("log")[0]);
++        CmdList cmd = new CmdList(args);
++        Log log = new Log(cmd);
++        ArrayList<String> as = log.getLogs();
++        for (String string : as) {
++            System.out.println(string);
++        }
+     }
+ }
+ 
++/**
++ * CmdArgs
++ * 
++ * 处理命令
++ */
+ class CmdArgs {
+-    String[] args;
+-    String noUseInStart="//";
++    protected String[] args = null;
+ 
+     /**
+      * 传入命令行参数数组构造
++     * 
+      * @param args
+      */
+     CmdArgs(String[] args) {
+-        this.args=args;
++        this.args = args;
+     }
+ 
+     /**
+-     * 传入命令构造，可以设置无用的前缀，如`groovy Lib`
+-     * @param args
+-     * @param noUseInStart
++     * 获取命令
++     * @return
+      */
+-    CmdArgs(String[] args, String noUseInStart) {
+-        this.args=args;
+-        this.noUseInStart=noUseInStart;
++    String[] getArgs() {
++        return this.args;
+     }
+ 
+     /**
+      * 获取命令
++     * 
+      * @return
+      */
+     String getCmd() {
+-        String cmd=new String(args[0]);
+-        for(int i=1; i<args.length;i++) {
+-            cmd+=" "+args[i];
++        String cmd = new String(args[0]);
++        for (int i = 1; i < args.length; i++) {
++            cmd += " " + args[i];
+         }
+         return cmd;
+     }
+ 
+     /**
+      * 获取某个命令行参数的值，多个值只会返回第一个
++     * 
+      * @param key
+      * @return
+      */
+     String argVal(String key) {
+-        String[] values=argVals(key);
+-        String value=values[0];
+-        return value;
++        return argVals(key).get(0);
+     }
+ 
+     /**
+      * 获取某个命令行参数的值，返回列表
++     * 
+      * @param key
+      * @return
+      */
+-    String[] argVals(String key) {
+-        if(!hasValue(key)) {
++    ArrayList<String> argVals(String key) {
++        if (!hasValue(key)) {
++            System.out.println(key + " no value");
+             return null;
+         }
+-        String[] values=null;
+-        String cmd=getCmd();
+-        String[] splitedCmd=cmd.split("-");
+-        for (String string : splitedCmd) {
+-            if(string.contains(key)) {
+-                String s=string.replaceAll(key+" ", "");
+-                values=s.split("[\\s]+");
++        ArrayList<String> values = new ArrayList<>();
++        for (int i = 0; i < args.length - 1; i++) {
++            if (args[i].equals(key)) {
++                for (int j = i + 1; j < args.length; j++) {
++                    if (args[j].charAt(0) == '-') {
++                        break;
++                    }
++                    values.add(args[j]);
++                }
+             }
+         }
+         return values;
+@@ -80,21 +99,235 @@ String argVal(String key) {
+ 
+     /**
+      * 判断该命令是否有对应的参数
++     * 
+      * @param key
+      * @return
+      */
+     boolean hasValue(String key) {
+-        String cmd=getCmd();
+-        String[] splitedCmd=cmd.split("-");
+-        for (String string : splitedCmd) {
+-            if(string.contains(key)) {
+-                if(string.trim().length()>key.length()) {
+-                    return true;
+-                } else {
+-                    break;
++        for (int i = 0; i < args.length; i++) {
++            if (args[i].equals(key)) {
++                if(i + 1 < args.length) {
++                    if (args[i + 1].charAt(0) != '-') {
++                        return true;
++                    } else {
++                        break;
++                    }
+                 }
+             }
+         }
+         return false;
+     }
++
++    /**
++     * 判断输入的命令是否符合规范
++     * 
++     * @return
++     */
++    boolean isLegalCmd() {
++        boolean result = false;
++        String cmd = getCmd(); // 要判断的命令
++        String[] patterns = { "list.*-log.*-out.*" }; // 命令集 包括命令及其必须的参数
++        int i; // 命令在指令集中的位置
++        // 获取命令在命令集中的位置 用于判断是什么命令
++        for (i = 0; i < patterns.length; i++) {
++            if (Pattern.matches(patterns[i], cmd)) {
++                break;
++            }
++        }
++        switch (i) {
++            case 0: {
++               if (new CmdList(args).isLegal()) {
++                   result = true;
++                }
++                break;
++          }
++            default: {
++                System.out.println("Wrong cmd");
++                break;
++            }
++        }
++        return result;
++    }
++}
++
++/**
++ * CmdList
++ * 
++ * 处理list命令
++ */
++class CmdList extends CmdArgs {
++    private String logPath = null;
++    private String outPath = null;
++
++    /**
++     * 传入list命令
++     * 
++     * @param cmd
++     */
++    CmdList(String[] args) {
++        super(args);
++        if(isLegal()) {
++            logPath = argVal("-log");
++            outPath = argVal("-out");
++        }
++    }
++
++    /**
++     * 获取日志文件的路径
++     * 
++     * @return
++     */
++    String getLogPath() {
++        return this.logPath;
++    }
++
++    /**
++     * 获取输出文件的路径
++     * 
++     * @return
++     */
++    String getOutPath() {
++        return this.outPath;
++    }
++
++    /**
++     * 判断list命令是否符合规范
++     * 
++     * @return
++     */
++    boolean isLegal() {
++        boolean result = false;
++        for (int i = 1; i < args.length; i++) {
++            switch (args[i]) {
++            case "-log":
++            case "-out":
++            case "-type":
++            case "-province": {
++                if (args[++i].charAt(0) == '-') {
++                    System.out.println(args[i - 1] + " 选项参数有误或没有参数");
++                    return result;
++                }
++                break;
++            }
++            default: {
++                break;
++            }
++            }
++        }
++        result = true;
++        return result;
++    }
++}
++
++/**
++ * Log
++ * 
++ * 处理日志文件
++ */
++class Log {
++    private String logPath = null;
++    private File logDir = null;
++    private String[] filesName = null;
++    private ArrayList<String> logs = new ArrayList<>();
++    private String ignore = "//.*";
++
++    /**
++     * 传入命令类并初始化日志文件的路径和文件列表
++     * 
++     * @param cmd
++     */
++    Log(CmdList cmdList) {
++        logPath = cmdList.getLogPath();
++        logDir = new File(logPath);
++        if (logDir.isDirectory()) {
++            this.filesName = logDir.list();
++            try {
++                readLog(logPath);
++            } catch (IOException e) {
++                e.printStackTrace();
++            }
++        }
++    }
++
++    /**
++     * 获取日志文件的文件名
++     * 
++     * @return
++     */
++    String[] getFilesName() {
++        return this.filesName;
++    }
++
++    void readLog(String logPath) throws IOException {
++        BufferedReader br = null;
++        String line = null;
++        for (String name : filesName) {
++            FileInputStream fis = new FileInputStream(logPath + name);
++            InputStreamReader isr = new InputStreamReader(fis, "utf-8");
++            br = new BufferedReader(isr);
++            while((line = br.readLine()) != null) {
++                if(delIgnore(line) != null) {
++                    logs.add(line);
++                }
++            }
++            br.close();
++        }
++    }
++
++    ArrayList<String> getLogs() {
++        return this.logs;
++    }
++
++    String delIgnore(String line) {
++        String result = line;
++        if(Pattern.matches(ignore, line)) {
++            result = null;
++        }
++        return result;
++    }
++
++    class Region {
++        private String name;
++        private int ip, sp, cure, dead; //感染患者， 疑似患者， 治愈， 死亡患者
++
++        /**
++         * 获取地区名称
++         * @return
++         */
++        String getName() {
++            return this.name;
++        }
++
++        /**
++         * 获取地区感染患者人数
++         * @return
++         */
++        int getIp() {
++            return this.ip;
++        }
++
++        /**
++         * 获取地区疑似患者人数
++         * @return
++         */
++        int getSp() {
++            return this.sp;
++        }
++
++        /**
++         * 获取地区治愈人数
++         * @return
++         */
++        int getCure() {
++            return this.cure;
++        }
++
++        /**
++         * 获取地区死亡患者人数
++         * @return
++         */
++        int getDead() {
++            return this.dead;
++        }
++    }
+ }
+\ No newline at end of file
+
+From 28538dec4d229ebf14f1af49346c77be5c734eb7 Mon Sep 17 00:00:00 2001
+From: XTG-L <XTG-L@github.com>
+Date: Wed, 12 Feb 2020 19:47:36 +0800
+Subject: [PATCH 06/13] =?UTF-8?q?=E5=9C=A8=E5=AE=9E=E7=8E=B0=E5=91=BD?=
+ =?UTF-8?q?=E4=BB=A4=E6=97=B6=E9=81=87=E5=88=B0=E9=97=AE=E9=A2=98=EF=BC=8C?=
+ =?UTF-8?q?=E5=A4=B4=E8=A3=82=E5=BC=80=EF=BC=8C=E5=85=88=E4=BD=9C=E4=B8=BA?=
+ =?UTF-8?q?=E4=B8=80=E4=B8=AA=E7=89=88=E6=9C=AC?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+从文件中读取的数据跟代码内编的字符串匹配不上，编码应该都是utf-8，正在查错。
+---
+ 221701127/src/InfectStatistic.java | 219 ++++++++++++++++++++++++-----
+ 1 file changed, 183 insertions(+), 36 deletions(-)
+
+diff --git a/221701127/src/InfectStatistic.java b/221701127/src/InfectStatistic.java
+index 81d842d..12d734c 100644
+--- a/221701127/src/InfectStatistic.java
++++ b/221701127/src/InfectStatistic.java
+@@ -8,7 +8,6 @@
+ 
+ /**
+  * InfectStatistic
+- *
+  * @author XTG-L
+  * @version 0.2
+  * @since 2020-2-8
+@@ -17,16 +16,23 @@
+     public static void main(String[] args) {
+         CmdList cmd = new CmdList(args);
+         Log log = new Log(cmd);
+-        ArrayList<String> as = log.getLogs();
+-        for (String string : as) {
+-            System.out.println(string);
++        log.logToRegion(log.getLogs());
++        // ArrayList<String> logs = log.getLogs();
++        // System.out.println(logs.get(0).equals("福建 新增 感染患者 2人"));
++        for (Log.Region region : log.getRegions()) {
++            System.out.println(
++                region.getName()+" "+
++                region.getIp()+" "+
++                region.getSp()+" "+
++                region.getCure()+" "+
++                region.getDead()
++            );
+         }
+     }
+ }
+ 
+ /**
+  * CmdArgs
+- * 
+  * 处理命令
+  */
+ class CmdArgs {
+@@ -34,7 +40,6 @@ public static void main(String[] args) {
+ 
+     /**
+      * 传入命令行参数数组构造
+-     * 
+      * @param args
+      */
+     CmdArgs(String[] args) {
+@@ -51,7 +56,6 @@ public static void main(String[] args) {
+ 
+     /**
+      * 获取命令
+-     * 
+      * @return
+      */
+     String getCmd() {
+@@ -64,7 +68,6 @@ String getCmd() {
+ 
+     /**
+      * 获取某个命令行参数的值，多个值只会返回第一个
+-     * 
+      * @param key
+      * @return
+      */
+@@ -74,7 +77,6 @@ String argVal(String key) {
+ 
+     /**
+      * 获取某个命令行参数的值，返回列表
+-     * 
+      * @param key
+      * @return
+      */
+@@ -99,7 +101,6 @@ String argVal(String key) {
+ 
+     /**
+      * 判断该命令是否有对应的参数
+-     * 
+      * @param key
+      * @return
+      */
+@@ -120,7 +121,6 @@ boolean hasValue(String key) {
+ 
+     /**
+      * 判断输入的命令是否符合规范
+-     * 
+      * @return
+      */
+     boolean isLegalCmd() {
+@@ -152,12 +152,11 @@ boolean isLegalCmd() {
+ 
+ /**
+  * CmdList
+- * 
+  * 处理list命令
+  */
+ class CmdList extends CmdArgs {
+-    private String logPath = null;
+-    private String outPath = null;
++    private String logPath = null;  //日志文件路径
++    private String outPath = null;  //输出文件路径
+ 
+     /**
+      * 传入list命令
+@@ -174,7 +173,6 @@ boolean isLegalCmd() {
+ 
+     /**
+      * 获取日志文件的路径
+-     * 
+      * @return
+      */
+     String getLogPath() {
+@@ -183,7 +181,6 @@ String getLogPath() {
+ 
+     /**
+      * 获取输出文件的路径
+-     * 
+      * @return
+      */
+     String getOutPath() {
+@@ -192,7 +189,6 @@ String getOutPath() {
+ 
+     /**
+      * 判断list命令是否符合规范
+-     * 
+      * @return
+      */
+     boolean isLegal() {
+@@ -221,19 +217,18 @@ boolean isLegal() {
+ 
+ /**
+  * Log
+- * 
+  * 处理日志文件
+  */
+ class Log {
+-    private String logPath = null;
+-    private File logDir = null;
+-    private String[] filesName = null;
+-    private ArrayList<String> logs = new ArrayList<>();
+-    private String ignore = "//.*";
++    private String logPath = null;  //日志文件路径
++    private File logDir = null; //日志文件的文件夹
++    private String[] filesName = null;  //日志文件的文件名
++    private ArrayList<String> logs = new ArrayList<>(); //用于储存日志文件的动态数组
++    private String ignore = "//.*"; //行忽略标志
++    private ArrayList<Region> regions = new ArrayList<>();  //用于储存地区类的动态数组
+ 
+     /**
+      * 传入命令类并初始化日志文件的路径和文件列表
+-     * 
+      * @param cmd
+      */
+     Log(CmdList cmdList) {
+@@ -251,13 +246,29 @@ boolean isLegal() {
+ 
+     /**
+      * 获取日志文件的文件名
+-     * 
+      * @return
+      */
+     String[] getFilesName() {
+         return this.filesName;
+     }
+ 
++    /**
++     * 获取日志文件数据
++     * @return
++     */
++    ArrayList<String> getLogs() {
++        return this.logs;
++    }
++
++    ArrayList<Region> getRegions() {
++        return this.regions;
++    }
++
++    /**
++     * 读取日志文件并储存在logs里，然后调用logToRegion将日志文件转换并保存
++     * @param logPath
++     * @throws IOException
++     */
+     void readLog(String logPath) throws IOException {
+         BufferedReader br = null;
+         String line = null;
+@@ -266,29 +277,117 @@ void readLog(String logPath) throws IOException {
+             InputStreamReader isr = new InputStreamReader(fis, "utf-8");
+             br = new BufferedReader(isr);
+             while((line = br.readLine()) != null) {
+-                if(delIgnore(line) != null) {
++                if(!isIgnore(line)) {
+                     logs.add(line);
+                 }
+             }
+             br.close();
+         }
++        logToRegion(logs);
+     }
+ 
+-    ArrayList<String> getLogs() {
+-        return this.logs;
+-    }
+-
+-    String delIgnore(String line) {
+-        String result = line;
++    /**
++     * 判断一行日志是否为注释行
++     * @param line
++     * @return
++     */
++    boolean isIgnore(String line) {
++        boolean result = false;
+         if(Pattern.matches(ignore, line)) {
+-            result = null;
++            result = true;
+         }
+         return result;
+     }
+ 
+-    class Region {
+-        private String name;
+-        private int ip, sp, cure, dead; //感染患者， 疑似患者， 治愈， 死亡患者
++    /**
++     * 将日志文件转换为地区类并储存
++     * @param logs
++     */
++    void logToRegion(ArrayList<String> logs) {
++        for (String log : logs) {
++            String[] items = log.split(" ");
++            Region tmpRegion = new Region(items[0]);
++            if(!regions.contains(tmpRegion)) {
++                Region region = new Region(items[0]);
++                regions.add(region);
++            }
++            Region region = regions.get(regions.indexOf(tmpRegion));
++            // for (String item : items) {
++            //     System.out.print(item);
++            // }
++            // System.out.print(items[1]);
++            // System.out.println("新增".equals(items[1]));
++            // items[1] = "新增";
++            switch (items[1]) {
++                case "新增": {
++                    items[3].replace("人", "");
++                    System.out.println(items[3]);
++                    if(items[2].equals("感染患者")) {
++                        region.setIp(region.getIp() + Integer.valueOf(items[3]));
++                    } else if(items[2].equals("疑似患者")) {
++                        region.setSp(region.getSp() + Integer.valueOf(items[3]));
++                    }
++                    break;
++                }
++                case "疑似患者": {
++                    items[4].replace("人","");
++                    region.setSp(region.getSp() - Integer.valueOf(items[4]));
++                    break;
++                }
++                case "感染患者": {
++                    items[4].replace("人","");
++                    break;
++                }
++                case "治愈": {
++                    break;
++                }
++                case "死亡": {
++                    break;
++                }
++                case "排除": {
++                    break;
++                }
++                default: {
++                    break;
++                }
++            }
++        }
++    }
++
++    /**
++     * Region
++     * 用于暂存日志文件内容的类对象
++     */
++    public class Region {
++        private String name, another;   //地区名称，可能会出现的另一个地区的名称
++        private int ip, sp, cure, dead; //感染患者，疑似患者，治愈，死亡患者
++
++        /**
++         * 传入地区名称
++         * @param name
++         */
++        Region(String name) {
++            this.name = name;
++            this.another = null;
++            this.ip = 0;
++            this.sp = 0;
++            this.cure = 0;
++            this.dead = 0;
++        }
++
++        /**
++         * 重载equals函数，用于排序和判断
++         * @param obj
++         * @return
++         */
++        @Override
++        public boolean equals(Object obj) {
++            if (obj instanceof Region) {
++                Region region = (Region) obj;
++                return this.name.equals(region.name);
++            }
++            return super.equals(obj);
++        }
+ 
+         /**
+          * 获取地区名称
+@@ -298,6 +397,22 @@ String getName() {
+             return this.name;
+         }
+ 
++        /**
++         * 获取另一个地区的名称
++         * @return
++         */
++        String getAnother() {
++            return this.another;
++        }
++
++        /**
++         * 设置另一个地区的名称
++         * @param another
++         */
++        void setAnother(String another) {
++            this.another = another;
++        }
++
+         /**
+          * 获取地区感染患者人数
+          * @return
+@@ -306,6 +421,14 @@ int getIp() {
+             return this.ip;
+         }
+ 
++        /**
++         * 设置地区感染患者人数
++         * @param ip
++         */
++        void setIp(int ip) {
++            this.ip = ip;
++        }
++
+         /**
+          * 获取地区疑似患者人数
+          * @return
+@@ -314,6 +437,14 @@ int getSp() {
+             return this.sp;
+         }
+ 
++        /**
++         * 设置地区疑似患者人数
++         * @param sp
++         */
++        void setSp(int sp) {
++            this.sp = sp;
++        }
++
+         /**
+          * 获取地区治愈人数
+          * @return
+@@ -322,6 +453,14 @@ int getCure() {
+             return this.cure;
+         }
+ 
++        /**
++         * 设置地区治愈人数
++         * @param cure
++         */
++        void setCure(int cure) {
++            this.cure = cure;
++        }
++
+         /**
+          * 获取地区死亡患者人数
+          * @return
+@@ -329,5 +468,13 @@ int getCure() {
+         int getDead() {
+             return this.dead;
+         }
++
++        /**
++         * 设置地区死亡人数
++         * @param dead
++         */
++        void setDead(int dead) {
++            this.dead = dead;
++        }
+     }
+ }
+\ No newline at end of file
+
+From a7b1ce500cd86bc69f68c03363e4129f017e9830 Mon Sep 17 00:00:00 2001
+From: XTG-L <XTG-L@github.com>
+Date: Thu, 13 Feb 2020 20:12:14 +0800
+Subject: [PATCH 07/13] =?UTF-8?q?=E8=A7=A3=E5=86=B3=E4=BA=86=E8=BF=99?=
+ =?UTF-8?q?=E4=B8=AAbug=EF=BC=8C=E4=BD=86=E6=98=AF=E9=80=BB=E8=BE=91?=
+ =?UTF-8?q?=E4=B8=8A=E8=BF=98=E6=98=AF=E6=9C=89=E9=97=AE=E9=A2=98=EF=BC=8C?=
+ =?UTF-8?q?=E5=8A=9F=E8=83=BD=E5=B0=9A=E6=9C=AA=E5=AE=9E=E7=8E=B0=E5=AE=8C?=
+ =?UTF-8?q?=E5=85=A8?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ 221701127/src/CmdArgs.class         | Bin 0 -> 2437 bytes
+ 221701127/src/CmdList.class         | Bin 0 -> 2376 bytes
+ 221701127/src/InfectStatistic.class | Bin 0 -> 1728 bytes
+ 221701127/src/InfectStatistic.java  | 150 ++++++++++++++++++----------
+ 221701127/src/Log$Region.class      | Bin 0 -> 1231 bytes
+ 221701127/src/Log.class             | Bin 0 -> 5395 bytes
+ 6 files changed, 100 insertions(+), 50 deletions(-)
+ create mode 100644 221701127/src/CmdArgs.class
+ create mode 100644 221701127/src/CmdList.class
+ create mode 100644 221701127/src/InfectStatistic.class
+ create mode 100644 221701127/src/Log$Region.class
+ create mode 100644 221701127/src/Log.class
+
+diff --git a/221701127/src/CmdArgs.class b/221701127/src/CmdArgs.class
+new file mode 100644
+index 0000000000000000000000000000000000000000..e42bfc20b5e92aca943c025e1c783914b7c05c97
+GIT binary patch
+literal 2437
+zcma)8-*XdH6#h25&9>>5{!B_GtwjNwq-`|()P`ya6pAT747O5GyG@pK>1MZVHXZw*
+zPpC8CjH54#KIrhmgFJwvtpg+Do1@Rp_$TP!z<~JOO|&hIjOpa=-E+_R?sv}l?oEIF
+z>&`s@2jGU#gH#i?Vz-JtA;{R<!G#w?w7e98h7mDKH{l>gJ0Rhe5XNvwMMkWpg#TeN
+z91*YM!u4n)j)gFR<0@Vap$l0tOg7?#ijyi%Nl<jRSeDRvE_+d5(vy~M7n3>9HSOYv
+zgkajVO>a~}WT4J^Y>MF-r(j5E&6>7xqEebO+%x)|MT=TAyfGg-JP@lBOmKQ+N(BjB
+z1F?FWx8yuMzc8sU))0eaI;C3@b`5NHuZy5oBbZ+7ze6gXX(h*8S6|MWWsgZW<;<e3
+zdli>i9Q?m=>CKcziPbo-m&v(8sBk@~83`e?oHdHN<(EPph|Q?jMr+QgxOrpT6t(P{
+zurC;SkM;0K(aaBvR%wXhw1%gIciZE=6N|6We#mjWvghiHlZH3%6w0kZ<Qj2C!|RyR
+z@Eis-Oydm=2@I+@t6>J`8gX7M?^5xmhPMPtr;om|P8#0EtOgx(8uDWH44#$HVUgc(
+ze8_T&9Gwd1Dhe75T%aPDp(wH7)~lh2Vb*%ub?jn)UdTYKR~54^os)AHnYjcOhH9%@
+z!>JJFVbVqFmn3wT^aUg1*m>QXHobYy%ARg})WCr{4cOeZx<ZmERk8cT`qe5mHhCT0
+z+;Z77O60=a8Bm2co#ZJVDE7}a^b!L?Qorr=FI9C>t?ou27GqIFST>J|ajBwP<i8>L
+z+U79|D43tu-7#*bkY9#->jhS`d#!1%Q8eC3p3*(fa0#fEbT2<|5OL_q70D1c$K4G(
+zZ;XhY)S6UPToe)^){Zsdnf8*iVASr8Y6Hggyyv*fDi+By>o^M)PP7TzHr$M*m&<~~
+z=j%DtFsfobrrQO}DDS8Sj%;q#I?IN@Gs}xc9ryK@&_Ctd43W_-D`$Gfh>A-Rc5ceA
+z9ybYnPxeDUui_qF<ZO~Sv7D*=@*L38$JuTK_y@GcS0Tlv?-7V6INYX5!qXf(7%1En
+z450~oumyYh-jD4y00AV?(h&a+fm@tZ!-Bps&3B$p&c$By1d;h1z6<%RaF<i7P_oLw
+zsCc<|9g&2XL{oRr0Aw!*q#KX^NC?b;PbDJEI7|vhnA13R@i~ZN*g>m?z(cgDJd5}J
+zEO&CXy6etbhAr{L3WD+q)Sn<fPV_V(cq!3U5dEDr#a5mOY5W51-=ZmT2O(eu&C;#A
+z(9W)+Wl|pP^@%Hm>o_iEy(#){xrY6{%IrQRtklvP5YMoZ;@+)oLti6!1L47%Z3S)9
+zmlY=Z+hv*K?ZLHl_o0OxX3&Up{OLT82rtDx-hK(p@&{YTQOxlU&C`Ro9N#UjxiI~5
+zgb|E9M3V|ldVr`Dy^r?$Oesdd0OA~Z@7C(`9+MSa8I}L-!yZ8{T1#eoRGF<M67lWI
+zY%P<o(5&3_yY!2E(?=G9>GKulq8Vjs&tvy1l+6<Mkz5+@`t<m(!UF`P-GUP+tl=7$
+zpQ#XGDah&g3fd=?AE^|%qa$}h7WEvWM!JVs$-y7cc}>)@$*<j?VdWb}!Ou^KQG7b@
+zqRUs=D#9y>Ttl0ZzJX@8vZI@A+_uIzMfCvhvoar$`-f=96>8`z74#7iuONw!sk%>i
+z@qEf+f5x(Z>1WY{;3IaXLB&>y%2Sc#-dzn{VZPvbLI&^xN_>Wx-U1wUsE1_$1suSB
+K+79^R%YOsq7&cu1
+
+literal 0
+HcmV?d00001
+
+diff --git a/221701127/src/CmdList.class b/221701127/src/CmdList.class
+new file mode 100644
+index 0000000000000000000000000000000000000000..e18f5c927c9d75e7297e7cbb7c48a8f495b79558
+GIT binary patch
+literal 2376
+zcmaJ>U2GIp6#iy+y0cxTKP=sr+EP(U?QUJFMJw1+EDMF|LaSSgfT+{mVLNm?v&_!c
+zH2PqS5Ax)b#wI+7Q87xOAQZ)<#uy*e@ZbXvKB}>RubLQ55WhRy)@^rnk~#OBbH8)$
+z`MdYqzpu^%*oGGaXhe4<*5eUDwh6LbkVggS36S*qu|uqVe(V(MV}A4puob)fhzWVO
+zAA1CNKq&VLvQLn~N<5Ayf;?p?fMGnT;3)+O2};IF4{Of2gkb!*Hl=lDG&9|qaBRa&
+z_i)?FJB4jIr8&9;*_qCA2^GM3$H;W{+qO0xH*yZ~l?fwlYEIrJCR`5FTY5?#?fhBW
+znlj8J&3wIvX*hin>f4W$g2SVXA!elrtce?@ejq<NrrRUhScaOagrg-V_G?*JRxlzV
+zkk*~}Qi^r$i!rTCQecLb@>D47c2gDHh?{N0l3hu@9p!iaBg-}PIJ}&wV&vj_TFXfA
+zwucWZc$(2Bth}An2Mm!--Jp3)Pdd!WVR4P*7SSISo6xG_E;OlV7G#4UEx237y@EW5
+zE*2=tuBsTtLBX?yDxN_^LPb<GQN<w~7J_J{iX(WIeTyzNK*dpvsCW*~t9SuCZwyHV
+zDHS@7NvPdrSx(Newd{V~8Mjio8XwYrjH@tkP{DB(6JSD0Y%(P#qQLdr>70ahWx7d+
+ztA~yQpxNnBQI@v$GW{=A(Smj5i5#P(WjdN+^0=mA<Jh=nC-f6}ofFm*X7Wnm4C2DY
+zxW&0IJGq=vnN~FMk88Q{!VI!=gFK(EwG4Mc#m<Jtj<bF4alRx2=w~_P_Q7y$W!BR<
+zN1x;juuaSN%CI_zc>~#dTh}Ie?<ZkO*d%Sd^~%Xxr$77UjaL`moLx9|^5*&T3$MSm
+zaPc(xf>J`mq&A_)EHkM&2MvdDnmI=^9Y(j#t@TRZEJaqFl%f9>(Jz%^RDmVBOZ(P;
+zdu5nY)`Y(JP81Fs(2|a2Pb<i?AaTo@$Y&*}gQlt5v5c0>>Gbe+aeWqj6b5OZW~MTF
+zuC-v;Q`+Ss%?d+tL(9O6hi$15r7mJxCX+B6y+^^6gv}-Sm5WV6%m3rBk<V`<U)l<I
+z#6>0N5qH&Hd0pL=Hx?3+V(%XQyu3xSLOt&}HJi!ZfR_m1<w(aBND=8WJc4)ykp-y`
+z#21-^GJ`{rNYForN&$)l11{&~)|#L?hpHJ=QA>{dva79L){?6cz67>*Sxb&u-vu|)
+zHqu?FC7oq<?;(KqQG*XqhcnFhL%u^781Y4P;uCDgCG5dv4B-mjm{0kBT*V1|j+Zcx
+z`{-dUymz?iQLtV?I}i#{8AfC==?z>ZYAPa^;F%@E_kh&rD!(SzQ5Nc54ZTL_{bix@
+zYUuZbMzMvp7F90}pkg)j`eN%k34EZeiEp*Z4@D+?rI`m$ky;_MlE5`@ue_s~xvrgm
+z7hj0Ax$A(ZTaL~l_%Zj#_{-Nj&K>1Ciu#5>xQ0>RDoV7?Gdp{O>)xp7{JI%z^>)i=
+z5RHoVQ*4!m*b)u0!xTdmLad33CR6nJy5*4k5$$*L7oV5^hT>m@^O{F$?()u|t~UA(
+z)?Y-(jZsc@T}3@GhlZxJgq*q4C-*j;rLo6tR~stH|48X4RN-fw!cCmREqsYz@fCI7
+z;5U4S-`#;|MCEPBl5`t86>OENtE<<v{E4=|SRXGQa$P<Qn`?lz%fjI_H6l*gPkBH8
+G1OEUCRxil_
+
+literal 0
+HcmV?d00001
+
+diff --git a/221701127/src/InfectStatistic.class b/221701127/src/InfectStatistic.class
+new file mode 100644
+index 0000000000000000000000000000000000000000..fefa546b9ce1dd3a89dc0b875506e07907c78c5a
+GIT binary patch
+literal 1728
+zcmaJ?&u<%55dL0b?{l0jNgO*(D1@{);G}5{1wwH`Y3mYdaNJUxmQX0X*jr~4dpGQ^
+zBO)#w;KC89QhVjnGaOveN);y#{3HAe2noXX{Dau7#af;>JNwPNnQvzI{r=Cx#{ka4
+zjba+}BX|ifN05qQ0gDnRqX=V3;#3q8r?p6H@ro9&YH=ot<9KZpC-Ax!Z%8ahF^;#i
+z$Y`;m#i|x>$GFc0iHj0h0b|v6?BJZhaBAVYKq%{0EP=7S?O26Iebe$vYO_X5sIF{B
+zU@CPpzpeIEx~80Jx)^x2Q(e)HM~Z<e@2soc7GC0##Jdt}0@0$|@XFSjt)s+q&TXq4
+z5F6NjV3$wpSSDuhti*dJE+faCDz0Nmyl>(I<OO85Uda=zQL{`l?^d<CZlZuICa&T`
+z6W35QQPSE+xNhPGJ~pv|Pq;bJ$!k{CcA2};Rm_~@SYEcKeBbg-+{C9QKEo{&pKI}j
+z77Din#xJ^V;0K=CUAKZQx8jc(*o>fTq5@6Q6UETskeVx-+bmRIasXenwt$VmuB9({
+zp4!(13d9brxxn&N;Cg*Ai~D|H)yaX|AUe@*gzcuUvJ2$Yvs8Vh8@u038h16QMj8^S
+z!5uVH`3}{shDNGZpqu7vkA;C%NJ2<35l2%C?V$Z7F`LnvTP?X==BGP*KLOJN6lJhB
+zjPWA&fAvrGh3@jg$Z|{h1?wv^!O>-}Lr&`^-o>{jwA}`cX83}t>ly3=bVgVpOh9h8
+z6^uiu?~1(BZrO%MH?3W=R3(brs0xgTxz3N(*VT@db)B*bZrH&VH9t^Jz&aKOaGm4T
+zVXOBglGxI7wIh%`oFd!Vb9b!Hd)D4zO_ezp`w|=kBk#I94W@awcb|?^duA^yr@|&C
+z+sKutTi;{pb1d!eS_9y{gU}(jx0p_dtg6+D?BR+8CvN_!f(GR#F#G>F%;6}%jrtnm
+zpC1hf9HaI;SHU&B_yFQ3Dgw_@8ZF}lMhKXtPN+!H8sW2hKVv91+(hUR!W(om@{b@l
+zPCh_neW{6&!l_JXCiHkYJiKfqj70cHOwWW8#+i(y-;AW+w}!ZX@W&Ft(I!T@nA)R>
+zBbo3__!m4Qa1YB`8x!~y;~7Ic8cj@S5z}H)i?|kvhnNBw^!~wbI{l$m`UOl<pJcjm
+zOd!E(r|<$9I7<%Bb6umQz@kb-f5{T}Smf74d_$hT<7x0c&w(Fkzk?+1VxCXH!z6To
+zMM#M`iLmS_bAs&siDQ2wE^%Dq#9vs&FkWn>lH`U!j7g32oOzSFjT*K||2gUr^7;<{
+G=l=yYRipj@
+
+literal 0
+HcmV?d00001
+
+diff --git a/221701127/src/InfectStatistic.java b/221701127/src/InfectStatistic.java
+index 12d734c..43503a4 100644
+--- a/221701127/src/InfectStatistic.java
++++ b/221701127/src/InfectStatistic.java
+@@ -4,6 +4,8 @@
+ import java.io.IOException;
+ import java.io.InputStreamReader;
+ import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.List;
+ import java.util.regex.Pattern;
+ 
+ /**
+@@ -14,12 +16,16 @@
+  */
+ class InfectStatistic {
+     public static void main(String[] args) {
++        System.out.println("done");
+         CmdList cmd = new CmdList(args);
+         Log log = new Log(cmd);
++        String[] filesName = log.getFiles();
++        for (String file : filesName) {
++            System.out.println(file);
++        }
+         log.logToRegion(log.getLogs());
+-        // ArrayList<String> logs = log.getLogs();
+-        // System.out.println(logs.get(0).equals("福建 新增 感染患者 2人"));
+-        for (Log.Region region : log.getRegions()) {
++        ArrayList<Log.Region> regions = log.getRegions();
++        for (Log.Region region : regions) {
+             System.out.println(
+                 region.getName()+" "+
+                 region.getIp()+" "+
+@@ -157,6 +163,9 @@ boolean isLegalCmd() {
+ class CmdList extends CmdArgs {
+     private String logPath = null;  //日志文件路径
+     private String outPath = null;  //输出文件路径
++    private String date = null;
++    private ArrayList<String> type = null;
++    private ArrayList<String> province = null;
+ 
+     /**
+      * 传入list命令
+@@ -166,8 +175,17 @@ boolean isLegalCmd() {
+     CmdList(String[] args) {
+         super(args);
+         if(isLegal()) {
+-            logPath = argVal("-log");
+-            outPath = argVal("-out");
++            this.logPath = argVal("-log");
++            this.outPath = argVal("-out");
++            if(getCmd().contains("-date")) {
++                this.date = argVal("-date");
++            }
++            if(getCmd().contains("-type")) {
++                this.type = argVals("-type");
++            }
++            if(getCmd().contains("-province")) {
++                this.province = argVals("-province");
++            }
+         }
+     }
+ 
+@@ -187,6 +205,18 @@ String getOutPath() {
+         return this.outPath;
+     }
+ 
++    String getDate() {
++        return this.date;
++    }
++
++    ArrayList<String> getType() {
++        return this.type;
++    }
++
++    ArrayList<String> getProvince() {
++        return this.province;
++    }
++
+     /**
+      * 判断list命令是否符合规范
+      * @return
+@@ -222,7 +252,7 @@ boolean isLegal() {
+ class Log {
+     private String logPath = null;  //日志文件路径
+     private File logDir = null; //日志文件的文件夹
+-    private String[] filesName = null;  //日志文件的文件名
++    private String[] files = null;  //日志文件的文件名
+     private ArrayList<String> logs = new ArrayList<>(); //用于储存日志文件的动态数组
+     private String ignore = "//.*"; //行忽略标志
+     private ArrayList<Region> regions = new ArrayList<>();  //用于储存地区类的动态数组
+@@ -235,7 +265,11 @@ boolean isLegal() {
+         logPath = cmdList.getLogPath();
+         logDir = new File(logPath);
+         if (logDir.isDirectory()) {
+-            this.filesName = logDir.list();
++            this.files = logDir.list();
++            Arrays.sort(files);
++            if(cmdList.getCmd().contains("-date")) {
++                delAfter(cmdList.argVal("-date"));
++            }
+             try {
+                 readLog(logPath);
+             } catch (IOException e) {
+@@ -244,12 +278,26 @@ boolean isLegal() {
+         }
+     }
+ 
++    String[] delAfter(String date) {
++        String[] result = null;
++        if(files.length > 0) {
++            List<String> fileList = new ArrayList<String>(Arrays.asList(files));
++            for (String file : fileList) {
++                if(date.compareTo(file) < 0) {
++                    fileList.remove(file);
++                }
++            }
++            fileList.toArray(result);
++        }
++        return result;
++    }
++
+     /**
+      * 获取日志文件的文件名
+      * @return
+      */
+-    String[] getFilesName() {
+-        return this.filesName;
++    String[] getFiles() {
++        return this.files;
+     }
+ 
+     /**
+@@ -260,6 +308,10 @@ boolean isLegal() {
+         return this.logs;
+     }
+ 
++    /**
++     * 获取地区数据
++     * @return
++     */
+     ArrayList<Region> getRegions() {
+         return this.regions;
+     }
+@@ -272,10 +324,11 @@ boolean isLegal() {
+     void readLog(String logPath) throws IOException {
+         BufferedReader br = null;
+         String line = null;
+-        for (String name : filesName) {
++        for (String name : files) {
+             FileInputStream fis = new FileInputStream(logPath + name);
+             InputStreamReader isr = new InputStreamReader(fis, "utf-8");
+             br = new BufferedReader(isr);
++            // br = new BufferedReader(new FileReader(logPath + name));
+             while((line = br.readLine()) != null) {
+                 if(!isIgnore(line)) {
+                     logs.add(line);
+@@ -305,46 +358,44 @@ boolean isIgnore(String line) {
+      */
+     void logToRegion(ArrayList<String> logs) {
+         for (String log : logs) {
+-            String[] items = log.split(" ");
+-            Region tmpRegion = new Region(items[0]);
+-            if(!regions.contains(tmpRegion)) {
+-                Region region = new Region(items[0]);
+-                regions.add(region);
+-            }
+-            Region region = regions.get(regions.indexOf(tmpRegion));
+-            // for (String item : items) {
+-            //     System.out.print(item);
+-            // }
+-            // System.out.print(items[1]);
+-            // System.out.println("新增".equals(items[1]));
+-            // items[1] = "新增";
++            String[] items = log.split("[\\s]+");
++            int index = indexOfRegion(items[0]);
++            Region region = regions.get(index);
+             switch (items[1]) {
+                 case "新增": {
+-                    items[3].replace("人", "");
+-                    System.out.println(items[3]);
+                     if(items[2].equals("感染患者")) {
+-                        region.setIp(region.getIp() + Integer.valueOf(items[3]));
++                        region.ip += Integer.valueOf(items[3].replace("人", ""));
+                     } else if(items[2].equals("疑似患者")) {
+-                        region.setSp(region.getSp() + Integer.valueOf(items[3]));
++                        region.sp += Integer.valueOf(items[3].replace("人", ""));
+                     }
+                     break;
+                 }
+                 case "疑似患者": {
+-                    items[4].replace("人","");
+-                    region.setSp(region.getSp() - Integer.valueOf(items[4]));
++                    if(items[2].equals("确认感染")) {
++                        region.ip += Integer.valueOf(items[3].replace("人", ""));
++                    } else if(items[2].equals("流入")) {
++                        region.sp -= Integer.valueOf(items[4].replace("人", ""));
++                        Region another = regions.get(indexOfRegion(items[3]));
++                        another.sp += Integer.valueOf(items[4].replace("人", ""));
++                    }
+                     break;
+                 }
+                 case "感染患者": {
+-                    items[4].replace("人","");
++                    region.ip -= Integer.valueOf(items[4].replace("人", ""));
++                    Region another = regions.get(indexOfRegion(items[3]));
++                    another.ip += Integer.valueOf(items[4].replace("人", ""));
+                     break;
+                 }
+                 case "治愈": {
++                    region.setCure(region.getCure() + Integer.valueOf(items[2].replace("人", "")));
+                     break;
+                 }
+                 case "死亡": {
++                    region.setDead(region.getDead() + Integer.valueOf(items[2].replace("人", "")));
+                     break;
+                 }
+                 case "排除": {
++                    region.setSp(region.getSp() - Integer.valueOf(items[3].replace("人", "")));
+                     break;
+                 }
+                 default: {
+@@ -354,13 +405,29 @@ void logToRegion(ArrayList<String> logs) {
+         }
+     }
+ 
++    /**
++     * 获取指定地区在动态数组中的下表，如果数组中没有，则向动态数组中加入该地区
++     * @param name
++     * @return
++     */
++    int indexOfRegion(String name) {
++        int index = -1;
++        Region region = new Region(name);
++        if(!regions.contains(region)) {
++            region = new Region(name);
++            regions.add(region);
++        }
++        index = regions.indexOf(region);
++        return index;
++    }
++
+     /**
+      * Region
+      * 用于暂存日志文件内容的类对象
+      */
+-    public class Region {
+-        private String name, another;   //地区名称，可能会出现的另一个地区的名称
+-        private int ip, sp, cure, dead; //感染患者，疑似患者，治愈，死亡患者
++    class Region {
++        protected String name;   //地区名称
++        protected int ip, sp, cure, dead; //感染患者，疑似患者，治愈，死亡患者
+ 
+         /**
+          * 传入地区名称
+@@ -368,7 +435,6 @@ void logToRegion(ArrayList<String> logs) {
+          */
+         Region(String name) {
+             this.name = name;
+-            this.another = null;
+             this.ip = 0;
+             this.sp = 0;
+             this.cure = 0;
+@@ -397,22 +463,6 @@ String getName() {
+             return this.name;
+         }
+ 
+-        /**
+-         * 获取另一个地区的名称
+-         * @return
+-         */
+-        String getAnother() {
+-            return this.another;
+-        }
+-
+-        /**
+-         * 设置另一个地区的名称
+-         * @param another
+-         */
+-        void setAnother(String another) {
+-            this.another = another;
+-        }
+-
+         /**
+          * 获取地区感染患者人数
+          * @return
+diff --git a/221701127/src/Log$Region.class b/221701127/src/Log$Region.class
+new file mode 100644
+index 0000000000000000000000000000000000000000..1f787e173879e5e190d7aadc4c276e9fea7e9131
+GIT binary patch
+literal 1231
+zcmZuvO-~bH5PoL6A7xo+g`x<82&nBA0Y5<@ULeNCf{8UAye(y|i)D-5t^dXUz(EsA
+zm4nf!G4bNjquxB~&6_&2t<uyUc4pq0XP)<&dH3V5gI53+vD||=W=!<roJ6x?=ETg4
+zIWOjdfr}=tU_np|1{Mjb?`*q-f&7;9#F;BQerc`{Rz1J8L{PjP0_8XeI8ckVDkIfR
+z*V!cK;X^N&o+oJed_}<evgdo@b;3wG%KT55xyRirl}#o|<UQYAuWfI*)w|9{nKQck
+zxaO1t!ce-c^Y+G;TMU;n_X&N4&?!Dzb9Pz{M#&A=Bkielrmf|ldW``&)*VY{cmyqI
+zp44<sbV#wlMM;Ynwv}i;gEOs&bF0y?l50k0p;D_B-5Z{0PUZXuERThSUJ!c4S=k{W
+zzU~I$%}Nj&xN2b#DGNimX2C+Ag?=O~B*h#NGk^ra<PA>WaZ6ss=SBPtteo$=)s?an
+z1a4qp$-;4r5R!)v)!YtG$o<irJXl+~xd}}0!}szZqC*u49I2ur@+>6stR?a+2S_GG
+zG@qqw2uDFU#!&$ZV(h2vY#n4bpx85Y#Ozodsu)d-F2;DyFv2j~aTpx#p@-_|r+o}k
+z1H<$JWAqY}bigPcs&&Dw)&=9)H;6w)D*GDoHG2=S8UFUsvukG?Fn5_%iMR)N5YSr~
+z^bQuiXWkDO<!THhSD(OGi&#8yMia7U95l7*lB7?39>+<JWyp4@Dp$2bKl6D4r&`cS
+zmZ5M)w?}ycha;Pkr7zIvD_1AGQfr;m-xxa8om%Up{?61t7(d;WTJNO($<Wi?sr63k
+x-_T?voast!bWkh&wm93Jy6qo`7NR7WI>~R7<{kwZ*pbiTGJBI(8b=nFfIr9{yaNCL
+
+literal 0
+HcmV?d00001
+
+diff --git a/221701127/src/Log.class b/221701127/src/Log.class
+new file mode 100644
+index 0000000000000000000000000000000000000000..6ca8047eaf8aa05d6fea5c92de9ca700a615be71
+GIT binary patch
+literal 5395
+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
+
+literal 0
+HcmV?d00001
+
+
+From 776cf2b58be14dec606a1be2c0ac2a8214b481fb Mon Sep 17 00:00:00 2001
+From: XTG-L <XTG-L@github.com>
+Date: Sat, 15 Feb 2020 11:32:55 +0800
+Subject: [PATCH 08/13] =?UTF-8?q?=E5=AE=8C=E6=88=90=E6=89=80=E6=9C=89?=
+ =?UTF-8?q?=E5=9F=BA=E6=9C=AC=E5=8A=9F=E8=83=BD?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .gitignore                          |   1 +
+ 221701127/codestyle.md              |  18 +-
+ 221701127/src/CmdArgs.class         | Bin 2437 -> 0 bytes
+ 221701127/src/CmdList.class         | Bin 2376 -> 0 bytes
+ 221701127/src/InfectStatistic.class | Bin 1728 -> 0 bytes
+ 221701127/src/InfectStatistic.java  | 542 ++++++++++++++++------------
+ 221701127/src/Log$Region.class      | Bin 1231 -> 0 bytes
+ 221701127/src/Log.class             | Bin 5395 -> 0 bytes
+ 8 files changed, 315 insertions(+), 246 deletions(-)
+ delete mode 100644 221701127/src/CmdArgs.class
+ delete mode 100644 221701127/src/CmdList.class
+ delete mode 100644 221701127/src/InfectStatistic.class
+ delete mode 100644 221701127/src/Log$Region.class
+ delete mode 100644 221701127/src/Log.class
+
+diff --git a/.gitignore b/.gitignore
+index 3d393af..fde345c 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -2,6 +2,7 @@
+ ### Example user template template
+ ### Example user template
+ 
++.class
+ # IntelliJ project files
+ .idea
+ *.iml
+diff --git a/221701127/codestyle.md b/221701127/codestyle.md
+index 50bf5d5..096c978 100644
+--- a/221701127/codestyle.md
++++ b/221701127/codestyle.md
+@@ -1,13 +1,11 @@
+ ## 代码风格
+ 
+-- 缩进
+-- 变量命名
+-- 每行最多字符数
+-- 函数最大行数
+-- 函数、类命名
+-- 常量
+-- 空行规则
+-- 注释规则
++- 缩进 一个制表符或4个空格
++- 变量命名 驼峰命名
++- 每行最多字符数 无限制
++- 函数最大行数 无限制
++- 函数、类命名 驼峰命名
++- 常量 首字母大写驼峰命名
++- 空行规则 类、函数、前后空行
++- 注释规则 变量、常量同行尾部注释，类、函数在头部注释
+ - 操作符前后空格
+-- 其他规则
+-- ...
+diff --git a/221701127/src/CmdArgs.class b/221701127/src/CmdArgs.class
+deleted file mode 100644
+index e42bfc20b5e92aca943c025e1c783914b7c05c97..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 2437
+zcma)8-*XdH6#h25&9>>5{!B_GtwjNwq-`|()P`ya6pAT747O5GyG@pK>1MZVHXZw*
+zPpC8CjH54#KIrhmgFJwvtpg+Do1@Rp_$TP!z<~JOO|&hIjOpa=-E+_R?sv}l?oEIF
+z>&`s@2jGU#gH#i?Vz-JtA;{R<!G#w?w7e98h7mDKH{l>gJ0Rhe5XNvwMMkWpg#TeN
+z91*YM!u4n)j)gFR<0@Vap$l0tOg7?#ijyi%Nl<jRSeDRvE_+d5(vy~M7n3>9HSOYv
+zgkajVO>a~}WT4J^Y>MF-r(j5E&6>7xqEebO+%x)|MT=TAyfGg-JP@lBOmKQ+N(BjB
+z1F?FWx8yuMzc8sU))0eaI;C3@b`5NHuZy5oBbZ+7ze6gXX(h*8S6|MWWsgZW<;<e3
+zdli>i9Q?m=>CKcziPbo-m&v(8sBk@~83`e?oHdHN<(EPph|Q?jMr+QgxOrpT6t(P{
+zurC;SkM;0K(aaBvR%wXhw1%gIciZE=6N|6We#mjWvghiHlZH3%6w0kZ<Qj2C!|RyR
+z@Eis-Oydm=2@I+@t6>J`8gX7M?^5xmhPMPtr;om|P8#0EtOgx(8uDWH44#$HVUgc(
+ze8_T&9Gwd1Dhe75T%aPDp(wH7)~lh2Vb*%ub?jn)UdTYKR~54^os)AHnYjcOhH9%@
+z!>JJFVbVqFmn3wT^aUg1*m>QXHobYy%ARg})WCr{4cOeZx<ZmERk8cT`qe5mHhCT0
+z+;Z77O60=a8Bm2co#ZJVDE7}a^b!L?Qorr=FI9C>t?ou27GqIFST>J|ajBwP<i8>L
+z+U79|D43tu-7#*bkY9#->jhS`d#!1%Q8eC3p3*(fa0#fEbT2<|5OL_q70D1c$K4G(
+zZ;XhY)S6UPToe)^){Zsdnf8*iVASr8Y6Hggyyv*fDi+By>o^M)PP7TzHr$M*m&<~~
+z=j%DtFsfobrrQO}DDS8Sj%;q#I?IN@Gs}xc9ryK@&_Ctd43W_-D`$Gfh>A-Rc5ceA
+z9ybYnPxeDUui_qF<ZO~Sv7D*=@*L38$JuTK_y@GcS0Tlv?-7V6INYX5!qXf(7%1En
+z450~oumyYh-jD4y00AV?(h&a+fm@tZ!-Bps&3B$p&c$By1d;h1z6<%RaF<i7P_oLw
+zsCc<|9g&2XL{oRr0Aw!*q#KX^NC?b;PbDJEI7|vhnA13R@i~ZN*g>m?z(cgDJd5}J
+zEO&CXy6etbhAr{L3WD+q)Sn<fPV_V(cq!3U5dEDr#a5mOY5W51-=ZmT2O(eu&C;#A
+z(9W)+Wl|pP^@%Hm>o_iEy(#){xrY6{%IrQRtklvP5YMoZ;@+)oLti6!1L47%Z3S)9
+zmlY=Z+hv*K?ZLHl_o0OxX3&Up{OLT82rtDx-hK(p@&{YTQOxlU&C`Ro9N#UjxiI~5
+zgb|E9M3V|ldVr`Dy^r?$Oesdd0OA~Z@7C(`9+MSa8I}L-!yZ8{T1#eoRGF<M67lWI
+zY%P<o(5&3_yY!2E(?=G9>GKulq8Vjs&tvy1l+6<Mkz5+@`t<m(!UF`P-GUP+tl=7$
+zpQ#XGDah&g3fd=?AE^|%qa$}h7WEvWM!JVs$-y7cc}>)@$*<j?VdWb}!Ou^KQG7b@
+zqRUs=D#9y>Ttl0ZzJX@8vZI@A+_uIzMfCvhvoar$`-f=96>8`z74#7iuONw!sk%>i
+z@qEf+f5x(Z>1WY{;3IaXLB&>y%2Sc#-dzn{VZPvbLI&^xN_>Wx-U1wUsE1_$1suSB
+K+79^R%YOsq7&cu1
+
+diff --git a/221701127/src/CmdList.class b/221701127/src/CmdList.class
+deleted file mode 100644
+index e18f5c927c9d75e7297e7cbb7c48a8f495b79558..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 2376
+zcmaJ>U2GIp6#iy+y0cxTKP=sr+EP(U?QUJFMJw1+EDMF|LaSSgfT+{mVLNm?v&_!c
+zH2PqS5Ax)b#wI+7Q87xOAQZ)<#uy*e@ZbXvKB}>RubLQ55WhRy)@^rnk~#OBbH8)$
+z`MdYqzpu^%*oGGaXhe4<*5eUDwh6LbkVggS36S*qu|uqVe(V(MV}A4puob)fhzWVO
+zAA1CNKq&VLvQLn~N<5Ayf;?p?fMGnT;3)+O2};IF4{Of2gkb!*Hl=lDG&9|qaBRa&
+z_i)?FJB4jIr8&9;*_qCA2^GM3$H;W{+qO0xH*yZ~l?fwlYEIrJCR`5FTY5?#?fhBW
+znlj8J&3wIvX*hin>f4W$g2SVXA!elrtce?@ejq<NrrRUhScaOagrg-V_G?*JRxlzV
+zkk*~}Qi^r$i!rTCQecLb@>D47c2gDHh?{N0l3hu@9p!iaBg-}PIJ}&wV&vj_TFXfA
+zwucWZc$(2Bth}An2Mm!--Jp3)Pdd!WVR4P*7SSISo6xG_E;OlV7G#4UEx237y@EW5
+zE*2=tuBsTtLBX?yDxN_^LPb<GQN<w~7J_J{iX(WIeTyzNK*dpvsCW*~t9SuCZwyHV
+zDHS@7NvPdrSx(Newd{V~8Mjio8XwYrjH@tkP{DB(6JSD0Y%(P#qQLdr>70ahWx7d+
+ztA~yQpxNnBQI@v$GW{=A(Smj5i5#P(WjdN+^0=mA<Jh=nC-f6}ofFm*X7Wnm4C2DY
+zxW&0IJGq=vnN~FMk88Q{!VI!=gFK(EwG4Mc#m<Jtj<bF4alRx2=w~_P_Q7y$W!BR<
+zN1x;juuaSN%CI_zc>~#dTh}Ie?<ZkO*d%Sd^~%Xxr$77UjaL`moLx9|^5*&T3$MSm
+zaPc(xf>J`mq&A_)EHkM&2MvdDnmI=^9Y(j#t@TRZEJaqFl%f9>(Jz%^RDmVBOZ(P;
+zdu5nY)`Y(JP81Fs(2|a2Pb<i?AaTo@$Y&*}gQlt5v5c0>>Gbe+aeWqj6b5OZW~MTF
+zuC-v;Q`+Ss%?d+tL(9O6hi$15r7mJxCX+B6y+^^6gv}-Sm5WV6%m3rBk<V`<U)l<I
+z#6>0N5qH&Hd0pL=Hx?3+V(%XQyu3xSLOt&}HJi!ZfR_m1<w(aBND=8WJc4)ykp-y`
+z#21-^GJ`{rNYForN&$)l11{&~)|#L?hpHJ=QA>{dva79L){?6cz67>*Sxb&u-vu|)
+zHqu?FC7oq<?;(KqQG*XqhcnFhL%u^781Y4P;uCDgCG5dv4B-mjm{0kBT*V1|j+Zcx
+z`{-dUymz?iQLtV?I}i#{8AfC==?z>ZYAPa^;F%@E_kh&rD!(SzQ5Nc54ZTL_{bix@
+zYUuZbMzMvp7F90}pkg)j`eN%k34EZeiEp*Z4@D+?rI`m$ky;_MlE5`@ue_s~xvrgm
+z7hj0Ax$A(ZTaL~l_%Zj#_{-Nj&K>1Ciu#5>xQ0>RDoV7?Gdp{O>)xp7{JI%z^>)i=
+z5RHoVQ*4!m*b)u0!xTdmLad33CR6nJy5*4k5$$*L7oV5^hT>m@^O{F$?()u|t~UA(
+z)?Y-(jZsc@T}3@GhlZxJgq*q4C-*j;rLo6tR~stH|48X4RN-fw!cCmREqsYz@fCI7
+z;5U4S-`#;|MCEPBl5`t86>OENtE<<v{E4=|SRXGQa$P<Qn`?lz%fjI_H6l*gPkBH8
+G1OEUCRxil_
+
+diff --git a/221701127/src/InfectStatistic.class b/221701127/src/InfectStatistic.class
+deleted file mode 100644
+index fefa546b9ce1dd3a89dc0b875506e07907c78c5a..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 1728
+zcmaJ?&u<%55dL0b?{l0jNgO*(D1@{);G}5{1wwH`Y3mYdaNJUxmQX0X*jr~4dpGQ^
+zBO)#w;KC89QhVjnGaOveN);y#{3HAe2noXX{Dau7#af;>JNwPNnQvzI{r=Cx#{ka4
+zjba+}BX|ifN05qQ0gDnRqX=V3;#3q8r?p6H@ro9&YH=ot<9KZpC-Ax!Z%8ahF^;#i
+z$Y`;m#i|x>$GFc0iHj0h0b|v6?BJZhaBAVYKq%{0EP=7S?O26Iebe$vYO_X5sIF{B
+zU@CPpzpeIEx~80Jx)^x2Q(e)HM~Z<e@2soc7GC0##Jdt}0@0$|@XFSjt)s+q&TXq4
+z5F6NjV3$wpSSDuhti*dJE+faCDz0Nmyl>(I<OO85Uda=zQL{`l?^d<CZlZuICa&T`
+z6W35QQPSE+xNhPGJ~pv|Pq;bJ$!k{CcA2};Rm_~@SYEcKeBbg-+{C9QKEo{&pKI}j
+z77Din#xJ^V;0K=CUAKZQx8jc(*o>fTq5@6Q6UETskeVx-+bmRIasXenwt$VmuB9({
+zp4!(13d9brxxn&N;Cg*Ai~D|H)yaX|AUe@*gzcuUvJ2$Yvs8Vh8@u038h16QMj8^S
+z!5uVH`3}{shDNGZpqu7vkA;C%NJ2<35l2%C?V$Z7F`LnvTP?X==BGP*KLOJN6lJhB
+zjPWA&fAvrGh3@jg$Z|{h1?wv^!O>-}Lr&`^-o>{jwA}`cX83}t>ly3=bVgVpOh9h8
+z6^uiu?~1(BZrO%MH?3W=R3(brs0xgTxz3N(*VT@db)B*bZrH&VH9t^Jz&aKOaGm4T
+zVXOBglGxI7wIh%`oFd!Vb9b!Hd)D4zO_ezp`w|=kBk#I94W@awcb|?^duA^yr@|&C
+z+sKutTi;{pb1d!eS_9y{gU}(jx0p_dtg6+D?BR+8CvN_!f(GR#F#G>F%;6}%jrtnm
+zpC1hf9HaI;SHU&B_yFQ3Dgw_@8ZF}lMhKXtPN+!H8sW2hKVv91+(hUR!W(om@{b@l
+zPCh_neW{6&!l_JXCiHkYJiKfqj70cHOwWW8#+i(y-;AW+w}!ZX@W&Ft(I!T@nA)R>
+zBbo3__!m4Qa1YB`8x!~y;~7Ic8cj@S5z}H)i?|kvhnNBw^!~wbI{l$m`UOl<pJcjm
+zOd!E(r|<$9I7<%Bb6umQz@kb-f5{T}Smf74d_$hT<7x0c&w(Fkzk?+1VxCXH!z6To
+zMM#M`iLmS_bAs&siDQ2wE^%Dq#9vs&FkWn>lH`U!j7g32oOzSFjT*K||2gUr^7;<{
+G=l=yYRipj@
+
+diff --git a/221701127/src/InfectStatistic.java b/221701127/src/InfectStatistic.java
+index 43503a4..294198f 100644
+--- a/221701127/src/InfectStatistic.java
++++ b/221701127/src/InfectStatistic.java
+@@ -1,51 +1,40 @@
+ import java.io.BufferedReader;
+ import java.io.File;
+ import java.io.FileInputStream;
++import java.io.FileOutputStream;
+ import java.io.IOException;
+ import java.io.InputStreamReader;
++import java.io.OutputStreamWriter;
+ import java.util.ArrayList;
+ import java.util.Arrays;
++import java.util.Collections;
++import java.util.Comparator;
+ import java.util.List;
+ import java.util.regex.Pattern;
+ 
+ /**
+  * InfectStatistic
++ * 
+  * @author XTG-L
+  * @version 0.2
+  * @since 2020-2-8
+  */
+ class InfectStatistic {
+     public static void main(String[] args) {
+-        System.out.println("done");
+         CmdList cmd = new CmdList(args);
+-        Log log = new Log(cmd);
+-        String[] filesName = log.getFiles();
+-        for (String file : filesName) {
+-            System.out.println(file);
+-        }
+-        log.logToRegion(log.getLogs());
+-        ArrayList<Log.Region> regions = log.getRegions();
+-        for (Log.Region region : regions) {
+-            System.out.println(
+-                region.getName()+" "+
+-                region.getIp()+" "+
+-                region.getSp()+" "+
+-                region.getCure()+" "+
+-                region.getDead()
+-            );
+-        }
++        cmd.action();
+     }
+ }
+ 
+ /**
+- * CmdArgs
+- * 处理命令
++ * CmdArgs 处理命令
+  */
+ class CmdArgs {
+     protected String[] args = null;
+ 
+     /**
+      * 传入命令行参数数组构造
++     * 
+      * @param args
+      */
+     CmdArgs(String[] args) {
+@@ -54,6 +43,7 @@ public static void main(String[] args) {
+ 
+     /**
+      * 获取命令
++     * 
+      * @return
+      */
+     String[] getArgs() {
+@@ -62,6 +52,7 @@ public static void main(String[] args) {
+ 
+     /**
+      * 获取命令
++     * 
+      * @return
+      */
+     String getCmd() {
+@@ -74,6 +65,7 @@ String getCmd() {
+ 
+     /**
+      * 获取某个命令行参数的值，多个值只会返回第一个
++     * 
+      * @param key
+      * @return
+      */
+@@ -83,6 +75,7 @@ String argVal(String key) {
+ 
+     /**
+      * 获取某个命令行参数的值，返回列表
++     * 
+      * @param key
+      * @return
+      */
+@@ -107,13 +100,14 @@ String argVal(String key) {
+ 
+     /**
+      * 判断该命令是否有对应的参数
++     * 
+      * @param key
+      * @return
+      */
+     boolean hasValue(String key) {
+         for (int i = 0; i < args.length; i++) {
+             if (args[i].equals(key)) {
+-                if(i + 1 < args.length) {
++                if (i + 1 < args.length) {
+                     if (args[i + 1].charAt(0) != '-') {
+                         return true;
+                     } else {
+@@ -127,6 +121,7 @@ boolean hasValue(String key) {
+ 
+     /**
+      * 判断输入的命令是否符合规范
++     * 
+      * @return
+      */
+     boolean isLegalCmd() {
+@@ -142,11 +137,11 @@ boolean isLegalCmd() {
+         }
+         switch (i) {
+             case 0: {
+-               if (new CmdList(args).isLegal()) {
+-                   result = true;
++                if (new CmdList(args).isLegal()) {
++                    result = true;
+                 }
+                 break;
+-          }
++            }
+             default: {
+                 System.out.println("Wrong cmd");
+                 break;
+@@ -157,12 +152,15 @@ boolean isLegalCmd() {
+ }
+ 
+ /**
+- * CmdList
+- * 处理list命令
++ * CmdList 处理list命令
+  */
+ class CmdList extends CmdArgs {
+-    private String logPath = null;  //日志文件路径
+-    private String outPath = null;  //输出文件路径
++    private String logPath = null; // 日志文件路径
++    private String outPath = null; // 输出文件路径
++    private File logDir = null; //日志文件的文件夹
++    private String[] files = null;  //日志文件的文件名
++    private ArrayList<String> logs = new ArrayList<>(); //用于储存日志文件的动态数组
++    private ArrayList<Log.Region> regions = new ArrayList<>();  //用于储存地区类的动态数组
+     private String date = null;
+     private ArrayList<String> type = null;
+     private ArrayList<String> province = null;
+@@ -170,27 +168,201 @@ boolean isLegalCmd() {
+     /**
+      * 传入list命令
+      * 
+-     * @param cmd
++     * @param args
+      */
+     CmdList(String[] args) {
+         super(args);
+-        if(isLegal()) {
++        if (isLegal()) {
+             this.logPath = argVal("-log");
+             this.outPath = argVal("-out");
+-            if(getCmd().contains("-date")) {
++            if (getCmd().contains("-date")) {
+                 this.date = argVal("-date");
+             }
+-            if(getCmd().contains("-type")) {
++            if (getCmd().contains("-type")) {
+                 this.type = argVals("-type");
+             }
+-            if(getCmd().contains("-province")) {
++            if (getCmd().contains("-province")) {
+                 this.province = argVals("-province");
+             }
+         }
++        logDir = new File(logPath);
++        if (logDir.isDirectory()) {
++            this.files = logDir.list();
++            Arrays.sort(files);
++            if (getCmd().contains("-date")) {
++                Log.rmAfter(files, getDate() + ".log.txt");
++            }
++        }
+     }
+ 
++    void action() {
++        try {
++            readLog(this.logPath, this.files, this.logs);
++            logToRegion(this.logs, this.regions);
++            outLog(this.outPath);
++        } catch (IOException e) {
++            e.printStackTrace();
++        }
++    }
++    /**
++     * 读取日志文件并储存在logs里，然后调用logToRegion将日志文件转换并保存
++     * @param logPath
++     * @throws IOException
++     */
++    static void readLog(String logPath, String[] files, ArrayList<String> logs) throws IOException {
++        BufferedReader br = null;
++        String line = null;
++        for (String name : files) {
++            if (name.equals("")) continue;
++            FileInputStream fis = new FileInputStream(logPath + name);
++            InputStreamReader isr = new InputStreamReader(fis, "utf-8");
++            br = new BufferedReader(isr);
++            while((line = br.readLine()) != null) {
++                if(!Log.isIgnore(line)) {
++                    logs.add(line);
++                }
++            }
++            br.close();
++        }
++    }
++
++    /**
++     * 将日志文件转换为地区类并储存
++     * @param logs
++     */
++    void logToRegion(ArrayList<String> logs, ArrayList<Log.Region> regions) {
++        for (String log : logs) {
++            String[] items = log.split("[\\s]+");
++            int index = Log.indexOfRegion(regions, items[0]);
++            int num = 0;
++            for (String item : items) {
++                if (item.endsWith("人")) {
++                    num = Integer.valueOf(item.replace("人", ""));
++                }
++            }
++            Log.Region region = regions.get(index);
++            switch (items[1]) {
++            case "新增": {
++                if (items[2].equals("感染患者")) {
++                    region.ip.add(num);
++                } else if (items[2].equals("疑似患者")) {
++                    region.sp.add(num);
++                }
++                break;
++            }
++            case "感染患者": {
++                if (items[2].equals("流入")) {
++                    region.ip.add(0 - num);
++                    Log.Region another = regions.get(Log.indexOfRegion(regions, items[3]));
++                    another.ip.add(num);
++                }
++                break;
++            }
++            case "疑似患者": {
++                if (items[2].equals("确诊感染")) {
++                    region.ip.add(num);
++                    region.sp.add(0 - num);
++                } else if (items[2].equals("流入")) {
++                    region.sp.add(0 - num);
++                    Log.Region another = regions.get(Log.indexOfRegion(regions, items[3]));
++                    another.sp.add(num);
++                }
++                break;
++            }
++            case "治愈": {
++                region.cure.add(num);
++                region.ip.add(0 - num);
++                break;
++            }
++            case "死亡": {
++                region.dead.add(num);
++                region.ip.add(0 - num);
++                break;
++            }
++            case "排除": {
++                region.sp.add(0 - num);
++                break;
++            }
++            default: {
++                break;
++            }
++            }
++        }
++    }
++
++    /**
++     * 向指定路径输出结果
++     * @param outPath
++     * @throws IOException
++     */
++    void outLog(String outPath) throws IOException {
++        Log.Region.sort(regions);
++        FileOutputStream fos = new FileOutputStream(outPath);
++        OutputStreamWriter osw = new OutputStreamWriter(fos, "utf-8");
++        Log.Region all = Log.sumAll(regions);
++        osw.write(regionToLine(all) + "\n");
++        osw.flush();
++        for (Log.Region region : regions) {
++            if(isAssign(this.province, region)) {
++                osw.write(regionToLine(region) + "\n");
++                osw.flush();
++            }
++        }
++        osw.close();
++    }
++
++    /**
++     * 获取当前地区是否为指定输出的地区
++     * @param province
++     * @param region
++     * @return
++     */
++    boolean isAssign(ArrayList<String> province, Log.Region region) {
++        if (province == null) {
++            return true;
++        } else if (province.contains(region.name)) {
++            return true;
++        } else {
++            return false;
++        }
++    }
++
++    String regionToLine(Log.Region region) {
++        String line = region.name;
++        if (this.type != null) {
++            if (this.type.contains("ip")) {
++                line += " 感人患者" + Log.Region.regionItemToInt(region, region.ip) + "人";
++            }
++            if (this.type.contains("sp")) {
++                line += " 疑似患者" + Log.Region.regionItemToInt(region, region.sp) + "人";
++            }
++            if (this.type.contains("cure")) {
++                line += " 治愈" + Log.Region.regionItemToInt(region, region.cure) + "人";
++            }
++            if (this.type.contains("dead")) {
++                line += " 死亡" + Log.Region.regionItemToInt(region, region.dead) + "人";
++            }
++        } else {
++            line += " 感人患者" + Log.Region.regionItemToInt(region, region.ip) + "人";
++            line += " 疑似患者" + Log.Region.regionItemToInt(region, region.sp) + "人";
++            line += " 治愈" + Log.Region.regionItemToInt(region, region.cure) + "人";
++            line += " 死亡" + Log.Region.regionItemToInt(region, region.dead) + "人";
++        }
++        return line;
++    }
++
++    /**
++     * 获取日志文件的文件名
++     * @return
++     */
++    String[] getFiles() {
++        return this.files;
++    }
++
++
+     /**
+      * 获取日志文件的路径
++     * 
+      * @return
+      */
+     String getLogPath() {
+@@ -198,46 +370,68 @@ String getLogPath() {
+     }
+ 
+     /**
+-     * 获取输出文件的路径
++     * 获取日志文件输出路径
+      * @return
+      */
+     String getOutPath() {
+         return this.outPath;
+     }
+ 
++    /**
++     * 获取命令中日期参数的值
++     * 
++     * @return
++     */
+     String getDate() {
+         return this.date;
+     }
+ 
++    /**
++     * 获取命令中类型参数的值
++     * @return
++     */
+     ArrayList<String> getType() {
+         return this.type;
+     }
+ 
++    /**
++     * 获取命令中地区参数的值
++     * @return
++     */
+     ArrayList<String> getProvince() {
+         return this.province;
+     }
+ 
++    /**
++     * 获取暂存的地区数据
++     * @return
++     */
++    ArrayList<Log.Region> getRegions() {
++        return this.regions;
++    }
++
+     /**
+      * 判断list命令是否符合规范
++     * 
+      * @return
+      */
+     boolean isLegal() {
+         boolean result = false;
+         for (int i = 1; i < args.length; i++) {
+             switch (args[i]) {
+-            case "-log":
+-            case "-out":
+-            case "-type":
+-            case "-province": {
+-                if (args[++i].charAt(0) == '-') {
+-                    System.out.println(args[i - 1] + " 选项参数有误或没有参数");
+-                    return result;
++                case "-log":
++                case "-out":
++                case "-type":
++                case "-province": {
++                   if (args[++i].charAt(0) == '-') {
++                      System.out.println(args[i - 1] + " 选项参数有误或没有参数");
++                      return result;
++                    }
++                    break;
++                }
++                default: {
++                    break;
+                 }
+-                break;
+-            }
+-            default: {
+-                break;
+-            }
+             }
+         }
+         result = true;
+@@ -253,9 +447,7 @@ boolean isLegal() {
+     private String logPath = null;  //日志文件路径
+     private File logDir = null; //日志文件的文件夹
+     private String[] files = null;  //日志文件的文件名
+-    private ArrayList<String> logs = new ArrayList<>(); //用于储存日志文件的动态数组
+-    private String ignore = "//.*"; //行忽略标志
+-    private ArrayList<Region> regions = new ArrayList<>();  //用于储存地区类的动态数组
++    private static String ignore = "//.*"; //行忽略标志
+ 
+     /**
+      * 传入命令类并初始化日志文件的路径和文件列表
+@@ -267,153 +459,80 @@ boolean isLegal() {
+         if (logDir.isDirectory()) {
+             this.files = logDir.list();
+             Arrays.sort(files);
+-            if(cmdList.getCmd().contains("-date")) {
+-                delAfter(cmdList.argVal("-date"));
+-            }
+-            try {
+-                readLog(logPath);
+-            } catch (IOException e) {
+-                e.printStackTrace();
++            if (cmdList.getCmd().contains("-date")) {
++                rmAfter(files, cmdList.getDate() + ".log.txt");
+             }
+         }
+     }
+ 
+-    String[] delAfter(String date) {
+-        String[] result = null;
++    /**
++     * 将指定日期之后的文件名置为""
++     * @param date
++     */
++    static void rmAfter(String[] files, String date) {
+         if(files.length > 0) {
+             List<String> fileList = new ArrayList<String>(Arrays.asList(files));
+-            for (String file : fileList) {
+-                if(date.compareTo(file) < 0) {
+-                    fileList.remove(file);
++            List<String> tmpList = new ArrayList<String>(Arrays.asList(files));
++            for (String file : tmpList) {
++                if (date.compareTo(file) < 0) {
++                    int index = fileList.indexOf(file);
++                    fileList.set(index, "");
+                 }
+             }
+-            fileList.toArray(result);
++            files = fileList.toArray(files);
+         }
+-        return result;
+-    }
++    }    
+ 
+-    /**
+-     * 获取日志文件的文件名
+-     * @return
+-     */
+-    String[] getFiles() {
+-        return this.files;
+-    }
+-
+-    /**
+-     * 获取日志文件数据
+-     * @return
+-     */
+-    ArrayList<String> getLogs() {
+-        return this.logs;
+-    }
+-
+-    /**
+-     * 获取地区数据
+-     * @return
+-     */
+-    ArrayList<Region> getRegions() {
+-        return this.regions;
+-    }
+-
+-    /**
+-     * 读取日志文件并储存在logs里，然后调用logToRegion将日志文件转换并保存
+-     * @param logPath
+-     * @throws IOException
+-     */
+-    void readLog(String logPath) throws IOException {
+-        BufferedReader br = null;
+-        String line = null;
+-        for (String name : files) {
+-            FileInputStream fis = new FileInputStream(logPath + name);
+-            InputStreamReader isr = new InputStreamReader(fis, "utf-8");
+-            br = new BufferedReader(isr);
+-            // br = new BufferedReader(new FileReader(logPath + name));
+-            while((line = br.readLine()) != null) {
+-                if(!isIgnore(line)) {
+-                    logs.add(line);
+-                }
+-            }
+-            br.close();
+-        }
+-        logToRegion(logs);
+-    }
++ 
+ 
+     /**
+      * 判断一行日志是否为注释行
++     * 
+      * @param line
+      * @return
+      */
+-    boolean isIgnore(String line) {
++    static boolean isIgnore(String line) {
+         boolean result = false;
+-        if(Pattern.matches(ignore, line)) {
++        if (Pattern.matches(ignore, line)) {
+             result = true;
+         }
+         return result;
+     }
+ 
+     /**
+-     * 将日志文件转换为地区类并储存
+-     * @param logs
++     * 获取全国地区总的数据
++     * @param regions
++     * @return
+      */
+-    void logToRegion(ArrayList<String> logs) {
+-        for (String log : logs) {
+-            String[] items = log.split("[\\s]+");
+-            int index = indexOfRegion(items[0]);
+-            Region region = regions.get(index);
+-            switch (items[1]) {
+-                case "新增": {
+-                    if(items[2].equals("感染患者")) {
+-                        region.ip += Integer.valueOf(items[3].replace("人", ""));
+-                    } else if(items[2].equals("疑似患者")) {
+-                        region.sp += Integer.valueOf(items[3].replace("人", ""));
+-                    }
+-                    break;
+-                }
+-                case "疑似患者": {
+-                    if(items[2].equals("确认感染")) {
+-                        region.ip += Integer.valueOf(items[3].replace("人", ""));
+-                    } else if(items[2].equals("流入")) {
+-                        region.sp -= Integer.valueOf(items[4].replace("人", ""));
+-                        Region another = regions.get(indexOfRegion(items[3]));
+-                        another.sp += Integer.valueOf(items[4].replace("人", ""));
+-                    }
+-                    break;
+-                }
+-                case "感染患者": {
+-                    region.ip -= Integer.valueOf(items[4].replace("人", ""));
+-                    Region another = regions.get(indexOfRegion(items[3]));
+-                    another.ip += Integer.valueOf(items[4].replace("人", ""));
+-                    break;
+-                }
+-                case "治愈": {
+-                    region.setCure(region.getCure() + Integer.valueOf(items[2].replace("人", "")));
+-                    break;
+-                }
+-                case "死亡": {
+-                    region.setDead(region.getDead() + Integer.valueOf(items[2].replace("人", "")));
+-                    break;
+-                }
+-                case "排除": {
+-                    region.setSp(region.getSp() - Integer.valueOf(items[3].replace("人", "")));
+-                    break;
+-                }
+-                default: {
+-                    break;
+-                }
++    static Region sumAll(ArrayList<Region> regions) {
++        Region all = new Log.Region("全国");
++        for (Region region : regions) {
++            for (int num : region.ip) {
++                all.ip.add(num);
++            }
++            for (int num : region.sp) {
++                all.sp.add(num);
++            }
++            for (int num : region.cure) {
++                all.cure.add(num);
++            }
++            for (int num : region.dead) {
++                all.dead.add(num);
+             }
+         }
++        return all;
+     }
+ 
+     /**
+      * 获取指定地区在动态数组中的下表，如果数组中没有，则向动态数组中加入该地区
++     * 
+      * @param name
+      * @return
+      */
+-    int indexOfRegion(String name) {
++    static int indexOfRegion(ArrayList<Region> regions, String name) {
+         int index = -1;
+         Region region = new Region(name);
+-        if(!regions.contains(region)) {
++        if (!regions.contains(region)) {
+             region = new Region(name);
+             regions.add(region);
+         }
+@@ -421,28 +540,29 @@ int indexOfRegion(String name) {
+         return index;
+     }
+ 
+-    /**
+-     * Region
+-     * 用于暂存日志文件内容的类对象
++    /** 
++     * Region 用于暂存日志文件内容的类对象
+      */
+-    class Region {
+-        protected String name;   //地区名称
+-        protected int ip, sp, cure, dead; //感染患者，疑似患者，治愈，死亡患者
++    static class Region {
++        protected String name; // 地区名称
++        protected ArrayList<Integer> ip, sp, cure, dead; // 感染患者，疑似患者，治愈，死亡患者
+ 
+         /**
+          * 传入地区名称
++         * 
+          * @param name
+          */
+         Region(String name) {
+             this.name = name;
+-            this.ip = 0;
+-            this.sp = 0;
+-            this.cure = 0;
+-            this.dead = 0;
++            this.ip = new ArrayList<>();
++            this.sp = new ArrayList<>();
++            this.cure = new ArrayList<>();
++            this.dead = new ArrayList<>();
+         }
+ 
+         /**
+          * 重载equals函数，用于排序和判断
++         * 
+          * @param obj
+          * @return
+          */
+@@ -456,75 +576,25 @@ public boolean equals(Object obj) {
+         }
+ 
+         /**
+-         * 获取地区名称
+-         * @return
+-         */
+-        String getName() {
+-            return this.name;
+-        }
+-
+-        /**
+-         * 获取地区感染患者人数
+-         * @return
+-         */
+-        int getIp() {
+-            return this.ip;
+-        }
+-
+-        /**
+-         * 设置地区感染患者人数
+-         * @param ip
+-         */
+-        void setIp(int ip) {
+-            this.ip = ip;
+-        }
+-
+-        /**
+-         * 获取地区疑似患者人数
+-         * @return
+-         */
+-        int getSp() {
+-            return this.sp;
+-        }
+-
+-        /**
+-         * 设置地区疑似患者人数
+-         * @param sp
+-         */
+-        void setSp(int sp) {
+-            this.sp = sp;
+-        }
+-
+-        /**
+-         * 获取地区治愈人数
+-         * @return
+-         */
+-        int getCure() {
+-            return this.cure;
+-        }
+-
+-        /**
+-         * 设置地区治愈人数
+-         * @param cure
++         * 对传入的地区的动态数组按名字进行降序排序
++         * 
++         * @param regions
+          */
+-        void setCure(int cure) {
+-            this.cure = cure;
+-        }
+-
+-        /**
+-         * 获取地区死亡患者人数
+-         * @return
+-         */
+-        int getDead() {
+-            return this.dead;
++        public static void sort(ArrayList<Region> regions) {
++            Collections.sort(regions, new Comparator<Region>() {
++                @Override
++                public int compare(Region r1, Region r2) {
++                    return r1.name.compareTo(r2.name);
++                }
++            });
+         }
+ 
+-        /**
+-         * 设置地区死亡人数
+-         * @param dead
+-         */
+-        void setDead(int dead) {
+-            this.dead = dead;
++        static int regionItemToInt(Region region, ArrayList<Integer> nums) {
++            int result = 0;
++            for (Integer num : nums) {
++                result += num;
++            }
++            return result;
+         }
+     }
+ }
+\ No newline at end of file
+diff --git a/221701127/src/Log$Region.class b/221701127/src/Log$Region.class
+deleted file mode 100644
+index 1f787e173879e5e190d7aadc4c276e9fea7e9131..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 1231
+zcmZuvO-~bH5PoL6A7xo+g`x<82&nBA0Y5<@ULeNCf{8UAye(y|i)D-5t^dXUz(EsA
+zm4nf!G4bNjquxB~&6_&2t<uyUc4pq0XP)<&dH3V5gI53+vD||=W=!<roJ6x?=ETg4
+zIWOjdfr}=tU_np|1{Mjb?`*q-f&7;9#F;BQerc`{Rz1J8L{PjP0_8XeI8ckVDkIfR
+z*V!cK;X^N&o+oJed_}<evgdo@b;3wG%KT55xyRirl}#o|<UQYAuWfI*)w|9{nKQck
+zxaO1t!ce-c^Y+G;TMU;n_X&N4&?!Dzb9Pz{M#&A=Bkielrmf|ldW``&)*VY{cmyqI
+zp44<sbV#wlMM;Ynwv}i;gEOs&bF0y?l50k0p;D_B-5Z{0PUZXuERThSUJ!c4S=k{W
+zzU~I$%}Nj&xN2b#DGNimX2C+Ag?=O~B*h#NGk^ra<PA>WaZ6ss=SBPtteo$=)s?an
+z1a4qp$-;4r5R!)v)!YtG$o<irJXl+~xd}}0!}szZqC*u49I2ur@+>6stR?a+2S_GG
+zG@qqw2uDFU#!&$ZV(h2vY#n4bpx85Y#Ozodsu)d-F2;DyFv2j~aTpx#p@-_|r+o}k
+z1H<$JWAqY}bigPcs&&Dw)&=9)H;6w)D*GDoHG2=S8UFUsvukG?Fn5_%iMR)N5YSr~
+z^bQuiXWkDO<!THhSD(OGi&#8yMia7U95l7*lB7?39>+<JWyp4@Dp$2bKl6D4r&`cS
+zmZ5M)w?}ycha;Pkr7zIvD_1AGQfr;m-xxa8om%Up{?61t7(d;WTJNO($<Wi?sr63k
+x-_T?voast!bWkh&wm93Jy6qo`7NR7WI>~R7<{kwZ*pbiTGJBI(8b=nFfIr9{yaNCL
+
+diff --git a/221701127/src/Log.class b/221701127/src/Log.class
+deleted file mode 100644
+index 6ca8047eaf8aa05d6fea5c92de9ca700a615be71..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 5395
+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
+
+
+From babe817797786c22b623be2419367588399581b3 Mon Sep 17 00:00:00 2001
+From: XTG-L <XTG-L@github.com>
+Date: Sun, 16 Feb 2020 20:05:02 +0800
+Subject: [PATCH 09/13] Update README.md
+
+---
+ 221701127/README.md | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/221701127/README.md b/221701127/README.md
+index 0b7fb93..1cb0fc9 100644
+--- a/221701127/README.md
++++ b/221701127/README.md
+@@ -1,4 +1,13 @@
+ # InfectStatistic-学号
+ 疫情统计
++<<<<<<< Updated upstream
+ 
+ 描述你的项目，包括如何运行、功能简介、作业链接、博客链接等
++=======
++本项目使用Java编写。
++在命令行中输入指令后即开始运行程序
++功能包括：统计并输出指定日志文件夹下在包括指定日期前的指定类型、指定地区的患者人数
++作业连接：https://github.com/XTG-L/InfectStatistic-main
++博客链接：https://www.cnblogs.com/xtg-log/p/12312487.html
++描述你的项目，包括如何运行、功能简介、作业链接、博客链接等
++>>>>>>> Stashed changes
+
+From 53f051b98d0a647397ec7cda161c1c742a38fba9 Mon Sep 17 00:00:00 2001
+From: XTG-L <XTG-L@github.com>
+Date: Sun, 16 Feb 2020 20:07:09 +0800
+Subject: [PATCH 10/13] Update README.md
+
+---
+ 221701127/README.md | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/221701127/README.md b/221701127/README.md
+index 1cb0fc9..4555d13 100644
+--- a/221701127/README.md
++++ b/221701127/README.md
+@@ -9,5 +9,4 @@
+ 功能包括：统计并输出指定日志文件夹下在包括指定日期前的指定类型、指定地区的患者人数
+ 作业连接：https://github.com/XTG-L/InfectStatistic-main
+ 博客链接：https://www.cnblogs.com/xtg-log/p/12312487.html
+-描述你的项目，包括如何运行、功能简介、作业链接、博客链接等
+ >>>>>>> Stashed changes
+
+From 3343885b37f3d74747cb9a2736042371bc9d58d2 Mon Sep 17 00:00:00 2001
+From: XTG <43336478+XTG-L@users.noreply.github.com>
+Date: Mon, 17 Feb 2020 12:14:49 +0800
+Subject: [PATCH 11/13] Update README.md
+
+---
+ 221701127/README.md | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/221701127/README.md b/221701127/README.md
+index 4555d13..c067a2a 100644
+--- a/221701127/README.md
++++ b/221701127/README.md
+@@ -1,12 +1,19 @@
+ # InfectStatistic-学号
+ 疫情统计
+-<<<<<<< Updated upstream
+ 
+ 描述你的项目，包括如何运行、功能简介、作业链接、博客链接等
+ =======
+ 本项目使用Java编写。
+-在命令行中输入指令后即开始运行程序
++
++在命令行中输入指令后即开始运行程序 [参数 (值)]
++命令：list [-log (logPath)] [-out (outPath)] [-date (date)] [-type (ip, sp, cure, dead)] [-province (province)]
++-log 和 -out参数为必须参数 -date -type -province均为可选参数
++logPath为日志文件的路径
++outPath为输出文件的路径
++date为指定的日期
++ip为指定感染患者人数，sp为指定疑似患者人数，cure为指定治愈人数，dead为指定死亡人数
++province为指定地区省份
++
+ 功能包括：统计并输出指定日志文件夹下在包括指定日期前的指定类型、指定地区的患者人数
+ 作业连接：https://github.com/XTG-L/InfectStatistic-main
+ 博客链接：https://www.cnblogs.com/xtg-log/p/12312487.html
+->>>>>>> Stashed changes
+
+From 1c60c51393d4274405bce0a728690ddabe27d185 Mon Sep 17 00:00:00 2001
+From: XTG <43336478+XTG-L@users.noreply.github.com>
+Date: Mon, 17 Feb 2020 12:15:48 +0800
+Subject: [PATCH 12/13] Update README.md
+
+---
+ 221701127/README.md | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/221701127/README.md b/221701127/README.md
+index c067a2a..ef78b61 100644
+--- a/221701127/README.md
++++ b/221701127/README.md
+@@ -5,15 +5,15 @@
+ =======
+ 本项目使用Java编写。
+ 
+-在命令行中输入指令后即开始运行程序 [参数 (值)]
+-命令：list [-log (logPath)] [-out (outPath)] [-date (date)] [-type (ip, sp, cure, dead)] [-province (province)]
+--log 和 -out参数为必须参数 -date -type -province均为可选参数
+-logPath为日志文件的路径
+-outPath为输出文件的路径
+-date为指定的日期
+-ip为指定感染患者人数，sp为指定疑似患者人数，cure为指定治愈人数，dead为指定死亡人数
+-province为指定地区省份
++在命令行中输入指令后即开始运行程序 \[参数 (值)]  
++命令：list \[-log (logPath)] \[-out (outPath)] \[-date (date)] \[-type (ip, sp, cure, dead)] \[-province (province)]  
++-log 和 -out参数为必须参数 -date -type -province均为可选参数  
++logPath为日志文件的路径  
++outPath为输出文件的路径  
++date为指定的日期  
++ip为指定感染患者人数，sp为指定疑似患者人数，cure为指定治愈人数，dead为指定死亡人数  
++province为指定地区省份  
+ 
+-功能包括：统计并输出指定日志文件夹下在包括指定日期前的指定类型、指定地区的患者人数
+-作业连接：https://github.com/XTG-L/InfectStatistic-main
+-博客链接：https://www.cnblogs.com/xtg-log/p/12312487.html
++功能包括：统计并输出指定日志文件夹下在包括指定日期前的指定类型、指定地区的患者人数  
++作业连接：https://github.com/XTG-L/InfectStatistic-main  
++博客链接：https://www.cnblogs.com/xtg-log/p/12312487.html  
+
+From 869750da0740fdd419d6ac8c546bb84d606dfea6 Mon Sep 17 00:00:00 2001
+From: XTG <43336478+XTG-L@users.noreply.github.com>
+Date: Mon, 17 Feb 2020 12:20:58 +0800
+Subject: [PATCH 13/13] Set theme jekyll-theme-minimal
+
+---
+ _config.yml | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 _config.yml
+
+diff --git a/_config.yml b/_config.yml
+new file mode 100644
+index 0000000..2f7efbe
+--- /dev/null
++++ b/_config.yml
+@@ -0,0 +1 @@
++theme: jekyll-theme-minimal
+\ No newline at end of file
