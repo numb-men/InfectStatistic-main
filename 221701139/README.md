@@ -2,8 +2,9 @@
 最近新型冠状病毒疫情严重，全国人民都感到担忧，迫切希望能够及时了解到病毒最新的情况，作为IT学子，大家请你帮忙开发一个疫情统计程序。
 该项目只需一条简单的命令即可统计疫情信息,
 # 运行方法
-命令行（win+r cmd）cd到项目src下，之后输入命令：
-``` java InfectStatistic list -date 2020-01-22 -log 221701139/log/ -out D:/output.txt ```
+命令行（win+r cmd）cd到项目src下，之后输入命令：可能会有编码问题
+``` javac -encoding UTF-8 InfectStatistic.java Lib.java ```
+``` java -cp .; -Dfile.encoding=utf-8 InfectStatistic list -log ..\log -out D:/output.txt ```
 目前支持的命令为list
 其相关参数为:
 * `-log` 指定日志目录的位置，该项必会附带，请直接使用传入的路径，而不是自己设置路径
